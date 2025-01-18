@@ -1,19 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:background="@color/background"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:id="@+id/panel_header"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+        <!-- Здесь можно добавить элементы заголовка -->
+    </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
+    <Button
+        android:id="@+id/button1"
+        style="@style/CustomButton"
+        android:text="@string/search"
+        app:icon="@drawable/magnifier"/>
+
+    <Button
+        android:id="@+id/button2"
+        style="@style/CustomButton"
+        android:text="@string/media_library"
+        app:icon="@drawable/mediaicon" />
+
+    <Button
+        android:id="@+id/button3"
+        style="@style/CustomButton"
+        android:text="@string/settings"
+        app:icon="@drawable/settingsicon"
+        android:layout_marginBottom="10dp"/>
+
+</LinearLayout>

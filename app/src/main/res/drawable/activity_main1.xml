@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8"
+        android:background="#FF0000" /> <!-- Красный цвет -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="92"
+        android:orientation="vertical"
+        android:background="@color/background"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <!-- Пространство 1% -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:ignore="NestedWeights" />
+
+        <!-- Контейнер для 3 кнопок -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="99"
+            android:orientation="vertical">
+
+            <include
+                layout="@drawable/rounded_button"
+                android:text="Button 1" />
+
+            <include
+                layout="@drawable/rounded_button"
+                android:text="Button 2" />
+
+            <include
+                layout="@drawable/rounded_button"
+                android:text="Button 3"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
