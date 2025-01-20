@@ -1,43 +1,103 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_main"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/background"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:background="@color/backgroundDay">
 
     <LinearLayout
-        android:id="@+id/panel_header"
+        android:id="@+id/PanelHeader"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="0dp"
+        android:layout_weight="8"
         android:orientation="horizontal">
-        <!-- Здесь можно добавить элементы заголовка -->
+
+        <LinearLayout
+            android:id="@+id/Layout"
+            style="@style/CustomHeaderStyle"
+            android:layout_weight="85"
+            android:orientation="horizontal"
+            tools:ignore="DisableBaselineAlignment,NestedWeights">
+
+            <FrameLayout
+                style="@style/CustomHeaderStyle"
+                android:layout_weight="1">
+
+                <Button
+                    android:id="@+id/x_Panel_Header_Middle_1Title"
+                    android:layout_width="228dp"
+                    style="@style/CustomHeaderNoteStyle"
+                    android:gravity="start"
+                    android:text="@string/playlist_maker"
+                    android:textAllCaps="false"
+                    app:icon="@drawable/expand_more"
+                    app:iconTint="@android:color/transparent"
+                    app:iconGravity="textEnd" />
+
+                <Button
+                    android:id="@+id/Button_Search_Light_ModeLeft"
+                    android:contentDescription="Hidden"
+                    android:layout_width="48dp"
+                    style="@style/CustomHeaderNoteStyle"
+                    app:icon="@drawable/arrow_back"
+                    app:iconTint="@android:color/transparent"
+                    tools:ignore="HardcodedText" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <Button
+            style="@style/CustomHeaderNoteStyle"
+            android:id="@+id/Button_Search_Light_ModeRight"
+            android:contentDescription="Hidden"
+            app:icon="@drawable/filter"
+            app:iconTint="@android:color/transparent"
+            android:layout_weight="15"
+            tools:ignore="HardcodedText" />
+
     </LinearLayout>
 
-    <Space
+    <LinearLayout
+        android:id="@+id/big_3_buttons_and_header_space"
         android:layout_width="match_parent"
-        android:layout_height="20dp" />
+        android:layout_height="0dp"
+        android:layout_weight="92"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
-    <Button
-        android:id="@+id/button1"
-        style="@style/CustomButton"
-        android:text="@string/search"
-        app:icon="@drawable/magnifier"/>
+        <View
+            android:id="@+id/header_space"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:ignore="NestedWeights" />
 
-    <Button
-        android:id="@+id/button2"
-        style="@style/CustomButton"
-        android:text="@string/media_library"
-        app:icon="@drawable/mediaicon" />
+        <LinearLayout
+            android:id="@+id/big_3_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="99"
+            android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button3"
-        style="@style/CustomButton"
-        android:text="@string/settings"
-        app:icon="@drawable/settingsicon"
-        android:layout_marginBottom="10dp"/>
+            <include
+                android:id="@+id/Button_Big1"
+                layout="@layout/rounded_button"/>
+
+            <include
+                android:id="@+id/Button_Big2"
+                layout="@layout/rounded_button1"/>
+
+            <include
+                android:id="@+id/Button_Big3"
+                layout="@layout/rounded_button2"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

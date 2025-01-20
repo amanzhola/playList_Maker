@@ -1,11 +1,17 @@
 <resources>
-    <string name="app_name">Playlist Maker</string>
-    <string name="upText1">Вопрос:</string>
-    <string name="upText2">2/10</string>
-    <string name="rating">Рейтинг этого фильма больше чем9?</string>
-    <string name="downBtnNo">Нет</string>
-    <string name="downBtnYes">Да</string>
+    <string name="app_name">PlayList Maker3</string>
     <string name="search">Поиск</string>
     <string name="media_library">Медиатека</string>
     <string name="settings">Настройки</string>
+    <string name="settings_in">Настройки</string>
+    <string name="playlist_maker">Playlist maker</string>
+    <string name="lists1">Темная тема</string>
+    <string name="lists2">Поделиться приложением</string>
+    <string name="lists3">Написать в поддержку</string>
+    <string name="lists4">Пользовательское соглашение</string>
+    <string name="share">share</string>
+    <string name="support">Support</string>
+    <string name="agreement">Agreement</string>
+    <string name="hidden">Hidden</string>
+
 </resources>
