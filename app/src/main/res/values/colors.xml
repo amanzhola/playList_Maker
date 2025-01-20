@@ -5,5 +5,10 @@
     <color name="background">#3772E7</color>
     <color name="textColor">#1A1B22</color>
     <color name="red">#E91E63</color>
+    <color name="backgroundtransparent">#00000000</color>
+    <color name="settingsDay">#FF000000</color>
+    <color name="setting_button_icon">@android:color/darker_gray</color>
+
+    <color name="backgroundDay">#3772E7</color>
 
 </resources>

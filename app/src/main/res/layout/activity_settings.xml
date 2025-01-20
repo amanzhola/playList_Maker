@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_settings"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/white"> <!-- общий фоновый цвет -->
+
+    <LinearLayout
+        android:id="@+id/PanelHeader"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/Layout"
+            style="@style/CustomHeaderStyle"
+            android:layout_weight="85"
+            android:orientation="horizontal"
+            tools:ignore="DisableBaselineAlignment,NestedWeights">
+
+            <FrameLayout
+                android:id="@+id/headerbetweenspace"
+                style="@style/CustomHeaderStyle"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/x_Panel_Header_Middle_1Title"
+                    android:layout_width="228dp"
+                    style="@style/CustomHeaderNoteSettingStyle"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:text="@string/settings_in"
+                    app:icon="@drawable/expand_more"
+                    app:iconGravity="textEnd"
+                    app:iconTint="@android:color/transparent"/>
+
+                <ImageView
+                    android:id="@+id/Button_Search_Light_ModeLeft"
+                    android:contentDescription="@string/hidden"
+                    android:layout_width="20dp"
+                    style="@style/CustomHeaderNoteStyle"
+                    android:src="@drawable/arrow_back"
+                    android:padding="3dp"
+                    app:tint="@color/black"
+                    android:layout_marginStart="15dp"/>
+
+            </FrameLayout>
+        </LinearLayout>
+
+        <Button
+            style="@style/CustomHeaderNoteStyle"
+            android:id="@+id/Button_Search_Light_ModeRight"
+            android:contentDescription="@string/hidden"
+            app:icon="@drawable/filter"
+            app:iconTint="@android:color/transparent"
+            android:layout_weight="15"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/settings_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="92"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/header_space"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:ignore="NestedWeights" />
+
+        <LinearLayout
+            android:id="@+id/settings_light_mode"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="99"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/list1"
+                android:layout_width="match_parent"
+                android:layout_height="61dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/switch_note"
+                    style="@style/CustomSettingsTextViewStyle"
+                    android:text="@string/lists1"/>
+
+                <Switch
+                    android:id="@+id/switch_control"
+                    style="@style/CustomSettingsButtonStyle"
+                    android:checked="false"
+                    android:focusable="false"
+                    android:layout_gravity="start"
+                    android:paddingEnd="20dp"
+                    tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/list2"
+                android:layout_width="match_parent"
+                android:layout_height="61dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/share_note"
+                    style="@style/CustomSettingsTextViewStyle"
+                    android:text="@string/lists2"/>
+
+                <Button
+                    android:id="@+id/share"
+                    style="@style/CustomSettingsButtonStyle"
+                    android:contentDescription="@string/share"
+                    app:icon="@drawable/share"
+                    app:iconTint="@color/setting_button_icon"
+                    app:iconGravity="textStart"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/list3"
+                android:layout_width="match_parent"
+                android:layout_height="61dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/support_note"
+                    style="@style/CustomSettingsTextViewStyle"
+                    android:text="@string/lists3"/>
+
+                <Button
+                    android:id="@+id/support"
+                    style="@style/CustomSettingsButtonStyle"
+                    android:contentDescription="@string/support"
+                    app:icon="@drawable/group"
+                    app:iconTint="@color/setting_button_icon"
+                    app:iconGravity="textStart"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/list4"
+                android:layout_width="match_parent"
+                android:layout_height="61dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/agreement_note"
+                    style="@style/CustomSettingsTextViewStyle"
+                    android:text="@string/lists4"/>
+
+                <Button
+                    android:id="@+id/agreement"
+                    style="@style/CustomSettingsButtonStyle"
+                    android:contentDescription="@string/agreement"
+                    app:icon="@drawable/vector"
+                    app:iconTint="@color/setting_button_icon"
+                    app:iconGravity="textStart"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
