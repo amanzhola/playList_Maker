@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -20,11 +22,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_main)
         setupFirstScreen()
 
+//        ночной режим 1ый экран
+        findViewById<View>(R.id.activity_main).setBackgroundColor(ContextCompat.getColor(this, R.color.black))
+
 //        1ый экран 3 кнопки без шапки
 //        findViewById<LinearLayout>(R.id.PanelHeader).visibility = View.GONE
-
-//        ночной режим 1ый экран
-//        findViewById<View>(R.id.activity_main).setBackgroundColor(ContextCompat.getColor(this, R.color.black))
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -43,7 +45,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val intent = Intent(this@MainActivity, SettingsActivity::class.java)
                 intent.putExtra("button_clicked", "search")
                 startActivity(intent)
-
             }
         }
         search.setOnClickListener(imageClickListener)
@@ -60,7 +61,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        3. Implementing OnClickListener on an Activity
         val settings = findViewById<View>(R.id.Button_Big3)
         settings.setOnClickListener(this@MainActivity)
-
     }
 
     override fun onClick(p0: View?) {
@@ -71,6 +71,4 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
-
-
 }

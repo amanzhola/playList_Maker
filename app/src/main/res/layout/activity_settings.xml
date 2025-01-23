@@ -27,16 +27,28 @@
                 style="@style/CustomHeaderStyle"
                 android:layout_weight="1">
 
-                <TextView
-                    android:id="@+id/x_Panel_Header_Middle_1Title"
-                    android:layout_width="228dp"
-                    style="@style/CustomHeaderNoteSettingStyle"
-                    android:padding="16dp"
-                    android:gravity="center"
-                    android:text="@string/settings_in"
-                    app:icon="@drawable/expand_more"
-                    app:iconGravity="textEnd"
-                    app:iconTint="@android:color/transparent"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/x_Panel_Header_Middle_1Title"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.55"
+                        style="@style/CustomHeaderNoteSettingStyle"
+                        android:paddingStart="16dp"
+                        android:gravity="center"
+                        android:text="@string/settings_in"
+                        app:icon="@drawable/expand_more"
+                        app:iconGravity="textEnd"
+                        app:iconTint="@android:color/transparent"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.45" />
+                </LinearLayout>
 
                 <ImageView
                     android:id="@+id/Button_Search_Light_ModeLeft"
@@ -93,14 +105,13 @@
                     style="@style/CustomSettingsTextViewStyle"
                     android:text="@string/lists1"/>
 
-                <Switch
+                <Button
                     android:id="@+id/switch_control"
                     style="@style/CustomSettingsButtonStyle"
-                    android:checked="false"
-                    android:focusable="false"
-                    android:layout_gravity="start"
-                    android:paddingEnd="20dp"
-                    tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
+                    android:contentDescription="@string/mode_switch"
+                    app:icon="@drawable/control"
+                    app:iconTint="@color/setting_button_icon"
+                    app:iconGravity="textStart"/>
 
             </LinearLayout>
 

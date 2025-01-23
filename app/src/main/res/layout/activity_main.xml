@@ -26,16 +26,30 @@
                 style="@style/CustomHeaderStyle"
                 android:layout_weight="1">
 
-                <Button
-                    android:id="@+id/x_Panel_Header_Middle_1Title"
-                    android:layout_width="228dp"
-                    style="@style/CustomHeaderNoteStyle"
-                    android:gravity="start"
-                    android:text="@string/playlist_maker"
-                    android:textAllCaps="false"
-                    app:icon="@drawable/expand_more"
-                    app:iconTint="@android:color/transparent"
-                    app:iconGravity="textEnd" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/x_Panel_Header_Middle_1Title"
+                        android:layout_width="0dp"
+                        android:layout_weight="9"
+                        style="@style/CustomHeaderNoteStyle"
+                        android:gravity="start"
+                        android:text="@string/playlist_maker"
+                        android:textAllCaps="false"
+                        app:icon="@drawable/expand_more"
+                        app:iconTint="@android:color/transparent"
+                        app:iconGravity="textEnd"
+                        android:paddingStart="16dp"
+                        tools:ignore="RtlSymmetry" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/Button_Search_Light_ModeLeft"
@@ -68,35 +82,39 @@
         android:layout_weight="92"
         android:orientation="vertical"
         android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingRight="16dp"
+        android:layout_marginTop="3dp">
 
-        <View
-            android:id="@+id/header_space"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            tools:ignore="NestedWeights" />
-
-        <LinearLayout
-            android:id="@+id/big_3_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="99"
-            android:orientation="vertical">
-
-            <include
+            <Button
                 android:id="@+id/Button_Big1"
-                layout="@layout/rounded_button"/>
+                style="@style/CustomButtonStyle"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/magnifier"
+                app:iconTint="@color/black"
+                app:iconGravity="textStart"
+                android:text="@string/search"
+                android:textAllCaps="false"/>
 
-            <include
+            <Button
                 android:id="@+id/Button_Big2"
-                layout="@layout/rounded_button1"/>
+                style="@style/CustomButtonStyle"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/mediaicon"
+                app:iconTint="@color/black"
+                app:iconGravity="textStart"
+                android:text="@string/media_library"
+                android:textAllCaps="false"/>
 
-            <include
+            <Button
                 android:id="@+id/Button_Big3"
-                layout="@layout/rounded_button2"/>
+                style="@style/CustomButtonStyle"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/settingsicon"
+                app:iconTint="@color/black"
+                app:iconGravity="textStart"
+                android:text="@string/settings"
+                android:textAllCaps="false"/>
 
-        </LinearLayout>
 
     </LinearLayout>
 

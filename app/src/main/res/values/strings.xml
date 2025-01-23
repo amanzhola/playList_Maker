@@ -13,5 +13,8 @@
     <string name="support">Support</string>
     <string name="agreement">Agreement</string>
     <string name="hidden">Hidden</string>
+    <string name="mode_switch">switch</string>
+    <string name="switchOff">Выключено</string>
+    <string name="switchOn">Включено</string>
 
 </resources>
