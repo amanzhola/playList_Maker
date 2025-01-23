@@ -1,5 +1,6 @@
 package com.example.playlistmaker
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -44,7 +45,11 @@ class SettingsActivity : AppCompatActivity() {
 
         backButton = findViewById(R.id.Button_Search_Light_ModeLeft)
         backButton.setOnClickListener {
-            onBackPressed()
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("dark_mode", isButtonOn)
+            setResult(RESULT_OK, resultIntent)
+            finish()
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_settings)) { v, insets ->
@@ -93,4 +98,3 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 }
-

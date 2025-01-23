@@ -13,6 +13,10 @@ import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
+    companion object {
+        const val SETTINGS_REQUEST_CODE = 1
+    }
+
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -21,9 +25,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        1ый экран тело
         setContentView(R.layout.activity_main)
         setupFirstScreen()
-
-//        ночной режим 1ый экран
-        findViewById<View>(R.id.activity_main).setBackgroundColor(ContextCompat.getColor(this, R.color.black))
 
 //        1ый экран 3 кнопки без шапки
 //        findViewById<LinearLayout>(R.id.PanelHeader).visibility = View.GONE
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 val intent = Intent(this@MainActivity, SettingsActivity::class.java)
                 intent.putExtra("button_clicked", "search")
-                startActivity(intent)
+                startActivityForResult(intent, SETTINGS_REQUEST_CODE)
             }
         }
         search.setOnClickListener(imageClickListener)
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         media.setOnClickListener {
             val intent = Intent(this@MainActivity, SettingsActivity::class.java)
             intent.putExtra("button_clicked", "media")
-            startActivity(intent)
+            startActivityForResult(intent, SETTINGS_REQUEST_CODE)
         }
 
 //        3. Implementing OnClickListener on an Activity
@@ -67,7 +68,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when (p0?.id) {
             R.id.Button_Big3 -> {
                 val displayIntent = Intent(this@MainActivity, SettingsActivity::class.java)
-                startActivity(displayIntent)
+                startActivityForResult(displayIntent, SETTINGS_REQUEST_CODE)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+            val isDarkMode = data?.getBooleanExtra("dark_mode", false) ?: false
+            if (isDarkMode) {
+                findViewById<View>(R.id.activity_main).setBackgroundColor(ContextCompat.getColor(this, R.color.black))
+            } else {
+                findViewById<View>(R.id.activity_main).setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundDay))
             }
         }
     }
