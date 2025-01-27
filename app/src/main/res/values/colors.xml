@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="background">#3772E7</color>
-    <color name="textColor">#1A1B22</color>
-    <color name="red">#E91E63</color>
-    <color name="backgroundtransparent">#00000000</color>
-    <color name="settingsDay">#FF000000</color>
-    <color name="setting_button_icon">@android:color/darker_gray</color>
-
+    <color name="white">#FFFFFF</color>
     <color name="backgroundDay">#3772E7</color>
+    <color name="textColor">#1A1B22</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="red">#FF0000</color> <!-- Красный -->
+    <color name="blue">#0000FF</color> <!-- Синий -->
+    <color name="green">#008000</color> <!-- Зеленый -->
+    <color name="yellow">#FFFF00</color> <!-- Желтый -->
+    <color name="gray">#808080</color> <!-- Серый -->
+    <color name="cyan">#00FFFF</color> <!-- Циан -->
+    <color name="magenta">#FF00FF</color> <!-- Магента -->
+    <color name="orange">#FFA500</color> <!-- Оранжевый -->
+    <color name="purple">#800080</color> <!-- Пурпурный -->
 
 </resources>

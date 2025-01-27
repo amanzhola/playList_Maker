@@ -1,20 +1,17 @@
 <resources>
-    <string name="app_name">PlayList Maker3</string>
+    <string name="app_name">PlayList Maker</string>
     <string name="search">Поиск</string>
-    <string name="media_library">Медиатека</string>
-    <string name="settings">Настройки</string>
-    <string name="settings_in">Настройки</string>
+    <string name="media">Медиатека</string>
+    <string name="list0">Настройки</string>
     <string name="playlist_maker">Playlist maker</string>
-    <string name="lists1">Темная тема</string>
-    <string name="lists2">Поделиться приложением</string>
-    <string name="lists3">Написать в поддержку</string>
-    <string name="lists4">Пользовательское соглашение</string>
+    <string name="list1">Темная тема</string>
+    <string name="list2">Поделиться приложением</string>
+    <string name="list3">Написать в поддержку</string>
+    <string name="list4">Пользовательское соглашение</string>
     <string name="share">share</string>
     <string name="support">Support</string>
     <string name="agreement">Agreement</string>
     <string name="hidden">Hidden</string>
-    <string name="mode_switch">switch</string>
-    <string name="switchOff">Выключено</string>
-    <string name="switchOn">Включено</string>
+
 
 </resources>

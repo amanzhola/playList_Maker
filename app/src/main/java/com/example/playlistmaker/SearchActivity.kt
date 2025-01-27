@@ -16,13 +16,8 @@ class SearchActivity : AppCompatActivity() {
 
 //        setContentView(R.layout.activity_search)
 
-        setContentView(R.layout.activity_settings)
 
-        val title = intent.getStringExtra("header_title")
-
-        title?.let { findViewById<TextView>(R.id.x_Panel_Header_Middle_1Title).text = it }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_settings)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
