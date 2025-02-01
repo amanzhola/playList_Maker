@@ -5,6 +5,13 @@
     <color name="backgroundDay">#3772E7</color>
     <color name="textColor">#1A1B22</color>
     <color name="transparent">#00000000</color>
+    <color name="colorPrimary">#00000000</color>
+
+    <color name="switch_thumb_off_color">#AEAFB4</color>
+    <color name="switch_thumb_on_color">#3772E7</color>
+    <color name="switch_track_off_color">#E6E8EB</color>
+    <color name="switch_track_on_color">#9FBBF3</color>
+
 
     <color name="red">#FF0000</color> <!-- Красный -->
     <color name="blue">#0000FF</color> <!-- Синий -->
@@ -15,5 +22,19 @@
     <color name="magenta">#FF00FF</color> <!-- Магента -->
     <color name="orange">#FFA500</color> <!-- Оранжевый -->
     <color name="purple">#800080</color> <!-- Пурпурный -->
+
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+
+
+    <color name="hintSearchIcon">#AEAFB4</color>
+    <color name="hintFieldColor">#E6E8EB</color>
+    <color name="hintColor">#AEAFB4</color>
+    <color name="cursorColor">#3772E7</color>
+
 
 </resources>

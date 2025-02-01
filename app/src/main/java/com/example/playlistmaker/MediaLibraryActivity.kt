@@ -12,7 +12,7 @@ class MediaLibraryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-//        setContentView(R.layout.activity_media_library)
+        setContentView(R.layout.activity_media_library)
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

@@ -1,26 +1,30 @@
 package com.example.playlistmaker
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
+import android.widget.Switch
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class SettingsActivity : AppCompatActivity() {
 
-    private var isButtonOn = false
+    companion object {
+        const val IS_BUTTON_ON_KEY = "isButtonOn"
+        const val BUTTON_CLICKED_KEY = "button_clicked"
+    }
+
+    private var isButtonOn: Boolean = false
     private lateinit var backButton: TextView
-    private lateinit var switchControlButton: TextView
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    private lateinit var switchControl: Switch
     private lateinit var settingsLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,144 +33,149 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         initViews()
-
-        isButtonOn = intent.getBooleanExtra("isButtonOn", false)
-
-        updateBackgroundColor()
+        setupState(savedInstanceState)
         setupClickListeners()
-
-        val intent = intent
-        if (intent != null && intent.hasExtra("isButtonOn")) {
-            isButtonOn = intent.getBooleanExtra("isButtonOn", false)
-            updateMargin()
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_settings)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
-        val buttonClicked = intent.getStringExtra("button_clicked")
-        setupHeader(buttonClicked)
+        handleWindowInsets()
+        setupHeader(intent.getStringExtra(BUTTON_CLICKED_KEY))
+        updateUI()
     }
 
-    // Функция для конвертации dp в px
-    private fun Int.dpToPx(): Int {
-        return (this * resources.displayMetrics.density).toInt()
-    }
-
-    // Функция для изменения layout_marginStart
-    private fun updateMargin() {
-        val shouldUseNegativeMargin = isButtonOn
-        val params = backButton.layoutParams as ViewGroup.MarginLayoutParams
-        params.marginStart = if (shouldUseNegativeMargin) -25.dpToPx() else 0
-        backButton.layoutParams = params
-    }
-
-    private fun hideOtherViews() {
-        findViewById<TextView>(R.id.switch_control).visibility = View.GONE
-        findViewById<TextView>(R.id.share).visibility = View.GONE
-        findViewById<TextView>(R.id.group).visibility = View.GONE
-        findViewById<TextView>(R.id.agreement).visibility = View.GONE
-    }
-
-    private fun setupHeader(buttonClicked: String?) {
-        val titleTextView = findViewById<TextView>(R.id.title)
-
-        when (buttonClicked) {
-            "search" -> {
-                hideOtherViews()
-                titleTextView.text = getString(R.string.search)
-            }
-            "media" -> {
-                hideOtherViews()
-                titleTextView.text = getString(R.string.media)
-            }
-            else -> titleTextView.text = getString(R.string.list0)
-        }
+    private fun setupState(savedInstanceState: Bundle?) {
+        isButtonOn = savedInstanceState?.getBoolean(IS_BUTTON_ON_KEY, false)
+            ?: intent.getBooleanExtra(IS_BUTTON_ON_KEY, false)
     }
 
     private fun initViews() {
-        switchControlButton = findViewById(R.id.switch_control)
+        switchControl = findViewById(R.id.switch_control)
         backButton = findViewById(R.id.title)
         settingsLayout = findViewById(R.id.activity_settings)
     }
 
     private fun setupClickListeners() {
-        switchControlButton.setOnClickListener {
-            isButtonOn = !isButtonOn
-            updateMargin()
-            updateBackgroundColor() // Обновляем UI при переключении
+        switchControl.setOnCheckedChangeListener { _, isChecked ->
+            isButtonOn = isChecked
+            updateUI()
         }
 
-        backButton.setOnClickListener {
-            val intent = Intent().apply {
-                putExtra("isButtonOn", isButtonOn)
+        backButton.setOnClickListener { onBackButtonPressed() }
+
+        val clickListener = View.OnClickListener { view ->
+            when (view.id) {
+                R.id.share -> shareApp()
+                R.id.group -> writeToSupport()
+                R.id.agreement -> openAgreement()
             }
-            setResult(RESULT_OK, intent)
-            finish()
+        }
+
+        listOf(R.id.share, R.id.group, R.id.agreement).forEach { id ->
+            findViewById<TextView>(id).setOnClickListener(clickListener)
         }
     }
 
-    private fun updateBackgroundColor() {
-        val backgroundColor = if (isButtonOn) {
-            ContextCompat.getColor(this, R.color.black)
-        } else {
-            ContextCompat.getColor(this, R.color.white)
-        }
-        settingsLayout.setBackgroundColor(backgroundColor)
+    private fun onBackButtonPressed() {
+        setResult(RESULT_OK, Intent().apply { putExtra(IS_BUTTON_ON_KEY, isButtonOn) })
+        finish()
+    }
 
-        val switchDrawableRes = if (isButtonOn) {
-            R.drawable.control1
-        } else {
-            R.drawable.control
-        }
-        // Установка правого Drawable по ресурсу
-        switchControlButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, switchDrawableRes, 0)
+    private fun updateUI() {
+        switchControl.isChecked = isButtonOn
+        updateColors()
+        updatePadding()
+        updateSwitchColors()
+    }
 
-        // Получаем Drawable из ресурса
-        val drawable = ContextCompat.getDrawable(this, R.drawable.arrow_back)
+    private fun updateColors() {
+        val textColorRes = if (isButtonOn) R.color.white else R.color.textColor
+        val backgroundColorRes = if (isButtonOn) R.color.black else R.color.white
 
-        // Проверяем состояние и задаем цвет
-        val color = if (isButtonOn) {
-            ContextCompat.getColor(this, R.color.black)
-        } else {
-            ContextCompat.getColor(this, R.color.transparent)
-        }
-
-        // Устанавливаем цвет стрелки
-        drawable?.let {
-            DrawableCompat.setTint(it, color)  // Меняем цвет
-            backButton.setCompoundDrawablesWithIntrinsicBounds(it, null, null, null) // Устанавливаем стрелку
-        }
-
-        // Обновляем цвет текста для всех TextView в LinearLayout
-        val textColor = if (isButtonOn) {
-            ContextCompat.getColor(this, R.color.white) // Цвет текста, когда кнопка включена
-        } else {
-            ContextCompat.getColor(this, R.color.textColor) // Цвет текста, когда кнопка выключена
-        }
-
-        // Изменяем цвет текста всех TextView внутри LinearLayout
-        for (i in 0 until settingsLayout.childCount) {
-            val view = settingsLayout.getChildAt(i)
-            if (view is TextView) {
-                view.setTextColor(textColor)
-            }
-        }
+        settingsLayout.setBackgroundColor(ContextCompat.getColor(this, backgroundColorRes))
+        setTextColorForAllTextViews(settingsLayout, textColorRes)
 
         val titleTextView = findViewById<TextView>(R.id.title)
+        titleTextView.setTextColor(ContextCompat.getColor(this, textColorRes))
+    }
 
-        // Пример изменения цвета текста в зависимости от условия
-        val colorTitle = if (isButtonOn) {
-            ContextCompat.getColor(this, R.color.white) // Здесь используйте свой цвет
+    private fun setTextColorForAllTextViews(parentLayout: LinearLayout, colorResId: Int) {
+        val color = ContextCompat.getColor(this, colorResId)
+        for (i in 0 until parentLayout.childCount) {
+            (parentLayout.getChildAt(i) as? TextView)?.setTextColor(color)
+        }
+    }
+
+    private fun updatePadding() {
+        backButton.setPadding(if (isButtonOn) (-25).dpToPx() else 0, backButton.paddingTop, backButton.paddingEnd, backButton.paddingBottom)
+    }
+
+    private fun handleWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(settingsLayout) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+    }
+
+    private fun updateSwitchColors() {
+        val (thumbColor, trackColor) = if (isButtonOn) {
+            Pair(R.color.switch_thumb_on_color, R.color.switch_track_on_color)
         } else {
-            ContextCompat.getColor(this, R.color.textColor)
+            Pair(R.color.switch_thumb_off_color, R.color.switch_track_off_color)
         }
 
-        // Установка цвета текста
-        titleTextView.setTextColor(colorTitle)
+        switchControl.thumbTintList = ContextCompat.getColorStateList(this, thumbColor)
+        switchControl.trackTintList = ContextCompat.getColorStateList(this, trackColor)
+    }
 
+    private fun setupHeader(buttonClicked: String?) {
+        val titleTextView = findViewById<TextView>(R.id.title)
+        titleTextView.text = when (buttonClicked) {
+            ScreenType.MEDIA.name -> {
+                hideOtherViews()
+                getString(R.string.media)
+            }
+            else -> getString(R.string.list0)
+        }
+    }
+
+    private fun hideOtherViews() {
+        for (i in 0 until settingsLayout.childCount) {
+            val child = settingsLayout.getChildAt(i)
+            if (child is TextView) {
+                child.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun shareApp() {
+        val shareMessage = getString(R.string.share_message)
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareMessage)
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(sendIntent, null))
+    }
+
+    private fun writeToSupport() {
+        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:${getString(R.string.support_email)}")
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.support_subject))
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.support_body))
+        }
+        startActivity(Intent.createChooser(emailIntent, null))
+    }
+
+    private fun openAgreement() {
+        val agreementUrl = getString(R.string.agreement_url)
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(agreementUrl))
+        startActivity(browserIntent)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(IS_BUTTON_ON_KEY, isButtonOn)
+    }
+
+    private fun Int.dpToPx(): Int {
+        return (this * resources.displayMetrics.density).toInt()
     }
 }

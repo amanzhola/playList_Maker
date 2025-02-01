@@ -1,68 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/title_layout"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="center_vertical">
 
         <TextView
             android:id="@+id/title"
-            style="@style/CustomTextView"
+            style="@style/SettingsTitleTextView"
             android:text="@string/list0"
-            android:layout_centerVertical="true"
-            app:drawableStartCompat="@drawable/arrow_back"
-            app:drawableTint="@android:color/black" />
+            app:drawableStartCompat="@drawable/arrow_back"/>
 
         <ImageView
             android:id="@+id/filter_list"
-            style="@style/CustomImageView"
+            style="@style/MainImageView"
+            android:contentDescription="@string/filter"
             android:src="@drawable/filter"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="@dimen/custom_padding"/>
 
         <ImageView
             android:id="@+id/dropdown"
-            style="@style/CustomImageView"
+            style="@style/MainImageView"
+            android:contentDescription="@string/dropdown"
             android:src="@drawable/expand_more"
             android:layout_toStartOf="@id/filter_list"
-            android:layout_marginEnd="100dp"
-            app:tint="@android:color/transparent"/>
+            android:layout_marginEnd="@dimen/dropdown"/>
 
-    </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="10dp"/>
-
-    <TextView
+    <Switch
         android:id="@+id/switch_control"
-        style="@style/CustomTextView"
+        style="@style/SwitchView"
         android:text="@string/list1"
-        app:drawableEndCompat="@drawable/control_selector"/>
+        android:paddingEnd="@dimen/switch_padding"
+        tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
     <TextView
         android:id="@+id/share"
-        style="@style/CustomTextView"
+        style="@style/SettingsTextView"
         android:text="@string/list2"
-        app:drawableEndCompat="@drawable/share" />
+        app:drawableEndCompat="@drawable/share"/>
 
     <TextView
         android:id="@+id/group"
-        style="@style/CustomTextView"
+        style="@style/SettingsTextView"
         android:text="@string/list3"
         app:drawableEndCompat="@drawable/group"/>
 
     <TextView
         android:id="@+id/agreement"
-        style="@style/CustomTextView"
+        style="@style/SettingsTextView"
         android:text="@string/list4"
-        app:drawableRightCompat="@drawable/vector" />
+        app:drawableEndCompat="@drawable/vector"/>
 
 </LinearLayout>
