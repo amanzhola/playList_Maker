@@ -1,19 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:background="@color/backgroundDay">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/CustomTitleTextView"
+            android:text="Playlist maker"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-25dp"
+            app:drawableStartCompat="@drawable/arrow_back"
+            app:drawableTint="@android:color/transparent" />
+
+        <ImageView
+            android:id="@+id/filter_list"
+            style="@style/CustomImageView"
+            android:src="@drawable/filter"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"/>
+
+        <ImageView
+            android:id="@+id/dropdown"
+            style="@style/CustomImageView"
+            android:src="@drawable/expand_more"
+            android:layout_toStartOf="@id/filter_list"
+            android:layout_marginEnd="100dp"
+            app:tint="@android:color/transparent"/>
+
+    </RelativeLayout>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/big_3_buttons_and_header_space"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="92"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_marginTop="3dp">
+
+        <Button
+            android:id="@+id/Button_Big1"
+            style="@style/CustomMaterialButtonStyle1"
+            android:text="@string/search"
+            app:icon="@drawable/magnifier"
+            app:iconGravity="textStart"
+            app:iconTint="@color/black"/>
+
+        <Button
+            android:id="@+id/Button_Big2"
+            style="@style/CustomMaterialButtonStyle1"
+            android:text="@string/media"
+            app:icon="@drawable/mediaicon"
+            app:iconGravity="textStart"
+            app:iconTint="@color/black"/>
+
+        <Button
+            android:id="@+id/Button_Big3"
+            style="@style/CustomMaterialButtonStyle1"
+            android:text="@string/list0"
+            app:icon="@drawable/settingsicon"
+            app:iconGravity="textStart"
+            app:iconTint="@color/black"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
