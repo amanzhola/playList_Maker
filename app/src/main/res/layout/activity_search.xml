@@ -9,6 +9,11 @@
       android:layout_height="?attr/actionBarSize"
       android:layout_gravity="center_vertical">
 
+    <ImageView
+        android:id="@+id/backArrow"
+        android:contentDescription="@string/arrow_back"
+        style="@style/SearchArrowBackIconStyle" />
+
     <TextView
         android:id="@+id/title"
         style="@style/SearchTitleTextView"/>
@@ -31,19 +36,24 @@
 
   </androidx.appcompat.widget.Toolbar>
 
-  <com.google.android.material.textfield.TextInputLayout
-      android:id="@+id/search_box"
-      style="@style/SearchBox">
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/inputEditText"
-        style="@style/SearchInput"/>
+      <com.google.android.material.textfield.TextInputLayout
+          android:id="@+id/search_box"
+          style="@style/SearchBox">
 
-  </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputEditText"
+            style="@style/SearchInput"/>
 
-  <ImageView
-      android:id="@+id/clearIcon"
-      style="@style/ClearIcon"
-      android:contentDescription="@string/clear_search"/>
+      </com.google.android.material.textfield.TextInputLayout>
+
+      <ImageView
+          android:id="@+id/clearIcon"
+          style="@style/ClearIcon"
+          android:contentDescription="@string/clear_search"/>
+  </FrameLayout>
 
 </LinearLayout>

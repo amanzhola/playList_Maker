@@ -3,41 +3,32 @@ package com.example.playlistmaker
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : BaseActivity() {
 
     companion object {
         const val SEARCH_QUERY_KEY = "searchQuery"
     }
 
-    private var isButtonOn = false
-    private lateinit var backButton: TextView
     private lateinit var mainLayout: LinearLayout
     private lateinit var inputEditText: TextInputEditText
     private lateinit var clearIcon: ImageView
-    private lateinit var titleTextView: TextView
-    private lateinit var settingsLauncher: ActivityResultLauncher<Intent>
+    private lateinit var searchInputLayout: TextInputLayout
     private var searchQuery = ""
 
-    @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,21 +36,16 @@ class SearchActivity : AppCompatActivity() {
 
         initViews()
         retrieveIntentData()
-
-        handleWindowInsets()
-
-        updateBackgroundColor()
-        setupActivityResultLauncher()
+        handleWindowInsets(mainLayout)
         setupListeners()
+        updateUI()
     }
 
-    @SuppressLint("CutPasteId")
     private fun initViews() {
-        backButton = findViewById(R.id.title)
-        mainLayout = findViewById(R.id.activity_search)
-        inputEditText = findViewById(R.id.inputEditText)
-        clearIcon = findViewById(R.id.clearIcon)
-        titleTextView = findViewById(R.id.title)
+        mainLayout = find(R.id.activity_search)
+        inputEditText = find(R.id.inputEditText)
+        clearIcon = find(R.id.clearIcon)
+        searchInputLayout = find(R.id.search_box)
     }
 
     private fun retrieveIntentData() {
@@ -68,12 +54,12 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         backButton.setOnClickListener { onBackButtonPressed() }
-        setupTextWatcher()
-        setupClearButtonListener()
+        inputEditText.addTextChangedListener(createTextWatcher())
+        clearIcon.setOnClickListener { clearSearchInput() }
     }
 
-    private fun setupTextWatcher() {
-        inputEditText.addTextChangedListener(object : TextWatcher {
+    private fun createTextWatcher(): TextWatcher {
+        return object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -82,15 +68,13 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {}
-        })
+        }
     }
 
-    private fun setupClearButtonListener() {
-        clearIcon.setOnClickListener {
-            inputEditText.text?.clear()
-            clearIcon.visibility = View.GONE
-            hideKeyboard()
-        }
+    private fun clearSearchInput() {
+        inputEditText.text?.clear()
+        clearIcon.visibility = View.GONE
+        hideKeyboard()
     }
 
     private fun hideKeyboard() {
@@ -103,64 +87,51 @@ class SearchActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun setupActivityResultLauncher() {
-        settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                isButtonOn = result.data?.getBooleanExtra(SettingsActivity.IS_BUTTON_ON_KEY, false) ?: false
-                Log.d("SearchActivity", "Switch state received: $isButtonOn")
-                updateBackgroundColor()
-            }
-        }
+    private fun updateUI() {
+        updateBackgroundColor()
+        updateIconAndInputColors()
     }
 
     private fun updateBackgroundColor() {
-        val isDarkModeEnabled = isButtonOn
-        mainLayout.setBackgroundColor(ContextCompat.getColor(this, if (isDarkModeEnabled) R.color.black else R.color.white))
-        backButton.setTextColor(if (isDarkModeEnabled) ContextCompat.getColor(this, R.color.white) else ContextCompat.getColor(this, R.color.black))
+        val backgroundColor = getColor(R.color.textColor, R.color.white)
+        val titleColor = getColor(R.color.white, R.color.textColor)
 
-        updateTitleIconColor(isDarkModeEnabled)
-        updateSearchInputDrawableColor(isDarkModeEnabled)
-        updateSearchBoxBackgroundColor(isDarkModeEnabled)
+        mainLayout.setBackgroundColor(ContextCompat.getColor(this, backgroundColor))
+        title.setTextColor(ContextCompat.getColor(this, titleColor))
     }
 
-    private fun updateTitleIconColor(isDarkModeEnabled: Boolean) {
-        val arrowBackTintColor = if (isDarkModeEnabled) R.color.white else R.color.black
-        ContextCompat.getDrawable(this, R.drawable.arrow_back)?.mutate()?.let { drawable ->
-            drawable.setColorFilter(ContextCompat.getColor(this, arrowBackTintColor), PorterDuff.Mode.SRC_IN)
-            titleTextView.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-        }
-    }
+    private fun updateIconAndInputColors() {
+        val iconColor = getColor(R.color.white, R.color.textColor)
+        backButton.setImageDrawable(getColoredDrawable(R.drawable.arrow_back, iconColor))
 
-    private fun updateSearchInputDrawableColor(isDarkModeEnabled: Boolean) {
-        val drawableTint = if (isDarkModeEnabled) R.color.textColor else R.color.hintSearchIcon
-        ContextCompat.getDrawable(this, R.drawable.magnifier)?.apply {
-            setColorFilter(ContextCompat.getColor(this@SearchActivity, drawableTint), PorterDuff.Mode.SRC_IN)
-            inputEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(this, null, null, null)
-        }
-    }
+        val drawableTint = getColor(R.color.textColor, R.color.hintSearchIcon)
+        inputEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(getColoredDrawable(R.drawable.magnifier, drawableTint), null, null, null)
 
-    private fun updateSearchBoxBackgroundColor(isDarkModeEnabled: Boolean) {
-        val boxBackgroundColor = if (isDarkModeEnabled) R.color.white else R.color.hintFieldColor
-        val searchInputLayout = findViewById<TextInputLayout>(R.id.search_box)
+        val boxBackgroundColor = getColor(R.color.white,R.color.hintFieldColor)
         searchInputLayout.setBoxBackgroundColor(ContextCompat.getColor(this, boxBackgroundColor))
     }
 
-    private fun handleWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(mainLayout) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+    private fun getColoredDrawable(drawableId: Int, colorId: Int): Drawable? {
+        val drawable = ContextCompat.getDrawable(this, drawableId)?.mutate() ?: return null
+        val colorFilter = PorterDuffColorFilter(
+            ContextCompat.getColor(this@SearchActivity, colorId),
+            PorterDuff.Mode.SRC_IN
+        )
+        drawable.colorFilter = colorFilter
+        return drawable
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         outState.putString(SEARCH_QUERY_KEY, searchQuery)
+        outState.putBoolean(SettingsActivity.IS_BUTTON_ON_KEY, isButtonOn)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         searchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
+        isButtonOn = savedInstanceState.getBoolean(SettingsActivity.IS_BUTTON_ON_KEY, false)
         inputEditText.setText(searchQuery)
+        updateUI() // Обновление фонового цвета и остальных элементов при восстановлении состояния
     }
 }

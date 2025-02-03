@@ -1,0 +1,61 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_main1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundDay">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/MainTitleTextView2"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:titleTextColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="@string/app_name"/>
+
+    <!-- Кнопка 1 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/Button_Big1"
+        style="@style/MainMaterialButtonStyle"
+        android:text="@string/search"
+        app:icon="@drawable/magnifier"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/Button_Big2"
+        app:layout_constraintHeight_percent="0.33" />
+
+    <!-- Кнопка 2 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/Button_Big2"
+        style="@style/MainMaterialButtonStyle"
+        android:text="@string/media"
+        app:icon="@drawable/media_icon"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/Button_Big1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/Button_Big3"
+        app:layout_constraintHeight_percent="0.33" />
+
+    <!-- Кнопка 3 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/Button_Big3"
+        style="@style/MainMaterialButtonStyle"
+        android:text="@string/list0"
+        app:icon="@drawable/settings_icon"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/Button_Big2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHeight_percent="0.10" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,26 +5,23 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.switchmaterial.SwitchMaterial
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : BaseActivity() {
 
     companion object {
         const val IS_BUTTON_ON_KEY = "isButtonOn"
         const val BUTTON_CLICKED_KEY = "button_clicked"
     }
 
-    private var isButtonOn: Boolean = false
-    private lateinit var backButton: TextView
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private lateinit var switchControl: Switch
+    private lateinit var switchControl: SwitchMaterial
     private lateinit var settingsLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +32,7 @@ class SettingsActivity : AppCompatActivity() {
         initViews()
         setupState(savedInstanceState)
         setupClickListeners()
-        handleWindowInsets()
+        handleWindowInsets(settingsLayout)
         setupHeader(intent.getStringExtra(BUTTON_CLICKED_KEY))
         updateUI()
     }
@@ -46,9 +43,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        switchControl = findViewById(R.id.switch_control)
-        backButton = findViewById(R.id.title)
-        settingsLayout = findViewById(R.id.activity_settings)
+        switchControl = find(R.id.switch_control)
+        settingsLayout = find(R.id.activity_settings)
     }
 
     private fun setupClickListeners() {
@@ -57,19 +53,15 @@ class SettingsActivity : AppCompatActivity() {
             updateUI()
         }
 
-        backButton.setOnClickListener { onBackButtonPressed() }
+        setupViewClickListener<ImageView>(R.id.backArrow) { if (!isButtonOn) onBackButtonPressed() }
+        setupViewClickListener<TextView>(R.id.share) { shareApp() }
+        setupViewClickListener<TextView>(R.id.group) { writeToSupport() }
+        setupViewClickListener<TextView>(R.id.agreement) { openAgreement() }
+        setupViewClickListener<TextView>(R.id.title) { if (isButtonOn) onBackButtonPressed() }
+    }
 
-        val clickListener = View.OnClickListener { view ->
-            when (view.id) {
-                R.id.share -> shareApp()
-                R.id.group -> writeToSupport()
-                R.id.agreement -> openAgreement()
-            }
-        }
-
-        listOf(R.id.share, R.id.group, R.id.agreement).forEach { id ->
-            findViewById<TextView>(id).setOnClickListener(clickListener)
-        }
+    private fun <T : View> setupViewClickListener(viewId: Int, action: () -> Unit) {
+        find<T>(viewId).setOnClickListener { action() }
     }
 
     private fun onBackButtonPressed() {
@@ -80,19 +72,18 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateUI() {
         switchControl.isChecked = isButtonOn
         updateColors()
-        updatePadding()
+        updateBackArrowVisibility()
         updateSwitchColors()
     }
 
     private fun updateColors() {
+        val backgroundColors = getColorPair(R.color.textColor, R.color.white )
+        updateColors(settingsLayout, null, backgroundColors)
+
         val textColorRes = if (isButtonOn) R.color.white else R.color.textColor
-        val backgroundColorRes = if (isButtonOn) R.color.black else R.color.white
 
-        settingsLayout.setBackgroundColor(ContextCompat.getColor(this, backgroundColorRes))
+        title.setTextColor(ContextCompat.getColor(this, textColorRes))
         setTextColorForAllTextViews(settingsLayout, textColorRes)
-
-        val titleTextView = findViewById<TextView>(R.id.title)
-        titleTextView.setTextColor(ContextCompat.getColor(this, textColorRes))
     }
 
     private fun setTextColorForAllTextViews(parentLayout: LinearLayout, colorResId: Int) {
@@ -102,16 +93,12 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePadding() {
-        backButton.setPadding(if (isButtonOn) (-25).dpToPx() else 0, backButton.paddingTop, backButton.paddingEnd, backButton.paddingBottom)
-    }
-
-    private fun handleWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(settingsLayout) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+    private fun updateBackArrowVisibility() {
+        val layoutParams = backButton.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.width = if (isButtonOn) 0 else resources.getDimensionPixelSize(R.dimen.arrow_back_icon_size)
+        layoutParams.marginEnd = if (isButtonOn) resources.getDimensionPixelSize(R.dimen.backArrowNight) else resources.getDimensionPixelSize(R.dimen.arrow_back_icon_padding)
+        backButton.layoutParams = layoutParams
+        backButton.requestLayout()
     }
 
     private fun updateSwitchColors() {
@@ -126,7 +113,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupHeader(buttonClicked: String?) {
-        val titleTextView = findViewById<TextView>(R.id.title)
+        val titleTextView = find<TextView>(R.id.title)
         titleTextView.text = when (buttonClicked) {
             ScreenType.MEDIA.name -> {
                 hideOtherViews()
@@ -155,13 +142,25 @@ class SettingsActivity : AppCompatActivity() {
         startActivity(Intent.createChooser(sendIntent, null))
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun writeToSupport() {
-        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:${getString(R.string.support_email)}")
-            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.support_subject))
-            putExtra(Intent.EXTRA_TEXT, getString(R.string.support_body))
+        val email = getString(R.string.support_email)
+        val subject = getString(R.string.support_subject)
+        val body = getString(R.string.support_body)
+
+        val emailIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
         }
-        startActivity(Intent.createChooser(emailIntent, null))
+
+        // Проверка на наличие почтового клиента
+        if (emailIntent.resolveActivity(packageManager) != null) {
+            startActivity(Intent.createChooser(emailIntent, null))
+        } else {
+            Toast.makeText(this, "Нет доступного почтового клиента", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun openAgreement() {
@@ -173,9 +172,5 @@ class SettingsActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(IS_BUTTON_ON_KEY, isButtonOn)
-    }
-
-    private fun Int.dpToPx(): Int {
-        return (this * resources.displayMetrics.density).toInt()
     }
 }

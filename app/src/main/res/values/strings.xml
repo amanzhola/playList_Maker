@@ -25,5 +25,6 @@
 
     <string name="search_hint">Поиск</string>
     <string name="clear_search">Очистить поисковый запрос</string>
+    <string name="empty_space">empty space</string>
 
 </resources>

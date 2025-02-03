@@ -9,25 +9,31 @@
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/arrow_back"
-                style="@style/MainTitleTextView"
-                android:text="@string/playlist_maker"
-                android:src="@drawable/arrow_back"/>
+        <ImageView
+            android:id="@+id/backArrow"
+            android:contentDescription="@string/arrow_back"
+            style="@style/ArrowBackIconStyle"
+            android:layout_width="@dimen/searchNoStroke"
+            android:layout_marginEnd="@dimen/searchNoStroke"/>
 
-            <ImageView
-                android:id="@+id/filter_list"
-                style="@style/MainImageView"
-                android:contentDescription="@string/filter"
-                android:src="@drawable/filter"
-                android:layout_marginEnd="16dp"/>
+        <TextView
+            android:id="@+id/arrow_back"
+            style="@style/MainTitleTextView"
+            android:text="@string/playlist_maker" />
 
-            <ImageView
-                android:id="@+id/dropdown"
-                style="@style/MainImageView"
-                android:contentDescription="@string/dropdown"
-                android:src="@drawable/expand_more"
-                android:layout_marginEnd="100dp"/>
+        <ImageView
+            android:id="@+id/filter_list"
+            style="@style/MainImageView"
+            android:contentDescription="@string/filter"
+            android:src="@drawable/filter"
+            android:layout_marginEnd="16dp"/>
+
+        <ImageView
+            android:id="@+id/dropdown"
+            style="@style/MainImageView"
+            android:contentDescription="@string/dropdown"
+            android:src="@drawable/expand_more"
+            android:layout_marginEnd="100dp"/>
 
     </androidx.appcompat.widget.Toolbar>
 

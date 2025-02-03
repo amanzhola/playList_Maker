@@ -13,11 +13,16 @@
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center_vertical">
 
+
+        <ImageView
+            android:id="@+id/backArrow"
+            android:contentDescription="@string/arrow_back"
+            style="@style/ArrowBackIconStyle"/>
+
         <TextView
             android:id="@+id/title"
             style="@style/SettingsTitleTextView"
-            android:text="@string/list0"
-            app:drawableStartCompat="@drawable/arrow_back"/>
+            android:text="@string/list0"/>
 
         <ImageView
             android:id="@+id/filter_list"
@@ -37,7 +42,7 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <Switch
+    <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switch_control"
         style="@style/SwitchView"
         android:text="@string/list1"
