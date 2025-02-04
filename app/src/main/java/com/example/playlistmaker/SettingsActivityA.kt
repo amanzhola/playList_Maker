@@ -5,26 +5,22 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivityA : BaseActivity() {
 
     companion object {
         const val IS_BUTTON_ON_KEY = "isButtonOn"
         const val BUTTON_CLICKED_KEY = "button_clicked"
     }
 
-    private var isButtonOn: Boolean = false
-    private lateinit var backButton: ImageView
     private lateinit var switchControl: SwitchMaterial
     private lateinit var settingsLayout: LinearLayout
 
@@ -36,9 +32,9 @@ class SettingsActivity : AppCompatActivity() {
         initViews()
         setupState(savedInstanceState)
         setupClickListeners()
-        handleWindowInsets()
+        handleWindowInsets(settingsLayout)
         setupHeader(intent.getStringExtra(BUTTON_CLICKED_KEY))
-        switchControl.isChecked = isButtonOn
+        updateUI()
     }
 
     private fun setupState(savedInstanceState: Bundle?) {
@@ -46,21 +42,15 @@ class SettingsActivity : AppCompatActivity() {
             ?: intent.getBooleanExtra(IS_BUTTON_ON_KEY, false)
     }
 
-    private fun <T : View> find(id: Int): T {
-        return findViewById(id) as T
-    }
-
     private fun initViews() {
         switchControl = find(R.id.switch_control)
-        backButton = find(R.id.backArrow)
         settingsLayout = find(R.id.activity_settings)
     }
 
     private fun setupClickListeners() {
         switchControl.setOnCheckedChangeListener { _, isChecked ->
             isButtonOn = isChecked
-            AppCompatDelegate.setDefaultNightMode(
-                if (isButtonOn) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            updateUI()
         }
 
         setupViewClickListener<ImageView>(R.id.backArrow) { if (!isButtonOn) onBackButtonPressed() }
@@ -79,18 +69,53 @@ class SettingsActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun handleWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(settingsLayout) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+    private fun updateUI() {
+        switchControl.isChecked = isButtonOn
+        updateColors()
+        updateBackArrowVisibility()
+        updateSwitchColors()
+    }
+
+    private fun updateColors() {
+        val backgroundColors = getColorPair(R.color.textColor, R.color.white )
+        updateColors(settingsLayout, null, backgroundColors)
+
+        val textColorRes = if (isButtonOn) R.color.white else R.color.textColor
+
+        title.setTextColor(ContextCompat.getColor(this, textColorRes))
+        setTextColorForAllTextViews(settingsLayout, textColorRes)
+    }
+
+    private fun setTextColorForAllTextViews(parentLayout: LinearLayout, colorResId: Int) {
+        val color = ContextCompat.getColor(this, colorResId)
+        for (i in 0 until parentLayout.childCount) {
+            (parentLayout.getChildAt(i) as? TextView)?.setTextColor(color)
         }
+    }
+
+    private fun updateBackArrowVisibility() {
+        val layoutParams = backButton.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.width = if (isButtonOn) 0 else resources.getDimensionPixelSize(R.dimen.arrow_back_24)
+        layoutParams.marginEnd = if (isButtonOn) resources.getDimensionPixelSize(R.dimen.backArrowNight) else resources.getDimensionPixelSize(R.dimen.arrow_back_padding_12)
+        backButton.layoutParams = layoutParams
+        backButton.requestLayout()
+    }
+
+    private fun updateSwitchColors() {
+        val (thumbColor, trackColor) = if (isButtonOn) {
+            Pair(R.color.switch_thumb_on_color, R.color.switch_track_on_color)
+        } else {
+            Pair(R.color.switch_thumb_off_color, R.color.switch_track_off_color)
+        }
+
+        switchControl.thumbTintList = ContextCompat.getColorStateList(this, thumbColor)
+        switchControl.trackTintList = ContextCompat.getColorStateList(this, trackColor)
     }
 
     private fun setupHeader(buttonClicked: String?) {
         val titleTextView = find<TextView>(R.id.title)
         titleTextView.text = when (buttonClicked) {
-            ScreenType.MEDIA.name -> {
+            ScreenTypeA.MEDIA.name -> {
                 hideOtherViews()
                 getString(R.string.media)
             }
@@ -130,6 +155,7 @@ class SettingsActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, body)
         }
 
+        // Проверка на наличие почтового клиента
         if (emailIntent.resolveActivity(packageManager) != null) {
             startActivity(Intent.createChooser(emailIntent, null))
         } else {

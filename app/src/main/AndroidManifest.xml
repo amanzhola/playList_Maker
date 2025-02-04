@@ -30,6 +30,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivityA"
+            android:exported="true" />
+        <activity
+            android:name=".SettingsActivityA"
+            android:exported="false" />
+        <activity
+            android:name=".SearchActivityA"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivityC"
+            android:exported="true" />
     </application>
 
 </manifest>

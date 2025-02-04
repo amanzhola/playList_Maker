@@ -81,7 +81,7 @@ open class BaseActivity : AppCompatActivity() {
     protected fun setupActivityResultLauncher(onResult: (Boolean) -> Unit) {
         settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                val isButtonOn = result.data?.getBooleanExtra(SettingsActivity.IS_BUTTON_ON_KEY, false) ?: false
+                val isButtonOn = result.data?.getBooleanExtra(SettingsActivityA.IS_BUTTON_ON_KEY, false) ?: false
                 onResult(isButtonOn)
             }
         }
@@ -89,8 +89,8 @@ open class BaseActivity : AppCompatActivity() {
 
     protected fun <T> launchActivity(activityClass: Class<T>, isButtonOn: Boolean, extra: String? = null) {
         Intent(this, activityClass).apply {
-            extra?.let { putExtra(SettingsActivity.BUTTON_CLICKED_KEY, it) }
-            putExtra(SettingsActivity.IS_BUTTON_ON_KEY, isButtonOn)
+            extra?.let { putExtra(SettingsActivityA.BUTTON_CLICKED_KEY, it) }
+            putExtra(SettingsActivityA.IS_BUTTON_ON_KEY, isButtonOn)
             settingsLauncher?.launch(this)  // Используем безопасный вызов
         }
     }

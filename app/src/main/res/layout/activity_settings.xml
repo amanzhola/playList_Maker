@@ -13,7 +13,6 @@
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center_vertical">
 
-
         <ImageView
             android:id="@+id/backArrow"
             android:contentDescription="@string/arrow_back"
@@ -30,7 +29,7 @@
             android:contentDescription="@string/filter"
             android:src="@drawable/filter"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="@dimen/custom_padding"/>
+            android:layout_marginEnd="@dimen/Padding_16"/>
 
         <ImageView
             android:id="@+id/dropdown"
@@ -38,7 +37,7 @@
             android:contentDescription="@string/dropdown"
             android:src="@drawable/expand_more"
             android:layout_toStartOf="@id/filter_list"
-            android:layout_marginEnd="@dimen/dropdown"/>
+            android:layout_marginEnd="@dimen/dropdown_160"/>
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -46,7 +45,7 @@
         android:id="@+id/switch_control"
         style="@style/SwitchView"
         android:text="@string/list1"
-        android:paddingEnd="@dimen/switch_padding"
+        android:paddingEnd="@dimen/Switch_padding_6"
         tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
     <TextView

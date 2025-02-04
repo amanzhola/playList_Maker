@@ -2,14 +2,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main1"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/backgroundDay">
+    style="@style/MainView1">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        style="@style/MainTitleTextView2"
+        style="@style/MainTitleTextView1"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:titleTextColor="@color/white"
@@ -30,7 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/Button_Big2"
-        app:layout_constraintHeight_percent="0.33" />
+        app:layout_constraintHeight_percent="0.30" />
 
     <!-- Кнопка 2 -->
     <com.google.android.material.button.MaterialButton
@@ -43,7 +41,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/Button_Big3"
-        app:layout_constraintHeight_percent="0.33" />
+        app:layout_constraintHeight_percent="0.30" />
 
     <!-- Кнопка 3 -->
     <com.google.android.material.button.MaterialButton
@@ -56,6 +54,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.10" />
+        app:layout_constraintHeight_percent="0.30" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

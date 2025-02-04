@@ -24,7 +24,7 @@
         android:contentDescription="@string/filter"
         android:src="@drawable/filter"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="@dimen/custom_padding"/>
+        android:layout_marginEnd="@dimen/Padding_16"/>
 
     <ImageView
         android:id="@+id/dropdown"
@@ -32,7 +32,7 @@
         android:contentDescription="@string/dropdown"
         android:src="@drawable/expand_more"
         android:layout_toStartOf="@id/filter_list"
-        android:layout_marginEnd="@dimen/dropdown"/>
+        android:layout_marginEnd="@dimen/dropdown_160"/>
 
   </androidx.appcompat.widget.Toolbar>
 
