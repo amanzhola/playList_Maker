@@ -1,6 +1,5 @@
 package com.example.playlistmaker
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -117,23 +116,16 @@ class SettingsActivity : AppCompatActivity() {
         startActivity(Intent.createChooser(sendIntent, null))
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
     private fun writeToSupport() {
-        val email = getString(R.string.support_email)
-        val subject = getString(R.string.support_subject)
-        val body = getString(R.string.support_body)
-
-        val emailIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "message/rfc822"
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            putExtra(Intent.EXTRA_TEXT, body)
+        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:${getString(R.string.support_email)}?subject=${getString(R.string.support_subject)}&body=${getString(R.string.support_body)}")
         }
+        startActivity(Intent.createChooser(emailIntent, null))
 
         if (emailIntent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(emailIntent, null))
+            startActivity(emailIntent)
         } else {
-            Toast.makeText(this, "Нет доступного почтового клиента", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Нет приложения для отправки электронной почты", Toast.LENGTH_SHORT).show()
         }
     }
 
