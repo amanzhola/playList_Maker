@@ -4,20 +4,19 @@
     android:id="@+id/activity_main1"
     style="@style/MainView1">
 
-    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/MainTitleTextView1"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:titleTextColor="@color/white"
+        android:layout_marginEnd="@dimen/Button_margin_16"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:navigationIcon="@drawable/arrow_back"
-        app:title="@string/app_name"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Кнопка 1 -->
+    </androidx.appcompat.widget.Toolbar>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/Button_Big1"
         style="@style/MainMaterialButtonStyle"
@@ -28,9 +27,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/Button_Big2"
-        app:layout_constraintHeight_percent="0.30" />
+        app:layout_constraintHeight_percent="0.30"
+        android:layout_marginBottom="0dp" />
 
-    <!-- Кнопка 2 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/Button_Big2"
         style="@style/MainMaterialButtonStyle"
@@ -41,9 +40,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/Button_Big3"
-        app:layout_constraintHeight_percent="0.30" />
+        app:layout_constraintHeight_percent="0.30"
+        android:layout_marginBottom="0dp" />
 
-    <!-- Кнопка 3 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/Button_Big3"
         style="@style/MainMaterialButtonStyle"
@@ -54,6 +53,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.30" />
+        app:layout_constraintHeight_percent="0.30"
+        android:layout_marginBottom="0dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

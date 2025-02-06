@@ -22,6 +22,31 @@
         <item name="android:background">@color/textColor</item>
     </style>
 
+    <style name="SettingsTitleTextView1">
+        <item name="title">@string/list0</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+
+    <style name="SearchTitleTextView1">
+        <item name="title">@string/search</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="navigationIcon">@drawable/arrow_back_2</item>
+    </style>
+
+    <style name="SettingsView1">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/textColor</item>
+    </style>
+
     <style name="SearchArrowBackIconStyle">
         <item name="android:layout_width">@dimen/arrow_back_24</item>
         <item name="android:layout_height">@dimen/arrow_back_24</item>

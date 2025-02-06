@@ -42,6 +42,15 @@
         <activity
             android:name=".MainActivityC"
             android:exported="true" />
+        <activity
+            android:name=".SettingsActivityC"
+            android:exported="false" />
+        <activity
+            android:name=".SearchActivityC"
+            android:exported="false" />
+        <activity
+            android:name=".MediaLibraryActivityC"
+            android:exported="false" />
     </application>
 
 </manifest>

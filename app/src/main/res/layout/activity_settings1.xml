@@ -1,0 +1,59 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_settings1"
+    style="@style/SettingsView1">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/SettingsTitleTextView1"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginEnd="@dimen/Button_margin_16"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_control"
+        style="@style/SwitchView"
+        android:text="@string/list1"
+        android:paddingEnd="@dimen/Switch_padding_6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/share"
+        style="@style/SettingsTextView"
+        android:text="@string/list2"
+        app:drawableEndCompat="@drawable/share"
+        app:layout_constraintTop_toBottomOf="@id/switch_control"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/group"
+        style="@style/SettingsTextView"
+        android:text="@string/list3"
+        app:drawableEndCompat="@drawable/group"
+        app:layout_constraintTop_toBottomOf="@id/share"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/agreement"
+        style="@style/SettingsTextView"
+        android:text="@string/list4"
+        app:drawableEndCompat="@drawable/vector"
+        app:layout_constraintTop_toBottomOf="@id/group"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

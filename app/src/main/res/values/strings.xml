@@ -26,5 +26,7 @@
     <string name="search_hint">Поиск</string>
     <string name="clear_search">Очистить поисковый запрос</string>
     <string name="empty_space">empty space</string>
+    <string name="dropdown_option1">Опция 1</string>
+    <string name="dropdown_option2">Опция 2</string>
 
 </resources>
