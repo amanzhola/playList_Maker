@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:id="@+id/activity_media_library"
+    style="@style/MainSearchView"
     tools:context=".MediaLibraryActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <ImageView
+            android:id="@+id/backArrow"
+            android:contentDescription="@string/arrow_back"
+            style="@style/SearchArrowBackIconStyle" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/SearchTitleTextView"
+            android:text="@string/media"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <include
+        android:id="@+id/bottom_nav_include"
+        layout="@layout/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>

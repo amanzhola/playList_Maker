@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">PlayList Maker</string>
+    <string name="app_name">Playlist maker</string>
     <string name="search">Поиск</string>
     <string name="media">Медиатека</string>
-    <string name="list0">Настройки</string>
+    <string name="settings">Настройки</string>
     <string name="playlist_maker">Playlist maker</string>
     <string name="list1">Темная тема</string>
     <string name="list2">Поделиться приложением</string>
@@ -29,4 +29,11 @@
     <string name="dropdown_option1">Опция 1</string>
     <string name="dropdown_option2">Опция 2</string>
 
+    <string name="set_titleColor">Цвет Заглавия</string>
+    <string name="set_btnTextColor">Цвет текста кнопки</string>
+    <string name="set_btnBackgroundColor">Цвет фона кнопки</string>
+    <string name="set_textColor">Цвет текста</string>
+    <string name="backgroundColor">Цвет фона</string>
+    <string name="iconColor">Цвет иконки</string>
+    <string name="dropdown_header">Выберите элемент</string>
 </resources>

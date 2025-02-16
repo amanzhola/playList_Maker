@@ -1,81 +1,136 @@
 package com.example.playlistmaker
 
+import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.Menu
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-class SettingsActivity : AppCompatActivity() {
+open class SettingsActivity : BaseActivity(), SettingsChangeListener {
 
-    companion object {
-        const val IS_BUTTON_ON_KEY = "isButtonOn"
-        const val BUTTON_CLICKED_KEY = "button_clicked"
-    }
-
-    private var isButtonOn: Boolean = false
     private lateinit var backButton: ImageView
     private lateinit var switchControl: SwitchMaterial
     private lateinit var settingsLayout: LinearLayout
+    private lateinit var sharedPreferences: SharedPreferences
+    private var isDarkTheme: Boolean = false
+    private lateinit var toolbar: Toolbar
+    private lateinit var bottomNavigationView: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        isDarkTheme = sharedPreferences.getBoolean("isDarkTheme", false)
+
+        setTheme(isDarkTheme)
+
         setContentView(R.layout.activity_settings)
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         initViews()
-        setupState(savedInstanceState)
-        setupClickListeners()
         handleWindowInsets()
-        setupHeader(intent.getStringExtra(BUTTON_CLICKED_KEY))
-        switchControl.isChecked = isButtonOn
+        setupClickListeners()
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation)
+
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.navigation_search -> {
+                    startActivityWithAnimation(SearchActivity::class.java)
+                    true
+                }
+
+                R.id.navigation_media -> {
+                    startActivityWithAnimation(MediaLibraryActivity::class.java)
+                    true
+                }
+
+                R.id.navigation_settings -> {
+                    true
+                }
+
+                else -> false
+            }
+        }
+        bottomNavigationView.selectedItemId = R.id.navigation_settings
+
     }
 
-    private fun setupState(savedInstanceState: Bundle?) {
-        isButtonOn = savedInstanceState?.getBoolean(IS_BUTTON_ON_KEY, false)
-            ?: intent.getBooleanExtra(IS_BUTTON_ON_KEY, false)
+    private fun startActivityWithAnimation(targetActivity: Class<*>) {
+        val intent = Intent(this, targetActivity)
+        val options = ActivityOptions.makeCustomAnimation(
+            this,
+                R.anim.enter_from_bottom,
+            R.anim.exit_to_top
+        )
+        startActivity(intent, options.toBundle())
     }
 
-    private fun <T : View> find(id: Int): T {
-        return findViewById(id) as T
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        val dropdownItem = menu.findItem(R.id.dropdown)
+        dropdownItem?.isVisible = false
+        return true
+    }
+
+    private fun <T : View> find(id: Int): T { return findViewById(id)!!
     }
 
     private fun initViews() {
-        switchControl = find(R.id.switch_control)
-        backButton = find(R.id.backArrow)
-        settingsLayout = find(R.id.activity_settings)
+        switchControl = findViewById(R.id.switch_control)
+        backButton = findViewById(R.id.backArrow)
+        settingsLayout = findViewById(R.id.activity_settings)
+
+        switchControl.isChecked = isDarkTheme
     }
 
     private fun setupClickListeners() {
         switchControl.setOnCheckedChangeListener { _, isChecked ->
-            isButtonOn = isChecked
-            AppCompatDelegate.setDefaultNightMode(
-                if (isButtonOn) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            onThemeChanged(isChecked)
         }
-
-        setupViewClickListener<ImageView>(R.id.backArrow) { if (!isButtonOn) onBackButtonPressed() }
+        setupViewClickListener<ImageView>(R.id.backArrow) {
+            if (!isDarkTheme) {
+                ActivityOptionsCompat.makeCustomAnimation(
+                    this,
+                    R.anim.enter_from_left,
+                    R.anim.exit_to_right
+                ).toBundle()
+                ActivityCompat.finishAfterTransition(this)
+            }
+        }
         setupViewClickListener<TextView>(R.id.share) { shareApp() }
         setupViewClickListener<TextView>(R.id.group) { writeToSupport() }
         setupViewClickListener<TextView>(R.id.agreement) { openAgreement() }
-        setupViewClickListener<TextView>(R.id.title) { if (isButtonOn) onBackButtonPressed() }
+        setupViewClickListener<TextView>(R.id.title) {
+            if (isDarkTheme) {
+                ActivityOptionsCompat.makeCustomAnimation(
+                    this,
+                    R.anim.fade_in,
+                    R.anim.fade_out
+                ).toBundle()
+                ActivityCompat.finishAfterTransition(this)
+            }
+        }
     }
+
 
     private fun <T : View> setupViewClickListener(viewId: Int, action: () -> Unit) {
         find<T>(viewId).setOnClickListener { action() }
-    }
-
-    private fun onBackButtonPressed() {
-        setResult(RESULT_OK, Intent().apply { putExtra(IS_BUTTON_ON_KEY, isButtonOn) })
-        finish()
     }
 
     private fun handleWindowInsets() {
@@ -86,57 +141,19 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupHeader(buttonClicked: String?) {
-        val titleTextView = find<TextView>(R.id.title)
-        titleTextView.text = when (buttonClicked) {
-            ScreenType.MEDIA.name -> {
-                hideOtherViews()
-                getString(R.string.media)
-            }
-            else -> getString(R.string.list0)
-        }
+    override fun onThemeChanged(isDarkTheme: Boolean) {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("isDarkTheme", isDarkTheme)
+        editor.apply()
+
+        setTheme(isDarkTheme)
+
+        switchControl.isChecked = isDarkTheme
     }
 
-    private fun hideOtherViews() {
-        for (i in 0 until settingsLayout.childCount) {
-            val child = settingsLayout.getChildAt(i)
-            if (child is TextView) {
-                child.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun shareApp() {
-        val shareMessage = getString(R.string.share_message)
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, shareMessage)
-            type = "text/plain"
-        }
-        startActivity(Intent.createChooser(sendIntent, null))
-    }
-
-    private fun writeToSupport() {
-        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:${getString(R.string.support_email)}?subject=${getString(R.string.support_subject)}&body=${getString(R.string.support_body)}")
-        }
-        startActivity(Intent.createChooser(emailIntent, null))
-
-        if (emailIntent.resolveActivity(packageManager) != null) {
-            startActivity(emailIntent)
-        } else {
-            Toast.makeText(this, "Нет приложения для отправки электронной почты", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun openAgreement() {
-        val agreementUrl = getString(R.string.agreement_url)
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(agreementUrl))
-        startActivity(browserIntent)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(IS_BUTTON_ON_KEY, isButtonOn)
+    private fun setTheme(isDarkTheme: Boolean) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
     }
 }

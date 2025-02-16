@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="navigationColor">#FFFFFF</color>
     <color name="backgroundDay">#3772E7</color>
     <color name="textColor">#1A1B22</color>
     <color name="transparent">#00000000</color>
@@ -35,11 +36,13 @@
     <color name="hintColor">#AEAFB4</color>
     <color name="cursorColor">#3772E7</color>
 
+<!--    <color name="colorPrimary">#3772E7</color>-->
 
     <color name="colorPrimary">#6200EE</color>
+<!--    <color name="colorPrimary">#6200EE</color>-->
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
-    <color name="background">#FFFFFF</color> <!-- Белый фон -->
+    <color name="background">#FFFFFF</color>
 
 
 
