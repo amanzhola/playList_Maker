@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/dropdown"
+        android:icon="@drawable/expand_more_border"
+        android:title=""
+        app:showAsAction="ifRoom"
+        app:iconTint = "@color/menu_state_selector"/>
+    <item
+        android:id="@+id/space_between"
+        android:icon="@null"
+        android:title=""
+        app:showAsAction="always"
+        android:enabled="false" />
+    <item
+        android:id="@+id/filter_list"
+        android:icon="@drawable/filter_border"
+        android:title=""
+        app:showAsAction="ifRoom"
+        app:iconTint = "@color/menu_state_selector"/>
+
+</menu>

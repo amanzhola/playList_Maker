@@ -1,51 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources>
+<resources >
 
-    <style name="CustomTextView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">61dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/black</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:drawablePadding">8dp</item>
+
+    <style name="Theme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColor">@color/textColor</item>
     </style>
 
-    <style name="CustomTitleTextView">
+
+    <style name="MainView">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">61dp</item>
-        <item name="android:textSize">22sp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@color/backgroundDay</item>
+    </style>
+
+    <style name="MainView1">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/backgroundDay</item>
+    </style>
+
+    <style name="SettingsView1">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="SearchArrowBackIconStyle">
+        <item name="android:layout_width">@dimen/arrow_back_24</item>
+        <item name="android:layout_height">@dimen/arrow_back_24</item>
+        <item name="android:src">@drawable/arrow_back</item>
+        <item name="android:contentDescription">@string/arrow_back</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+        <item name="android:layout_marginEnd">@dimen/arrow_back_padding_12</item>
+        <item name="android:tint">@color/textColor</item>
+    </style>
+
+    <style name="ArrowBackIconStyle">
+        <item name="android:layout_width">@dimen/arrow_back_24</item>
+        <item name="android:layout_height">@dimen/arrow_back_24</item>
+        <item name="android:src">@drawable/arrow_back</item>
+        <item name="android:contentDescription">@string/arrow_back</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+        <item name="android:layout_marginEnd">@dimen/arrow_back_padding_12</item>
+        <item name="android:tint">@color/textColor</item>
+    </style>
+
+    <style name="MainTitleTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:drawablePadding">8dp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
     </style>
 
-    <style name="CustomImageView">
-        <item name="android:layout_width">12dp</item>
-        <item name="android:layout_height">12dp</item>
-        <item name="android:contentDescription">Icon</item>
+    <style name="MainTitleTextView1">
+        <item name="title">@string/playlist_maker</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+
+    </style>
+
+    <style name="SettingsTitleTextView1">
+        <item name="title">@string/list0</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="titleTextColor">@color/textColor</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="navigationIcon">@drawable/arrow_back_1</item>
+    </style>
+
+    <style name="SearchTitleTextView1">
+        <item name="title">@string/search</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="titleTextColor">@color/textColor</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="navigationIcon">@drawable/arrow_back_1</item>
+    </style>
+
+    <style name="MainImageView">
+        <item name="android:layout_width">@dimen/Icon_12</item>
+        <item name="android:layout_height">@dimen/Icon_12</item>
         <item name="android:layout_centerVertical">true</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:tint">@color/transparent</item>
         <item name="android:tintMode">multiply</item>
+        <item name="android:layout_gravity">end|center_vertical</item>
     </style>
 
-    <style name="CustomMaterialButtonStyle1" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="MainMaterialButtonStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:layout_height">0dp</item>
-        <item name="android:layout_weight">1</item>
         <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_weight">1</item>
         <item name="android:backgroundTint">@android:color/white</item>
         <item name="android:textColor">@color/textColor</item>
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:layout_marginBottom">1dp</item>
-        <item name="cornerRadius">16dp</item>
+        <item name="android:layout_marginLeft">@dimen/Button_margin_16</item>
+        <item name="android:layout_marginRight">@dimen/Button_margin_16</item>
+        <item name="cornerRadius">@dimen/Button_radius_16</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconTint">@color/textColor</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:translationZ">0dp</item>
+    </style>
+
+    <style name="SettingsTitleTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+
+    <style name="SwitchView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/Settings_Height_61</item>
+        <item name="android:textSize">@dimen/Settings_Text_16</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_marginTop">@dimen/Separator_10</item>
+        <item name="android:paddingStart">@dimen/Padding_16</item>
+        <item name="android:paddingEnd">@dimen/Switch_padding_6</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:thumbTint">@color/switch_thumb_off_color</item>
+        <item name="android:trackTint">@color/switch_thumb_off_color</item>
+    </style>
+
+    <style name="SettingsTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/Settings_Height_61</item>
+        <item name="android:textSize">@dimen/Settings_Text_16</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">@dimen/Padding_16</item>
+        <item name="android:paddingEnd">@dimen/Padding_18</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+
+    <style name="MainSearchView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="SearchTitleTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingEnd">@dimen/Padding_16</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:text">@string/search</item>
 
     </style>
 
+
+    <style name="SearchBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxHeight">@dimen/searchBoxHeight_36</item>
+        <item name="hintEnabled">true</item>
+        <item name="boxBackgroundMode">outline</item>
+        <item name="boxStrokeWidth">@dimen/searchNoStroke</item>
+        <item name="boxCornerRadiusTopStart">@dimen/searchRadius_8</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/searchRadius_8</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/searchRadius_8</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/searchRadius_8</item>
+        <item name="android:paddingHorizontal">@dimen/searchPaddingLeftRight_16</item>
+        <item name="android:paddingVertical">@dimen/searchPaddingTopBottom_8</item>
+        <item name="boxBackgroundColor">@color/hintFieldColor</item>
+        <item name="android:textColorHint">@color/hintColor</item>
+    </style>
+
+    <style name="SearchInput">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxHeight">@dimen/searchLineHeight_52</item>
+        <item name="android:hint">@string/search</item>
+        <item name="android:maxLength">20</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:inputType">text</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textColorHint">@color/textColor</item>
+        <item name="android:textSize">@dimen/Settings_Text_16</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:drawableStart">@drawable/magnifier</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:drawableTint">@color/hintSearchIcon</item>
+        <item name="android:paddingVertical">@dimen/searchIconAndHintVerticalPadding_8.5</item>
+        <item name="cursorColor">@color/cursorColor</item>
+    </style>
+
+    <style name="ClearIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">end|center_vertical</item>
+        <item name="android:contentDescription">@string/clear_search</item>
+        <item name="android:src">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="android:padding">@dimen/searchEraserPadding_16</item>
+        <item name="android:visibility">gone</item>
+        <item name="tint">@color/gray</item>
+    </style>
 
 </resources>

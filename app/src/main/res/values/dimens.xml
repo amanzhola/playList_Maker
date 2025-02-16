@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="Settings_Height_61">61dp</dimen>
+    <dimen name="Settings_Text_16">16sp</dimen>
+    <dimen name="Title_text_22">22sp</dimen>
+    <dimen name="Padding_16">16dp</dimen>
+    <dimen name="Padding_18">18dp</dimen>
+    <dimen name="Padding_night_0">0dp</dimen>
+    <dimen name="dropdown_160">160dp</dimen>
+    <dimen name="Switch_padding_6">6dp</dimen>
+    <dimen name="Separator_10">10dp</dimen>
+    <dimen name="Drawable_padding_8">8dp</dimen>
+    <dimen name="Icon_12">12dp</dimen>
+    <dimen name="Button_radius_16">16dp</dimen>
+    <dimen name="Button_margin_16">16dp</dimen>
+    <dimen name="arrow_back_24">24dp</dimen>
+    <dimen name="arrow_back_padding_12">12dp</dimen>
+
+    <dimen name="searchRadius_8">8dp</dimen>
+    <dimen name="searchBoxHeight_36">36dp</dimen>
+    <dimen name="searchPaddingTopBottom_8">8dp</dimen>
+    <dimen name="searchPaddingLeftRight_16">16dp</dimen>
+    <dimen name="searchNoStroke">0dp</dimen>
+    <dimen name="searchLineHeight_52">52dp</dimen>
+    <dimen name="searchIconAndHintVerticalPadding_8.5">8.5dp</dimen>
+    <dimen name="searchEraserPadding_16">16dp</dimen>
+
+    <dimen name="backArrowNight">0dp</dimen>
+</resources>
