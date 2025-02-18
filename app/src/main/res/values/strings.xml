@@ -1,21 +1,21 @@
 <resources>
-    <string name="app_name">PlayList Maker</string>
+    <string name="app_name" translatable="false">Playlist maker</string>
     <string name="search">Поиск</string>
     <string name="media">Медиатека</string>
-    <string name="list0">Настройки</string>
+    <string name="settings">Настройки</string>
     <string name="playlist_maker">Playlist maker</string>
-    <string name="list1">Темная тема</string>
-    <string name="list2">Поделиться приложением</string>
-    <string name="list3">Написать в поддержку</string>
-    <string name="list4">Пользовательское соглашение</string>
+    <string name="switch_r">Темная тема</string>
+    <string name="share_r">Поделиться приложением</string>
+    <string name="support_r">Написать в поддержку</string>
+    <string name="agreement_r">Пользовательское соглашение</string>
 
-    <string name="share">share</string>
-    <string name="support">Support</string>
-    <string name="agreement">Agreement</string>
-    <string name="hidden">Hidden</string>
-    <string name="filter">filter</string>
-    <string name="dropdown">dropdown</string>
-    <string name="arrow_back">arrow_back</string>
+    <string name="share">Поиск</string>
+    <string name="support">Поддержка</string>
+    <string name="agreement">Соглашение</string>
+    <string name="hidden">Скрытый</string>
+    <string name="filter">Фильтр</string>
+    <string name="dropdown">Выпадающие списки</string>
+    <string name="arrow_back">Стрелка_назад</string>
 
     <string name="share_message">Курс по Андроид-разработке в Практикуме: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>
     <string name="support_email">amanzholaimov@gmail.com</string>
@@ -25,8 +25,23 @@
 
     <string name="search_hint">Поиск</string>
     <string name="clear_search">Очистить поисковый запрос</string>
-    <string name="empty_space">empty space</string>
+    <string name="empty_space">Пространство заполнитель</string>
     <string name="dropdown_option1">Опция 1</string>
     <string name="dropdown_option2">Опция 2</string>
+
+<!--    выборно, опция для выбора цветов, опций релаизации в гите-->
+    <string name="set_titleColor">Цвет Заглавия</string>
+    <string name="set_btnTextColor">Цвет текста кнопки</string>
+    <string name="set_btnBackgroundColor">Цвет фона кнопки</string>
+    <string name="set_textColor">Цвет текста</string>
+    <string name="backgroundColor">Цвет фона</string>
+    <string name="iconColor">Цвет иконки</string>
+    <string name="dropdown_header">Выберите элемент</string>
+
+    <string name="switch_short">Тема</string>
+    <string name="share_short">Поделиться</string>
+    <string name="support_short">Поддержка</string>
+    <string name="agreement_short">Соглашение</string>
+    <string name="navigation">Навигация</string>
 
 </resources>

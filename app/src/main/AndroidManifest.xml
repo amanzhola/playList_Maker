@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -30,27 +33,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivityA"
-            android:exported="true" />
-        <activity
-            android:name=".SettingsActivityA"
-            android:exported="false" />
-        <activity
-            android:name=".SearchActivityA"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivityC"
-            android:exported="true" />
-        <activity
-            android:name=".SettingsActivityC"
-            android:exported="false" />
-        <activity
-            android:name=".SearchActivityC"
-            android:exported="false" />
-        <activity
-            android:name=".MediaLibraryActivityC"
-            android:exported="false" />
+
     </application>
 
+    <queries>
+        <package android:name="com.google.android.gm" />
+        <package android:name="com.android.email" />
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent>
+    </queries>
+
 </manifest>
+
+<!--    android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"-->
