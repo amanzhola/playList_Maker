@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-open class SettingsActivity : BaseActivity(), SettingsChangeListener {
+class SettingsActivity : BaseActivity(), SettingsChangeListener {
 
     private lateinit var backButton: ImageView
     private lateinit var switchControl: SwitchMaterial
@@ -45,29 +45,7 @@ open class SettingsActivity : BaseActivity(), SettingsChangeListener {
         initViews()
         handleWindowInsets()
         setupClickListeners()
-
-        bottomNavigationView = findViewById(R.id.bottom_navigation)
-
-        bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.navigation_search -> {
-                    startActivityWithAnimation(SearchActivity::class.java)
-                    true
-                }
-
-                R.id.navigation_media -> {
-                    startActivityWithAnimation(MediaLibraryActivity::class.java)
-                    true
-                }
-
-                R.id.navigation_settings -> {
-                    true
-                }
-
-                else -> false
-            }
-        }
-        bottomNavigationView.selectedItemId = R.id.navigation_settings
+        bottomNavigationView()
 
     }
 
@@ -75,7 +53,7 @@ open class SettingsActivity : BaseActivity(), SettingsChangeListener {
         val intent = Intent(this, targetActivity)
         val options = ActivityOptions.makeCustomAnimation(
             this,
-                R.anim.enter_from_bottom,
+            R.anim.enter_from_bottom,
             R.anim.exit_to_top
         )
         startActivity(intent, options.toBundle())
@@ -117,14 +95,14 @@ open class SettingsActivity : BaseActivity(), SettingsChangeListener {
         setupViewClickListener<TextView>(R.id.group) { writeToSupport() }
         setupViewClickListener<TextView>(R.id.agreement) { openAgreement() }
         setupViewClickListener<TextView>(R.id.title) {
-            if (isDarkTheme) {
-                ActivityOptionsCompat.makeCustomAnimation(
-                    this,
-                    R.anim.fade_in,
-                    R.anim.fade_out
-                ).toBundle()
-                ActivityCompat.finishAfterTransition(this)
-            }
+                if (isDarkTheme) {
+                    ActivityOptionsCompat.makeCustomAnimation(
+                        this,
+                        R.anim.fade_in,
+                        R.anim.fade_out
+                    ).toBundle()
+                    ActivityCompat.finishAfterTransition(this)
+                }
         }
     }
 
@@ -149,11 +127,40 @@ open class SettingsActivity : BaseActivity(), SettingsChangeListener {
         setTheme(isDarkTheme)
 
         switchControl.isChecked = isDarkTheme
+        val resultIntent = Intent().apply {
+            putExtra("isDarkTheme", isDarkTheme)
+        }
+        setResult(RESULT_OK, resultIntent)
     }
 
     private fun setTheme(isDarkTheme: Boolean) {
         AppCompatDelegate.setDefaultNightMode(
             if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
+    }
+
+    private fun bottomNavigationView(){
+        bottomNavigationView = findViewById(R.id.bottom_navigation)
+
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.navigation_search -> {
+                    startActivityWithAnimation(SearchActivity::class.java)
+                    true
+                }
+
+                R.id.navigation_media -> {
+                    startActivityWithAnimation(MediaLibraryActivity::class.java)
+                    true
+                }
+
+                R.id.navigation_settings -> {
+                    true
+                }
+
+                else -> false
+            }
+        }
+        bottomNavigationView.selectedItemId = R.id.navigation_settings
     }
 }

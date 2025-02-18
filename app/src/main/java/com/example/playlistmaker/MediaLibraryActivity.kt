@@ -29,33 +29,8 @@ class MediaLibraryActivity : BaseActivity() {
 
         initViews()
         handleWindowInsets()
-        backButton.setOnClickListener {
-            ActivityOptionsCompat.makeCustomAnimation(
-                this, R.anim.enter_from_left, R.anim.exit_to_right
-            ).toBundle()
-
-            finishAfterTransition()
-        }
-
-        bottomNavigationView = findViewById(R.id.bottom_navigation)
-
-        bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.navigation_search -> {
-                    startActivityWithAnimation(SearchActivity::class.java)
-                    true
-                }
-                R.id.navigation_media -> {
-                    true
-                }
-                R.id.navigation_settings -> {
-                    startActivityWithAnimation(SearchActivity::class.java)
-                    true
-                }
-                else -> false
-            }
-        }
-        bottomNavigationView.selectedItemId = R.id.navigation_media
+        setupClickListeners()
+        bottomNavigationView()
     }
 
     private fun startActivityWithAnimation(targetActivity: Class<*>) {
@@ -80,5 +55,37 @@ class MediaLibraryActivity : BaseActivity() {
             view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    private fun setupClickListeners(){
+        backButton.setOnClickListener {
+            ActivityOptionsCompat.makeCustomAnimation(
+                this, R.anim.enter_from_left, R.anim.exit_to_right
+            ).toBundle()
+
+            finishAfterTransition()
+        }
+    }
+
+    private fun bottomNavigationView(){
+        bottomNavigationView = findViewById(R.id.bottom_navigation)
+
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.navigation_search -> {
+                    startActivityWithAnimation(SearchActivity::class.java)
+                    true
+                }
+                R.id.navigation_media -> {
+                    true
+                }
+                R.id.navigation_settings -> {
+                    startActivityWithAnimation(SettingsActivity::class.java)
+                    true
+                }
+                else -> false
+            }
+        }
+        bottomNavigationView.selectedItemId = R.id.navigation_media
     }
 }

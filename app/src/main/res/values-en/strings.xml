@@ -1,0 +1,47 @@
+<resources>
+<!--    <string name="app_name">Playlist maker</string>-->
+<!--    <string name="search">Search</string>-->
+<!--    <string name="media">Media</string>-->
+<!--    <string name="settings">Settings</string>-->
+<!--    <string name="playlist_maker">Playlist maker</string>-->
+<!--    <string name="switch_r">Dark Mode</string>-->
+<!--    <string name="share_r">Share</string>-->
+<!--    <string name="support_r">Support</string>-->
+<!--    <string name="agreement_r">User agreement</string>-->
+
+<!--    <string name="share">Share</string>-->
+<!--    <string name="support">Support</string>-->
+<!--    <string name="agreement">Agreement</string>-->
+<!--    <string name="hidden">Hidden</string>-->
+<!--    <string name="filter">Filter</string>-->
+<!--    <string name="dropdown">Dropdown</string>-->
+<!--    <string name="arrow_back">Arrow_back</string>-->
+
+<!--    <string name="share_message">Course on Android Development in Practicum: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>-->
+<!--    <string name="support_email">amanzholaimov@gmail.com</string>-->
+<!--    <string name="support_subject">Message to the app developers of Playlist Maker</string>-->
+<!--    <string name="support_body">Thanks to the developers for a cool app!</string>-->
+<!--    <string name="agreement_url">https://yandex.ru/legal/practicum_offer/</string>-->
+
+<!--    <string name="search_hint">Search</string>-->
+<!--    <string name="clear_search">Clear search query</string>-->
+<!--    <string name="empty_space">Space filler</string>-->
+<!--    <string name="dropdown_option1">Option 1</string>-->
+<!--    <string name="dropdown_option2">Option 2</string>-->
+
+<!--    &lt;!&ndash;    as an option, done in Git several options&ndash;&gt;-->
+<!--    <string name="set_titleColor">Title color</string>-->
+<!--    <string name="set_btnTextColor">Button text color</string>-->
+<!--    <string name="set_btnBackgroundColor">Button background color</string>-->
+<!--    <string name="set_textColor">Text color</string>-->
+<!--    <string name="backgroundColor">Background color</string>-->
+<!--    <string name="iconColor">Icon color</string>-->
+<!--    <string name="dropdown_header">Select an item</string>-->
+
+<!--    <string name="switch_short">Mode</string>-->
+<!--    <string name="share_short">Share</string>-->
+<!--    <string name="support_short">Support</string>-->
+<!--    <string name="agreement_short">Agrement</string>-->
+<!--    <string name="navigation">Navigation</string>-->
+
+</resources>

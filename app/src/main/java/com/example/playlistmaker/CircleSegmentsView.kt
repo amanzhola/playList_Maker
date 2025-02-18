@@ -34,11 +34,11 @@ class CircleSegmentsView(context: Context, attrs: AttributeSet?) : View(context,
     )
 
     private val segmentTexts = arrayOf(
-        "Switch",
-        "Share",
-        "Support",
-        "Agreement",
-        "Navigation"
+        context.getString(R.string.switch_short), // "Switch"
+        context.getString(R.string.share_short), // "Share"
+        context.getString(R.string.support_short), //  "Support"
+        context.getString(R.string.agreement_short), // "Agreement"
+        context.getString(R.string.navigation) // "Navigation"
     )
 
     private val segmentIcons = arrayOfNulls<Bitmap>(segmentTexts.size)

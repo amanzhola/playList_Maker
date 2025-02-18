@@ -1,94 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Dark" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="Theme.Dark.PlaylistMaker" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/background</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="clearsTag">@color/textColor</item>
-    </style>
-
-    <style name="BottomNavigationStyle" parent="Theme.AppCompat.DayNight.DarkActionBar">
-        <item name="android:background">@color/textColor</item>
-        <item name="itemIconTint">@color/white</item>
-        <item name="itemTextColor">@color/white</item>
-    </style>
-
-    <style name="MainView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:background">@color/textColor</item>
-    </style>
-
-    <style name="SettingsView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:background">@color/textColor</item>
-    </style>
-
-    <style name="SearchArrowBackIconStyle" parent="SearchArrowBackIconStyle1">
-        <item name="android:tint">@color/white</item>
     </style>
 
     <style name="ArrowBackIconStyle" parent="ArrowBackIconStyle1">
         <item name="android:layout_width">@dimen/searchNoStroke</item>
         <item name="android:layout_marginEnd">@dimen/searchNoStroke</item>
-        <item name="android:tint">@color/transparent</item>
     </style>
 
-    <style name="SettingsTitleTextView" parent="SearchTitleTextView1">
-        <item name="android:textColor">@color/white</item>
+    <style name="SettingsTitleTextView" parent="SettingsTitleTextView1">
         <item name="android:paddingStart">@dimen/Padding_night_0</item>
     </style>
 
-    <style name="SettingsTextView" parent="SettingsTextView1">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="SwitchView" parent="SwitchView1"> ok
-        <item name="android:textColor">@color/white</item>
+    <style name="SwitchView" parent="SwitchView1">
         <item name="thumbTint">@color/switch_thumb_on_color</item>
         <item name="trackTint">@color/switch_track_on_color</item>
     </style>
 
-    <style name="MainSearchView"> ok
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:background">@color/textColor</item>
-    </style>
-
-    <style name="SearchTitleTextView" parent="SearchTitleTextView1">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="SearchBox" parent="SearchBox1">
-        <item name="android:textColorHint">@color/textColor</item>
-        <item name="boxBackgroundColor">@color/white</item>
-    </style>
-
-    <style name="SearchInput" parent="SearchInput1">
-        <item name="android:drawableTint">@color/textColor</item>
-    </style>
-
-    <style name="ClearIcon" parent="ClearIcon1">
-        <item name="tint">@color/textColor</item>
-    </style>
-
-    <style name="track_author" parent="track_author1">
-        <item name="android:textColor">@color/white</item>
-        <item name="drawableTint">@color/white</item>
-    </style>
-
-    <style name="track_name" parent="track_name1">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="arrow_fw">
-        <item name="android:tint">@color/white</item>
-    </style>
+    <color name="blue_white">@color/black</color>
+    <color name="textColor_white">@color/white</color>
+    <color name="textColor_transparent">@color/transparent</color>
+    <color name="black_white">@color/white</color>
+    <color name="hintColor_textColor">@color/textColor</color>
+    <color name="hintField_white">@color/white</color>
+    <color name="hintColor_white">@color/white</color>
+    <color name="white_textColor">@color/textColor</color>
 
 </resources>

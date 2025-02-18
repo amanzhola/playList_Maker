@@ -20,8 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-
-open class SearchActivity : BaseActivity() {
+class SearchActivity : BaseActivity() {
 
     companion object {const val SEARCH_QUERY_KEY = "searchQuery"}
 

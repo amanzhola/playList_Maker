@@ -30,26 +30,26 @@
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switch_control"
         style="@style/SwitchView"
-        android:text="@string/list1"
+        android:text="@string/switch_r"
         android:paddingEnd="@dimen/Switch_padding_6"
         tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
     <TextView
         android:id="@+id/share"
         style="@style/SettingsTextView"
-        android:text="@string/list2"
+        android:text="@string/share_r"
         app:drawableEndCompat="@drawable/share"/>
 
     <TextView
         android:id="@+id/group"
         style="@style/SettingsTextView"
-        android:text="@string/list3"
+        android:text="@string/support_r"
         app:drawableEndCompat="@drawable/group"/>
 
     <TextView
         android:id="@+id/agreement"
         style="@style/SettingsTextView"
-        android:text="@string/list4"
+        android:text="@string/agreement_r"
         app:drawableEndCompat="@drawable/vector"/>
 
     <include
