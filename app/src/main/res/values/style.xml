@@ -256,6 +256,11 @@
     <color name="hintColor_white">@color/hintColor</color>
     <color name="hintField_white">@color/hintFieldColor</color>
     <color name="white_textColor">@color/white</color>
+    <color name="blue_blue">@color/backgroundDay</color>
+    <color name="yellow_yellow">@color/bunColor</color>
+    <color name="white_white">@color/white</color>
+    <color name="textColor_textColor">@color/textColor</color>
+
 
 
     <color name="red1">@color/red</color>
