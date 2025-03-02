@@ -27,7 +27,6 @@ class SearchActivity : BaseActivity() {
     companion object {
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val TRACK_LIST_KEY = "trackList" }
-
     private lateinit var backButton: ImageView
     private lateinit var inputEditText: TextInputEditText
     private lateinit var clearIcon: ImageView
