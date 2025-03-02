@@ -33,8 +33,6 @@ class SearchActivity : BaseActivity() {
     private lateinit var clearIcon: ImageView
     private lateinit var searchInputLayout: TextInputLayout
     private var searchQuery = ""
-    private var isBottomNavVisible = true
-
     private lateinit var adapter: TrackAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var apiService: iTunesApi
@@ -44,6 +42,8 @@ class SearchActivity : BaseActivity() {
     private var lastSearchQuery: String? = null
     private var isErrorVisible = false
     private var isErrorTypeNoResults: Boolean = false
+    private lateinit var bottomNavigationLine: View
+    private var isBottomNavigationVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,17 +73,21 @@ class SearchActivity : BaseActivity() {
 
         adapter = TrackAdapter(trackList, this)
         recyclerView.adapter = adapter
+        hideBottomNavigationView()
     }
 
     override fun onSegment4Clicked() {
-        if (isBottomNavVisible) {
-            bottomNavigationView.visibility = View.GONE
-            line.visibility = View.GONE
-        } else {
-            bottomNavigationView.visibility = View.VISIBLE
-            line.visibility = View.VISIBLE
-        }
-        isBottomNavVisible = !isBottomNavVisible
+        isBottomNavigationVisible = !isBottomNavigationVisible
+        setBottomNavigationVisibility(isBottomNavigationVisible)
+    }
+
+    private fun setBottomNavigationVisibility(isVisible: Boolean) {
+        bottomNavigationView.visibility = if (isVisible) View.VISIBLE else View.GONE
+        bottomNavigationLine.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun hideBottomNavigationView() {
+        setBottomNavigationVisibility(false)
     }
 
     override fun getLayoutId(): Int {
@@ -101,6 +105,7 @@ class SearchActivity : BaseActivity() {
         searchInputLayout = findViewById(R.id.search_box)
         textView = findViewById(R.id.fail)
         update = findViewById(R.id.btnUpdate)
+        bottomNavigationLine = findViewById(R.id.navigationLine)
     }
 
     private fun setupListeners() {
@@ -182,51 +187,59 @@ class SearchActivity : BaseActivity() {
 
     private fun performSearch() {
         val query = inputEditText.text.toString().trim()
-        if (query.isNotEmpty()) lastSearchQuery = query
-            if (query.isNotEmpty()) {
+        if (query.isNotEmpty()) {
+            lastSearchQuery = query
+
             apiService.search(query).enqueue(object : Callback<SearchResponse> {
-                override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) =
+                override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
                     if (response.isSuccessful && response.body() != null) {
                         trackList = response.body()!!.results
+
                         if (trackList.isEmpty()) {
-                            showErrorPlaceholder(true)
+                            clearTracksAndShowError(true)
                         } else {
                             isErrorVisible = false
-                            isErrorTypeNoResults = false
                             textView.visibility = View.GONE
                             update.visibility = View.GONE
                             adapter = TrackAdapter(trackList, this@SearchActivity)
                             recyclerView.adapter = adapter
                         }
+                    } else {
+                        clearTracksAndShowError(false)
                     }
-                    else showErrorPlaceholder(true)
-
+                }
                 override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                    showErrorPlaceholder(false)
+                    clearTracksAndShowError(false)
                 }
             })
         }
     }
 
-    private fun showErrorPlaceholder(isNoResults: Boolean ) {
+    private fun clearTracksAndShowError(isNoResults: Boolean) {
+        trackList = emptyList()
+        adapter = TrackAdapter(trackList, this)
+        recyclerView.adapter = adapter
+
+        showErrorPlaceholder(isNoResults)
+    }
+
+    private fun showErrorPlaceholder(isNoResults: Boolean) {
         isErrorVisible = true
         isErrorTypeNoResults = isNoResults
-        if (isNoResults) {
-            textView.isEnabled = true
-            textView.setText(R.string.searchFail)
 
+        textView.visibility = View.VISIBLE
+        update.visibility = if (!isNoResults) View.VISIBLE else View.GONE
+        if (isNoResults) {
+            textView.setText(R.string.searchFail)
         } else {
-            textView.isEnabled = false
             textView.setText(R.string.networkFail)
-            update.visibility = View.VISIBLE
-            update.setOnClickListener(fun(_: View) {
+            update.setOnClickListener {
                 lastSearchQuery?.let { query ->
                     inputEditText.setText(query)
                     performSearch()
                 }
-            })
+            }
         }
-        textView.visibility = View.VISIBLE
     }
 
     @SuppressLint("MissingSuperCall")
