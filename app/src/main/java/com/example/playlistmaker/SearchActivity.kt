@@ -73,7 +73,6 @@ class SearchActivity : BaseActivity() {
 
         adapter = TrackAdapter(trackList, this)
         recyclerView.adapter = adapter
-
     }
 
     override fun onSegment4Clicked() {
