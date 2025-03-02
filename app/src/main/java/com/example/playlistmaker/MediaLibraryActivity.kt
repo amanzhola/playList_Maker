@@ -12,7 +12,7 @@ class MediaLibraryActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
 
         initViews()
         setupClickListeners()
@@ -22,11 +22,22 @@ class MediaLibraryActivity : BaseActivity() {
 
     override fun onSegment4Clicked() {
         if (isBottomNavVisible) {
-            bottomNavigationView.visibility = View.GONE
-            line.visibility = View.GONE
+            bottomNavigationView.animate().translationY(bottomNavigationView.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
+                bottomNavigationView.visibility = View.GONE
+            }
+            line.animate().translationY(line.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
+                line.visibility = View.GONE            }
         } else {
             bottomNavigationView.visibility = View.VISIBLE
             line.visibility = View.VISIBLE
+
+            bottomNavigationView.alpha = 0f
+            bottomNavigationView.translationY = bottomNavigationView.height.toFloat()
+            bottomNavigationView.animate().translationY(0f).alpha(1f).setDuration(300)
+
+            line.alpha = 0f
+            line.translationY = line.height.toFloat()
+            line.animate().translationY(0f).alpha(1f).setDuration(300)
         }
         isBottomNavVisible = !isBottomNavVisible
     }

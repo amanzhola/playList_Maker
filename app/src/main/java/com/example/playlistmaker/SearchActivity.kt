@@ -27,26 +27,27 @@ class SearchActivity : BaseActivity() {
     companion object {
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val TRACK_LIST_KEY = "trackList" }
+
     private lateinit var backButton: ImageView
     private lateinit var inputEditText: TextInputEditText
     private lateinit var clearIcon: ImageView
     private lateinit var searchInputLayout: TextInputLayout
     private var searchQuery = ""
+    private var isBottomNavVisible = true
     private lateinit var adapter: TrackAdapter
     private lateinit var recyclerView: RecyclerView
-    private lateinit var apiService: iTunesApi
+    private lateinit var apiService: ITunesApi
     private var trackList: List<Track> = emptyList()
     private lateinit var textView: TextView
     private lateinit var update: MaterialButton
     private var lastSearchQuery: String? = null
     private var isErrorVisible = false
     private var isErrorTypeNoResults: Boolean = false
-    private lateinit var bottomNavigationLine: View
-    private var isBottomNavigationVisible = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
 
         initViews()
         setupListeners()
@@ -57,13 +58,14 @@ class SearchActivity : BaseActivity() {
             .baseUrl("https://itunes.apple.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(iTunesApi::class.java)
+            .create(ITunesApi::class.java)
 
         recyclerView = findViewById(R.id.tracks_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         if (savedInstanceState != null) {
             searchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
+
             val jsonTrackList = savedInstanceState.getString(TRACK_LIST_KEY, "")
             if (jsonTrackList.isNotEmpty()) {
                 trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toList()
@@ -72,21 +74,28 @@ class SearchActivity : BaseActivity() {
 
         adapter = TrackAdapter(trackList, this)
         recyclerView.adapter = adapter
-        hideBottomNavigationView()
     }
 
     override fun onSegment4Clicked() {
-        isBottomNavigationVisible = !isBottomNavigationVisible
-        setBottomNavigationVisibility(isBottomNavigationVisible)
-    }
+        if (isBottomNavVisible) {
+            bottomNavigationView.animate().translationY(bottomNavigationView.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
+                bottomNavigationView.visibility = View.GONE
+            }
+            line.animate().translationY(line.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
+                line.visibility = View.GONE            }
+        } else {
+            bottomNavigationView.visibility = View.VISIBLE
+            line.visibility = View.VISIBLE
 
-    private fun setBottomNavigationVisibility(isVisible: Boolean) {
-        bottomNavigationView.visibility = if (isVisible) View.VISIBLE else View.GONE
-        bottomNavigationLine.visibility = if (isVisible) View.VISIBLE else View.GONE
-    }
+            bottomNavigationView.alpha = 0f
+            bottomNavigationView.translationY = bottomNavigationView.height.toFloat()
+            bottomNavigationView.animate().translationY(0f).alpha(1f).setDuration(300)
 
-    private fun hideBottomNavigationView() {
-        setBottomNavigationVisibility(false)
+            line.alpha = 0f
+            line.translationY = line.height.toFloat()
+            line.animate().translationY(0f).alpha(1f).setDuration(300)
+        }
+        isBottomNavVisible = !isBottomNavVisible
     }
 
     override fun getLayoutId(): Int {
@@ -104,7 +113,6 @@ class SearchActivity : BaseActivity() {
         searchInputLayout = findViewById(R.id.search_box)
         textView = findViewById(R.id.fail)
         update = findViewById(R.id.btnUpdate)
-        bottomNavigationLine = findViewById(R.id.navigationLine)
     }
 
     private fun setupListeners() {
@@ -120,6 +128,13 @@ class SearchActivity : BaseActivity() {
 
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
             searchInputLayout.hint = if (hasFocus) null else getString(R.string.search)
+            if (hasFocus) {
+                bottomNavigationView.visibility = View.GONE
+                line.visibility = View.GONE
+            } else {
+                bottomNavigationView.visibility = View.VISIBLE
+                line.visibility = View.VISIBLE
+            }
         }
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
@@ -155,7 +170,7 @@ class SearchActivity : BaseActivity() {
                         else -> maxCharacterCount
                     }
                 }
-                if (s != null && s.length > maxCharacterCount) {
+                if ((s != null) && (s.length > maxCharacterCount)) {
                     inputEditText.setText(s.substring(0, maxCharacterCount))
                     inputEditText.setSelection(maxCharacterCount)
                 }
@@ -175,70 +190,12 @@ class SearchActivity : BaseActivity() {
         hideKeyboard()
 
         trackList = emptyList()
-        adapter = TrackAdapter(trackList, this)
-        recyclerView.adapter = adapter
+        adapter.updateTracks(trackList)
     }
 
     private fun hideKeyboard() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
-    }
-
-    private fun performSearch() {
-        val query = inputEditText.text.toString().trim()
-        if (query.isNotEmpty()) {
-            lastSearchQuery = query
-
-            apiService.search(query).enqueue(object : Callback<SearchResponse> {
-                override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
-                    if (response.isSuccessful && response.body() != null) {
-                        trackList = response.body()!!.results
-
-                        if (trackList.isEmpty()) {
-                            clearTracksAndShowError(true)
-                        } else {
-                            isErrorVisible = false
-                            textView.visibility = View.GONE
-                            update.visibility = View.GONE
-                            adapter = TrackAdapter(trackList, this@SearchActivity)
-                            recyclerView.adapter = adapter
-                        }
-                    } else {
-                        clearTracksAndShowError(false)
-                    }
-                }
-                override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                    clearTracksAndShowError(false)
-                }
-            })
-        }
-    }
-
-    private fun clearTracksAndShowError(isNoResults: Boolean) {
-        trackList = emptyList()
-        adapter = TrackAdapter(trackList, this)
-        recyclerView.adapter = adapter
-
-        showErrorPlaceholder(isNoResults)
-    }
-
-    private fun showErrorPlaceholder(isNoResults: Boolean) {
-        isErrorVisible = true
-        isErrorTypeNoResults = isNoResults
-
-        textView.visibility = View.VISIBLE
-        update.visibility = if (!isNoResults) View.VISIBLE else View.GONE
-        if (isNoResults) {
-            textView.setText(R.string.searchFail)
-        } else {
-            textView.setText(R.string.networkFail)
-            update.setOnClickListener {
-                lastSearchQuery?.let { query ->
-                    inputEditText.setText(query)
-                    performSearch()
-                }
-            }
-        }
     }
 
     @SuppressLint("MissingSuperCall")
@@ -263,9 +220,74 @@ class SearchActivity : BaseActivity() {
         }
         isErrorVisible = savedInstanceState.getBoolean("isErrorVisible", false)
         isErrorTypeNoResults = savedInstanceState.getBoolean("isErrorTypeNoResults", false)
-        if (isErrorVisible) showErrorPlaceholder(isErrorTypeNoResults)
+        if (isErrorVisible){
+            showErrorPlaceholder(isErrorTypeNoResults)
+        }
     }
 
+    private fun showErrorPlaceholder(isNoResults: Boolean) {
+        isErrorVisible = true
+        isErrorTypeNoResults = isNoResults
+
+        textView.visibility = View.VISIBLE
+
+        if (isNoResults) {
+            textView.isEnabled = true
+            textView.setText(R.string.searchFail)
+            update.visibility = View.GONE
+        } else {
+            textView.isEnabled = false
+            textView.setText(R.string.networkFail)
+            update.visibility = View.VISIBLE
+
+            update.setOnClickListener {
+                lastSearchQuery?.let { query ->
+                    inputEditText.setText(query)
+                    performSearch()
+                }
+            }
+        }
+    }
+
+    private fun performSearch() {
+        val query = inputEditText.text.toString().trim()
+        if (query.isNotEmpty()) {
+            lastSearchQuery = query
+
+            apiService.search(query).enqueue(object : Callback<SearchResponse> {
+                override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        trackList = response.body()!!.results
+                        updateRecyclerView()
+                    } else {
+                        clearTracksAndShowError(trackList.isEmpty())
+                    }
+                }
+
+                override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                    clearTracksAndShowError(false)
+                }
+            })
+        }
+    }
+
+    private fun updateRecyclerView() {
+        if (trackList.isEmpty()) {
+            clearTracksAndShowError(true)
+        } else {
+            isErrorVisible = false
+            textView.visibility = View.GONE
+            update.visibility = View.GONE
+
+            adapter.updateTracks(trackList)
+        }
+    }
+    private fun clearTracksAndShowError(isNoResults: Boolean) {
+        trackList = emptyList()
+        adapter.updateTracks(trackList)
+        showErrorPlaceholder(isNoResults)
+    }
+    
     fun getAdapter(): TrackAdapter {
         return adapter
     }

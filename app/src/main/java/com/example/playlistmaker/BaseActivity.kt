@@ -25,11 +25,8 @@ import kotlin.random.Random
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.button.MaterialButton
 import android.content.SharedPreferences
-import android.os.Build
-import android.view.WindowInsets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.view.WindowInsetsController
 
 open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClickListener {
 
@@ -56,24 +53,24 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
     private val segmentIcons by lazy {
         intArrayOf(
-        R.drawable.switch_24,
-        R.drawable.share,
-        R.drawable.group,
-        R.drawable.vector,
-        if (this is MainActivity) R.drawable.color_24 else R.drawable.navigation_24,
-        R.drawable.translate_24
-    )
+            R.drawable.switch_24,
+            R.drawable.share,
+            R.drawable.group,
+            R.drawable.vector,
+            if (this is MainActivity) R.drawable.color_24 else R.drawable.navigation_24,
+            R.drawable.translate_24
+        )
     }
 
     private val newSegmentIcons by lazy {
         intArrayOf(
-        R.drawable.text_color_24,
-        R.drawable.background_24,
-        R.drawable.text_color_24,
-        R.drawable.color_24,
-        if (this is MainActivity) R.drawable.background_24 else R.drawable.translate_24,
-        if (this is MainActivity) R.drawable.translate_24 else R.drawable.color_24
-    )
+            R.drawable.text_color_24,
+            R.drawable.background_24,
+            R.drawable.text_color_24,
+            R.drawable.color_24,
+            if (this is MainActivity) R.drawable.background_24 else R.drawable.translate_24,
+            if (this is MainActivity) R.drawable.translate_24 else R.drawable.color_24
+        )
     }
     private val totalSegments = segmentColors.size
     private val newTotalSegments = newSegmentColors.size
@@ -112,30 +109,6 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         applySettings()
         colorPreferences = getColorSharedPreferences()
-    }
-
-    protected fun enableEdgeToEdge() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Для Android 11 и выше используйте WindowInsetsController
-            val decorView = window.decorView
-            // Получаем WindowInsetsController
-            val insetsController: WindowInsetsController? = decorView.windowInsetsController
-            insetsController?.let {
-                // Скрываем статусную и навигационную панели
-                it.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-
-                it.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                )
-            }
-        }
-        return
-//        else {
-//            // Для более ранних версий используем прежний подход
-//            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-//                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//        }
     }
 
     private fun handleWindowInsets() {
@@ -223,10 +196,10 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         when (segmentIndex) {
             0 -> if (this is MainActivity) {
                 toolbar.setTitleTextColor(color)
-                } else {
-                    findViewById<TextView>(R.id.title).setTextColor(color)
-                    findViewById<ImageView>(R.id.backArrow).imageTintList = ColorStateList.valueOf(color)
-                }
+            } else {
+                findViewById<TextView>(R.id.title).setTextColor(color)
+                findViewById<ImageView>(R.id.backArrow).imageTintList = ColorStateList.valueOf(color)
+            }
             1 -> mainLayout.setBackgroundColor(color)
             2 -> when (this) {
                 is MainActivity -> mainLayout.changeBtnTextColor(color)

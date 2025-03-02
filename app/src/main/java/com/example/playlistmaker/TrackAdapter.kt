@@ -16,10 +16,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 
-class TrackAdapter(private val tracks: List<Track>, context: Context) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
+class TrackAdapter(private var tracks: List<Track>, context: Context) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
 
-    private val defaultTextColor: Int = context.getColor(R.color.hintColor_white)
-    private val defaultTextNameColor: Int = context.getColor(R.color.black_white)
+    private val defaultTextColor: Int = context.resources.getColor(R.color.hintColor_white, context.theme)
+    private val defaultTextNameColor: Int = context.resources.getColor(R.color.black_white, context.theme)
     private var textNameColor: Int = defaultTextNameColor
     private var textColor: Int = defaultTextColor
     private var arrowColor: Int = defaultTextColor
@@ -46,13 +46,17 @@ class TrackAdapter(private val tracks: List<Track>, context: Context) : Recycler
                 Glide.with(context)
                     .load(track.artworkUrl100)
                     .placeholder(R.drawable.placeholder)
-                    .transform(RoundedCorners(radius))
+                    .transform(
+                        RoundedCorners(radius)
+                    )
                     .into(artworkImageView)
             } else {
                 Glide.with(context)
                     .load(R.drawable.placeholder)
                     .error(R.drawable.placeholder)
-                    .transform(RoundedCorners(radius))
+                    .transform(
+                        RoundedCorners(radius)
+                    )
                     .into(artworkImageView)
             }
 
@@ -62,6 +66,12 @@ class TrackAdapter(private val tracks: List<Track>, context: Context) : Recycler
             trackTimeTextView.setTextColor(textColor)
 
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateTracks(newTracks: List<Track>) {
+        this.tracks = newTracks
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
