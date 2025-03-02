@@ -1,103 +1,121 @@
 package com.example.playlistmaker
 
 import android.annotation.SuppressLint
-import android.app.ActivityOptions
-import android.content.Intent
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.Menu
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.LinearLayout
-import androidx.appcompat.widget.Toolbar
+import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
 class SearchActivity : BaseActivity() {
 
-    companion object {const val SEARCH_QUERY_KEY = "searchQuery"}
+    companion object {
+        const val SEARCH_QUERY_KEY = "searchQuery"
+        const val TRACK_LIST_KEY = "trackList" }
 
     private lateinit var backButton: ImageView
-    private lateinit var searchLayout: LinearLayout
     private lateinit var inputEditText: TextInputEditText
     private lateinit var clearIcon: ImageView
     private lateinit var searchInputLayout: TextInputLayout
     private var searchQuery = ""
-    private lateinit var toolbar: Toolbar
-    private lateinit var bottomNavigationView: BottomNavigationView
-    private lateinit var bottomNavigationLine: View
+    private var isBottomNavVisible = true
+    private lateinit var adapter: TrackAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var apiService: ITunesApi
+    private var trackList: List<Track> = emptyList()
+    private lateinit var textView: TextView
+    private lateinit var update: MaterialButton
+    private var lastSearchQuery: String? = null
+    private var isErrorVisible = false
+    private var isErrorTypeNoResults: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
-        setContentView(R.layout.activity_search)
-        toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         initViews()
-        handleWindowInsets()
         setupListeners()
-        bottomNavigationView()
-        hideBottomNavigationView()
+        setupBottomNavigationView()
+        bottomNavigationView.selectedItemId = R.id.navigation_search
 
-        val tracks = ArrayList<Track>()
-        tracks.add(Track("Smells Like Teen Spirit", "Nirvana", "5:01",
-            "https://is5-ssl.mzstatic.com/image/thumb/Music115/v4/7b/58/c2/7b58c21a-2b51-2bb2-e59a-9bb9b96ad8c3/00602567924166.rgb.jpg/100x100bb.jpg"))
+        apiService = Retrofit.Builder()
+            .baseUrl("https://itunes.apple.com")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ITunesApi::class.java)
 
-        tracks.add(Track("Billie Jean","Michael Jackson","4:35",
-            "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/3d/9d/38/3d9d3811-71f0-3a0e-1ada-3004e56ff852/827969428726.jpg/100x100bb.jpg"))
+        recyclerView = findViewById(R.id.tracks_recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-        tracks.add(Track("Stayin' Alive","Bee Gees","4:10",
-            "https://is4-ssl.mzstatic.com/image/thumb/Music115/v4/1f/80/1f/1f801fc1-8c0f-ea3e-d3e5-387c6619619e/16UMGIM86640.rgb.jpg/100x100bb.jpg"))
+        if (savedInstanceState != null) {
+            searchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
 
-        tracks.add(Track("Whole Lotta Love","Led Zeppelin","5:33",
-            "https://is2-ssl.mzstatic.com/image/thumb/Music62/v4/7e/17/e3/7e17e33f-2efa-2a36-e916-7f808576cf6b/mzm.fyigqcbs.jpg/100x100bb.jpg"))
+            val jsonTrackList = savedInstanceState.getString(TRACK_LIST_KEY, "")
+            if (jsonTrackList.isNotEmpty()) {
+                trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toList()
+            }
+        }
 
-        tracks.add(Track("Sweet Child O'Mine","Guns N' Roses","5:03",
-            "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/a0/4d/c4/a04dc484-03cc-02aa-fa82-5334fcb4bc16/18UMGIM24878.rgb.jpg/100x100bb.jpg"))
-
-        val recyclerView = findViewById<RecyclerView>(R.id.tracks_recycler_view)
-        val adapter = TrackAdapter(tracks)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        adapter = TrackAdapter(trackList, this)
         recyclerView.adapter = adapter
     }
 
     override fun onSegment4Clicked() {
-        bottomNavigationView.visibility = View.VISIBLE
-        bottomNavigationLine.visibility = View.VISIBLE
+        if (isBottomNavVisible) {
+            bottomNavigationView.animate().translationY(bottomNavigationView.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
+                bottomNavigationView.visibility = View.GONE
+            }
+            line.animate().translationY(line.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
+                line.visibility = View.GONE            }
+        } else {
+            bottomNavigationView.visibility = View.VISIBLE
+            line.visibility = View.VISIBLE
+
+            bottomNavigationView.alpha = 0f
+            bottomNavigationView.translationY = bottomNavigationView.height.toFloat()
+            bottomNavigationView.animate().translationY(0f).alpha(1f).setDuration(300)
+
+            line.alpha = 0f
+            line.translationY = line.height.toFloat()
+            line.animate().translationY(0f).alpha(1f).setDuration(300)
+        }
+        isBottomNavVisible = !isBottomNavVisible
     }
 
-    private fun hideBottomNavigationView() {
-        bottomNavigationView.visibility = View.GONE
-        bottomNavigationLine.visibility = View.GONE
+    override fun getLayoutId(): Int {
+        return R.layout.activity_search
     }
 
-    private fun startActivityWithAnimation(targetActivity: Class<*>) {
-        val intent = Intent(this, targetActivity)
-        val options = ActivityOptions.makeCustomAnimation(this, R.anim.enter_from_bottom, R.anim.exit_to_top)
-        startActivity(intent, options.toBundle())
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
-        return true
+    override fun getMainLayoutId(): Int {
+        return R.id.activity_search
     }
 
     private fun initViews() {
         backButton = findViewById(R.id.backArrow)
-        searchLayout = findViewById(R.id.activity_search)
         inputEditText = findViewById(R.id.inputEditText)
         clearIcon = findViewById(R.id.clearIcon)
         searchInputLayout = findViewById(R.id.search_box)
-        bottomNavigationLine = findViewById(R.id.navigationLine)
+        textView = findViewById(R.id.fail)
+        update = findViewById(R.id.btnUpdate)
     }
 
     private fun setupListeners() {
@@ -105,7 +123,6 @@ class SearchActivity : BaseActivity() {
             ActivityOptionsCompat.makeCustomAnimation(
                 this, R.anim.enter_from_left, R.anim.exit_to_right
             ).toBundle()
-
             finishAfterTransition()
         }
 
@@ -114,24 +131,69 @@ class SearchActivity : BaseActivity() {
 
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
             searchInputLayout.hint = if (hasFocus) null else getString(R.string.search)
+            if (hasFocus) {
+                bottomNavigationView.visibility = View.GONE
+                line.visibility = View.GONE
+            } else {
+                bottomNavigationView.visibility = View.VISIBLE
+                line.visibility = View.VISIBLE
+            }
+        }
+
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                performSearch()
+                true
+            } else {
+                false
+            }
         }
     }
 
     private fun createTextWatcher(): TextWatcher {
         return object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 searchQuery = s.toString()
+                val inputWidth: Int = inputEditText.width
+                val characterWidth: Float = inputEditText.paint.measureText("à")
+                var maxCharacterCount: Int = calculateMaxCharacterCount(inputWidth, characterWidth, 0.75)
+
+                if (!s.isNullOrEmpty()) {
+                    maxCharacterCount = when {
+                        s.all { it.isLowerCase() && it in 'à'..'ÿ' } ->
+                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.55)
+                        s.all { it.isUpperCase() && it in 'À'..'ß' } ->
+                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.50)
+                        s.all { it.isLowerCase() && it in 'a'..'z' } ->
+                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.60)
+                        s.all { it.isUpperCase() && it in 'A'..'Z' } ->
+                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.55)
+                        else -> maxCharacterCount
+                    }
+                }
+                if ((s != null) && (s.length > maxCharacterCount)) {
+                    inputEditText.setText(s.substring(0, maxCharacterCount))
+                    inputEditText.setSelection(maxCharacterCount)
+                }
                 clearIcon.visibility = if (!s.isNullOrEmpty()) View.VISIBLE else View.GONE
             }
-            override fun afterTextChanged(s: Editable?) {}
+            override fun afterTextChanged(s: Editable?) { }
         }
+    }
+
+    private fun calculateMaxCharacterCount(maxWidth: Int, charWidth: Float, percentage: Double): Int {
+        return (maxWidth * percentage / charWidth).toInt()
     }
 
     private fun clearSearchInput() {
         inputEditText.text?.clear()
         clearIcon.visibility = View.GONE
         hideKeyboard()
+
+        trackList = emptyList()
+        adapter.updateTracks(trackList)
     }
 
     private fun hideKeyboard() {
@@ -143,40 +205,106 @@ class SearchActivity : BaseActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(SEARCH_QUERY_KEY, searchQuery)
+        outState.putString(TRACK_LIST_KEY, Gson().toJson(trackList))
+        outState.putBoolean("isErrorVisible", isErrorVisible)
+        outState.putBoolean("isErrorTypeNoResults", isErrorTypeNoResults)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         searchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
         inputEditText.setText(searchQuery)
-    }
 
-    private fun handleWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(searchLayout) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        val jsonTrackList = savedInstanceState.getString(TRACK_LIST_KEY, "")
+        if (jsonTrackList.isNotEmpty()) {
+            trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toList()
+            adapter = TrackAdapter(trackList, this)
+            recyclerView.adapter = adapter
+        }
+        isErrorVisible = savedInstanceState.getBoolean("isErrorVisible", false)
+        isErrorTypeNoResults = savedInstanceState.getBoolean("isErrorTypeNoResults", false)
+        if (isErrorVisible){
+            showErrorPlaceholder(isErrorTypeNoResults)
         }
     }
 
-    private fun bottomNavigationView(){
-        bottomNavigationView = findViewById(R.id.bottom_navigation)
+    private fun showErrorPlaceholder(isNoResults: Boolean) {
+        isErrorVisible = true
+        isErrorTypeNoResults = isNoResults
 
-        bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.navigation_search -> {true}
-                R.id.navigation_media -> {
-                    startActivityWithAnimation(MediaLibraryActivity::class.java)
-                    true
+        textView.visibility = View.VISIBLE
+
+        if (isNoResults) {
+            textView.isEnabled = true
+            textView.setText(R.string.searchFail)
+            update.visibility = View.GONE
+        } else {
+            textView.isEnabled = false
+            textView.setText(R.string.networkFail)
+            update.visibility = View.VISIBLE
+
+            update.setOnClickListener {
+                lastSearchQuery?.let { query ->
+                    inputEditText.setText(query)
+                    performSearch()
                 }
-                R.id.navigation_settings -> {
-                    startActivityWithAnimation(SettingsActivity::class.java)
-                    true
-                }
-                else -> false
             }
         }
-        bottomNavigationView.selectedItemId = R.id.navigation_search
     }
 
+    private fun performSearch() {
+        val query = inputEditText.text.toString().trim()
+        if (query.isNotEmpty()) {
+            lastSearchQuery = query
+
+            if (!isNetworkAvailable(this)) {
+                clearTracksAndShowError(false)
+                showErrorPlaceholder(false)
+                return
+            }
+
+            apiService.search(query).enqueue(object : Callback<SearchResponse> {
+                override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        trackList = response.body()!!.results
+                        updateRecyclerView()
+                    } else {
+                        clearTracksAndShowError(trackList.isEmpty())
+                    }
+                }
+
+                override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                    clearTracksAndShowError(false)
+                }
+            })
+        }
+    }
+
+    private fun updateRecyclerView() {
+        if (trackList.isEmpty()) {
+            clearTracksAndShowError(true)
+        } else {
+            isErrorVisible = false
+            textView.visibility = View.GONE
+            update.visibility = View.GONE
+
+            adapter.updateTracks(trackList)
+        }
+    }
+    private fun clearTracksAndShowError(isNoResults: Boolean) {
+        trackList = emptyList()
+        adapter.updateTracks(trackList)
+        showErrorPlaceholder(isNoResults)
+    }
+    
+    fun getAdapter(): TrackAdapter {
+        return adapter
+    }
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        return networkCapabilities != null && (networkCapabilities.hasTransport(
+            NetworkCapabilities.TRANSPORT_WIFI) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+    }
 }

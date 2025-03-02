@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_search"
     style="@style/MainSearchView"
@@ -18,7 +19,7 @@
 
         <TextView
             android:id="@+id/title"
-            style="@style/SearchTitleTextView"/>
+            style="@style/SearchTitleTextView" />
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -32,7 +33,7 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputEditText"
-                style="@style/SearchInput"/>
+                style="@style/SearchInput" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -42,6 +43,15 @@
             android:contentDescription="@string/clear_search" />
 
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/fail"
+        style="@style/SearchFail"
+        app:drawableTopCompat="@drawable/icon_fail"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUpdate"
+        style="@style/SearchUpdate"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tracks_recycler_view"

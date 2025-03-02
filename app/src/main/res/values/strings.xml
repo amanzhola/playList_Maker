@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name" translatable="false">Playlist maker</string>
+
+    <string name="app_name">Playlist maker</string>
     <string name="search">Поиск</string>
     <string name="media">Медиатека</string>
     <string name="settings">Настройки</string>
@@ -9,7 +10,7 @@
     <string name="support_r">Написать в поддержку</string>
     <string name="agreement_r">Пользовательское соглашение</string>
 
-    <string name="share">Поиск</string>
+    <string name="share">Поделиться</string>
     <string name="support">Поддержка</string>
     <string name="agreement">Соглашение</string>
     <string name="hidden">Скрытый</string>
@@ -30,12 +31,12 @@
     <string name="dropdown_option2">Опция 2</string>
 
 <!--    выборно, опция для выбора цветов, опций релаизации в гите-->
-    <string name="set_titleColor">Цвет Заглавия</string>
-    <string name="set_btnTextColor">Цвет текста кнопки</string>
-    <string name="set_btnBackgroundColor">Цвет фона кнопки</string>
-    <string name="set_textColor">Цвет текста</string>
-    <string name="backgroundColor">Цвет фона</string>
-    <string name="iconColor">Цвет иконки</string>
+    <string name="set_titleColor">Заглавия</string>
+    <string name="set_backgroundColor">Фона</string>
+    <string name="set_btnTextColor">Текста</string>
+    <string name="set_iconColor">Иконки</string>
+    <string name="set_btnBackgroundColor">Кнопки</string>
+
     <string name="dropdown_header">Выберите элемент</string>
 
     <string name="switch_short">Тема</string>
@@ -43,5 +44,13 @@
     <string name="support_short">Поддержка</string>
     <string name="agreement_short">Соглашение</string>
     <string name="navigation">Навигация</string>
+    <string name="change">Цвет</string>
+    <string name="language">Язык</string>
+
+    <string name="toDefault">Базовый</string>
+
+    <string name="searchFail">Ничего не нашлось</string>
+    <string name="networkFail">Проблемы со связью\n\nЗагрузка не удалась. Проверьте\n подключение к интернету</string>
+    <string name="update">Обновить</string>
 
 </resources>

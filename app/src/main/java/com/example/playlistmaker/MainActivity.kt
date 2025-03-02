@@ -1,61 +1,17 @@
 package com.example.playlistmaker
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import android.view.View
-import android.widget.LinearLayout
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.appcompat.widget.Toolbar
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityOptionsCompat
 
 class MainActivity : BaseActivity() {
 
-    private lateinit var settingsLauncher: ActivityResultLauncher<Intent>
-    private lateinit var mainLayout: LinearLayout
-    private lateinit var toolbar: Toolbar
-
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        enableEdgeToEdge()
 
-        toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        mainLayout = findViewById(R.id.activity_main)
-        settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data: Intent? = result.data
-                if (data != null) {
-                    val isDarkTheme = data.getBooleanExtra("isDarkTheme", false)
-                    setAppTheme(isDarkTheme)
-                }
-            }
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(mainLayout) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
         setupButtons()
-    }
-
-    private fun setAppTheme(isDarkTheme: Boolean) {
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
-        return true
     }
 
     private fun setupButtons() {

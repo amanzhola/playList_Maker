@@ -5,6 +5,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import android.util.TypedValue
 import android.content.Context
+import android.content.res.ColorStateList
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.LayoutInflater
@@ -13,31 +14,35 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.imageview.ShapeableImageView
 
-private const val MAX_ARTIST_NAME_LENGTH = 40
+class TrackAdapter(private var tracks: List<Track>, context: Context) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
 
-class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
+    private val defaultTextColor: Int = context.resources.getColor(R.color.hintColor_white, context.theme)
+    private val defaultTextNameColor: Int = context.resources.getColor(R.color.black_white, context.theme)
+    private var textNameColor: Int = defaultTextNameColor
+    private var textColor: Int = defaultTextColor
+    private var arrowColor: Int = defaultTextColor
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
         private val trackNameTextView: TextView = itemView.findViewById(R.id.track_name)
         private val artistNameTextView: TextView = itemView.findViewById(R.id.track_auctor)
         private val trackTimeTextView: TextView = itemView.findViewById(R.id.track_duration)
         private val artworkImageView: ImageView = itemView.findViewById(R.id.track_image)
+        private val arrowImageView: ShapeableImageView = itemView.findViewById(R.id.arrow_fw)
 
-        fun bind(track: Track, context: Context) {
+        fun bind(track: Track, context: Context, arrowColor: Int, textColor: Int, textNameColor: Int) {
             trackNameTextView.text = track.trackName
-            if (track.artistName.length > MAX_ARTIST_NAME_LENGTH) {
-                ellipsizeEnd(artistNameTextView, MAX_ARTIST_NAME_LENGTH, track.artistName)
-            } else {
-                artistNameTextView.text = track.artistName
-            }
-            trackTimeTextView.text = track.trackTime
+            artistNameTextView.text = track.artistName
+            trackTimeTextView.text = track.trackDuration
 
-            val radius = TypedValue.applyDimension(
+            val radius: Int = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 2f, itemView.context.resources.displayMetrics
             ).toInt()
 
             if (isNetworkAvailable(context)) {
+
                 Glide.with(context)
                     .load(track.artworkUrl100)
                     .placeholder(R.drawable.placeholder)
@@ -54,30 +59,46 @@ class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<Track
                     )
                     .into(artworkImageView)
             }
+
+            arrowImageView.imageTintList = ColorStateList.valueOf(arrowColor)
+            trackNameTextView.setTextColor(textNameColor)
+            artistNameTextView.setTextColor(textColor)
+            trackTimeTextView.setTextColor(textColor)
+
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateTracks(newTracks: List<Track>) {
+        this.tracks = newTracks
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.track_item, parent, false)
+        val itemView: View = LayoutInflater.from(parent.context).inflate(R.layout.track_item, parent, false)
         return ViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val track = tracks[position]
-        holder.bind(track, holder.itemView.context)
+        val track: Track = tracks[position]
+        holder.bind(track, holder.itemView.context, arrowColor, textColor, textNameColor)
     }
 
     override fun getItemCount(): Int {
         return tracks.size
     }
-}
 
-@SuppressLint("SetTextI18n")
-private fun ellipsizeEnd(textView: TextView, maxLength: Int, fullText: String) {
-    if (fullText.length <= maxLength) {
-        textView.text = fullText
-    } else {
-        textView.text = fullText.substring(0, maxLength - 3) + "…"
+    @SuppressLint("NotifyDataSetChanged")
+    fun setArrowColor(color: Int) {
+        this.arrowColor = color
+        notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setTextColor(color: Int) {
+        this.textNameColor = color
+        this.textColor = color
+        notifyDataSetChanged()
     }
 }
 
