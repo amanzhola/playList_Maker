@@ -1,59 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_search"
-    style="@style/MainSearchView">
+    style="@style/MainSearchView"
+    tools:context=".SearchActivity">
 
-  <androidx.appcompat.widget.Toolbar
-      android:id="@+id/toolbar"
-      android:layout_width="match_parent"
-      android:layout_height="?attr/actionBarSize"
-      android:layout_gravity="center_vertical">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <ImageView
-        android:id="@+id/backArrow"
-        android:contentDescription="@string/arrow_back"
-        style="@style/SearchArrowBackIconStyle" />
+        <ImageView
+            android:id="@+id/backArrow"
+            android:contentDescription="@string/arrow_back"
+            style="@style/SearchArrowBackIconStyle" />
 
-    <TextView
-        android:id="@+id/title"
-        style="@style/SearchTitleTextView"/>
+        <TextView
+            android:id="@+id/title"
+            style="@style/SearchTitleTextView"/>
 
-    <ImageView
-        android:id="@+id/filter_list"
-        style="@style/MainImageView"
-        android:contentDescription="@string/filter"
-        android:src="@drawable/filter"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="@dimen/Padding_16"/>
+    </androidx.appcompat.widget.Toolbar>
 
-    <ImageView
-        android:id="@+id/dropdown"
-        style="@style/MainImageView"
-        android:contentDescription="@string/dropdown"
-        android:src="@drawable/expand_more"
-        android:layout_toStartOf="@id/filter_list"
-        android:layout_marginEnd="@dimen/dropdown_160"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-  </androidx.appcompat.widget.Toolbar>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/search_box"
+            style="@style/SearchBox">
 
-  <FrameLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputEditText"
+                style="@style/SearchInput"/>
 
-      <com.google.android.material.textfield.TextInputLayout
-          android:id="@+id/search_box"
-          style="@style/SearchBox">
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputEditText"
-            style="@style/SearchInput"/>
+        <ImageView
+            android:id="@+id/clearIcon"
+            style="@style/ClearIcon"
+            android:contentDescription="@string/clear_search" />
 
-      </com.google.android.material.textfield.TextInputLayout>
+    </FrameLayout>
 
-      <ImageView
-          android:id="@+id/clearIcon"
-          style="@style/ClearIcon"
-          android:contentDescription="@string/clear_search"/>
-  </FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tracks_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <include
+        android:id="@+id/bottom_nav_include"
+        layout="@layout/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

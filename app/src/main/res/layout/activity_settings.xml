@@ -5,65 +5,57 @@
     android:id="@+id/activity_settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    style="@style/SettingsView"
+    tools:context=".SettingsActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_gravity="center_vertical">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <ImageView
             android:id="@+id/backArrow"
-            android:contentDescription="@string/arrow_back"
-            style="@style/ArrowBackIconStyle"/>
+            style="@style/ArrowBackIconStyle"
+            android:contentDescription="@string/arrow_back"/>
 
         <TextView
             android:id="@+id/title"
             style="@style/SettingsTitleTextView"
-            android:text="@string/list0"/>
-
-        <ImageView
-            android:id="@+id/filter_list"
-            style="@style/MainImageView"
-            android:contentDescription="@string/filter"
-            android:src="@drawable/filter"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="@dimen/Padding_16"/>
-
-        <ImageView
-            android:id="@+id/dropdown"
-            style="@style/MainImageView"
-            android:contentDescription="@string/dropdown"
-            android:src="@drawable/expand_more"
-            android:layout_toStartOf="@id/filter_list"
-            android:layout_marginEnd="@dimen/dropdown_160"/>
+            android:text="@string/settings"/>
 
     </androidx.appcompat.widget.Toolbar>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switch_control"
         style="@style/SwitchView"
-        android:text="@string/list1"
+        android:text="@string/switch_r"
         android:paddingEnd="@dimen/Switch_padding_6"
         tools:ignore="RtlSymmetry,UseSwitchCompatOrMaterialXml" />
 
     <TextView
         android:id="@+id/share"
         style="@style/SettingsTextView"
-        android:text="@string/list2"
+        android:text="@string/share_r"
         app:drawableEndCompat="@drawable/share"/>
 
     <TextView
         android:id="@+id/group"
         style="@style/SettingsTextView"
-        android:text="@string/list3"
+        android:text="@string/support_r"
         app:drawableEndCompat="@drawable/group"/>
 
     <TextView
         android:id="@+id/agreement"
         style="@style/SettingsTextView"
-        android:text="@string/list4"
+        android:text="@string/agreement_r"
         app:drawableEndCompat="@drawable/vector"/>
+
+    <include
+        android:id="@+id/bottom_nav_include"
+        layout="@layout/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
