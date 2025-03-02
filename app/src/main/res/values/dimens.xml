@@ -2,6 +2,7 @@
 <resources>
     <dimen name="Settings_Height_61">61dp</dimen>
     <dimen name="Settings_Text_16">16sp</dimen>
+    <dimen name="Search_Text_19">19sp</dimen>
     <dimen name="Search_Text_11">11sp</dimen>
     <dimen name="Title_text_22">22sp</dimen>
     <dimen name="Padding_16">16dp</dimen>
@@ -33,5 +34,7 @@
     <dimen name="track_45">45dp</dimen>
     <dimen name="track_13">13dp</dimen>
     <dimen name="radius_2dp">2dp</dimen>
+
+    <dimen name="SearchFailTop_102">102dp</dimen>
 
 </resources>

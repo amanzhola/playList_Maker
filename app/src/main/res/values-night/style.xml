@@ -21,7 +21,7 @@
         <item name="trackTint">@color/switch_track_on_color</item>
     </style>
 
-    <color name="blue_white">@color/black</color>
+    <color name="blue_textColor">@color/textColor</color>
     <color name="textColor_white">@color/white</color>
     <color name="textColor_transparent">@color/transparent</color>
     <color name="black_white">@color/white</color>
@@ -29,5 +29,17 @@
     <color name="hintField_white">@color/white</color>
     <color name="hintColor_white">@color/white</color>
     <color name="white_textColor">@color/textColor</color>
+
+    <color name="green1">@color/green</color>
+    <color name="blue1">@color/blue</color>
+    <color name="white1">@color/white</color>
+    <color name="yellow1">@color/yellow</color>
+    <color name="cyan1">@color/cyan</color>
+    <color name="magenta1">@color/magenta</color>
+    <color name="black1">@color/black</color>
+    <color name="gray1">@color/gray</color>
+    <color name="backgroundDay1">@color/backgroundDay</color>
+    <color name="hintFieldColor1">@color/hintFieldColor</color>
+    <color name="switch_track_on_color1">@color/switch_track_on_color</color>
 
 </resources>

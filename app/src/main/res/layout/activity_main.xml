@@ -15,19 +15,19 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/Button_Big1"
         style="@style/MainMaterialButtonStyle"
         android:text="@string/search"
         app:icon="@drawable/magnifier"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/Button_Big2"
         style="@style/MainMaterialButtonStyle"
         android:text="@string/media"
         app:icon="@drawable/media_icon"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/Button_Big3"
         style="@style/MainMaterialButtonStyle"
         android:text="@string/settings"

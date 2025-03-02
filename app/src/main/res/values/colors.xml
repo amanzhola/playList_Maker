@@ -36,6 +36,8 @@
     <color name="hintColor">#AEAFB4</color>
     <color name="cursorColor">#3772E7</color>
 
+    <color name="bunColor">#FCD452</color>
+
 
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
