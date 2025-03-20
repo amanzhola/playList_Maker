@@ -9,11 +9,11 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.min
@@ -121,7 +121,8 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
         paint!!.color = Color.RED // Устанавливаем цвет Color.RED
         canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), smallCircleRadius, paint!!)
 
-        val smallCircleText = if (isChangedState) context.getString(R.string.change) else context.getString(R.string.settings)
+        val smallCircleText = if (isChangedState) context.getString(R.string.change) else context.getString(
+            R.string.settings)
         textPaint!!.color = Color.WHITE
         textPaint!!.textSize = 17f // Размер текста
         textPaint!!.textAlign = Paint.Align.CENTER

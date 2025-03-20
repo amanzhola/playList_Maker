@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.PlaylistMaker" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    </style>
+
+    <style name="SwitchView" parent="SettingsTextView">
+        <item name="thumbTint">@color/switch_thumb_on_color</item>
+        <item name="trackTint">@color/switch_track_on_color</item>
+    </style>
+
+        <color name="blue_textColor">@color/textColor</color>
+        <color name="textColor_white">@color/white</color>
+        <color name="textColor_transparent">@color/transparent</color>
+        <color name="black_white">@color/white</color>
+        <color name="hintColor_textColor">@color/textColor</color>
+        <color name="hintField_white">@color/white</color>
+        <color name="hintColor_white">@color/white</color>
+        <color name="white_textColor">@color/textColor</color>
+        <color name="blue_blue">@color/backgroundDay</color>
+        <color name="yellow_yellow">@color/bunColor</color>
+        <color name="white_white">@color/white</color>
+        <color name="textColor_textColor">@color/textColor</color>
+
+        <color name="green1">@color/green</color>
+        <color name="blue1">@color/blue</color>
+        <color name="white1">@color/white</color>
+        <color name="yellow1">@color/yellow</color>
+        <color name="cyan1">@color/cyan</color>
+        <color name="magenta1">@color/magenta</color>
+        <color name="black1">@color/black</color>
+        <color name="gray1">@color/gray</color>
+        <color name="backgroundDay1">@color/backgroundDay</color>
+        <color name="hintFieldColor1">@color/hintFieldColor</color>
+        <color name="switch_track_on_color1">@color/switch_track_on_color</color>
+
+</resources>

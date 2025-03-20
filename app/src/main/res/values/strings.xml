@@ -1,10 +1,10 @@
 <resources>
 
-    <string name="app_name">Playlist maker</string>
+    <string name="app_name" translatable="false">Playlist maker</string>
     <string name="search">Поиск</string>
     <string name="media">Медиатека</string>
     <string name="settings">Настройки</string>
-    <string name="playlist_maker">Playlist maker</string>
+    <string name="playlist_maker" translatable="false">Playlist maker</string>
     <string name="switch_r">Темная тема</string>
     <string name="share_r">Поделиться приложением</string>
     <string name="support_r">Написать в поддержку</string>
@@ -30,7 +30,7 @@
     <string name="dropdown_option1">Опция 1</string>
     <string name="dropdown_option2">Опция 2</string>
 
-<!--    выборно, опция для выбора цветов, опций релаизации в гите-->
+    <!--    выборно, опция для выбора цветов, опций релаизации в гите-->
     <string name="set_titleColor">Заглавия</string>
     <string name="set_backgroundColor">Фона</string>
     <string name="set_btnTextColor">Текста</string>
@@ -52,5 +52,22 @@
     <string name="searchFail">Ничего не нашлось</string>
     <string name="networkFail">Проблемы со связью\n\nЗагрузка не удалась. Проверьте\n подключение к интернету</string>
     <string name="update">Обновить</string>
+
+    <string name="supportEmail">Не найдено приложение\n для открытия электронной почты</string>
+    <string name="movie">Кино</string>
+    <string name="weather">Погода</string>
+
+    <string name="clean">Очистить историю</string>
+    <string name="search_history">Вы искали</string>
+
+    <string name="option">Опция</string>
+
+    <string name="movie_picture">Кино-фильм</string>
+    <string name="nothing_found">Кинофильм не найден</string>
+    <string name="something_went_wrong">Произошла ошибка</string>
+    <string name="enter_movie_name">Enter the movie title\n</string>
+
+    <string name="nothing_found_city">Город не найден</string>
+    <string name="enter_city_name">Введите название города</string>
 
 </resources>

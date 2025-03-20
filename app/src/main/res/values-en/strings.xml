@@ -53,4 +53,21 @@
     <string name="networkFail">Connection problems\n\nDownload failed. Check\n your internet connection</string>
     <string name="update">Update</string>
 
+    <string name="supportEmail">No app found\n to open email</string>
+    <string name="movie">Movie</string>
+    <string name="weather">Weather</string>
+
+    <string name="clean">Clear history</string>
+    <string name="search_history">Last search</string>
+
+    <string name="option">Option</string>
+
+    <string name="movie_picture">Movie</string>
+    <string name="nothing_found">Movie not found</string>
+    <string name="something_went_wrong">An error occurred</string>
+    <string name="enter_movie_name">Enter movie name\n</string>
+
+    <string name="nothing_found_city">City not found</string>
+    <string name="enter_city_name">Enter the city name</string>
+
 </resources>
