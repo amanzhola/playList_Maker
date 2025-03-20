@@ -694,5 +694,4 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             }
         }
     }
-
 }

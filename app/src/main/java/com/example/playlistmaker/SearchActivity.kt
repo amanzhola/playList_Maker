@@ -268,7 +268,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
             return
         }
 
-        val itemView = layoutInflater.inflate(R.layout.track_item, null)
+        val itemView = layoutInflater.inflate(R.layout.track_item, recyclerView, false)
         itemView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
