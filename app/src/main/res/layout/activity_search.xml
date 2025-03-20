@@ -1,27 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_search"
-    style="@style/MainSearchView"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white_textColor"
     tools:context=".SearchActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <ImageView
-            android:id="@+id/backArrow"
-            android:contentDescription="@string/arrow_back"
-            style="@style/SearchArrowBackIconStyle" />
-
-        <TextView
-            android:id="@+id/title"
-            style="@style/SearchTitleTextView" />
-
-    </androidx.appcompat.widget.Toolbar>
+    <include layout="@layout/toolbar"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -45,23 +33,24 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/fail"
-        style="@style/SearchFail"
-        app:drawableTopCompat="@drawable/icon_fail"/>
+        android:id="@+id/history"
+        style="@style/SearchHistoryTextView"
+        android:text="@string/search_history"
+        tools:visibility="visible"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnUpdate"
-        style="@style/SearchUpdate"/>
+    <include
+        layout="@layout/fail" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tracks_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"/>
 
-    <include
-        android:id="@+id/bottom_nav_include"
-        layout="@layout/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUpdate"
+        style="@style/SearchUpdate"
+        tools:visibility="visible"/>
+
+    <include layout="@layout/bottom_navigation" />
 
 </LinearLayout>

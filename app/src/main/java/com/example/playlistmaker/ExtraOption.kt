@@ -4,14 +4,14 @@ import android.os.Bundle
 import android.view.View.VISIBLE
 import android.widget.TextView
 
-class MediaLibraryActivity : BaseActivity() {
+class ExtraOption : BaseActivity() {
 
     private var isBottomNavVisible: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        findViewById<TextView>(R.id.bottom2).isSelected = true
+        findViewById<TextView>(R.id.bottom6).isSelected = true
     }
 
     override fun onSegment4Clicked() {
@@ -24,7 +24,7 @@ class MediaLibraryActivity : BaseActivity() {
     }
 
     override fun getToolbarConfig(): ToolbarConfig {
-        return ToolbarConfig(VISIBLE, R.string.media) { navigateToMainActivity() }
+        return ToolbarConfig(VISIBLE, R.string.option) { navigateToMainActivity() }
     }
 
     override fun shouldEnableEdgeToEdge(): Boolean {
@@ -32,7 +32,7 @@ class MediaLibraryActivity : BaseActivity() {
     }
 
     override fun getLayoutId(): Int {
-        return R.layout.activity_media_library
+        return R.layout.activity_extra_option
     }
 
     override fun getMainLayoutId(): Int {

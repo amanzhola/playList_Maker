@@ -7,12 +7,16 @@ import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.DisplayMetrics
+import android.view.Display
 import android.view.View
+import android.view.View.VISIBLE
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.app.ActivityOptionsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -24,38 +28,41 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.math.min
 
-class SearchActivity : BaseActivity() {
+
+class SearchActivity : BaseActivity(), OnTrackClickListener {
 
     companion object {
         const val SEARCH_QUERY_KEY = "searchQuery"
-        const val TRACK_LIST_KEY = "trackList" }
+        const val TRACK_LIST_KEY = "trackList"
+    }
 
-    private lateinit var backButton: ImageView
+    private lateinit var adapter: TrackAdapter
+    private var isBottomNavVisible: Boolean = true
     private lateinit var inputEditText: TextInputEditText
     private lateinit var clearIcon: ImageView
     private lateinit var searchInputLayout: TextInputLayout
     private var searchQuery = ""
-    private var isBottomNavVisible = true
-    private lateinit var adapter: TrackAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var apiService: ITunesApi
-    private var trackList: List<Track> = emptyList()
+    private var trackList: MutableList<Track> = mutableListOf()
     private lateinit var textView: TextView
+    private lateinit var history: TextView
     private lateinit var update: MaterialButton
-    private var lastSearchQuery: String? = null
     private var isErrorVisible = false
     private var isErrorTypeNoResults: Boolean = false
-
+    private var isHistory: Boolean = false
+    private lateinit var searchHistory: SearchHistory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
+        searchHistory = SearchHistory(getSharedPreferences("app_prefs", Context.MODE_PRIVATE))
+        searchHistory.loadHistory()
 
         initViews()
         setupListeners()
-        setupBottomNavigationView()
-        bottomNavigationView.selectedItemId = R.id.navigation_search
+        findViewById<TextView>(R.id.bottom1).isSelected = true
 
         apiService = Retrofit.Builder()
             .baseUrl("https://itunes.apple.com")
@@ -71,134 +78,13 @@ class SearchActivity : BaseActivity() {
 
             val jsonTrackList = savedInstanceState.getString(TRACK_LIST_KEY, "")
             if (jsonTrackList.isNotEmpty()) {
-                trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toList()
+                trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toMutableList()
             }
         }
 
-        adapter = TrackAdapter(trackList, this)
+        adapter = TrackAdapter(trackList, this, this)
         recyclerView.adapter = adapter
-    }
 
-    override fun onSegment4Clicked() {
-        if (isBottomNavVisible) {
-            bottomNavigationView.animate().translationY(bottomNavigationView.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
-                bottomNavigationView.visibility = View.GONE
-            }
-            line.animate().translationY(line.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
-                line.visibility = View.GONE            }
-        } else {
-            bottomNavigationView.visibility = View.VISIBLE
-            line.visibility = View.VISIBLE
-
-            bottomNavigationView.alpha = 0f
-            bottomNavigationView.translationY = bottomNavigationView.height.toFloat()
-            bottomNavigationView.animate().translationY(0f).alpha(1f).setDuration(300)
-
-            line.alpha = 0f
-            line.translationY = line.height.toFloat()
-            line.animate().translationY(0f).alpha(1f).setDuration(300)
-        }
-        isBottomNavVisible = !isBottomNavVisible
-    }
-
-    override fun getLayoutId(): Int {
-        return R.layout.activity_search
-    }
-
-    override fun getMainLayoutId(): Int {
-        return R.id.activity_search
-    }
-
-    private fun initViews() {
-        backButton = findViewById(R.id.backArrow)
-        inputEditText = findViewById(R.id.inputEditText)
-        clearIcon = findViewById(R.id.clearIcon)
-        searchInputLayout = findViewById(R.id.search_box)
-        textView = findViewById(R.id.fail)
-        update = findViewById(R.id.btnUpdate)
-    }
-
-    private fun setupListeners() {
-        backButton.setOnClickListener {
-            ActivityOptionsCompat.makeCustomAnimation(
-                this, R.anim.enter_from_left, R.anim.exit_to_right
-            ).toBundle()
-            finishAfterTransition()
-        }
-
-        inputEditText.addTextChangedListener(createTextWatcher())
-        clearIcon.setOnClickListener { clearSearchInput() }
-
-        inputEditText.setOnFocusChangeListener { _, hasFocus ->
-            searchInputLayout.hint = if (hasFocus) null else getString(R.string.search)
-            if (hasFocus) {
-                bottomNavigationView.visibility = View.GONE
-                line.visibility = View.GONE
-            } else {
-                bottomNavigationView.visibility = View.VISIBLE
-                line.visibility = View.VISIBLE
-            }
-        }
-
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                performSearch()
-                true
-            } else {
-                false
-            }
-        }
-    }
-
-    private fun createTextWatcher(): TextWatcher {
-        return object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                searchQuery = s.toString()
-                val inputWidth: Int = inputEditText.width
-                val characterWidth: Float = inputEditText.paint.measureText("à")
-                var maxCharacterCount: Int = calculateMaxCharacterCount(inputWidth, characterWidth, 0.75)
-
-                if (!s.isNullOrEmpty()) {
-                    maxCharacterCount = when {
-                        s.all { it.isLowerCase() && it in 'à'..'ÿ' } ->
-                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.55)
-                        s.all { it.isUpperCase() && it in 'À'..'ß' } ->
-                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.50)
-                        s.all { it.isLowerCase() && it in 'a'..'z' } ->
-                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.60)
-                        s.all { it.isUpperCase() && it in 'A'..'Z' } ->
-                            calculateMaxCharacterCount(inputWidth, characterWidth, 0.55)
-                        else -> maxCharacterCount
-                    }
-                }
-                if ((s != null) && (s.length > maxCharacterCount)) {
-                    inputEditText.setText(s.substring(0, maxCharacterCount))
-                    inputEditText.setSelection(maxCharacterCount)
-                }
-                clearIcon.visibility = if (!s.isNullOrEmpty()) View.VISIBLE else View.GONE
-            }
-            override fun afterTextChanged(s: Editable?) { }
-        }
-    }
-
-    private fun calculateMaxCharacterCount(maxWidth: Int, charWidth: Float, percentage: Double): Int {
-        return (maxWidth * percentage / charWidth).toInt()
-    }
-
-    private fun clearSearchInput() {
-        inputEditText.text?.clear()
-        clearIcon.visibility = View.GONE
-        hideKeyboard()
-
-        trackList = emptyList()
-        adapter.updateTracks(trackList)
-    }
-
-    private fun hideKeyboard() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
     }
 
     @SuppressLint("MissingSuperCall")
@@ -217,8 +103,8 @@ class SearchActivity : BaseActivity() {
 
         val jsonTrackList = savedInstanceState.getString(TRACK_LIST_KEY, "")
         if (jsonTrackList.isNotEmpty()) {
-            trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toList()
-            adapter = TrackAdapter(trackList, this)
+            trackList = Gson().fromJson(jsonTrackList, Array<Track>::class.java).toMutableList()
+            adapter = TrackAdapter(trackList, this, this)
             recyclerView.adapter = adapter
         }
         isErrorVisible = savedInstanceState.getBoolean("isErrorVisible", false)
@@ -228,26 +114,55 @@ class SearchActivity : BaseActivity() {
         }
     }
 
-    private fun showErrorPlaceholder(isNoResults: Boolean) {
-        isErrorVisible = true
-        isErrorTypeNoResults = isNoResults
+    override fun onTrackClicked(track: Track) {
+        val position = trackList.indexOf(track)
+        if (position >= 0) {
+            trackList.removeAt(position)
+            adapter.notifyItemRemoved(position)
+            adapter.notifyItemRangeChanged(position, trackList.size)
+            if (!isHistory) addTrackToHistory(track)
+        }
+    }
 
-        textView.visibility = View.VISIBLE
+    private fun addTrackToHistory(newTrack: Track) {
+        searchHistory.addTrackToHistory(newTrack)
+    }
 
-        if (isNoResults) {
-            textView.isEnabled = true
-            textView.setText(R.string.searchFail)
-            update.visibility = View.GONE
-        } else {
-            textView.isEnabled = false
-            textView.setText(R.string.networkFail)
-            update.visibility = View.VISIBLE
+    override fun onPause() {
+        super.onPause()
+        searchHistory.saveHistory()
+    }
 
-            update.setOnClickListener {
-                lastSearchQuery?.let { query ->
-                    inputEditText.setText(query)
-                    performSearch()
+    private fun setupListeners() {
+        inputEditText.addTextChangedListener(createTextWatcher())
+        clearIcon.setOnClickListener { clearSearchInput() }
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            searchInputLayout.hint = if (hasFocus) null else getString(R.string.search)
+            if (hasFocus) {
+                hideBottomNavigation()
+
+                isHistory = true
+                showHistory()
+
+            } else {
+                showBottomNavigation()
+
+                if (isHistory) {
+                    isHistory = false
+                    showHistory()
                 }
+
+            }
+        }
+
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                isHistory = false
+                performSearch()
+                true
+            } else {
+                false
             }
         }
     }
@@ -255,7 +170,7 @@ class SearchActivity : BaseActivity() {
     private fun performSearch() {
         val query = inputEditText.text.toString().trim()
         if (query.isNotEmpty()) {
-            lastSearchQuery = query
+            searchQuery = query
 
             if (!isNetworkAvailable(this)) {
                 clearTracksAndShowError(false)
@@ -291,20 +206,174 @@ class SearchActivity : BaseActivity() {
             adapter.updateTracks(trackList)
         }
     }
+
     private fun clearTracksAndShowError(isNoResults: Boolean) {
-        trackList = emptyList()
+        trackList.clear()
         adapter.updateTracks(trackList)
         showErrorPlaceholder(isNoResults)
     }
-    
+
+    private fun showErrorPlaceholder(isNoResults: Boolean) {
+        isErrorVisible = true
+        isErrorTypeNoResults = isNoResults
+
+        textView.visibility = VISIBLE
+
+        if (isNoResults) {
+            textView.isEnabled = true
+            textView.setText(R.string.searchFail)
+            update.visibility = View.GONE
+        } else {
+            textView.isEnabled = false
+            textView.setText(R.string.networkFail)
+
+            update.visibility = VISIBLE
+            update.setText(R.string.update)
+
+            update.setOnClickListener {
+                trackList.clear()
+                searchQuery.let { query ->
+                    inputEditText.setText(query)
+                    isHistory = false
+                    performSearch()
+                }
+            }
+        }
+    }
+
+
+    private fun showHistory() {
+        if (isHistory && searchHistory.trackHistoryList.isNotEmpty()) {
+            history.visibility = VISIBLE
+            update.visibility = VISIBLE
+
+            adapter.updateTracks(searchHistory.trackHistoryList)
+            setRecyclerViewHeightBasedOnItems()
+
+            update.setOnClickListener {
+                searchHistory.clearHistory()
+                showHistory()
+            }
+        } else {
+            history.visibility = View.GONE
+            update.visibility = View.GONE
+            resetRecyclerViewHeight()
+        }
+    }
+
+    private fun setRecyclerViewHeightBasedOnItems() {
+        val itemCount = searchHistory.trackHistoryList.size
+        if (itemCount == 0) {
+            resetRecyclerViewHeight()
+            return
+        }
+
+        val itemView = layoutInflater.inflate(R.layout.track_item, recyclerView, false)
+        itemView.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        val itemHeight = itemView.measuredHeight
+
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display: Display = windowManager.defaultDisplay
+
+        val displayMetrics = DisplayMetrics()
+        display.getRealMetrics(displayMetrics)
+
+        val maxHeight = (displayMetrics.heightPixels * 0.5).toInt()
+        val maxVisibleItemsByHeight: Int = maxHeight / itemHeight
+        val maxVisibleItems: Int = min(itemCount, maxVisibleItemsByHeight)
+
+        val layoutParams = recyclerView.layoutParams
+        layoutParams.height = itemHeight * maxVisibleItems
+        recyclerView.layoutParams = layoutParams
+    }
+
+    private fun resetRecyclerViewHeight() {
+        val layoutParams = recyclerView.layoutParams
+        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        recyclerView.layoutParams = layoutParams
+    }
+
+
+    private fun createTextWatcher(): TextWatcher {
+        return object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchQuery = s.toString()
+                clearIcon.visibility = if (!s.isNullOrEmpty()) VISIBLE else View.GONE
+                if (!s.isNullOrEmpty()) {
+                    isHistory = false
+                    showHistory()
+                }
+
+            }
+            override fun afterTextChanged(s: Editable?) { }
+        }
+    }
+
+    private fun clearSearchInput() {
+        inputEditText.text?.clear()
+        clearIcon.visibility = View.GONE
+        hideKeyboard()
+
+        trackList.clear()
+        adapter.updateTracks(trackList)
+
+        isErrorVisible = false
+        textView.visibility = View.GONE
+        update.visibility = View.GONE
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+    }
+
+    private fun initViews() {
+        inputEditText = findViewById(R.id.inputEditText)
+        clearIcon = findViewById(R.id.clearIcon)
+        searchInputLayout = findViewById(R.id.search_box)
+        textView = findViewById(R.id.fail)
+        update = findViewById(R.id.btnUpdate)
+        history = findViewById(R.id.history)
+    }
+
+    override fun onSegment4Clicked() {
+        if (isBottomNavVisible) {
+            hideBottomNavigation()
+        } else {
+            showBottomNavigation()
+        }
+        isBottomNavVisible = !isBottomNavVisible
+    }
+
+    override fun getToolbarConfig(): ToolbarConfig {
+        return ToolbarConfig(VISIBLE, R.string.search) { navigateToMainActivity() }
+    }
+
+    override fun shouldEnableEdgeToEdge(): Boolean {
+        return false
+    }
+
+    override fun getLayoutId(): Int {
+        return R.layout.activity_search
+    }
+
+    override fun getMainLayoutId(): Int {
+        return R.id.main
+    }
+
     fun getAdapter(): TrackAdapter {
         return adapter
     }
 
-    fun isNetworkAvailable(context: Context): Boolean {
+    private fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         return networkCapabilities != null && (networkCapabilities.hasTransport(
             NetworkCapabilities.TRANSPORT_WIFI) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
     }
+
 }

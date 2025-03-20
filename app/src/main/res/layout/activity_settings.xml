@@ -1,31 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_settings"
+    android:id="@+id/settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    style="@style/SettingsView"
+    android:background="@color/white_textColor"
     tools:context=".SettingsActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <ImageView
-            android:id="@+id/backArrow"
-            style="@style/ArrowBackIconStyle"
-            android:contentDescription="@string/arrow_back"/>
-
-        <TextView
-            android:id="@+id/title"
-            style="@style/SettingsTitleTextView"
-            android:text="@string/settings"/>
-
-    </androidx.appcompat.widget.Toolbar>
+    <include layout="@layout/toolbar" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switch_control"
@@ -52,10 +37,8 @@
         android:text="@string/agreement_r"
         app:drawableEndCompat="@drawable/vector"/>
 
-    <include
-        android:id="@+id/bottom_nav_include"
-        layout="@layout/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <include layout="@layout/bottom_navigation" />
+
+
 
 </LinearLayout>

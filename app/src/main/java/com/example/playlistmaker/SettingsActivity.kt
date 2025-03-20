@@ -1,56 +1,49 @@
 package com.example.playlistmaker
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityOptionsCompat
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : BaseActivity() {
 
-    private lateinit var backButton: ImageView
-    lateinit var switchControl: SwitchMaterial
-    private lateinit var sharedPreferences: SharedPreferences
-    private var isDarkTheme: Boolean = false
-    private var isBottomNavVisible = true
+    private lateinit var switchControl: SwitchMaterial
+    private var isBottomNavVisible: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-
-        sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
-        isDarkTheme = sharedPreferences.getBoolean(darkThemeKey, false)
 
         initViews()
         setupClickListeners()
-        setupBottomNavigationView()
-        bottomNavigationView.selectedItemId = R.id.navigation_settings
+        findViewById<TextView>(R.id.bottom3).isSelected = true
     }
 
     override fun onSegment4Clicked() {
         if (isBottomNavVisible) {
-            bottomNavigationView.animate().translationY(bottomNavigationView.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
-                bottomNavigationView.visibility = View.GONE
-            }
-            line.animate().translationY(line.height.toFloat()).alpha(0f).setDuration(300).withEndAction {
-                line.visibility = View.GONE            }
+            hideBottomNavigation()
         } else {
-            bottomNavigationView.visibility = View.VISIBLE
-            line.visibility = View.VISIBLE
-
-            bottomNavigationView.alpha = 0f
-            bottomNavigationView.translationY = bottomNavigationView.height.toFloat()
-            bottomNavigationView.animate().translationY(0f).alpha(1f).setDuration(300)
-
-            line.alpha = 0f
-            line.translationY = line.height.toFloat()
-            line.animate().translationY(0f).alpha(1f).setDuration(300)
+            showBottomNavigation()
         }
         isBottomNavVisible = !isBottomNavVisible
+    }
+
+    override fun getToolbarConfig(): ToolbarConfig {
+        return if (isDarkThemeEnabled()) {
+            ToolbarConfig(GONE, R.string.settings) { navigateToMainActivity() }
+        } else {
+            ToolbarConfig(VISIBLE, R.string.settings) { navigateToMainActivity() }
+        }
+    }
+
+    private fun initViews() {
+        switchControl = findViewById(R.id.switch_control)
+        switchControl.isChecked = (application as App).isDarkTheme
+    }
+
+    override fun shouldEnableEdgeToEdge(): Boolean {
+        return false
     }
 
     override fun getLayoutId(): Int {
@@ -58,47 +51,24 @@ class SettingsActivity : BaseActivity() {
     }
 
     override fun getMainLayoutId(): Int {
-        return R.id.activity_settings
-    }
-
-    private fun <T : View> find(id: Int): T { return findViewById(id)!! }
-
-    private fun initViews() {
-        switchControl = findViewById(R.id.switch_control)
-        backButton = findViewById(R.id.backArrow)
-        switchControl.isChecked = isDarkTheme
+        return R.id.settings
     }
 
     private fun setupClickListeners() {
-        switchControl.setOnCheckedChangeListener { _, _ ->
-            if (!isDialogVisible) {
-                onSegmentClicked(0, false)
-            }
+
+        switchControl.setOnCheckedChangeListener { _, checked ->
+            (applicationContext as App).switchTheme(
+                checked
+            )
         }
+
         setupViewClickListener<TextView>(R.id.share) { shareApp() }
         setupViewClickListener<TextView>(R.id.group) { writeToSupport() }
         setupViewClickListener<TextView>(R.id.agreement) { openAgreement() }
 
-        if (isDarkTheme){
-            setupViewClickListener<TextView>(R.id.title) {
-                ActivityOptionsCompat.makeCustomAnimation(
-                    this,
-                    R.anim.fade_in,
-                    R.anim.fade_out
-                ).toBundle()
-                ActivityCompat.finishAfterTransition(this)
-            }
-        } else {
-            setupViewClickListener<ImageView>(R.id.backArrow) {
-                ActivityOptionsCompat.makeCustomAnimation(
-                    this,
-                    R.anim.enter_from_left,
-                    R.anim.exit_to_right
-                ).toBundle()
-                ActivityCompat.finishAfterTransition(this)
-            }
-        }
     }
+
+    private fun <T : View> find(id: Int): T { return findViewById(id)!! }
 
     private fun <T : View> setupViewClickListener(viewId: Int, action: () -> Unit) {
         find<T>(viewId).setOnClickListener { action() }
