@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources >
 
-    <style name="Theme.PlaylistMaker" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.Light.PlaylistMaker" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -19,10 +19,22 @@
         <item name="android:textFontWeight">500</item>
     </style>
 
+    <style name="Text19">
+        <item name="android:textSize">@dimen/Search_Text_19</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
     <style name="Text16">
         <item name="android:textSize">@dimen/Settings_Text_16</item>
         <item name="android:fontFamily">@font/ys_display_regular</item>
         <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="Text14">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
     </style>
 
     <style name="Text11">
@@ -35,7 +47,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:background">@color/blue_white</item>
+        <item name="android:background">@color/blue_textColor</item>
     </style>
 
     <style name="SettingsView">
@@ -146,7 +158,7 @@
     <style name="SearchBox">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:maxHeight">@dimen/searchBoxHeight_36</item>
+        <item name="android:maxHeight">@dimen/searchLineHeight_52</item>
         <item name="boxBackgroundMode">outline</item>
         <item name="hintEnabled">true</item>
         <item name="android:hint">@string/search</item>
@@ -166,8 +178,7 @@
     <style name="SearchInput" parent="Text16">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:maxHeight">@dimen/searchLineHeight_52</item>
-        <item name="android:maxLength">20</item>
+        <item name="android:maxHeight">@dimen/searchBoxHeight_36</item>
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:maxLines">1</item>
@@ -193,8 +204,36 @@
         <item name="tint">@color/hintColor_textColor</item>
     </style>
 
+    <style name="SearchFail" parent="Text19">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">@dimen/SearchFailTop_102</item>
+        <item name="android:drawablePadding">@dimen/Padding_16</item>
+        <item name="android:text">@string/searchFail</item>
+        <item name="android:textColor">@color/textColor_white</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="SearchUpdate" parent="Text14">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginTop">@dimen/Padding_16</item>
+        <item name="android:text">@string/update</item>
+        <item name="android:textColor">@color/white_textColor</item>
+        <item name="backgroundTint">@color/textColor_white</item>
+        <item name="cornerRadius">@dimen/track_45</item>
+        <item name="android:inputType">text</item>
+        <item name="android:visibility">gone</item>
+
+    </style>
+
     <style name="track_author" parent="Text11">
         <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
         <item name="android:textColor">@color/hintColor_white</item>
         <item name="drawableTint">@color/hintColor_white</item>
     </style>
@@ -209,7 +248,7 @@
         <item name="android:tint">@color/hintColor_white</item>
     </style>
 
-    <color name="blue_white">@color/backgroundDay</color>
+    <color name="blue_textColor">@color/backgroundDay</color>
     <color name="textColor_white">@color/textColor</color>
     <color name="textColor_transparent">@color/textColor</color>
     <color name="black_white">@color/black</color>
@@ -217,6 +256,25 @@
     <color name="hintColor_white">@color/hintColor</color>
     <color name="hintField_white">@color/hintFieldColor</color>
     <color name="white_textColor">@color/white</color>
+    <color name="blue_blue">@color/backgroundDay</color>
+    <color name="yellow_yellow">@color/bunColor</color>
+    <color name="white_white">@color/white</color>
+    <color name="textColor_textColor">@color/textColor</color>
+
+
+
+    <color name="red1">@color/red</color>
+    <color name="green1">@color/green</color>
+    <color name="blue1">@color/blue</color>
+    <color name="white1">@color/white</color>
+    <color name="yellow1">@color/yellow</color>
+    <color name="cyan1">@color/cyan</color>
+    <color name="magenta1">@color/magenta</color>
+    <color name="black1">@color/black</color>
+    <color name="gray1">@color/gray</color>
+    <color name="backgroundDay1">@color/backgroundDay</color>
+    <color name="hintFieldColor1">@color/hintFieldColor</color>
+    <color name="switch_track_on_color1">@color/switch_track_on_color</color>
 
 </resources>
 
