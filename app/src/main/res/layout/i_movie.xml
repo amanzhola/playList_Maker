@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:padding="8dp"
     android:layout_marginBottom="8dp"
-    android:background="#eeeeee">
+    android:background="@color/eeeee_black">
 
     <ImageView android:id="@+id/cover"
         android:layout_width="120dp"
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:textColor="@android:color/black"
+            android:textColor="@color/black_white"
             android:textSize="20sp"
             android:textStyle="bold"
             tools:text="Barsik lost the ring: The Ring of the Power"/>
@@ -32,9 +32,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginStart="8dp"
-            android:textColor="@android:color/black"
+            android:textColor="@color/black_white"
             android:textSize="16sp"
             android:textStyle="italic"
             tools:text="2202 - TV Series of Yandex Practikum, Mosсow"/>
+
+<!--        android:textColor="@android:color/black"-->
+
     </LinearLayout>
 </LinearLayout>

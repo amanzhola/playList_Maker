@@ -1,7 +1,8 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.movie
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.Movie
 
 class MoviesAdapter : RecyclerView.Adapter<MovieViewHolder>() {
 

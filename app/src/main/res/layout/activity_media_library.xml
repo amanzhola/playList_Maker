@@ -10,6 +10,9 @@
 
     <include layout="@layout/toolbar" />
 
+    <include
+        layout="@layout/fail"/>
+
     <include layout="@layout/bottom_navigation" />
 
 </LinearLayout>

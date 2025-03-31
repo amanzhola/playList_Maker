@@ -10,6 +10,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.movie.MoviesAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,7 +31,9 @@ data class Movie(
     val resultType: String,
     val image: String,
     val title: String,
-    val description: String
+    val description: String,
+    val ratings: String,
+    val genre: String
 )
 
 // MoviesResponse.kt
@@ -78,7 +81,8 @@ class SearchMovie : BaseActivity() {
 
         searchButton.setOnClickListener {
             if (queryInput.text.isNotEmpty()) {
-                imdbService.findMovie(apiKey, queryInput.text.toString()).enqueue(object : Callback<MoviesResponse> {
+                imdbService.findMovie(apiKey, queryInput.text.toString()).enqueue(object :
+                    Callback<MoviesResponse> {
                     @SuppressLint("NotifyDataSetChanged")
                     override fun onResponse(call: Call<MoviesResponse>, response: Response<MoviesResponse>) {
                         if (response.isSuccessful) {

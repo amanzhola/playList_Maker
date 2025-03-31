@@ -1,4 +1,4 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.search
 
 data class SearchResponse(
     val resultCount: Int,
