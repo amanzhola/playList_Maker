@@ -1,22 +1,29 @@
 package com.example.playlistmaker
 
 import android.annotation.SuppressLint
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import android.util.TypedValue
 import android.content.Context
 import android.content.res.ColorStateList
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.imageview.ShapeableImageView
 
-class TrackAdapter(private var tracks: List<Track>, context: Context) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
+interface OnTrackClickListener {
+    fun onTrackClicked(track: Track)
+}
+
+class TrackAdapter(private var tracks: MutableList<Track>,
+                   context: Context,
+                   private val listener: OnTrackClickListener) :
+    RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
 
     private val defaultTextColor: Int = context.resources.getColor(R.color.hintColor_white, context.theme)
     private val defaultTextNameColor: Int = context.resources.getColor(R.color.black_white, context.theme)
@@ -36,6 +43,7 @@ class TrackAdapter(private var tracks: List<Track>, context: Context) : Recycler
             trackNameTextView.text = track.trackName
             artistNameTextView.text = track.artistName
             trackTimeTextView.text = track.trackDuration
+
 
             val radius: Int = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 2f, itemView.context.resources.displayMetrics
@@ -69,7 +77,7 @@ class TrackAdapter(private var tracks: List<Track>, context: Context) : Recycler
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateTracks(newTracks: List<Track>) {
+    fun updateTracks(newTracks: MutableList<Track>) {
         this.tracks = newTracks
         notifyDataSetChanged()
     }
@@ -82,6 +90,11 @@ class TrackAdapter(private var tracks: List<Track>, context: Context) : Recycler
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val track: Track = tracks[position]
         holder.bind(track, holder.itemView.context, arrowColor, textColor, textNameColor)
+
+        holder.itemView.setOnClickListener {
+            listener.onTrackClicked(track)
+        }
+
     }
 
     override fun getItemCount(): Int {

@@ -45,22 +45,49 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation (libs.material.v161)
-    implementation(libs.glide)
-    annotationProcessor (libs.compiler)
-    implementation(libs.androidx.recyclerview)
-    implementation (libs.gson)
+
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
+    implementation (libs.glide)
+    annotationProcessor (libs.compiler)
+    implementation(libs.gson)
+    implementation(libs.androidx.recyclerview)
 
+//    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+//    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+//    implementation("com.github.bumptech.glide:glide:4.12.0")
+//    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+//    implementation("com.google.code.gson:gson:2.8.8")
+//    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    // previous mess for info
+
+
+//    implementation (libs.material.v161)
+
+//    implementation(libs.glide)
+//    annotationProcessor (libs.compiler)
+//    implementation(libs.androidx.recyclerview)
+//    implementation (libs.gson)
 //    implementation (libs.retrofit)
 //    implementation (libs.converter.gson)
-    implementation (libs.glide.v4120)
-    annotationProcessor (libs.compiler.v4120)
+
+//    implementation (libs.androidx.appcompat.v131)
+//    implementation (libs.material.v140)
+
+// удаленные из-за дублирования
+//    implementation (libs.retrofit)
+//    implementation (libs.converter.gson)
+
+//    implementation (libs.glide.v4120)
+//    annotationProcessor (libs.compiler.v4120)
 
 //    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
 //    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 //    implementation ("com.github.bumptech.glide:glide:4.12.0")
 //    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+
+//    implementation ("com.github.bumptech.glide:glide:4.14.2")
+//    annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
 
 }

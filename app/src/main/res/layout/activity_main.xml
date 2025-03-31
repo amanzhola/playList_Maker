@@ -1,37 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
-    style="@style/MainView"
-    tools:context=".MainActivity">
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/main"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:background="@color/blue_textColor"
+tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        style="@style/MainTitleTextView1"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+<include layout="@layout/toolbar" />
 
-    </androidx.appcompat.widget.Toolbar>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/Button_Big1"
-        style="@style/MainMaterialButtonStyle"
-        android:text="@string/search"
-        app:icon="@drawable/magnifier"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/Button_Big2"
-        style="@style/MainMaterialButtonStyle"
-        android:text="@string/media"
-        app:icon="@drawable/media_icon"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/Button_Big3"
-        style="@style/MainMaterialButtonStyle"
-        android:text="@string/settings"
-        app:icon="@drawable/settings_icon"/>
-
+<include layout="@layout/button" android:id="@+id/button1"/>
+<include layout="@layout/button" android:id="@+id/button2"/>
+<include layout="@layout/button" android:id="@+id/button3"/>
+<include layout="@layout/button" android:id="@+id/button4"/>
+<include layout="@layout/button" android:id="@+id/button5"/>
+<include layout="@layout/button" android:id="@+id/button6"/>
 
 </LinearLayout>
