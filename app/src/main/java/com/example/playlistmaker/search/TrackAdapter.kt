@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -81,10 +82,20 @@ class TrackAdapter(private var tracks: MutableList<Track>,
     val currentTracks: MutableList<Track>
         get() = tracks
 
-    @SuppressLint("NotifyDataSetChanged")
+//    @SuppressLint("NotifyDataSetChanged")
+//    fun updateTracks(newTracks: MutableList<Track>) {
+//        this.tracks = newTracks
+//        notifyDataSetChanged()
+//    }
+
     fun updateTracks(newTracks: MutableList<Track>) {
-        this.tracks = newTracks
-        notifyDataSetChanged()
+        val diffCallback = TracksDiffCallback(tracks, newTracks)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        this.tracks.clear()
+        this.tracks.addAll(newTracks)
+
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
