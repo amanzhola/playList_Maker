@@ -32,8 +32,15 @@ class TrackAdapterAudio(
         private val trackCountry: TextView = itemView.findViewById(R.id.track_country)
 
         init {
+//            itemView.setOnClickListener {
+//                listener.onTrackClicked(tracks[adapterPosition])
+//            }
+
             itemView.setOnClickListener {
-                listener.onTrackClicked(tracks[adapterPosition])
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onTrackClicked(tracks[position])
+                }
             }
         }
 

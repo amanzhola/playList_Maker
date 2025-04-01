@@ -250,6 +250,8 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                 searchQuery = s.toString()
                 clearIcon.visibility = if (!s.isNullOrEmpty()) VISIBLE else GONE
                 if (!s.isNullOrEmpty()) {
+                    trackList.clear()
+                    adapter.updateTracks(trackList)
                     isHistory = false
                     searchHistory.hideHistory()
                 }
