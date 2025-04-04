@@ -18,6 +18,7 @@ import com.example.playlistmaker.ExtraOption
 import com.example.playlistmaker.R
 import com.example.playlistmaker.search.NetworkUtils.isNetworkAvailable
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.gson.Gson
 
 interface OnTrackClickListener {
     fun onArrowClicked(track: Track)
@@ -112,14 +113,17 @@ class TrackAdapter(private var tracks: MutableList<Track>,
         }
 
         holder.itemView.setOnClickListener {
+
             listener.onTrackClicked(track)
-            val intent = Intent(holder.itemView.context, ExtraOption::class.java).apply {
-                putExtra("TRACK_LIST", ArrayList(tracks))
-                putExtra("TRACK_INDEX", holder.adapterPosition)
+            val context = holder.itemView.context
+            val trackListJson = Gson().toJson(tracks)
+
+            val intent = Intent(context, ExtraOption::class.java).apply {
+                putExtra("TRACK_LIST_JSON", trackListJson)
+                putExtra("TRACK_INDEX", holder.bindingAdapterPosition)
                 putExtra("IS_FROM_SEARCH", true)
             }
-            holder.itemView.context.startActivity(intent)
-        }
+            context.startActivity(intent)}
 
 // as option to return for a page only
 //        holder.itemView.setOnClickListener {

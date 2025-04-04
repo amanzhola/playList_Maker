@@ -145,6 +145,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                 adapter.notifyItemRemoved(position)
                 adapter.notifyItemRangeChanged(position, searchHistory.trackHistoryList.size)
                 searchHistory.saveHistory()
+                adapter.updateTracks(searchHistory.trackHistoryList)
             }
         } else {
             val position = trackList.indexOf(track)
@@ -152,7 +153,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                 trackList.removeAt(position)
                 adapter.notifyItemRemoved(position)
                 adapter.notifyItemRangeChanged(position, trackList.size)
-//                searchHistory.addTrackToHistory(track)
+                adapter.updateTracks(trackList)
             }
         }
     }
@@ -177,10 +178,9 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                 }
             } else {
                 showBottomNavigation()
-                if (isHistory) {
-                    isHistory = false
-                    searchHistory.hideHistory()
-                }
+                isHistory = false
+                searchHistory.hideHistory()
+
             }
         }
 
@@ -230,12 +230,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                         trackList.clear()
                         searchQuery.let { query ->
                             inputEditText.setText(query)
-
                             performSearch()
-
-                            isHistory = false
-                            textView.visibility = GONE
-                            searchHistory.hideHistory()
                         }
                     }
                 }

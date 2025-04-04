@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.50" />
+            app:layout_constraintGuide_percent="0.55" />
 
         <ImageView
             android:id="@+id/track_image"
@@ -42,7 +42,7 @@
             android:scaleType="centerCrop"
             app:layout_constrainedWidth="true"
             android:contentDescription="@string/placeholder"
-            android:layout_marginBottom="@dimen/Separator_10"
+            android:layout_marginBottom="5dp"
             app:layout_constraintBottom_toTopOf="@id/track_name"
             app:layout_constraintStart_toEndOf="@id/leftBorder"
             app:layout_constraintEnd_toStartOf="@id/rightBorder"
@@ -65,8 +65,7 @@
             style="@style/Text14_400"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginVertical="@dimen/Switch_padding_6"
             app:layout_constraintStart_toEndOf="@id/leftBorder"
             app:layout_constraintEnd_toStartOf="@id/rightBorder"
             app:layout_constraintTop_toBottomOf="@id/horizontal_guideline"
@@ -142,7 +141,7 @@
             style="@style/Text13_400"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="20dp"
             android:text="@string/duration"
             app:layout_constraintStart_toStartOf="@id/leftBorder16"
             app:layout_constraintTop_toBottomOf="@id/play_time" />
@@ -152,7 +151,7 @@
             style="@style/Text13_400_"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="20dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/duration"
             app:layout_constraintEnd_toEndOf="@id/rightBorder16"
             app:layout_constraintTop_toBottomOf="@id/play_time"
@@ -164,7 +163,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/album"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="@id/leftBorder16"
             app:layout_constraintTop_toBottomOf="@id/duration"
             android:visibility="visible"/>
@@ -176,7 +175,7 @@
             android:layout_height="wrap_content"
             app:layout_constrainedWidth="true"
             app:layout_constraintBaseline_toBaselineOf="@+id/album"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="@id/rightBorder16"
             app:layout_constraintTop_toBottomOf="@id/track_duration"
             app:layout_constraintStart_toEndOf="@id/duration"
@@ -190,7 +189,7 @@
             style="@style/Text13_400"
             android:id="@+id/year"
             android:text="@string/year"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="@id/leftBorder16"
             app:layout_constraintTop_toBottomOf="@id/track_album" />
 
@@ -199,7 +198,7 @@
             android:layout_height="wrap_content"
             style="@style/Text13_400_"
             android:id="@+id/track_year"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginTop="4dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/year"
             app:layout_constraintEnd_toEndOf="@id/rightBorder16"
             app:layout_constraintTop_toBottomOf="@id/track_album"
@@ -211,7 +210,7 @@
             android:id="@+id/genre"
             style="@style/Text13_400"
             android:text="@string/genre"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="@id/leftBorder16"
             app:layout_constraintTop_toBottomOf="@id/year" />
 
@@ -220,7 +219,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/track_genre"
             style="@style/Text13_400_"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginTop="4dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/genre"
             app:layout_constraintEnd_toEndOf="@id/rightBorder16"
             app:layout_constraintTop_toBottomOf="@id/track_year"
@@ -232,7 +231,7 @@
             android:id="@+id/country"
             style="@style/Text13_400"
             android:text="@string/country"
-            android:layout_marginVertical="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginVertical="4dp"
             app:layout_constraintStart_toStartOf="@id/leftBorder16"
             app:layout_constraintTop_toBottomOf="@id/genre"
             app:layout_constraintBottom_toBottomOf="parent"/>
@@ -242,7 +241,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/track_country"
             style="@style/Text13_400_"
-            android:layout_marginVertical="@dimen/searchPaddingTopBottom_8"
+            android:layout_marginVertical="4dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/country"
             app:layout_constraintEnd_toEndOf="@id/rightBorder16"
             app:layout_constraintTop_toBottomOf="@id/track_genre"

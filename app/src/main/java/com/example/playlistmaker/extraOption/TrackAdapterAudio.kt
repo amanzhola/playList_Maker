@@ -37,7 +37,8 @@ class TrackAdapterAudio(
 //            }
 
             itemView.setOnClickListener {
-                val position = adapterPosition
+//                val position = adapterPosition (устарел adapterPosition)
+                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onTrackClicked(tracks[position])
                 }

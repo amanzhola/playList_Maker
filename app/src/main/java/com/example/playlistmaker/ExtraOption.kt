@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.extraOption.OnTrackAudioClickListener
 import com.example.playlistmaker.extraOption.TrackAdapterAudio
 import com.example.playlistmaker.search.Track
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class ExtraOption : BaseActivity() {
 
@@ -21,7 +23,10 @@ class ExtraOption : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        trackList = intent.getParcelableArrayListExtra("TRACK_LIST") ?: emptyList()
+        val json = intent.getStringExtra("TRACK_LIST_JSON")
+
+        val type = object : TypeToken<List<Track>>() {}.type
+        trackList = Gson().fromJson(json, type) ?: emptyList()
         currentTrackIndex = intent.getIntExtra("TRACK_INDEX", 0)
 
         recyclerView = findViewById(R.id.tracks_recycler_view)
@@ -47,13 +52,15 @@ class ExtraOption : BaseActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putParcelableArrayList("TRACK_LIST", ArrayList(trackList))
+        outState.putString("TRACK_LIST_JSON", Gson().toJson(trackList))
         outState.putBoolean("IS_BOTTOM_NAV_VISIBLE", isBottomNavVisible)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        trackList = savedInstanceState.getParcelableArrayList("TRACK_LIST") ?: emptyList()
+        val json = savedInstanceState.getString("TRACK_LIST_JSON")
+        val type = object : TypeToken<List<Track>>() {}.type
+        trackList = Gson().fromJson(json, type) ?: emptyList()
         isBottomNavVisible = savedInstanceState.getBoolean("IS_BOTTOM_NAV_VISIBLE", false)
     }
 
