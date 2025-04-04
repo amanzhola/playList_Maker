@@ -2,6 +2,7 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.PlaylistMaker" parent="Theme.Material3.DayNight.NoActionBar">
+<!--        <item name="actionBarSize">@dimen/searchBoxHeight_36</item>-->
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
@@ -10,6 +11,13 @@
         <item name="android:textSize">@dimen/Title_text_22</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textFontWeight">500</item>
+    </style>
+
+    <style name="Text22_400">
+        <item name="android:textSize">@dimen/Title_text_22</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">@color/textColor_white</item>
     </style>
 
     <style name="Text19">
@@ -28,6 +36,27 @@
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textFontWeight">500</item>
+    </style>
+
+    <style name="Text14_400">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">@color/textColor_white</item>
+    </style>
+
+    <style name="Text13_400">
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">@color/switch_thumb_off_color</item>
+    </style>
+
+    <style name="Text13_400_">
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">@color/textColor_white</item>
     </style>
 
     <style name="Text11">
@@ -127,7 +156,6 @@
         <item name="android:visibility">gone</item>
     </style>
 
-
     <style name="track_author" parent="Text11">
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
@@ -171,6 +199,9 @@
     <color name="yellow_yellow">@color/bunColor</color>
     <color name="white_white">@color/white</color>
     <color name="textColor_textColor">@color/textColor</color>
+
+    movie
+    <color name="eeeee_black">@color/eeeee</color>
 
 
 

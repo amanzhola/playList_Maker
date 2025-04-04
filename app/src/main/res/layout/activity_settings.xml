@@ -12,6 +12,9 @@
 
     <include layout="@layout/toolbar" />
 
+    <include
+        layout="@layout/fail"/>
+
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switch_control"
         style="@style/SwitchView"

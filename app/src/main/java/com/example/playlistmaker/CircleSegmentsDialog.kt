@@ -20,7 +20,8 @@ class CircleSegmentsDialog(context: Context, private val listener: BaseActivity)
 
         circleSegmentsView = findViewById(R.id.circleSegmentsView)
 
-        circleSegmentsView.setOnSegmentClickListener(object : CircleSegmentsView.OnSegmentClickListener {
+        circleSegmentsView.setOnSegmentClickListener(object :
+            CircleSegmentsView.OnSegmentClickListener {
             override fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean) {
                 listener.onSegmentClicked(segmentIndex, isChangedState)
                 dismiss()

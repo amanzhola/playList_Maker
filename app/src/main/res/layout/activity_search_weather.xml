@@ -28,9 +28,10 @@
             android:hint="@string/enter_city_name"
             android:inputType="text"
             android:autofillHints="text"
-            android:textColorHint="@color/red1"
+            android:textColorHint="@color/hintSearchIcon"
             android:minHeight="48dp"
-            android:maxWidth="488dp"/>
+            android:maxWidth="488dp"
+            android:background="@color/hintField_white"/>
 
         <Button
             android:id="@+id/searchButton"
@@ -50,7 +51,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/locations"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:contentDescription="@string/weather"/>
 
         <TextView
             android:id="@+id/placeholderMessage"
@@ -62,8 +64,10 @@
             android:textStyle="bold"
             android:textColor="@color/black_white" />
 
+        <include layout="@layout/bottom_navigation" />
+
     </FrameLayout>
 
-    <include layout="@layout/bottom_navigation" />
+<!--    <include layout="@layout/bottom_navigation" />-->
 
 </LinearLayout>

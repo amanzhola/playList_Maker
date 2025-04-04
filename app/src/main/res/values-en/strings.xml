@@ -70,4 +70,25 @@
     <string name="nothing_found_city">City not found</string>
     <string name="enter_city_name">Enter the city name</string>
 
+    <string name="movie_search_button">Search button</string>
+    <string name="cover">Cover</string>
+    <string name="movie_rating">IMDb 7.9/10</string>
+    <string name="description">Description</string>
+    <string name="movie_genre">Drama, Comedy</string>
+    <string name="register">Регистрация</string>
+    <string name="favorite">Избранное</string>
+
+    <string name="duration">Duration</string>
+    <string name="album">Album</string>
+    <string name="year">Year</string>
+    <string name="genre">Genre</string>
+    <string name="country">Country</string>
+    <string name="add_track">Add Track</string>
+    <string name="add_favorite">Add to Favorite</string>
+    <string name="play_track">Play Track</string>
+    <string name="placeholder">Placeholder</string>
+    <string name="temp_fix_time">0:30</string>
+
+    <string name="Optoin2">""</string>
+
 </resources>

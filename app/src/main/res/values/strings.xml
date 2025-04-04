@@ -70,4 +70,25 @@
     <string name="nothing_found_city">Город не найден</string>
     <string name="enter_city_name">Введите название города</string>
 
+    <string name="movie_search_button">Кнопка поиска</string>
+    <string name="cover">Обложка</string>
+    <string name="movie_rating">IMDb 7.9/10</string>
+    <string name="description">Описание</string>
+    <string name="movie_genre">Драма, Комедия</string>
+    <string name="register">Регистрация</string>
+    <string name="favorite">Избранное</string>
+
+    <string name="duration">Длительность</string>
+    <string name="album">Альбом</string>
+    <string name="year">Год</string>
+    <string name="genre">Жанр</string>
+    <string name="country">Страна</string>
+    <string name="add_track">Добавить Трек</string>
+    <string name="add_favorite">Добавить в Избранное</string>
+    <string name="play_track">Воспроизвести Трек</string>
+    <string name="placeholder">Заглушка</string>
+    <string name="temp_fix_time">0:30</string>
+
+    <string name="Optoin2">""</string>
+
 </resources>

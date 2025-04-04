@@ -60,6 +60,14 @@ dependencies {
 //    implementation("com.google.code.gson:gson:2.8.8")
 //    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    implementation (libs.androidx.lifecycle.livedata.ktx)
+
+//    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+//    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
+
+    // sprint 13
+//    implementation ("androidx.constraintlayout:constraintlayout:2.0.0")
     // previous mess for info
 
 

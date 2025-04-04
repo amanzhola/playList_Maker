@@ -32,6 +32,11 @@
 
     </FrameLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
     <TextView
         android:id="@+id/history"
         style="@style/SearchHistoryTextView"
@@ -44,12 +49,15 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tracks_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUpdate"
         style="@style/SearchUpdate"
         tools:visibility="visible"/>
+
+    </LinearLayout>
 
     <include layout="@layout/bottom_navigation" />
 

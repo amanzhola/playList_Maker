@@ -105,7 +105,7 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
                     val bitmap = it.toBitmap()
 
                     // Изменяем цвет иконки на синий (Color.BLUE) или серый
-                    val coloredBitmap = changeBitmapColor(bitmap, R.color.hintFieldColor )
+                    val coloredBitmap = changeBitmapColor(bitmap, R.color.hintFieldColor)
 
                     val iconX = (centerX + radius * 0.75 * cos(Math.toRadians((startAngle + sweepAngle / 2).toDouble()))).toFloat()
                     val iconY = (centerY + radius * 0.75 * sin(Math.toRadians((startAngle + sweepAngle / 2).toDouble()))).toFloat()
@@ -123,7 +123,8 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
         canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), smallCircleRadius, paint!!)
 
         val smallCircleText = if (isChangedState) context.getString(R.string.change) else context.getString(
-            R.string.settings)
+            R.string.settings
+        )
         textPaint!!.color = Color.WHITE
         textPaint!!.textSize = 17f // Размер текста
         textPaint!!.textAlign = Paint.Align.CENTER

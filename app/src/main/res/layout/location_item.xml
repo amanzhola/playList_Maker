@@ -9,4 +9,4 @@
     android:gravity="center_vertical"
     android:textSize="18sp"
     android:textColor="@color/black_white"
-    android:background="#eeeeee"/>
+    android:background="@color/eeeee_black"/>

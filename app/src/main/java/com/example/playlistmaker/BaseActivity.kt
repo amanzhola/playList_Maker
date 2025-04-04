@@ -27,6 +27,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.search.TrackAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -194,10 +195,17 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
                 )
                 true
             }
+            R.id.filter_list -> {
+                reverseList()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    open fun reverseList() {
+        // To be done by subclass or derived class
+    }
 
     override fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean) {
         val randomColor = getNextColor(this)
@@ -268,7 +276,6 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             4 -> if (this is MainActivity) mainLayout.changeBtnBackgroundColor(color)
         }
     }
-
 
     private fun saveColor(segmentIndex: Int, color: Int) {
         colorPreferences.edit().apply {
