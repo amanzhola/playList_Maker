@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white_textColor"
+    android:orientation="vertical"
+    android:id="@+id/main"
     tools:context=".ExtraOption">
 
     <include layout="@layout/toolbar" />
+
+    <include
+        layout="@layout/fail"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tracks_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!--    an option to have single full page on track_item2 👈  версия через recycler -->
+    <!--  версия альтернатива viewpager2 реализована в movie 🎯-->
 
     <include layout="@layout/bottom_navigation" />
 

@@ -9,6 +9,9 @@ tools:context=".MainActivity">
 
 <include layout="@layout/toolbar" />
 
+<include
+    layout="@layout/fail"/>
+
 <include layout="@layout/button" android:id="@+id/button1"/>
 <include layout="@layout/button" android:id="@+id/button2"/>
 <include layout="@layout/button" android:id="@+id/button3"/>

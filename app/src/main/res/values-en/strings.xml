@@ -1,73 +1,100 @@
 <resources>
 
-    <string name="app_name">Playlist maker</string>
-    <string name="search">Search</string>
-    <string name="media">Media</string>
-    <string name="settings">Settings</string>
-    <string name="playlist_maker">Playlist maker</string>
-    <string name="switch_r">Dark Mode</string>
-    <string name="share_r">Share</string>
-    <string name="support_r">Support</string>
-    <string name="agreement_r">User agreement</string>
+    <string name="app_name">✨Playlist maker</string>
+    <string name="search">🧐Search</string>
+    <string name="media">🎶Media</string>
+    <string name="settings">🛠Settings</string>
+    <string name="playlist_maker">Playlist maker💯</string>
+    <string name="switch_r">😎Dark Mode</string>
+    <string name="share_r">💌Share</string>
+    <string name="support_r">🐶Support</string>
+    <string name="agreement_r">📝User agreement</string>
 
-    <string name="share">Share</string>
-    <string name="support">Support</string>
-    <string name="agreement">Agreement</string>
-    <string name="hidden">Hidden</string>
-    <string name="filter">Filter</string>
-    <string name="dropdown">Dropdown</string>
-    <string name="arrow_back">Arrow_back</string>
+    <string name="share">💌Share</string>
+    <string name="support">📦Support</string>
+    <string name="agreement">👨‍🔧Agreement</string>
+    <string name="hidden">⚠️Hidden</string>
+    <string name="filter">💡Filter</string>
+    <string name="dropdown">✌️Dropdown</string>
+    <string name="arrow_back">🎯Arrow_back</string>
 
-    <string name="share_message">Course on Android Development in Practicum: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>
+    <string name="share_message">🏁Course on Android Development in Practicum: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>
     <string name="support_email">amanzholaimov@gmail.com</string>
-    <string name="support_subject">Message to the app developers of Playlist Maker</string>
-    <string name="support_body">Thanks to the developers for a cool app!</string>
+    <string name="support_subject">😅Message to the app developers of Playlist Maker</string>
+    <string name="support_body">🧰Thanks to the developers for a cool app!</string>
     <string name="agreement_url">https://yandex.ru/legal/practicum_offer/</string>
 
-    <string name="search_hint">Search</string>
-    <string name="clear_search">Clear search query</string>
-    <string name="empty_space">Space filler</string>
-    <string name="dropdown_option1">Option 1</string>
-    <string name="dropdown_option2">Option 2</string>
+    <string name="search_hint">Search</string> // 🔎
+    <string name="clear_search">Clear search query📌</string>
+    <string name="empty_space">🔸Space filler</string>
+    <string name="dropdown_option1">Option 1🅰️</string>
+    <string name="dropdown_option2">Option 2🅱️</string>
 
     <!--    as an option, done in Git several options-->
-    <string name="set_titleColor">Title</string>
-    <string name="set_backgroundColor">Background</string>
-    <string name="set_btnTextColor">Btn txt</string>
-    <string name="set_iconColor">Icon</string>
-    <string name="set_btnBackgroundColor">Btn background</string>
+    <string name="set_titleColor">✨Title</string>
+    <string name="set_backgroundColor">🌈Background</string>
+    <string name="set_btnTextColor">✍️Btn txt</string>
+    <string name="set_iconColor">👨Icon</string>
+    <string name="set_btnBackgroundColor">Button🎨</string>
 
-    <string name="dropdown_header">Select an item</string>
+    <string name="dropdown_header">Select an item💪</string>
 
-    <string name="switch_short">Mode</string>
-    <string name="share_short">Share</string>
-    <string name="support_short">Support</string>
-    <string name="agreement_short">Agrement</string>
-    <string name="navigation">Navigation</string>
-    <string name="change">Color</string>
-    <string name="language">Language</string>
+    <string name="switch_short">😎Mode</string>
+    <string name="share_short">💌Share</string>
+    <string name="support_short">🐶Support</string>
+    <string name="agreement_short">📝Agrement</string>
+    <string name="navigation">🌐Navigation</string>
+    <string name="change">🎨Color</string>
+    <string name="language">🧠Language</string>
 
-    <string name="toDefault">Default</string>
+    <string name="toDefault">Default👨‍🔧</string>
 
-    <string name="searchFail">Found nothing</string>
-    <string name="networkFail">Connection problems\n\nDownload failed. Check\n your internet connection</string>
-    <string name="update">Update</string>
+    <string name="searchFail">Found nothing🤔</string>
+    <string name="networkFail">Connection problems👇\n\nDownload failed. 🔧Check\n your internet connection</string>
+    <string name="update">Update🔁</string>
 
-    <string name="supportEmail">No app found\n to open email</string>
-    <string name="movie">Movie</string>
-    <string name="weather">Weather</string>
+    <string name="supportEmail">💥No app found\n to open email🤔</string>
+    <string name="movie">🍿Movie</string>
+    <string name="weather">🌤️Weather</string>
 
-    <string name="clean">Clear history</string>
-    <string name="search_history">Last search</string>
+    <string name="clean">🧩Clear history</string>
+    <string name="search_history">🔍Last search 🎵</string>
 
-    <string name="option">Option</string>
+    <string name="option">📂Option</string>
 
-    <string name="movie_picture">Movie</string>
-    <string name="nothing_found">Movie not found</string>
-    <string name="something_went_wrong">An error occurred</string>
-    <string name="enter_movie_name">Enter movie name\n</string>
+    <string name="movie_picture">🍿Movie</string>
+    <string name="nothing_found">Movie not found🛑</string>
+    <string name="something_went_wrong">📛An error occurred</string>
+    <string name="enter_movie_name">❓Enter movie name\n</string>
 
-    <string name="nothing_found_city">City not found</string>
-    <string name="enter_city_name">Enter the city name</string>
+    <string name="nothing_found_city">City not found🚫</string>
+    <string name="enter_city_name">✨Enter the city name</string>
+
+    <string name="movie_search_button">Search button🧐</string>
+    <string name="cover">👉Cover</string>
+    <string name="movie_rating">IMDb 7.9/10⭐</string>
+    <string name="description">📝Description</string>
+    <string name="movie_genre">📚Drama, Comedy</string>
+    <string name="register">Register👈</string>
+    <string name="favorite">Favorite✨</string>
+    💬
+    <string name="duration">🗂️Duration</string>
+    <string name="album">Album📀</string>
+    <string name="year">📅Year</string>
+    <string name="genre">Genre📚</string>
+    <string name="country">🌐Country</string>
+    <string name="add_track">Add Track🎁</string>
+    <string name="add_favorite">Add to Favorite🙂</string>
+    <string name="play_track">🙂Play Track</string>
+    <string name="placeholder">🧱Placeholder</string>
+    <string name="temp_fix_time">🕒0:30</string>
+
+    <string name="track_story_empty">Track history is empty😌</string>
+    <string name="history_track">Tracks from history 🎵 🎵</string>
+    <string name="empty_track">Empty Track😌</string>
+    <string name="track_share">🎵Track share</string>
+    <string name="track_detail_title">🎶Track(s)👉💿🎧📀🎵👇</string>
+
+    <string name="set_time">🕒0:00</string>
 
 </resources>

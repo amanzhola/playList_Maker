@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
@@ -27,9 +28,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.ExtraOption.Companion.PREFS_NAME1
+import com.example.playlistmaker.ExtraOption.Companion.TRACK_KEY
+import com.example.playlistmaker.search.SearchHistory
+import com.example.playlistmaker.search.Track
+import com.example.playlistmaker.search.TrackAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -40,6 +47,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import java.io.File
 import java.util.Locale
 
 interface ApiService {
@@ -80,6 +88,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private var currentLanguage: String = ""
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var colorPreferences: SharedPreferences
+    private lateinit var historyPreferences: SharedPreferences
     private var isDialogVisible = false
     private val baseSegmentColors = intArrayOf(
         R.color.hintFieldColor,
@@ -90,7 +99,11 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private val segmentIcons by lazy {
         intArrayOf(
             R.drawable.switch_24,
-            R.drawable.share,
+            when (this) {
+                is SearchActivity -> R.drawable.queue_music_24
+                is ExtraOption -> R.drawable.music_note_24
+                else -> R.drawable.share
+            },
             R.drawable.group,
             R.drawable.vector,
             if (this is MainActivity) R.drawable.color_24 else R.drawable.navigation_24,
@@ -125,7 +138,8 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private val langKey = "language"
 
     private val failTextView: TextView by lazy { findViewById(R.id.fail) }
-
+    private lateinit var gson: Gson
+    private lateinit var searchHistory: SearchHistory
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -134,6 +148,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         buttonIndex = intent.getIntExtra("buttonIndex", -1)
 
         sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        historyPreferences = getSharedPreferences(SearchHistory.PREFS_NAME, Context.MODE_PRIVATE)
         applySettings()
         colorPreferences = getColorSharedPreferences()
 
@@ -167,6 +182,9 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             if (this is MainActivity) getString(R.string.set_btnBackgroundColor) else getString(R.string.language), // "Цвет фона кнопки",
             if (this is MainActivity) getString(R.string.language) else getString(R.string.toDefault) // "По умолчанию"
         )
+
+        gson = Gson()
+        searchHistory = SearchHistory(historyPreferences) // 👌 null for 2 more 😉 parameters
     }
 
     private fun getColorSharedPreferences(): SharedPreferences {
@@ -194,10 +212,17 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
                 )
                 true
             }
+            R.id.filter_list -> {
+                reverseList()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    open fun reverseList() {
+        // To be done by subclass or derived class 🔧✨
+    }
 
     override fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean) {
         val randomColor = getNextColor(this)
@@ -213,7 +238,11 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
             when (segmentIndex) {
                 0 -> toggleTheme()
-                1 -> shareApp()
+                1 -> when (this) {
+                    is SearchActivity -> shareTrackHistory()
+                    is ExtraOption -> shareSingleTrack()
+                    else -> shareApp()
+                }
                 2 -> writeToSupport()
                 3 -> openAgreement()
                 4 -> if (this is MainActivity) clearAllColors() else onSegment4Clicked()
@@ -223,7 +252,73 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         }
     }
 
-    open fun onSegment4Clicked() {}
+    private fun shareSingleTrack() { // 🎵
+        val prefs = getSharedPreferences(PREFS_NAME1, Context.MODE_PRIVATE)
+        val json = prefs.getString(TRACK_KEY, null)
+
+        if (json.isNullOrEmpty()) {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.empty_track))
+            }
+            startActivity(Intent.createChooser(intent, null))
+            return
+        }
+
+        val selectedTrack = gson.fromJson(json, Track::class.java)
+        val jsonFile = createJsonFile(listOf(selectedTrack))
+
+        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
+
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/json"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.track_share))
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(shareIntent, null))
+    }
+
+
+    private fun shareTrackHistory() { // 🎵 🎵 🎵
+        val json = historyPreferences.getString(SearchHistory.TRACK_HISTORY_LIST_KEY, null)
+
+        val tracks = if (!json.isNullOrEmpty()) {
+            gson.fromJson(json, Array<Track>::class.java).toList()
+        } else {
+            emptyList()
+        }
+
+        if (tracks.isEmpty()) {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.track_story_empty))
+            }
+            startActivity(Intent.createChooser(intent, null))
+            return
+        }
+
+        val jsonFile = createJsonFile(tracks)
+        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
+
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/json"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.history_track)) // 💥 R.string.history_track
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(shareIntent, null)) // 💥 🧠 👉 🤔
+    }
+
+    private fun createJsonFile(tracks: List<Track>): File {
+        val file = File(cacheDir, "track_history.json")
+        file.printWriter().use { out ->
+            out.print(gson.toJson(tracks))
+        }
+        return file
+    }
+
+    open fun onSegment4Clicked() {} // by btm navig 🔥
 
     private fun toggleTheme() {
         val app = application as App
@@ -254,7 +349,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             1 -> mainLayout.setBackgroundColor(color)
             2 -> when (this) {
                 is MainActivity -> mainLayout.changeBtnTextColor(color)
-                is SearchActivity -> this.getAdapter().also { it.setTextColor(color) }
+                is SearchActivity -> this.getAdapter().also { it.setTextColor(color) } // 🛠
                 else -> mainLayout.changeColor(color, true, ignoreViewId = R.id.toolbar)
             }
             3 -> when (this) {
@@ -269,7 +364,6 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         }
     }
 
-
     private fun saveColor(segmentIndex: Int, color: Int) {
         colorPreferences.edit().apply {
             putInt(getColorKey(segmentIndex), color)
@@ -277,7 +371,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         }
     }
 
-    private fun getColorKey(segmentIndex: Int): String {
+    private fun getColorKey(segmentIndex: Int): String { // 📤  👍
         val activityName = when (this) {
             is MainActivity -> "MainActivity"
             is SettingsActivity -> "SettingsActivity"
@@ -310,9 +404,9 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             apply()
         }
         recreate()
-        // option
+        // option 🔧
 //        finish()
-//        startActivity(intent)
+//        startActivity(intent) // 🧠
     }
 
 
@@ -365,7 +459,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             val bottomView: TextView? = findViewById(bottomViewId)
 
             if (bottomView != null && index < buttonPairs.size) {
-                bottomView.text = buttonPairs[index].first
+                bottomView.text = buttonPairs[index].first // ☝️
                 bottomView.setCompoundDrawablesWithIntrinsicBounds(0, buttonPairs[index].second, 0, 0)
 
                 bottomView.setOnClickListener {
@@ -398,7 +492,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         }
     }
 
-    protected fun setBottomNavigationVisibility() {
+    protected fun setBottomNavigationVisibility() { // 🧠
 
         for (i in bottomViewIds.indices) {
             val bottomView: TextView? = findViewById(bottomViewIds[i])
@@ -522,7 +616,6 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             type = "text/plain"
         }
         startActivity(Intent.createChooser(sendIntent, null))
-
     }
 
     protected fun writeToSupport() {
@@ -536,7 +629,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             startActivity(emailIntent)
         } catch (e: Exception) {
             CoroutineScope(Dispatchers.IO).launch {
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main){ // 👇
                     showFailPlaceholder(check = true, checkSupport = true)
                     delay(3000)
                     showFailPlaceholder(check = false, checkSupport = false)
@@ -549,7 +642,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         CoroutineScope(Dispatchers.IO).launch {
             val isInternetAvailable: Boolean = checkInternetConnection()
             withContext(Dispatchers.Main){
-                if (!isInternetAvailable){
+                if (!isInternetAvailable){ // 👇
                     showFailPlaceholder(check = true, checkSupport = false)
                     delay(timeMillis = 3000)
                     showFailPlaceholder(check = false, false)
@@ -596,7 +689,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
                         else view.visibility = VISIBLE
                     }
                 }
-                is SwitchMaterial -> {
+                is SwitchMaterial -> { // 🤔
                     if (this is SettingsActivity) {
                         if (check) view.visibility = View.INVISIBLE
                         else view.visibility = VISIBLE
@@ -616,7 +709,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         for (i in 0 until childCount) {
             when (val view: View? = getChildAt(i)) {
                 is Button -> {
-                    view.setTextColor(textColor)
+                    view.setTextColor(textColor) // 👨‍🔧
                 }
                 is ViewGroup -> {
                     view.changeBtnTextColor(textColor)
@@ -686,7 +779,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
                         }
                     }
                 }
-                is BottomNavigationView -> {
+                is BottomNavigationView -> { //  😉 💡 👉 🔄 👈
                 }
                 is ViewGroup -> {
                     view.changeColorView(color, isTextColor, ignoreViewId)

@@ -24,13 +24,15 @@
             android:layout_weight="2"
             android:layout_marginEnd="16dp"
             android:layout_gravity="center_vertical"
-            android:textColor="@color/black"
+            android:textColor="@color/black1"
             android:hint="@string/enter_movie_name"
+            android:paddingHorizontal="8dp"
             android:inputType="text"
             android:autofillHints="text"
-            android:textColorHint="@color/red1"
+            android:textColorHint="@color/hintSearchIcon"
             android:minHeight="48dp"
-            android:maxWidth="488dp"/>
+            android:maxWidth="488dp"
+            android:background="@color/hintField_white"/>
 
         <Button
             android:id="@+id/searchButton"
@@ -39,6 +41,7 @@
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:text="@string/search"
+            android:contentDescription="@string/movie_search_button"
             android:maxWidth="320dp"/>
     </LinearLayout>
 
@@ -46,10 +49,12 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/movies"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:contentDescription="@string/movie_picture"/>
 
         <TextView
             android:id="@+id/placeholderMessage"
@@ -62,8 +67,11 @@
             android:textColor="@color/black_white"
             android:visibility="gone"
             tools:visibility="visible"/>
+
+        <include layout="@layout/bottom_navigation" />
+
     </FrameLayout>
 
-    <include layout="@layout/bottom_navigation" />
+<!--    <include layout="@layout/bottom_navigation" />-->
 
 </LinearLayout>

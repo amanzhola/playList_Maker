@@ -15,27 +15,13 @@ class MediaLibraryActivity : BaseActivity() {
     }
 
     override fun onSegment4Clicked() {
-        if (isBottomNavVisible) {
-            hideBottomNavigation()
-        } else {
-            showBottomNavigation()
-        }
+        if (isBottomNavVisible) hideBottomNavigation()
+        else showBottomNavigation()
         isBottomNavVisible = !isBottomNavVisible
     }
 
-    override fun getToolbarConfig(): ToolbarConfig {
-        return ToolbarConfig(VISIBLE, R.string.media) { navigateToMainActivity() }
-    }
-
-    override fun shouldEnableEdgeToEdge(): Boolean {
-        return false
-    }
-
-    override fun getLayoutId(): Int {
-        return R.layout.activity_media_library
-    }
-
-    override fun getMainLayoutId(): Int {
-        return R.id.main
-    }
+    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.media) { navigateToMainActivity() }
+    override fun shouldEnableEdgeToEdge(): Boolean = false
+    override fun getLayoutId(): Int = R.layout.activity_media_library
+    override fun getMainLayoutId(): Int = R.id.main
 }

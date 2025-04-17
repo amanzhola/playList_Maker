@@ -21,38 +21,24 @@ class SettingsActivity : BaseActivity() {
     }
 
     override fun onSegment4Clicked() {
-        if (isBottomNavVisible) {
-            hideBottomNavigation()
-        } else {
-            showBottomNavigation()
-        }
+        if (isBottomNavVisible) hideBottomNavigation()
+        else showBottomNavigation()
         isBottomNavVisible = !isBottomNavVisible
     }
 
-    override fun getToolbarConfig(): ToolbarConfig {
-        return if (isDarkThemeEnabled()) {
-            ToolbarConfig(GONE, R.string.settings) { navigateToMainActivity() }
-        } else {
-            ToolbarConfig(VISIBLE, R.string.settings) { navigateToMainActivity() }
-        }
-    }
+    override fun getToolbarConfig(): ToolbarConfig =
+        if (isDarkThemeEnabled()) ToolbarConfig(GONE, R.string.settings) { navigateToMainActivity() }
+        else ToolbarConfig(VISIBLE, R.string.settings) { navigateToMainActivity() }
 
     private fun initViews() {
         switchControl = findViewById(R.id.switch_control)
         switchControl.isChecked = (application as App).isDarkTheme
     }
 
-    override fun shouldEnableEdgeToEdge(): Boolean {
-        return false
-    }
+    override fun shouldEnableEdgeToEdge(): Boolean = false
+    override fun getLayoutId(): Int = R.layout.activity_settings
+    override fun getMainLayoutId(): Int = R.id.settings
 
-    override fun getLayoutId(): Int {
-        return R.layout.activity_settings
-    }
-
-    override fun getMainLayoutId(): Int {
-        return R.id.settings
-    }
 
     private fun setupClickListeners() {
 

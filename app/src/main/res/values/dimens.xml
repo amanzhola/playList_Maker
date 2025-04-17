@@ -37,4 +37,10 @@
 
     <dimen name="SearchFailTop_102">102dp</dimen>
 
+    <dimen name="duration_margin_top">40dp</dimen>
+    <dimen name="album_margin_top">15dp</dimen>
+    <dimen name="author_margin_top">8dp</dimen>
+    <dimen name="author_margin_button">20dp</dimen>
+    <dimen name="guideline">0.6</dimen>
+
 </resources>
