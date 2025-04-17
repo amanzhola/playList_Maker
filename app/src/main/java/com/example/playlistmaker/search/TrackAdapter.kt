@@ -1,6 +1,5 @@
 package com.example.playlistmaker.search
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -80,14 +79,10 @@ class TrackAdapter(private var tracks: MutableList<Track>,
         }
     }
 
-    val currentTracks: MutableList<Track>
-        get() = tracks
 
-//    @SuppressLint("NotifyDataSetChanged")
-//    fun updateTracks(newTracks: MutableList<Track>) {
-//        this.tracks = newTracks
-//        notifyDataSetChanged()
-//    }
+    fun getTracks(): List<Track> {
+        return tracks
+    }
 
     fun updateTracks(newTracks: MutableList<Track>) {
         val diffCallback = TracksDiffCallback(tracks, newTracks)
@@ -97,6 +92,11 @@ class TrackAdapter(private var tracks: MutableList<Track>,
         this.tracks.addAll(newTracks)
 
         diffResult.dispatchUpdatesTo(this)
+    }
+
+    fun reverseTracks() { // 🔍
+        val reversedTracks = tracks.reversed().toMutableList()
+        updateTracks(reversedTracks)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -123,9 +123,10 @@ class TrackAdapter(private var tracks: MutableList<Track>,
                 putExtra("TRACK_INDEX", holder.bindingAdapterPosition)
                 putExtra("IS_FROM_SEARCH", true)
             }
-            context.startActivity(intent)}
+            context.startActivity(intent)
+        }
 
-// as option to return for a page only
+// as option to return for a page only 👈 alternative via viewpager2 page/4direct_list movie
 //        holder.itemView.setOnClickListener {
 //            listener.onTrackClicked(track)
 //            val intent = Intent(holder.itemView.context, ExtraOption::class.java).apply {
@@ -139,16 +140,15 @@ class TrackAdapter(private var tracks: MutableList<Track>,
         return tracks.size
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setArrowColor(color: Int) {
         this.arrowColor = color
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount) // 🧐
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setTextColor(color: Int) {
-        this.textNameColor = color
         this.textColor = color
-        notifyDataSetChanged()
+        this.textNameColor = color
+        notifyItemRangeChanged(0, itemCount) // 🧐
     }
+
 }

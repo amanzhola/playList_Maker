@@ -26,6 +26,7 @@
             android:layout_gravity="center_vertical"
             android:textColor="@color/black_white"
             android:hint="@string/enter_city_name"
+            android:paddingHorizontal="8dp"
             android:inputType="text"
             android:autofillHints="text"
             android:textColorHint="@color/hintSearchIcon"

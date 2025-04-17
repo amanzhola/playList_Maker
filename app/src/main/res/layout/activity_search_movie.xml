@@ -26,6 +26,7 @@
             android:layout_gravity="center_vertical"
             android:textColor="@color/black1"
             android:hint="@string/enter_movie_name"
+            android:paddingHorizontal="8dp"
             android:inputType="text"
             android:autofillHints="text"
             android:textColorHint="@color/hintSearchIcon"

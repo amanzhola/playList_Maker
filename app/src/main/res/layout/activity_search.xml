@@ -43,6 +43,16 @@
         android:text="@string/search_history"
         tools:visibility="visible"/>
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="@dimen/track_45"
+        android:layout_height="@dimen/track_45"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/Button_margin_16"
+        android:layout_marginBottom="@dimen/Padding_16"
+        android:indeterminateTint="@color/blue"
+        android:visibility="gone" />
+
     <include
         layout="@layout/fail" />
 

@@ -2,7 +2,6 @@ package com.example.playlistmaker
 
 import android.content.Intent
 import android.os.Bundle
-
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.core.app.ActivityOptionsCompat
@@ -19,7 +18,6 @@ open class MainActivity : BaseActivity() {
         setupButtons()
         setInitialButtonVisibility()
         setBottomNavigationVisibility()
-
     }
 
     override fun getToolbarConfig(): ToolbarConfig {
@@ -48,14 +46,13 @@ open class MainActivity : BaseActivity() {
             R.id.button5,
             R.id.button6
         )
-
         buttonIds.forEachIndexed { index, buttonId ->
             if (index < buttonPairs.size) {
                 val buttonData = buttonPairs[index]
                 val button: MaterialButton = findViewById(buttonId)
                 button.text = buttonData.first
-                button.setIconResource(buttonData.second)
-
+//                button.setIconResource(buttonData.second)
+                button.setIconResource(0) // ?
                 button.setOnClickListener {
                     onButtonClicked(index)
                 }

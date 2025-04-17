@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 android {
@@ -68,6 +69,12 @@ dependencies {
 
     // sprint 13
 //    implementation ("androidx.constraintlayout:constraintlayout:2.0.0")
+
+    // ViewPager2
+//    implementation "androidx.viewpager2:viewpager2:1.0.0"
+
+    implementation (libs.androidx.viewpager2)
+
     // previous mess for info
 
 

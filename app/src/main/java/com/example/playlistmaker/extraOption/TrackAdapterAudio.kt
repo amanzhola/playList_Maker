@@ -1,5 +1,6 @@
 package com.example.playlistmaker.extraOption
 
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,12 +13,15 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.search.Track
 
 interface OnTrackAudioClickListener {
-    fun onTrackClicked(track: Track)
+    fun onTrackClicked(track: Track, position: Int)
+    fun onBackArrowClicked()
 }
 
 class TrackAdapterAudio(
     private val tracks: List<Track>,
-    private val listener: OnTrackAudioClickListener
+    private val listener: OnTrackAudioClickListener,
+    private val audioPlayer: AudioPlayer,
+    private val layoutId: Int = R.layout.track_item1
 ) : RecyclerView.Adapter<TrackAdapterAudio.TrackViewHolder>() {
 
     inner class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,26 +34,37 @@ class TrackAdapterAudio(
         private val trackYear: TextView = itemView.findViewById(R.id.track_year)
         private val trackGenre: TextView = itemView.findViewById(R.id.track_genre)
         private val trackCountry: TextView = itemView.findViewById(R.id.track_country)
+        private val playButton: ImageView = itemView.findViewById(R.id.play_track)
+        private val playTime: TextView = itemView.findViewById(R.id.play_time)
+
+        private val backArrow: ImageView? = itemView.findViewById(R.id.arrow_back)
 
         init {
-//            itemView.setOnClickListener {
-//                listener.onTrackClicked(tracks[adapterPosition])
-//            }
-
             itemView.setOnClickListener {
-//                val position = adapterPosition (устарел adapterPosition)
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    listener.onTrackClicked(tracks[position])
+                    listener.onTrackClicked(tracks[position], position)
                 }
+            }
+
+            backArrow?.setOnClickListener {
+                listener.onBackArrowClicked()
             }
         }
 
         fun bind(track: Track) {
+
+            val radiusInDp = 8f
+            val radiusInPx: Int = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                radiusInDp,
+                itemView.context.resources.displayMetrics
+            ).toInt()
+
             Glide.with(itemView.context)
                 .load(track.artworkUrl512)
                 .placeholder(R.drawable.placeholder)
-                .transform(RoundedCorners(8))
+                .transform(RoundedCorners(radiusInPx))
                 .into(trackImage)
 
             trackName.text = track.trackName
@@ -72,11 +87,29 @@ class TrackAdapterAudio(
             )
             trackGenre.text = track.primaryGenreName
             trackCountry.text = track.country
+
+            playButton.setOnClickListener {
+                if (audioPlayer.isPlaying()) {
+                    audioPlayer.pause()
+                    playButton.setImageResource(R.drawable.play)
+                } else {
+                    audioPlayer.play(track.previewUrl, { time ->
+                        playTime.text = time
+                    }, {
+                        playButton.setImageResource(R.drawable.play)
+
+                        val defaultTime = itemView.context.getString(R.string.set_time)
+                        playTime.text = defaultTime
+                    })
+                    playButton.setImageResource(R.drawable.pause)
+                }
+            }
+
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.track_item1, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
         return TrackViewHolder(view)
     }
 
