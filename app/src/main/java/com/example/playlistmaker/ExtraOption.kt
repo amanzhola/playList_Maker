@@ -12,6 +12,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.extraOption.ExtraOptionViewModel
 import com.example.playlistmaker.extraOption.OnTrackAudioClickListener
 import com.example.playlistmaker.extraOption.TrackAdapterAudio
 import com.example.playlistmaker.search.Track
@@ -25,17 +26,18 @@ class ExtraOption : BaseActivity() {
     private lateinit var toolbar: Toolbar
 
     private val viewModel: ExtraOptionViewModel by viewModels()
-    private var isHorizontal = true
-    private val audioPlayer get() = viewModel.audioPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val json = intent.getStringExtra("TRACK_LIST_JSON") ?: return
-        viewModel.setTrackList(json)
-        viewModel.setCurrentTrackIndex(intent.getIntExtra("TRACK_INDEX", 0))
+        if (savedInstanceState == null) {
 
-        isHorizontal = viewModel.isHorizontal
+            val json = intent.getStringExtra("TRACK_LIST_JSON") ?: return
+            viewModel.setTrackList(json)
+            viewModel.setCurrentTrackIndex(intent.getIntExtra("TRACK_INDEX", 0))
+
+        }
+
         val savedScrollPosition = viewModel.scrollPosition
 
         recyclerView = findViewById(R.id.tracks_recycler_view)
@@ -44,54 +46,42 @@ class ExtraOption : BaseActivity() {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView)
 
+        viewModel.isHorizontal.observe(this) { isHorizontal ->
+            recyclerView.layoutManager = LinearLayoutManager(
+                this,
+                if (isHorizontal) LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL,
+                false
+            )
+        }
+
+        adapter = TrackAdapterAudio(viewModel.trackList.value ?: emptyList(), object :
+            OnTrackAudioClickListener {
+            override fun onTrackClicked(track: Track, position: Int) {
+                viewModel.setCurrentTrackIndex(position)
+
+                viewModel.toggleIsHorizontal()
+
+                viewModel.scrollPosition = position
+
+                snapHelper.attachToRecyclerView(null)
+                snapHelper.attachToRecyclerView(recyclerView)
+
+                recyclerView.scrollToPosition(position)
+            }
+
+            override fun onBackArrowClicked() {
+                // case for single page
+            }
+
+            override fun onPlayButtonClicked(track: Track) {
+                viewModel.audioPlay(track)
+            }
+        })
+
+        recyclerView.adapter = adapter
+
         viewModel.trackList.observe(this) { trackList ->
-            adapter = TrackAdapterAudio(trackList, object : OnTrackAudioClickListener {
-                override fun onTrackClicked(track: Track, position: Int) {
-                    viewModel.setCurrentTrackIndex(position)
-
-                    isHorizontal = !isHorizontal
-                    viewModel.isHorizontal = isHorizontal
-
-                    recyclerView.layoutManager = LinearLayoutManager(
-                        this@ExtraOption,
-                        if (isHorizontal) LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL,
-                        false
-                    )
-
-                    viewModel.scrollPosition = position
-
-                    snapHelper.attachToRecyclerView(null)
-                    snapHelper.attachToRecyclerView(recyclerView)
-
-                    recyclerView.scrollToPosition(position)
-                }
-
-                override fun onBackArrowClicked(){
-                    // case for single page
-                }
-            },audioPlayer)
-
-            recyclerView.adapter = adapter
-
-            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                @SuppressLint("UseKtx")
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val position = (recyclerView.layoutManager as LinearLayoutManager)
-                            .findFirstVisibleItemPosition()
-                        viewModel.setCurrentTrackIndex(position)
-
-                        val currentTrack = viewModel.trackList.value?.getOrNull(position)
-                        currentTrack?.let {
-                            val prefs = getSharedPreferences(PREFS_NAME1, Context.MODE_PRIVATE)
-                            val trackJson = Gson().toJson(it)
-                            prefs.edit().putString(TRACK_KEY, trackJson).apply()
-                        }
-                    }
-                }
-            })
+            adapter.update(trackList)
 
             val scrollTo = if (savedScrollPosition != -1) savedScrollPosition
             else viewModel.currentTrackIndex.value ?: 0
@@ -99,18 +89,33 @@ class ExtraOption : BaseActivity() {
             (recyclerView.layoutManager as LinearLayoutManager)
                 .scrollToPositionWithOffset(scrollTo, 0)
 
-        }
+        } // 🔥
+
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            @SuppressLint("UseKtx")
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val position = (recyclerView.layoutManager as LinearLayoutManager)
+                        .findFirstVisibleItemPosition()
+                    viewModel.setCurrentTrackIndex(position)
+
+                    val currentTrack = viewModel.trackList.value?.getOrNull(position)
+                    currentTrack?.let {
+                        val prefs = getSharedPreferences(PREFS_NAME1, Context.MODE_PRIVATE)
+                        val trackJson = Gson().toJson(it)
+                        prefs.edit().putString(TRACK_KEY, trackJson).apply()
+                    }
+                }
+            }
+        })
 
         val isFromSearch = intent.getBooleanExtra("IS_FROM_SEARCH", false)
         viewModel.isBottomNavVisible = !isFromSearch
 
         titleAndHeight()
         findViewById<TextView>(R.id.bottom6).isSelected = true
-    }
-
-    override fun onStop() {
-        super.onStop()
-        audioPlayer.stop()
     }
 
     override fun onPause() {
@@ -141,7 +146,10 @@ class ExtraOption : BaseActivity() {
     }
 
     override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.option)
-    { if (viewModel.isBottomNavVisible) navigateToMainActivity() else finish() }
+    { if (viewModel.isBottomNavVisible) navigateToMainActivity() else {
+        finish()
+        viewModel.stopAudioPlay()
+    } }
     override fun shouldEnableEdgeToEdge(): Boolean = false
     override fun getLayoutId(): Int = R.layout.activity_extra_option
     override fun getMainLayoutId(): Int = R.id.main

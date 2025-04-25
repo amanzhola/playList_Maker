@@ -167,7 +167,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
         segmentTexts = arrayOf(
             getString(R.string.switch_short),
-            getString(R.string.share_short),
+            getString(R.string.share_short), // 🎶
             getString(R.string.support_short),
             getString(R.string.agreement_short),
             if (this is MainActivity) getString(R.string.toDefault) else getString(R.string.navigation),
@@ -180,7 +180,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             getString(R.string.set_btnTextColor), // "Цвет текста текста",
             getString(R.string.set_iconColor), // "Цвет иконок",
             if (this is MainActivity) getString(R.string.set_btnBackgroundColor) else getString(R.string.language), // "Цвет фона кнопки",
-            if (this is MainActivity) getString(R.string.language) else getString(R.string.toDefault) // "По умолчанию"
+            if (this is MainActivity) getString(R.string.language) else getString(R.string.toDefault) // "По умолчанию" 🧹
         )
 
         gson = Gson()
@@ -280,7 +280,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     }
 
 
-    private fun shareTrackHistory() { // 🎵 🎵 🎵
+    private fun shareTrackHistory() { // 🎵 🎵 🎵 // 🎶
         val json = historyPreferences.getString(SearchHistory.TRACK_HISTORY_LIST_KEY, null)
 
         val tracks = if (!json.isNullOrEmpty()) {
@@ -689,7 +689,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
                         else view.visibility = VISIBLE
                     }
                 }
-                is SwitchMaterial -> { // 🤔
+                is SwitchMaterial -> { // 🤔 😬
                     if (this is SettingsActivity) {
                         if (check) view.visibility = View.INVISIBLE
                         else view.visibility = VISIBLE

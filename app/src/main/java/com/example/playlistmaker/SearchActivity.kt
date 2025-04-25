@@ -2,11 +2,12 @@ package com.example.playlistmaker
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -44,6 +45,13 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
 
     private lateinit var viewModel: SearchViewModel
 
+    companion object {
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L // ?
+    }
+
+    private val searchRunnable = Runnable { viewModel.onSearchActionDone() }
+    private val handler = Handler(Looper.getMainLooper())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,6 +71,11 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
 
         setupObservers()
         setupListeners()
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
 
     private fun setupObservers(){
@@ -121,15 +134,6 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
             viewModel.setInputFocused(hasFocus)
         }
-
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                viewModel.onSearchActionDone()
-                true
-            } else {
-                false
-            }
-        }
     }
 
     private fun createTextWatcher(): TextWatcher {
@@ -137,6 +141,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 viewModel.setSearchQuery(s.toString())
+                searchDebounce() // ?
             }
             override fun afterTextChanged(s: Editable?) { }
         }

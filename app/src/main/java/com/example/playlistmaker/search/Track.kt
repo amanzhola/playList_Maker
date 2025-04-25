@@ -17,7 +17,8 @@ data class Track(
     val country: String, // 🌍
     val previewUrl: String, // 🎧
     val trackId: Int, // 🆔
-    var isPlaying: Boolean = false
+    var isPlaying: Boolean = false,
+    var playTime: String? = "🕒0:00"
 ): Parcelable {
     val trackDuration: String
         get() = SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackTimeMillis)

@@ -1,28 +1,36 @@
 package com.example.playlistmaker.extraOption
 
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.search.Track
+import com.google.android.material.imageview.ShapeableImageView
 
 interface OnTrackAudioClickListener {
     fun onTrackClicked(track: Track, position: Int)
+    fun onPlayButtonClicked(track: Track)
     fun onBackArrowClicked()
 }
 
 class TrackAdapterAudio(
-    private val tracks: List<Track>,
+    private var tracks: List<Track>,
     private val listener: OnTrackAudioClickListener,
-    private val audioPlayer: AudioPlayer,
     private val layoutId: Int = R.layout.track_item1
 ) : RecyclerView.Adapter<TrackAdapterAudio.TrackViewHolder>() {
+
+    fun update(newItems: List<Track>) {
+        val diffCallback = TracksDiffCallbackAudio(tracks, newItems)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        tracks = newItems
+        diffResult.dispatchUpdatesTo(this)
+    }
 
     inner class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val trackImage: ImageView = itemView.findViewById(R.id.track_image)
@@ -36,35 +44,34 @@ class TrackAdapterAudio(
         private val trackCountry: TextView = itemView.findViewById(R.id.track_country)
         private val playButton: ImageView = itemView.findViewById(R.id.play_track)
         private val playTime: TextView = itemView.findViewById(R.id.play_time)
-
-        private val backArrow: ImageView? = itemView.findViewById(R.id.arrow_back)
+        private val backArrow: ShapeableImageView? = itemView.findViewById(R.id.arrow_fw)
 
         init {
+            playButton.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onPlayButtonClicked(tracks[position])
+                }
+            }
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onTrackClicked(tracks[position], position)
                 }
             }
-
             backArrow?.setOnClickListener {
-                listener.onBackArrowClicked()
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onBackArrowClicked()
+                }
             }
         }
 
         fun bind(track: Track) {
-
-            val radiusInDp = 8f
-            val radiusInPx: Int = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                radiusInDp,
-                itemView.context.resources.displayMetrics
-            ).toInt()
-
             Glide.with(itemView.context)
                 .load(track.artworkUrl512)
                 .placeholder(R.drawable.placeholder)
-                .transform(RoundedCorners(radiusInPx))
+                .transform(RoundedCorners(8))
                 .into(trackImage)
 
             trackName.text = track.trackName
@@ -88,23 +95,18 @@ class TrackAdapterAudio(
             trackGenre.text = track.primaryGenreName
             trackCountry.text = track.country
 
-            playButton.setOnClickListener {
-                if (audioPlayer.isPlaying()) {
-                    audioPlayer.pause()
-                    playButton.setImageResource(R.drawable.play)
-                } else {
-                    audioPlayer.play(track.previewUrl, { time ->
-                        playTime.text = time
-                    }, {
-                        playButton.setImageResource(R.drawable.play)
+            updatePlayTime(track)
+            updatePlayState(track)
+        }
 
-                        val defaultTime = itemView.context.getString(R.string.set_time)
-                        playTime.text = defaultTime
-                    })
-                    playButton.setImageResource(R.drawable.pause)
-                }
-            }
+        fun updatePlayTime(track: Track) {
+            playTime.text = track.playTime ?: "🕒0:00"
+        }
 
+        fun updatePlayState(track: Track) {
+            playButton.setImageResource(
+                if (track.isPlaying) R.drawable.pause else R.drawable.play
+            )
         }
     }
 
@@ -115,6 +117,22 @@ class TrackAdapterAudio(
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(tracks[position])
+    }
+
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            val payload = payloads[0] as? List<*>
+            val track = tracks[position]
+
+            payload?.forEach {
+                when (it) {
+                    "playTime" -> holder.updatePlayTime(track)
+                    "isPlaying" -> holder.updatePlayState(track)
+                }
+            }
+        }
     }
 
     override fun getItemCount(): Int {

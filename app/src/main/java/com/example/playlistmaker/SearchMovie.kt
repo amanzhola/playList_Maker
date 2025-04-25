@@ -3,6 +3,8 @@ package com.example.playlistmaker
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.Button
@@ -28,6 +30,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchMovie : BaseActivity() {
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L // ✨
+    }
+
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
 
     private val apiKey = "k_zcuw1ytf"
     private val imdbBaseUrl = "https://tv-api.com"
@@ -65,6 +74,9 @@ class SearchMovie : BaseActivity() {
     }
 
     private fun showChoiceDialog(selectedMovie: Movie, position: Int) {
+
+        if (!clickDebounce()) return // ✨
+
         val options = arrayOf("Один фильм", "Список фильмов")
 
         AlertDialog.Builder(this)
@@ -192,6 +204,15 @@ class SearchMovie : BaseActivity() {
 //        }
 
         findViewById<TextView>(R.id.bottom4).isSelected = true
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
     }
 
     private fun showMessage(text: String, additionalMessage: String) {

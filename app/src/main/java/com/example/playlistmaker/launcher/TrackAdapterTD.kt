@@ -2,6 +2,8 @@ package com.example.playlistmaker.launcher
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +25,13 @@ class TrackAdapterTD(
     private var tracks: List<Track>,
     private val listener: OnTrackClickListener
 ) : RecyclerView.Adapter<TrackAdapterTD.ViewHolder>() {
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L // ✨
+    }
+
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
 
     fun updateTracks(newTracks: List<Track>) {
         val diffCallback = TracksDiffCallback(tracks, newTracks)
@@ -59,6 +68,8 @@ class TrackAdapterTD(
 
             itemView.setOnClickListener {
 
+                if (!clickDebounce()) return@setOnClickListener // ✨
+
                 val intent = Intent(context, TrackPreviewActivity::class.java).apply {
                     putExtra("track", track)
                     putExtra("track_list_json", Gson().toJson(tracks))
@@ -85,4 +96,13 @@ class TrackAdapterTD(
     }
 
     override fun getItemCount(): Int = tracks.size
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
 }

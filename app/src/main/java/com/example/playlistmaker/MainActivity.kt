@@ -51,8 +51,8 @@ open class MainActivity : BaseActivity() {
                 val buttonData = buttonPairs[index]
                 val button: MaterialButton = findViewById(buttonId)
                 button.text = buttonData.first
-//                button.setIconResource(buttonData.second)
-                button.setIconResource(0) // ?
+//                button.setIconResource(buttonData.second) // ?? ? ? ? ? ? ?
+                button.setIconResource(0) // ? ? ? ?
                 button.setOnClickListener {
                     onButtonClicked(index)
                 }
