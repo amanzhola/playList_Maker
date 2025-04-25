@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="duration_margin_top">17dp</dimen>
+    <dimen name="album_margin_top">4dp</dimen>
+    <dimen name="author_margin_top">6dp</dimen>
+    <dimen name="author_margin_button">6dp</dimen>
+    <dimen name="guideline">0.55</dimen>
+
+</resources>

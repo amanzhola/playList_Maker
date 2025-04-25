@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
-import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.View.VISIBLE
@@ -8,37 +9,23 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.movie.IMDbApi
+import com.example.playlistmaker.movie.Movie
+import com.example.playlistmaker.movie.MoviePager
+import com.example.playlistmaker.movie.MoviePagerList
+import com.example.playlistmaker.movie.MoviesAdapter
+import com.example.playlistmaker.movie.MoviesEvent
+import com.example.playlistmaker.movie.MoviesResponse
+import com.example.playlistmaker.movie.MoviesViewModel
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Path
-
-interface IMDbApi {
-    @GET("/en/API/SearchMovie/{apiKey}/{expression}")
-    fun findMovie(@Path("apiKey") apiKey: String,
-                  @Path("expression") expression: String): Call<MoviesResponse>
-}
-
-// Movie.kt
-data class Movie(
-    val id: String,
-    val resultType: String,
-    val image: String,
-    val title: String,
-    val description: String
-)
-
-// MoviesResponse.kt
-class MoviesResponse(
-    val searchType: String,
-    val expression: String,
-    val results: List<Movie>
-)
 
 class SearchMovie : BaseActivity() {
 
@@ -58,10 +45,60 @@ class SearchMovie : BaseActivity() {
     private lateinit var moviesList: RecyclerView
 
     private val movies = ArrayList<Movie>()
-    private val adapter = MoviesAdapter()
 
+    private val gson = Gson()
+//    private val adapter = MoviesAdapter { movie ->
+//        val intent = Intent(this, MoviePager::class.java)
+//        val movieJson = gson.toJson(movie)
+//        intent.putExtra("selected_movie", movieJson)
+//        startActivity(intent)
+//    }
+
+    private val adapter = MoviesAdapter { event ->
+        // Прямо обрабатываем событие SingleMovie
+        val selectedMovieEvent = event as? MoviesEvent.SingleMovie
+        selectedMovieEvent?.let {
+            val selectedMovie = it.movie
+            val position = it.position // Получаем позицию из события
+            showChoiceDialog(selectedMovie, position)  // Передаем выбранный фильм и его индекс
+        }
+    }
+
+    private fun showChoiceDialog(selectedMovie: Movie, position: Int) {
+        val options = arrayOf("Один фильм", "Список фильмов")
+
+        AlertDialog.Builder(this)
+            .setTitle("Выберите опцию")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> {
+                        // Выбран "Один фильм"
+                        val movieJson = gson.toJson(selectedMovie)
+                        val intent = Intent(this, MoviePager::class.java)
+                        intent.putExtra("selected_movie", movieJson)
+                        startActivity(intent)
+                    }
+                    1 -> {
+                        // Выбран "Список фильмов"
+                        val movieList: List<Movie> = adapter.getMovies() // Получаем полный список фильмов
+                        val movieJsonList = gson.toJson(movieList) // Сериализуем в JSON
+                        val intent = Intent(this, MoviePagerList::class.java)
+                        intent.putExtra("MOVIE_LIST_JSON", movieJsonList)
+                        intent.putExtra("MOVIE_INDEX", position) // Передача индекса фильма
+                        startActivity(intent)
+                    }
+                }
+            }
+            .setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
 
     private var isBottomNavVisible: Boolean = true
+    private lateinit var viewModel: MoviesViewModel
+
+//    companion object {
+//        private const val KEY_MOVIES_JSON = "saved_movies"
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,23 +112,44 @@ class SearchMovie : BaseActivity() {
 
         moviesList.layoutManager = LinearLayoutManager(this)
         moviesList.adapter = adapter
+        // option without viewmodel
+//        if (savedInstanceState != null) {
+//            val json = savedInstanceState.getString(KEY_MOVIES_JSON)
+//            val type = object : TypeToken<List<Movie>>() {}.type
+//            val restoredMovies: List<Movie>? = Gson().fromJson(json, type)
+//
+//            restoredMovies?.let {
+//                adapter.updateMovies(it)
+//            }
+//        }
+
+        viewModel = ViewModelProvider(this)[MoviesViewModel::class.java]
+
+        // Подписываемся на изменения списка фильмов
+        viewModel.movies.observe(this) { newMovies ->
+            adapter.updateMovies(newMovies)
+        }
 
         searchButton.setOnClickListener {
-            if (queryInput.text.isNotEmpty()) {
-                imdbService.findMovie(apiKey, queryInput.text.toString()).enqueue(object : Callback<MoviesResponse> {
-                    @SuppressLint("NotifyDataSetChanged")
+            val query = queryInput.text.toString()
+
+            if (query.isNotEmpty()) {
+                imdbService.getAdvancedSearch(apiKey, query).enqueue(object :
+                    Callback<MoviesResponse> {
                     override fun onResponse(call: Call<MoviesResponse>, response: Response<MoviesResponse>) {
                         if (response.isSuccessful) {
-                            movies.clear()
-                            if (response.body()?.results?.isNotEmpty() == true) {
-                                movies.addAll(response.body()?.results!!)
-                                adapter.notifyDataSetChanged()
+                            response.body()?.results?.let { newMovies ->
+//                                adapter.updateMovies(newMovies)
+//                                movies.clear()
+//                                movies.addAll(newMovies)
+                                viewModel.updateMovies(newMovies)
                                 showMessage("", "")
-                            } else {
-                                showMessage(getString(R.string.nothing_found), "")
-                            }
+                            } ?: showMessage(getString(R.string.nothing_found), "")
                         } else {
-                            showMessage(getString(R.string.something_went_wrong), response.code().toString())
+                            showMessage(
+                                getString(R.string.something_went_wrong),
+                                response.code().toString()
+                            )
                         }
                     }
 
@@ -104,16 +162,43 @@ class SearchMovie : BaseActivity() {
             }
         }
 
+//// option for SearchMovie
+
+//        searchButton.setOnClickListener {
+//            if (queryInput.text.isNotEmpty()) {
+//                imdbService.findMovie(apiKey, queryInput.text.toString()).enqueue(object :
+//                    Callback<MoviesResponse> {
+//                    override fun onResponse(call: Call<MoviesResponse>, response: Response<MoviesResponse>) {
+//                        if (response.isSuccessful) {
+//                            response.body()?.results?.let { newMovies ->
+////                                adapter.updateMovies(newMovies)
+////                                movies.clear()
+////                                movies.addAll(newMovies)
+//                                viewModel.updateMovies(newMovies)
+//                                showMessage("", "")
+//                            } ?: showMessage(getString(R.string.nothing_found), "")
+//                        } else {
+//                            showMessage(getString(R.string.something_went_wrong), response.code().toString())
+//                        }
+//                    }
+//
+//                    override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
+//                        showMessage(getString(R.string.something_went_wrong), t.message.toString())
+//                    }
+//                })
+//            } else {
+//                showMessage(getString(R.string.enter_movie_name), "")
+//            }
+//        }
+
         findViewById<TextView>(R.id.bottom4).isSelected = true
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun showMessage(text: String, additionalMessage: String) {
         if (text.isNotEmpty()) {
             placeholderMessage.visibility = VISIBLE
-            movies.clear()
-            adapter.notifyDataSetChanged()
             placeholderMessage.text = text
+
             if (additionalMessage.isNotEmpty()) {
                 Toast.makeText(applicationContext, additionalMessage, Toast.LENGTH_LONG).show()
             }
@@ -122,28 +207,22 @@ class SearchMovie : BaseActivity() {
         }
     }
 
+    override fun reverseList() {
+        val currentTracksList = adapter.getMovies()
+        val reversedList = currentTracksList.reversed()
+        adapter.updateMovies(reversedList)
+        moviesList.scrollToPosition(0)
+    }
+
     override fun onSegment4Clicked() {
-        if (isBottomNavVisible) {
-            hideBottomNavigation()
-        } else {
-            showBottomNavigation()
-        }
+        if (isBottomNavVisible) hideBottomNavigation()
+        else showBottomNavigation()
         isBottomNavVisible = !isBottomNavVisible
     }
 
-    override fun getToolbarConfig(): ToolbarConfig {
-        return ToolbarConfig(VISIBLE, R.string.movie) { navigateToMainActivity() }
-    }
+    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.movie) { navigateToMainActivity() }
+    override fun shouldEnableEdgeToEdge(): Boolean = false
+    override fun getLayoutId(): Int = R.layout.activity_search_movie
+    override fun getMainLayoutId(): Int = R.id.main
 
-    override fun shouldEnableEdgeToEdge(): Boolean {
-        return false
-    }
-
-    override fun getLayoutId(): Int {
-        return R.layout.activity_search_movie
-    }
-
-    override fun getMainLayoutId(): Int {
-        return R.id.main
-    }
 }

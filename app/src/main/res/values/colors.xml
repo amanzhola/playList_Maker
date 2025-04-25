@@ -40,6 +40,7 @@
 
     Movie
     <color name="dark_red">#D32F2F</color>
+    <color name="eeeee">#eeeeee</color>
 
 
 </resources>

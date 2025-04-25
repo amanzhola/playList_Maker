@@ -1,10 +1,12 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.weather
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.ForecastLocation
+import com.example.playlistmaker.R
 
 class LocationViewHolder(parent: ViewGroup) :
     RecyclerView.ViewHolder(

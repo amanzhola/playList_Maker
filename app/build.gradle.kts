@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 android {
@@ -59,6 +60,20 @@ dependencies {
 //    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 //    implementation("com.google.code.gson:gson:2.8.8")
 //    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    implementation (libs.androidx.lifecycle.livedata.ktx)
+
+//    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+//    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
+
+    // sprint 13
+//    implementation ("androidx.constraintlayout:constraintlayout:2.0.0")
+
+    // ViewPager2
+//    implementation "androidx.viewpager2:viewpager2:1.0.0"
+
+    implementation (libs.androidx.viewpager2)
 
     // previous mess for info
 

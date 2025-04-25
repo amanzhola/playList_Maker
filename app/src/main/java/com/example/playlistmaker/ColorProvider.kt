@@ -13,5 +13,6 @@ object ColorProvider {
         R.color.gray1,
         R.color.backgroundDay1,
         R.color.hintFieldColor1,
-        R.color.switch_track_on_color1)
+        R.color.switch_track_on_color1
+    )
 }
