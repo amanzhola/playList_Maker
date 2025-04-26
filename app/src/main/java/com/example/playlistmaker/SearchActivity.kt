@@ -113,7 +113,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
 
                     viewModel.isInputFocused.observe(this) { isFocused ->
                         searchInputLayout.hint = if (isFocused) null else getString(R.string.search)
-//                        if (isFocused) hideBottomNavigation() else showBottomNavigation()
+                        if (isFocused) hideBottomNavigation() else showBottomNavigation() // back by review 14
                     }
 
                     viewModel.searchQuery.observe(this) { query ->

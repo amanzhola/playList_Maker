@@ -1,5 +1,6 @@
 package com.example.playlistmaker.extraOption
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.search.Track
-import com.google.android.material.imageview.ShapeableImageView
 
 interface OnTrackAudioClickListener {
     fun onTrackClicked(track: Track, position: Int)
@@ -44,7 +44,7 @@ class TrackAdapterAudio(
         private val trackCountry: TextView = itemView.findViewById(R.id.track_country)
         private val playButton: ImageView = itemView.findViewById(R.id.play_track)
         private val playTime: TextView = itemView.findViewById(R.id.play_time)
-        private val backArrow: ShapeableImageView? = itemView.findViewById(R.id.arrow_fw)
+        private val backArrow: ImageView? = itemView.findViewById(R.id.arrow_back)
 
         init {
             playButton.setOnClickListener {
@@ -60,6 +60,7 @@ class TrackAdapterAudio(
                 }
             }
             backArrow?.setOnClickListener {
+                Log.d("TrackAdapter", "backArrow: $backArrow")
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onBackArrowClicked()

@@ -113,9 +113,9 @@ class ExtraOption : BaseActivity() {
 
         val isFromSearch = intent.getBooleanExtra("IS_FROM_SEARCH", false)
         viewModel.isBottomNavVisible = !isFromSearch
-
         titleAndHeight()
         findViewById<TextView>(R.id.bottom6).isSelected = true
+        hideBottomNavigation()
     }
 
     override fun onPause() {
@@ -146,10 +146,12 @@ class ExtraOption : BaseActivity() {
     }
 
     override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.option)
-    { if (viewModel.isBottomNavVisible) navigateToMainActivity() else {
-        finish()
-        viewModel.stopAudioPlay()
-    } }
+    {
+        if (viewModel.isBottomNavVisible) navigateToMainActivity() else {
+            finish()
+            viewModel.stopAudioPlay()
+        }
+    }
     override fun shouldEnableEdgeToEdge(): Boolean = false
     override fun getLayoutId(): Int = R.layout.activity_extra_option
     override fun getMainLayoutId(): Int = R.id.main
