@@ -3,7 +3,7 @@ package com.example.playlistmaker.launcher
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlist_playertraining.AudioPlayer
+import com.example.playlistmaker.extraOption.AudioPlayer
 import com.example.playlistmaker.search.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

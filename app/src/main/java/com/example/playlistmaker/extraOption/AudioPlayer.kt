@@ -1,4 +1,4 @@
-package com.example.playlist_playertraining
+package com.example.playlistmaker.extraOption
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -13,13 +13,13 @@ class AudioPlayer private constructor() {
     private val handler = Handler(Looper.getMainLooper())
     private var onTimeUpdateCallback: ((String) -> Unit)? = null
     private var stateChangeCallback: ((PlaybackState) -> Unit)? = null
-    var currentTrackId: Int = -1
-    var lastPlayedTrackId: Int = -1
 
     enum class PlaybackState {
         IDLE, PREPARING, PREPARED, PLAYING, PAUSED, STOPPED
     }
 
+    var currentTrackId: Int = -1
+    var lastPlayedTrackId: Int = -1
     var playbackState: PlaybackState = PlaybackState.IDLE
 
     private val updateRunnable = object : Runnable {
@@ -60,32 +60,29 @@ class AudioPlayer private constructor() {
         stateChangeCallback?.invoke(playbackState)
 
         mediaPlayer = MediaPlayer().apply {
+            setDataSource(previewUrl)
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
 
-                setDataSource(previewUrl)
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-                )
+            setOnPreparedListener {
+                Log.d("AudioPlayer", "MediaPlayer is prepared for track ID: $currentTrackId")
+                playbackState = PlaybackState.PREPARED
+                stateChangeCallback?.invoke(playbackState)
+                startPlayback()
+            }
 
-                setOnPreparedListener {
-                    Log.d("AudioPlayer", "MediaPlayer is prepared for track ID: $currentTrackId")
-                    playbackState = PlaybackState.PREPARED
-                    stateChangeCallback?.invoke(playbackState)
-                    startPlayback() // Запускаем воспроизведение после подготовки
-                }
+            setOnCompletionListener {
+                stateChangeCallback?.invoke(PlaybackState.STOPPED)
+                onTimeUpdateCallback?.invoke("00:00")
 
-                setOnCompletionListener {
-                    stateChangeCallback?.invoke(PlaybackState.STOPPED)
-                    onTimeUpdateCallback?.invoke("00:00")
+                stopPlayback()
+            }
 
-                    stopPlayback()
-
-                    currentTrackId = -1
-                }
-
-                prepareAsync()
+            prepareAsync()
         }
     }
 
@@ -95,7 +92,7 @@ class AudioPlayer private constructor() {
                 it.start()
                 playbackState = PlaybackState.PLAYING
                 stateChangeCallback?.invoke(playbackState)
-                handler.post(updateRunnable) // Запускаем обновление времени
+                handler.post(updateRunnable)
             }
         }
     }
@@ -106,7 +103,7 @@ class AudioPlayer private constructor() {
                 it.pause()
                 playbackState = PlaybackState.PAUSED
                 stateChangeCallback?.invoke(playbackState)
-                handler.removeCallbacks(updateRunnable) // Останавливаем обновление времени
+                handler.removeCallbacks(updateRunnable)
             }
         }
     }
@@ -117,18 +114,20 @@ class AudioPlayer private constructor() {
                 it.start()
                 playbackState = PlaybackState.PLAYING
                 stateChangeCallback?.invoke(playbackState)
-                handler.post(updateRunnable) // Возвращаем обновление времени
+                handler.post(updateRunnable)
             }
         }
     }
 
     fun stopPlayback() {
         mediaPlayer?.let {
-            it.stop()
-            playbackState = PlaybackState.STOPPED
-            stateChangeCallback?.invoke(playbackState)
-            handler.removeCallbacks(updateRunnable)
-            releasePlayer() // Освобождение ресурсов после остановки
+            if (it.isPlaying) {
+                it.stop()
+                playbackState = PlaybackState.STOPPED
+                stateChangeCallback?.invoke(playbackState)
+                handler.removeCallbacks(updateRunnable)
+            }
+            releasePlayer()
         }
     }
 
@@ -156,4 +155,12 @@ class AudioPlayer private constructor() {
     fun getValidTrackId(): Int {
         return if (currentTrackId != -1) currentTrackId else lastPlayedTrackId
     }
+
+    fun clearCallbacks() {
+        onTimeUpdateCallback = null
+        stateChangeCallback = null
+        handler.removeCallbacks(updateRunnable)
+    }
 }
+
+

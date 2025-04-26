@@ -3,14 +3,13 @@ package com.example.playlistmaker.extraOption
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlist_playertraining.AudioPlayer
 import com.example.playlistmaker.search.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class ExtraOptionViewModel : ViewModel() {
 
-    private val audioPlayer =  AudioPlayer.getInstance()  // 🎧
+    private val audioPlayer = AudioPlayer.getInstance()  // 🎧
 
     private val _trackList = MutableLiveData<List<Track>>(emptyList())
     val trackList: LiveData<List<Track>> get() = _trackList
@@ -21,9 +20,8 @@ class ExtraOptionViewModel : ViewModel() {
     private val _isHorizontal = MutableLiveData<Boolean>(true)
     val isHorizontal: LiveData<Boolean> get() = _isHorizontal
 
-    fun toggleIsHorizontal() {
-        _isHorizontal.value = _isHorizontal.value?.not() ?: true
-    }
+    private val _playbackState = MutableLiveData<AudioPlayer.PlaybackState>(AudioPlayer.PlaybackState.IDLE)
+    val playbackState: LiveData<AudioPlayer.PlaybackState> get() = _playbackState
 
     var isBottomNavVisible: Boolean = true
     var scrollPosition: Int = -1
@@ -41,8 +39,9 @@ class ExtraOptionViewModel : ViewModel() {
         }
 
         audioPlayer.setStateChangeCallback { state ->
-            val trackId = audioPlayer.getValidTrackId()
+            _playbackState.postValue(state) // Обновляем состояние воспроизведения
 
+            val trackId = audioPlayer.getValidTrackId()
             _trackList.postValue(_trackList.value?.map {
                 if (it.trackId == trackId) {
                     when (state) {
@@ -68,30 +67,34 @@ class ExtraOptionViewModel : ViewModel() {
         _currentTrackIndex.value = index
     }
 
+    fun toggleIsHorizontal() {
+        _isHorizontal.value = _isHorizontal.value?.not() ?: true
+    }
+
     fun toggleBottomNavVisibility() {
         isBottomNavVisible = !isBottomNavVisible
     }
 
     fun audioPlay(track: Track) {
-
-        val isSameTrack = audioPlayer.isCurrentTrackPlaying(track.trackId)
-        val isPausedSameTrack = !audioPlayer.isPlaying() && audioPlayer.playbackState == AudioPlayer.PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId
-
         when {
-            isSameTrack -> {
+            audioPlayer.isCurrentTrackPlaying(track.trackId) -> {
                 audioPlayer.pause()
             }
-            isPausedSameTrack -> {
+            audioPlayer.playbackState == AudioPlayer.PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> {
                 audioPlayer.resume()
             }
             else -> {
                 audioPlayer.setTrack(track.previewUrl, track.trackId)
             }
         }
-
     }
 
-    fun stopAudioPlay(){
+    fun stopAudioPlay() {
         audioPlayer.stopPlayback()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        audioPlayer.clearCallbacks()
     }
 }

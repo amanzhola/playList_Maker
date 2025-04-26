@@ -96,17 +96,9 @@ class SearchViewModel(
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
-        if (isInputFocused.value == true) {
-            if (query.isNotEmpty()) {
-                if (!isEditing) {
-                    _isHistory.value = false
-                    _trackList.value = mutableListOf()
-                }
-            } else {
-                isEditing = false
-                updateIsHistoryAndTrackList()
-            }
-        }
+        _isClearIconVisible.value = query.isNotEmpty()
+
+        updateIsHistoryAndTrackList()
     }
 
     private fun updateIsHistoryAndTrackList(
