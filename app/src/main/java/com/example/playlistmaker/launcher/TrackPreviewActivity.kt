@@ -3,7 +3,6 @@ package com.example.playlistmaker.launcher
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +24,7 @@ class TrackPreviewActivity : AppCompatActivity() {
     private lateinit var adapter: TrackAdapterAudio
 
     private val viewModel: TrackPreviewViewModel by viewModels()
+    private lateinit var snapHelper: PagerSnapHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,39 +38,20 @@ class TrackPreviewActivity : AppCompatActivity() {
 
         }
 
-        val savedScrollPosition = viewModel.scrollPosition
-
         recyclerView = findViewById(R.id.track_detail_recycler)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-
-        val snapHelper = PagerSnapHelper()
+        snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView)
-
-        viewModel.isHorizontal.observe(this) { isHorizontal ->
-            recyclerView.layoutManager = LinearLayoutManager(
-                this@TrackPreviewActivity,
-                if (isHorizontal) LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL,
-                false
-            )
-        }
 
         adapter = TrackAdapterAudio(viewModel.trackList.value ?: emptyList(), object :
             OnTrackAudioClickListener {
             override fun onTrackClicked(track: Track, position: Int) {
                 viewModel.setCurrentTrackIndex(position)
-
                 viewModel.toggleIsHorizontal()
-
-                viewModel.scrollPosition = position
-
-                snapHelper.attachToRecyclerView(null)
-                snapHelper.attachToRecyclerView(recyclerView)
-
+                viewModel.setScrollPosition(position)
                 recyclerView.scrollToPosition(position)
             }
 
             override fun onBackArrowClicked() {
-                Log.d("TrackAdapterAudio", "Back arrow clicked")
                 viewModel.stopAudioPlay()
                 finish()
             }
@@ -81,16 +62,20 @@ class TrackPreviewActivity : AppCompatActivity() {
         },layoutId = R.layout.track_item2) // 💥 + audio to user
 
         recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        viewModel.isHorizontal.observe(this) { isHorizontal ->
+            recyclerView.layoutManager = LinearLayoutManager(
+                this,
+                if (isHorizontal) LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL,
+                false
+            )
+        }
 
         viewModel.trackList.observe(this) { trackList ->
             adapter.update(trackList)
-
-            val scrollTo = if (savedScrollPosition != -1) savedScrollPosition
-            else viewModel.currentTrackIndex.value ?: 0
-
-            (recyclerView.layoutManager as LinearLayoutManager)
-                .scrollToPositionWithOffset(scrollTo, 0)
-
+            val currentIndex = viewModel.currentTrackIndex.value ?: 0 // 📝 📂
+            recyclerView.scrollToPosition(currentIndex) // 🎯 🎵
         } // 🔥
 
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -123,7 +108,7 @@ class TrackPreviewActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         val currentPosition = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-        viewModel.scrollPosition = currentPosition
+        viewModel.setScrollPosition(currentPosition)
     }
 
     companion object {

@@ -9,7 +9,7 @@ import com.google.gson.reflect.TypeToken
 
 class ExtraOptionViewModel : ViewModel() {
 
-    private val audioPlayer = AudioPlayer.getInstance()  // 🎧
+    private val audioPlayer = AudioPlayer.getInstance() // 🎧
 
     private val _trackList = MutableLiveData<List<Track>>(emptyList())
     val trackList: LiveData<List<Track>> get() = _trackList
@@ -24,7 +24,9 @@ class ExtraOptionViewModel : ViewModel() {
     val playbackState: LiveData<AudioPlayer.PlaybackState> get() = _playbackState
 
     var isBottomNavVisible: Boolean = true
-    var scrollPosition: Int = -1
+
+    private val _scrollPosition = MutableLiveData<Int>(-1)
+    val scrollPosition: LiveData<Int> get() = _scrollPosition
 
     init {
         initAudioCallbacks()
@@ -33,23 +35,24 @@ class ExtraOptionViewModel : ViewModel() {
     private fun initAudioCallbacks() {
         audioPlayer.setOnTimeUpdateCallback { time ->
             val trackId = audioPlayer.currentTrackId
-            _trackList.postValue(_trackList.value?.map {
+            _trackList.postValue(_trackList.value?.map { // 🚑
                 if (it.trackId == trackId) it.copy(playTime = "🕒$time") else it
             })
         }
 
         audioPlayer.setStateChangeCallback { state ->
-            _playbackState.postValue(state) // Обновляем состояние воспроизведения
+            _playbackState.postValue(state)
 
             val trackId = audioPlayer.getValidTrackId()
-            _trackList.postValue(_trackList.value?.map {
+            _trackList.postValue(_trackList.value?.map { // 🚑
                 if (it.trackId == trackId) {
-                    when (state) {
+                    when (state) { // 📚
                         AudioPlayer.PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
                         AudioPlayer.PlaybackState.PREPARED -> it.copy(isPlaying = false)
                         AudioPlayer.PlaybackState.PLAYING -> it.copy(isPlaying = true)
                         AudioPlayer.PlaybackState.PAUSED -> it.copy(isPlaying = false)
-                        AudioPlayer.PlaybackState.STOPPED, AudioPlayer.PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
+                        AudioPlayer.PlaybackState.STOPPED,
+                        AudioPlayer.PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
                     }
                 } else {
                     it.copy(isPlaying = false, playTime = "🕒0:00")
@@ -71,8 +74,16 @@ class ExtraOptionViewModel : ViewModel() {
         _isHorizontal.value = _isHorizontal.value?.not() ?: true
     }
 
-    fun toggleBottomNavVisibility() {
+    fun toggleBottomNavVisibility() { // 🚗
         isBottomNavVisible = !isBottomNavVisible
+    }
+
+    fun setScrollPosition(position: Int) {
+        _scrollPosition.value = position
+    }
+
+    fun clearScrollPosition() {
+        _scrollPosition.value = -1
     }
 
     fun audioPlay(track: Track) {
@@ -89,7 +100,7 @@ class ExtraOptionViewModel : ViewModel() {
         }
     }
 
-    fun stopAudioPlay() {
+    fun stopAudioPlay() { // ⛔
         audioPlayer.stopPlayback()
     }
 

@@ -5,10 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
@@ -112,6 +113,8 @@ class SearchMovie : BaseActivity() {
 //        private const val KEY_MOVIES_JSON = "saved_movies"
 //    }
 
+    private val progressBar: ProgressBar by lazy { findViewById(R.id.progressBar) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -146,9 +149,11 @@ class SearchMovie : BaseActivity() {
             val query = queryInput.text.toString()
 
             if (query.isNotEmpty()) {
+                progressBar.visibility = VISIBLE
                 imdbService.getAdvancedSearch(apiKey, query).enqueue(object :
                     Callback<MoviesResponse> {
                     override fun onResponse(call: Call<MoviesResponse>, response: Response<MoviesResponse>) {
+                        progressBar.visibility = GONE
                         if (response.isSuccessful) {
                             response.body()?.results?.let { newMovies ->
 //                                adapter.updateMovies(newMovies)
@@ -224,7 +229,7 @@ class SearchMovie : BaseActivity() {
                 Toast.makeText(applicationContext, additionalMessage, Toast.LENGTH_LONG).show()
             }
         } else {
-            placeholderMessage.visibility = View.GONE
+            placeholderMessage.visibility = GONE
         }
     }
 

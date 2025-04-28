@@ -16,8 +16,9 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tracks_recycler_view"
+        android:contentDescription="@string/recycle_full_screen_track"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="match_parent"/>
 
     <!--    an option to have single full page on track_item2 👈  версия через recycler -->
     <!--  версия альтернатива viewpager2 реализована в movie 🎯-->

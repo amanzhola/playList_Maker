@@ -7,7 +7,7 @@
 
     <com.example.playlistmaker.CircleSegmentsView
         android:id="@+id/circleSegmentsView"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
+        android:layout_width="@dimen/dialog_circle"
+        android:layout_height="@dimen/dialog_circle"
         android:background="@android:color/transparent"/>
 </RelativeLayout>

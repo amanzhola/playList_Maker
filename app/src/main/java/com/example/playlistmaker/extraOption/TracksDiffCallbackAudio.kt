@@ -26,11 +26,11 @@ class TracksDiffCallbackAudio(
 
         val changes = mutableListOf<String>()
 
-        if (oldItem.isPlaying != newItem.isPlaying) {
+        if (oldItem.isPlaying != newItem.isPlaying) { // 👨‍💻✨
             changes.add("isPlaying")
         }
 
-        if (oldItem.playTime != newItem.playTime) {
+        if (oldItem.playTime != newItem.playTime) { // 👨‍💻✨
             changes.add("playTime")
         }
 

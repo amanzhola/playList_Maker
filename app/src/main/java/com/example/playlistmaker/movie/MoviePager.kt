@@ -22,7 +22,7 @@ class MoviePager : AppCompatActivity() {
     private lateinit var ratingTextView: TextView
     private lateinit var descriptionTextView: TextView
 
-    private var movieJson: String? = null
+    private var movieJson: String? = null //  🎓
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +36,7 @@ class MoviePager : AppCompatActivity() {
         ratingTextView = findViewById(R.id.rating)
         descriptionTextView = findViewById(R.id.description)
 
-        val gson = Gson()
+        val gson = Gson() // 🌼
 
         movieJson = if (savedInstanceState != null) savedInstanceState.getString("selected_movie")
         else intent.getStringExtra("selected_movie")
