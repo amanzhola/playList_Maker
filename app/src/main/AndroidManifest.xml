@@ -28,7 +28,7 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".launcher.TrackPreviewActivity"
+            android:name=".ui.launcherPosters.TrackPreviewActivity"
             android:exported="false" />
 
         <provider
@@ -42,7 +42,7 @@
         </provider>
 
         <activity
-            android:name=".LauncherActivity"
+            android:name=".ui.launcher.LauncherActivity"
             android:exported="true"
             android:launchMode="singleTop">
 
@@ -66,29 +66,29 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".launcher.TrackDetailActivity"
+            android:name=".ui.launcherPosters.TrackDetailActivity"
             android:exported="false"
             android:launchMode="singleTop" />
         <activity
-            android:name=".movie.MoviePagerList"
+            android:name=".ui.moviePosters.MoviePagerList"
             android:exported="false" />
         <activity
-            android:name=".movie.MoviePager"
+            android:name=".ui.moviePosters.MoviePager"
             android:exported="false" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".ExtraOption"
+            android:name=".ui.audioPosters.ExtraOption"
             android:exported="false" />
         <activity
-            android:name=".SearchWeather"
+            android:name=".ui.weather.SearchWeather"
             android:exported="false" />
         <activity
-            android:name=".SearchMovie"
+            android:name=".ui.movie.SearchMovie"
             android:exported="false" />
         <activity
-            android:name=".SearchActivity"
+            android:name=".ui.audio.SearchActivity"
             android:exported="false" />
         <activity
             android:name=".MediaLibraryActivity"

@@ -65,10 +65,10 @@
     <string name="movie_picture">🍿Кино-фильм</string>
     <string name="nothing_found">Кинофильм не найден🛑</string>
     <string name="something_went_wrong">📛Произошла ошибка</string>
-    <string name="enter_movie_name">❓Введите название фильма\n</string>
+    <string name="enter_movie_name">✍️ название(❓) ➡️ 🎞️🍿</string>
 
     <string name="nothing_found_city">Город не найден🚫</string>
-    <string name="enter_city_name">✨Введите название города</string>
+    <string name="enter_city_name">✍️ название(❓) ➡️ 🏡</string>
 
     <string name="movie_search_button">Кнопка поиска🧐</string>
     <string name="cover">👉Обложка</string>
