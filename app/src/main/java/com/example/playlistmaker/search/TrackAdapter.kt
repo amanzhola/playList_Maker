@@ -3,6 +3,8 @@ package com.example.playlistmaker.search
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -35,6 +37,13 @@ class TrackAdapter(private var tracks: MutableList<Track>,
     private var textNameColor: Int = defaultTextNameColor
     private var textColor: Int = defaultTextColor
     private var arrowColor: Int = defaultTextColor
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L // ✨
+    }
+
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -113,6 +122,7 @@ class TrackAdapter(private var tracks: MutableList<Track>,
         }
 
         holder.itemView.setOnClickListener {
+            if (!clickDebounce()) return@setOnClickListener // ✨
 
             listener.onTrackClicked(track)
             val context = holder.itemView.context
@@ -149,6 +159,15 @@ class TrackAdapter(private var tracks: MutableList<Track>,
         this.textColor = color
         this.textNameColor = color
         notifyItemRangeChanged(0, itemCount) // 🧐
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
     }
 
 }

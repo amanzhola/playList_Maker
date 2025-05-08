@@ -36,7 +36,11 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
     private var newSegmentTexts: Array<String> = arrayOf()
     private var segmentIcons: IntArray = intArrayOf()
     private var newSegmentIcons: IntArray = intArrayOf()
-    private val smallCircleRadius = 45f
+
+    private val smallCircleRadius by lazy { resources.getDimension(R.dimen.small_circle_radius) }
+    private val textSizeSmall by lazy { resources.getDimension(R.dimen.text_size_small) }
+    private val textSizeLarge by lazy { resources.getDimension(R.dimen.text_size_large) }
+    private val iconSize by lazy { resources.getDimension(R.dimen.icon_size).toInt() }
 
     private var totalSegments: Int = 0
     private var newTotalSegments: Int = 0
@@ -47,15 +51,23 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
 
     private fun init() {
         paint = Paint()
-        textPaint = Paint()
-        textPaint!!.color = Color.WHITE
-        textPaint!!.textSize = 15f
-        textPaint!!.textAlign = Paint.Align.CENTER
+        textPaint = Paint().apply {
+            color = Color.WHITE
+            textSize = textSizeSmall
+            textAlign = Paint.Align.CENTER
+        }
     }
 
-    fun setSegmentData(colors: IntArray, texts: Array<String>, icons: IntArray, newColors: IntArray,
-                       newTexts: Array<String>, newIcons: IntArray, total: Int, newTotal: Int) {
-
+    fun setSegmentData(
+        colors: IntArray,
+        texts: Array<String>,
+        icons: IntArray,
+        newColors: IntArray,
+        newTexts: Array<String>,
+        newIcons: IntArray,
+        total: Int,
+        newTotal: Int
+    ) {
         this.segmentColors = colors
         this.segmentTexts = texts
         this.segmentIcons = icons
@@ -67,22 +79,23 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
         invalidate()
     }
 
-    @SuppressLint("DrawAllocation", "ResourceAsColor")
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         val width = width
         val height = height
-        val radius = (min(width.toDouble(), height.toDouble()) / 2).toInt()
+        val radius = (min(width, height) / 2).toInt()
         val centerX = width / 2
         val centerY = height / 2
 
         var startAngle = 0f
-        val sweepAngle = 360f / (if (isChangedState) newTotalSegments else totalSegments) // 360 / N
+        val sweepAngle = 360f / (if (isChangedState) newTotalSegments else totalSegments)
 
         segmentAngles.clear()
+
         for (i in 0 until (if (isChangedState) newTotalSegments else totalSegments)) {
-            paint!!.color = if (isChangedState)newSegmentColors[i] else segmentColors[i]
+            paint!!.color = if (isChangedState) newSegmentColors[i] else segmentColors[i]
             canvas.drawArc(
                 (centerX - radius).toFloat(), (centerY - radius).toFloat(),
                 (centerX + radius).toFloat(), (centerY + radius).toFloat(),
@@ -93,9 +106,9 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
 
             val textX = (centerX + radius / 2 * cos(Math.toRadians((startAngle + sweepAngle / 2).toDouble()))).toFloat()
             val textY = (centerY + radius / 2 * sin(Math.toRadians((startAngle + sweepAngle / 2).toDouble()))).toFloat()
+
             (if (isChangedState) newSegmentTexts[i] else segmentTexts[i]).let {
-                canvas.drawText(
-                    it, textX, textY, textPaint!!)
+                canvas.drawText(it, textX, textY, textPaint!!)
             }
 
             val icon = if (isChangedState) newSegmentIcons[i] else segmentIcons[i]
@@ -103,13 +116,10 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
                 val drawable: Drawable? = ContextCompat.getDrawable(context!!, icon)
                 drawable?.let {
                     val bitmap = it.toBitmap()
-
-                    // Изменяем цвет иконки на синий (Color.BLUE) или серый
                     val coloredBitmap = changeBitmapColor(bitmap, R.color.hintFieldColor)
 
                     val iconX = (centerX + radius * 0.75 * cos(Math.toRadians((startAngle + sweepAngle / 2).toDouble()))).toFloat()
                     val iconY = (centerY + radius * 0.75 * sin(Math.toRadians((startAngle + sweepAngle / 2).toDouble()))).toFloat()
-                    val iconSize = 50 // размер иконки
 
                     val scaledIcon = coloredBitmap.scale(iconSize, iconSize)
                     canvas.drawBitmap(scaledIcon, iconX - iconSize / 2, iconY - iconSize / 2, null)
@@ -119,22 +129,22 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
             startAngle += sweepAngle
         }
 
-        paint!!.color = Color.RED // Устанавливаем цвет Color.RED
+        // Маленький круг в центре
+        paint!!.color = Color.RED
         canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), smallCircleRadius, paint!!)
 
-        val smallCircleText = if (isChangedState) context.getString(R.string.change) else context.getString(
-            R.string.settings
-        )
+        val smallCircleText = if (isChangedState) context.getString(R.string.change) else context.getString(R.string.settings)
+        textPaint!!.textSize = textSizeLarge
         textPaint!!.color = Color.WHITE
-        textPaint!!.textSize = 17f // Размер текста
         textPaint!!.textAlign = Paint.Align.CENTER
         canvas.drawText(smallCircleText, centerX.toFloat(), centerY.toFloat() + textPaint!!.textSize / 4, textPaint!!)
     }
 
     private fun changeBitmapColor(sourceBitmap: Bitmap, color: Int): Bitmap {
         val resultBitmap = sourceBitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val paint = Paint()
-        paint.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+        val paint = Paint().apply {
+            colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+        }
         val canvas = Canvas(resultBitmap)
         canvas.drawBitmap(resultBitmap, 0f, 0f, paint)
         return resultBitmap
@@ -157,7 +167,7 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
 
         val dx = x - centerX
         val dy = y - centerY
-        val distance = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+        val distance = sqrt((dx * dx + dy * dy))
 
         if (distance <= smallCircleRadius) {
             toggleSegmentState()
@@ -165,7 +175,7 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
         }
 
         val angle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
-        val normalizedAngle = (if (angle >= 0) angle else angle + 360) // нормализуем угол в [0, 360]
+        val normalizedAngle = (if (angle >= 0) angle else angle + 360)
 
         for (i in 0 until (if (isChangedState) newTotalSegments else totalSegments)) {
             val startAngle = (360f / (if (isChangedState) newTotalSegments else totalSegments)) * i
@@ -190,5 +200,4 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
     interface OnSegmentClickListener {
         fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean)
     }
-
 }

@@ -43,4 +43,11 @@
     <dimen name="author_margin_button">20dp</dimen>
     <dimen name="guideline">0.6</dimen>
 
+    <dimen name="dialog_circle">260dp</dimen>
+
+    <dimen name="small_circle_radius">38dp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_large">14sp</dimen>
+    <dimen name="icon_size">28dp</dimen>
+
 </resources>

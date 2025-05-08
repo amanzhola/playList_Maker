@@ -13,6 +13,13 @@
     <include
         layout="@layout/fail"/>
 
+    <Button android:id="@+id/playButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:enabled="false"
+        android:text="PLAY"/>
+
     <include layout="@layout/bottom_navigation" />
 
 </LinearLayout>

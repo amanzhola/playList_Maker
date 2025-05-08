@@ -31,7 +31,7 @@
     <string name="dropdown_option2">Option 2🅱️</string>
 
     <!--    as an option, done in Git several options-->
-    <string name="set_titleColor">✨Title</string>
+    <string name="set_titleColor">Title✨</string>
     <string name="set_backgroundColor">🌈Background</string>
     <string name="set_btnTextColor">✍️Btn txt</string>
     <string name="set_iconColor">👨Icon</string>
@@ -96,5 +96,7 @@
     <string name="track_detail_title">🎶Track(s)👉💿🎧📀🎵👇</string>
 
     <string name="set_time">🕒0:00</string>
+
+    <string name="recycle_full_screen_track">🎵Full screen Track📱</string>
 
 </resources>

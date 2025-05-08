@@ -3,10 +3,13 @@ package com.example.playlistmaker
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.os.Handler
+import android.os.Looper
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
@@ -28,6 +31,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchMovie : BaseActivity() {
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L // ✨
+    }
+
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
 
     private val apiKey = "k_zcuw1ytf"
     private val imdbBaseUrl = "https://tv-api.com"
@@ -65,6 +75,9 @@ class SearchMovie : BaseActivity() {
     }
 
     private fun showChoiceDialog(selectedMovie: Movie, position: Int) {
+
+        if (!clickDebounce()) return // ✨
+
         val options = arrayOf("Один фильм", "Список фильмов")
 
         AlertDialog.Builder(this)
@@ -100,6 +113,8 @@ class SearchMovie : BaseActivity() {
 //        private const val KEY_MOVIES_JSON = "saved_movies"
 //    }
 
+    private val progressBar: ProgressBar by lazy { findViewById(R.id.progressBar) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -134,9 +149,11 @@ class SearchMovie : BaseActivity() {
             val query = queryInput.text.toString()
 
             if (query.isNotEmpty()) {
+                progressBar.visibility = VISIBLE
                 imdbService.getAdvancedSearch(apiKey, query).enqueue(object :
                     Callback<MoviesResponse> {
                     override fun onResponse(call: Call<MoviesResponse>, response: Response<MoviesResponse>) {
+                        progressBar.visibility = GONE
                         if (response.isSuccessful) {
                             response.body()?.results?.let { newMovies ->
 //                                adapter.updateMovies(newMovies)
@@ -194,6 +211,15 @@ class SearchMovie : BaseActivity() {
         findViewById<TextView>(R.id.bottom4).isSelected = true
     }
 
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
     private fun showMessage(text: String, additionalMessage: String) {
         if (text.isNotEmpty()) {
             placeholderMessage.visibility = VISIBLE
@@ -203,7 +229,7 @@ class SearchMovie : BaseActivity() {
                 Toast.makeText(applicationContext, additionalMessage, Toast.LENGTH_LONG).show()
             }
         } else {
-            placeholderMessage.visibility = View.GONE
+            placeholderMessage.visibility = GONE
         }
     }
 

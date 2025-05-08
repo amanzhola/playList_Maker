@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface IMDbApi {
+interface IMDbApi { // 📎 🧑‍💻
     @GET("/en/API/SearchMovie/{apiKey}/{expression}")
     fun findMovie(@Path("apiKey") apiKey: String,
                   @Path("expression") expression: String)

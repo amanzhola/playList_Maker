@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Parcelize
-data class Track(
+data class Track( // 🧱
     val trackName: String,// 🎵
     val artistName: String,// 🎤
     val trackTimeMillis: Long, // ⏱️
@@ -17,14 +17,15 @@ data class Track(
     val country: String, // 🌍
     val previewUrl: String, // 🎧
     val trackId: Int, // 🆔
-    var isPlaying: Boolean = false
+    var isPlaying: Boolean = false,
+    var playTime: String? = "🕒0:00"
 ): Parcelable {
-    val trackDuration: String
+    val trackDuration: String // 🧪
         get() = SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackTimeMillis)
 
-    val artworkUrlSmall: String
+    val artworkUrlSmall: String // 🎁
         get() = artworkUrl100 ?: ""
 
-    val artworkUrl512: String
+    val artworkUrl512: String // ❓
         get() = artworkUrl100?.replaceAfterLast("/", "512x512bb.jpg") ?: ""
 }

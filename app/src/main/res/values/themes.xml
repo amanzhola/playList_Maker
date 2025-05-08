@@ -89,7 +89,7 @@
         <item name="boxBackgroundMode">outline</item>
         <item name="hintEnabled">true</item>
         <item name="android:hint">@string/search_hint</item>
-        <item name="android:textColorHint">@color/hintColor</item>
+        <item name="android:textColorHint">@color/hintColor_textColor</item>
         <item name="boxStrokeWidth">@dimen/searchNoStroke</item>
         <item name="boxStrokeColor">@color/transparent</item>
         <item name="boxCornerRadiusTopStart">@dimen/searchRadius_8</item>
