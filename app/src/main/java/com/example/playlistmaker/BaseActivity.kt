@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.usecases.ThemeManager
 import com.example.playlistmaker.ui.audio.TrackAdapter
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.movie.SearchMovie
@@ -138,9 +139,11 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private val failTextView: TextView by lazy { findViewById(R.id.fail) }
     lateinit var gson: Gson
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    protected val themeManager: ThemeManager // 😎
+        get() = (application as App).themeManager
 
-        (application as App).switchTheme((application as App).isDarkTheme)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        themeManager.applyTheme() // 🌓 ↔️ 🌗
         super.onCreate(savedInstanceState)
         buttonIndex = intent.getIntExtra("buttonIndex", -1)
 
@@ -259,20 +262,18 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     open fun onSegment4Clicked() {} // by btm navig 🔥
 
     private fun toggleTheme() {
-        val app = application as App
-        app.switchTheme(!app.isDarkTheme)
+        themeManager.toggleTheme() // 🌓
         applySettings()
         if (this is SettingsActivity) {
             val switchControl: SwitchMaterial = findViewById(R.id.switch_control)
-            switchControl.isChecked = app.isDarkTheme
+            switchControl.isChecked = themeManager.repository.isDarkTheme()
         }
 
     }
 
     private fun applySettings() {
-        val app = application as App
         currentLanguage = sharedPreferences.getString(langKey, "ru") ?: "ru"
-        app.switchTheme(app.isDarkTheme)
+        themeManager.applyTheme() // 🌓
         applyLanguage(currentLanguage)
     }
 
@@ -317,8 +318,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             is MediaLibraryActivity -> "MediaLibraryActivity"
             else -> "UnknownActivity"
         }
-        val app = application as App
-        val themeSuffix = if (app.isDarkTheme) "_dark" else "_light"
+        val themeSuffix = if (isDarkThemeEnabled()) "_dark" else "_light" // 🌓
         return "${activityName}_segment_$segmentIndex$themeSuffix"
     }
 
@@ -463,9 +463,8 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         navigationLine.visibility = visibility
     }
 
-    fun isDarkThemeEnabled(): Boolean {
-        val app = application as App
-        return app.isDarkTheme
+    fun isDarkThemeEnabled(): Boolean { // 🌓 ↔️ 🌗
+        return themeManager.repository.isDarkTheme()
     }
 
     protected open fun shouldEnableEdgeToEdge(): Boolean = true

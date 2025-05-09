@@ -21,7 +21,7 @@ import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.UIUpdater
 import kotlinx.coroutines.launch
 
-class SearchWeather : BaseActivity() {
+class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
 
     // ❌ Удаляем прямые зависимости, они теперь в Creator
     // ❌  private val forecaBaseUrl = "https://fnw-us.foreca.com" //  👨‍💻✨

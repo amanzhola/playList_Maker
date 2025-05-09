@@ -32,7 +32,7 @@ class SettingsActivity : BaseActivity() {
 
     private fun initViews() {
         switchControl = findViewById(R.id.switch_control)
-        switchControl.isChecked = (application as App).isDarkTheme
+        switchControl.isChecked = isDarkThemeEnabled()
     }
 
     override fun shouldEnableEdgeToEdge(): Boolean = false
@@ -43,10 +43,9 @@ class SettingsActivity : BaseActivity() {
     private fun setupClickListeners() {
 
         switchControl.setOnCheckedChangeListener { _, checked ->
-            (applicationContext as App).switchTheme(
-                checked
-            )
-        }
+            themeManager.repository.setDarkTheme(checked)
+            themeManager.applyTheme()
+        } // 🌞 ⇄ 🌚
 
         setupViewClickListener<TextView>(R.id.share) { shareApp() }
         setupViewClickListener<TextView>(R.id.group) { writeToSupport() }

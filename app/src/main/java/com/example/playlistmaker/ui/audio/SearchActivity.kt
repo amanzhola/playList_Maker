@@ -31,7 +31,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
-class SearchActivity : BaseActivity(), OnTrackClickListener {
+class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
     private lateinit var adapter: TrackAdapter
     private var isBottomNavVisible = true

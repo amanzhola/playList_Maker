@@ -24,7 +24,7 @@ import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.UIUpdater
 import com.google.gson.Gson
 
-class SearchMovie : BaseActivity() {
+class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
