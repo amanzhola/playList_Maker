@@ -10,7 +10,6 @@ import java.util.Locale
 
 class AudioPlayerInteractionImpl : AudioPlayerInteraction {
 
-
     private var mediaPlayer: MediaPlayer? = null
     private val handler = Handler(Looper.getMainLooper()) // 🚑
     private var onTimeUpdateCallback: ((String) -> Unit)? = null
@@ -48,7 +47,6 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         stateChangeCallback?.invoke(playbackState)
 
         mediaPlayer = MediaPlayer().apply { // 💡 ⏭️
-            setDataSource(previewUrl)
             setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -56,21 +54,28 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
                     .build()
             )
 
+            setDataSource(previewUrl)
+
             setOnPreparedListener { // 📌
                 playbackState = PlaybackState.PREPARED
                 stateChangeCallback?.invoke(playbackState)
                 startPlayback()
             }
 
-            setOnCompletionListener { // ⚠️ 📦
-                stateChangeCallback?.invoke(PlaybackState.STOPPED)
-                onTimeUpdateCallback?.invoke("00:00")
+            setOnCompletionListener {
+                stopPlayback() //  🛑 ❓ 🔁 🧩
+            }
 
-                stopPlayback()
+            setOnErrorListener { _, what, extra -> // ⚠️ 📦
+                playbackState = PlaybackState.IDLE
+                stateChangeCallback?.invoke(playbackState)
+                releasePlayer()
+                true
             }
 
             prepareAsync()
         }
+
     }
 
     private fun startPlayback() { // ▶️ 💃 ⏭️
@@ -124,6 +129,10 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         currentTrackId = -1
         playbackState = PlaybackState.IDLE
         stateChangeCallback?.invoke(playbackState)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            stateChangeCallback?.invoke(playbackState)
+        }, 100) //  🛑 ❓ 🔁 🧩
     }
 
     override fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true // ☕

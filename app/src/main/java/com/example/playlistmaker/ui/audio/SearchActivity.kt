@@ -116,7 +116,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
                     viewModel.isInputFocused.observe(this) { isFocused ->
                         searchInputLayout.hint = if (isFocused) null else getString(R.string.search_hint)
 //                        if (isFocused) hideBottomNavigation() else showBottomNavigation()
-                        hideBottomNavigation() // адекватам убрать
+                        hideBottomNavigation() // // (адекватам убрать)
                     }
 
                     viewModel.searchQuery.observe(this) { query ->
@@ -190,7 +190,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
         shareTrackHistory(tracks)
     }
 
-    private fun shareTrackHistory(tracks: List<Track>) { // ? ? ? // ?
+    private fun shareTrackHistory(tracks: List<Track>) {
         if (tracks.isEmpty()) {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
@@ -209,6 +209,6 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
             putExtra(Intent.EXTRA_TEXT, getString(R.string.history_track)) // ? R.string.history_track
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        startActivity(Intent.createChooser(shareIntent, null)) // ? ? ? ?
+        startActivity(Intent.createChooser(shareIntent, null))
     }
 }

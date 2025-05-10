@@ -119,8 +119,13 @@ object Creator {
     }
 
     // --- Метод для предоставления AudioPlayer ---
+    private var audioPlayerInstance: AudioPlayerInteraction? = null
+
     fun provideAudioPlayer(): AudioPlayerInteraction {
-        return AudioPlayerInteractionImpl()
+        if (audioPlayerInstance == null) {
+            audioPlayerInstance = AudioPlayerInteractionImpl()
+        }
+        return audioPlayerInstance!!
     }
 
     // --- Метод для предоставления SettingsActivity переключение темы ---

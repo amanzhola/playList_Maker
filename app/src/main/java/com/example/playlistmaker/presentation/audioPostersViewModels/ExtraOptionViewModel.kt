@@ -39,7 +39,7 @@ class ExtraOptionViewModel(
             val trackId = audioPlayer.currentTrackId
             _trackList.postValue(_trackList.value?.map { // 🚑
 //                if (it.trackId == trackId) it.copy(playTime = "🕒$time") else it
-                if (it.trackId == trackId) it.copy(playTime = time) else it
+                if (it.trackId == trackId) it.copy(playTime = time) else it // ☝️ ❌ 🔁 🧩 ❓
             })
         }
 
@@ -51,17 +51,17 @@ class ExtraOptionViewModel(
                 if (it.trackId == trackId) {
                     when (state) { // 📚
 //                        PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
-                        PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "...")
+                        PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "...") // ☝️ ❌ 🔁 🧩 ❓
                         PlaybackState.PREPARED -> it.copy(isPlaying = false)
                         PlaybackState.PLAYING -> it.copy(isPlaying = true)
                         PlaybackState.PAUSED -> it.copy(isPlaying = false)
                         PlaybackState.STOPPED,
 //                        PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
-                        PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "0:00")
+                        PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "0:00")// ☝️ ❌ 🔁 🧩 ❓
                     }
                 } else {
 //                    it.copy(isPlaying = false, playTime = "🕒0:00")
-                    it.copy(isPlaying = false, playTime = "0:00")
+                    it.copy(isPlaying = false, playTime = "0:00")// ☝️ ❌ 🔁 🧩 ❓
                 }
             })
         }

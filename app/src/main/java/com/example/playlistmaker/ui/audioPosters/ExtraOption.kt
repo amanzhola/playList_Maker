@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ToolbarConfig
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.models.Track
@@ -36,7 +37,7 @@ class ExtraOption : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl()
+        val audioPlayer = Creator.provideAudioPlayer()
         val factory = ExtraOptionViewModelFactory(audioPlayer)
 
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]
@@ -137,8 +138,9 @@ class ExtraOption : BaseActivity() {
 
     override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.option) {
         if (viewModel.isBottomNavVisible) navigateToMainActivity() else { // 💎
-            finish()
             viewModel.stopAudioPlay()
+            finish()
+
         }
     }
 
