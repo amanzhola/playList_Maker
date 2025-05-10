@@ -46,6 +46,7 @@ class TrackAdapterAudio(
         private val playButton: ImageView = itemView.findViewById(R.id.play_track)
         private val playTime: TextView = itemView.findViewById(R.id.play_time)
         private val backArrow: ImageView? = itemView.findViewById(R.id.arrow_back)
+        private val favorite: ImageView? = itemView.findViewById(R.id.favorite)
 
         init {
             playButton.setOnClickListener {
@@ -109,6 +110,9 @@ class TrackAdapterAudio(
         fun updatePlayState(track: Track) {
             playButton.setImageResource(
                 if (track.isPlaying) R.drawable.pause else R.drawable.play
+            )
+            favorite?.setImageResource(
+                if (track.isPlaying) R.drawable.favorite1 else R.drawable.favorite
             )
         }
     }
