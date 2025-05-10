@@ -3,14 +3,14 @@ package com.example.playlistmaker.presentation.launcherViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.utils.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayer
 import com.example.playlistmaker.domain.models.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class TrackPreviewViewModel : ViewModel() {
-
-    private val audioPlayer =  AudioPlayer.getInstance()  // 🎧 🕒
+class TrackPreviewViewModel( // 🖼️
+    private val audioPlayer: AudioPlayer // 🎧 🕒
+) : ViewModel() {
 
     private val _trackList = MutableLiveData<List<Track>>(emptyList())
     val trackList: LiveData<List<Track>> get() = _trackList
@@ -101,7 +101,7 @@ class TrackPreviewViewModel : ViewModel() {
     }
 
     fun stopAudioPlay() {
-        audioPlayer.stopPlayback()
+        audioPlayer.stop()
     }
 
     override fun onCleared() {

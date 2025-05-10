@@ -16,7 +16,7 @@ enum class ErrorState {
     NONE
 }
 
-class SearchViewModel(
+class SearchViewModel( // 🖼️
     private val audioInteraction: AudioInteraction,
     private val searchHistoryRepository: SearchHistoryRepository,
     private val sharedPreferences: SharedPreferences

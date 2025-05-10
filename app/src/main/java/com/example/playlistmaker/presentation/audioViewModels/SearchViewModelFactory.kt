@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.domain.api.AudioInteraction
 import com.example.playlistmaker.domain.repository.SearchHistoryRepository
 
-class SearchViewModelFactory(
+class SearchViewModelFactory( // 🖼️
     private val audioInteraction: AudioInteraction,
     private val searchHistoryRepository: SearchHistoryRepository,
     private val sharedPreferences: SharedPreferences

@@ -3,14 +3,12 @@ package com.example.playlistmaker.presentation.audioPostersViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.playlistmaker.domain.api.AudioPlayer
 import com.example.playlistmaker.domain.models.Track
-import com.example.playlistmaker.utils.AudioPlayer
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class ExtraOptionViewModel : ViewModel() {
-
-    private val audioPlayer = AudioPlayer.getInstance() // 🎧
+class ExtraOptionViewModel(private val audioPlayer: AudioPlayer) : ViewModel() { // 🖼️
 
     private val _trackList = MutableLiveData<List<Track>>(emptyList())
     val trackList: LiveData<List<Track>> get() = _trackList
@@ -45,15 +43,14 @@ class ExtraOptionViewModel : ViewModel() {
             _playbackState.postValue(state)
 
             val trackId = audioPlayer.getValidTrackId()
-            _trackList.postValue(_trackList.value?.map { // 🚑
+            _trackList.postValue(_trackList.value?.map {// 🚑
                 if (it.trackId == trackId) {
                     when (state) { // 📚
                         AudioPlayer.PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
                         AudioPlayer.PlaybackState.PREPARED -> it.copy(isPlaying = false)
                         AudioPlayer.PlaybackState.PLAYING -> it.copy(isPlaying = true)
                         AudioPlayer.PlaybackState.PAUSED -> it.copy(isPlaying = false)
-                        AudioPlayer.PlaybackState.STOPPED,
-                        AudioPlayer.PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
+                        AudioPlayer.PlaybackState.STOPPED, AudioPlayer.PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
                     }
                 } else {
                     it.copy(isPlaying = false, playTime = "🕒0:00")
@@ -102,7 +99,7 @@ class ExtraOptionViewModel : ViewModel() {
     }
 
     fun stopAudioPlay() { // ⛔
-        audioPlayer.stopPlayback()
+        audioPlayer.stop()
     }
 
     override fun onCleared() {

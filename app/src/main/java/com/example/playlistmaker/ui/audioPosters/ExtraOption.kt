@@ -8,17 +8,20 @@ import android.util.TypedValue
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ToolbarConfig
+import com.example.playlistmaker.data.utils.AudioPlayerImpl
+import com.example.playlistmaker.domain.api.AudioPlayer
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModel
+import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModelFactory
 import com.google.gson.Gson
 
 class ExtraOption : BaseActivity() {
@@ -27,11 +30,16 @@ class ExtraOption : BaseActivity() {
     private lateinit var adapter: TrackAdapterAudio
     private lateinit var titleTextView: TextView
     private lateinit var toolbar: Toolbar
-    private val viewModel: ExtraOptionViewModel by viewModels()
+    private lateinit var viewModel: ExtraOptionViewModel
     private lateinit var snapHelper: PagerSnapHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val audioPlayer: AudioPlayer = AudioPlayerImpl()
+        val factory = ExtraOptionViewModelFactory(audioPlayer)
+
+        viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]
 
         if (savedInstanceState == null) {   // 🎵 👉 📦 💾
             val json = intent.getStringExtra("TRACK_LIST_JSON") ?: return
