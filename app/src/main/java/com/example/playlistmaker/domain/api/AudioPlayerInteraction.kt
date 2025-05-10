@@ -1,6 +1,6 @@
 package com.example.playlistmaker.domain.api
 
-interface AudioPlayer {
+interface AudioPlayerInteraction {
     enum class PlaybackState {
         IDLE, PREPARING, PREPARED, PLAYING, PAUSED, STOPPED
     }

@@ -1,102 +1,202 @@
 <resources>
+    <!--    для // ❌ -->
+    <string name="app_name" translatable="false">Playlist maker</string>
+    <string name="search">Поиск</string>
+    <string name="media">Медиатека</string>
+    <string name="settings">Настройки</string>
+    <string name="playlist_maker" translatable="false">Playlist maker</string>
+    <string name="switch_r">Темная тема</string>
+    <string name="share_r">Поделиться приложением</string>
+    <string name="support_r">Написать в поддержку</string>
+    <string name="agreement_r">Пользовательское соглашение</string>
 
-    <string name="app_name" translatable="false">✨Playlist maker</string>
-    <string name="search">🧐Поиск</string>
-    <string name="media">🎶Медиатека</string>
-    <string name="settings">🛠Настройки</string>
-    <string name="playlist_maker" translatable="false">Playlist maker💯</string>
-    <string name="switch_r">😎Темная тема</string>
-    <string name="share_r">💌Поделиться приложением</string>
-    <string name="support_r">🐶Написать в поддержку</string>
-    <string name="agreement_r">📝Пользовательское соглашение</string>
+    <string name="share">Поделиться</string>
+    <string name="support">Поддержка</string>
+    <string name="agreement">Соглашение</string>
+    <string name="hidden">Скрытый</string>
+    <string name="filter">Фильтр</string>
+    <string name="dropdown">Выпадающие списки</string>
+    <string name="arrow_back">Стрелка_назад</string>
 
-    <string name="share">💌Поделиться</string>
-    <string name="support">📦Поддержка</string>
-    <string name="agreement">👨‍🔧Соглашение</string>
-    <string name="hidden">⚠️Скрытый</string>
-    <string name="filter">💡Фильтр</string>
-    <string name="dropdown">✌️Выпадающие списки</string>
-    <string name="arrow_back">🎯Стрелка_назад</string>
-
-    <string name="share_message">🏁Курс по Андроид-разработке в Практикуме: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>
+    <string name="share_message">Курс по Андроид-разработке в Практикуме: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>
     <string name="support_email">amanzholaimov@gmail.com</string>
-    <string name="support_subject">😅Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
-    <string name="support_body">🧰Спасибо разработчикам и разработчицам за крутое приложение!</string>
+    <string name="support_subject">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
+    <string name="support_body">Спасибо разработчикам и разработчицам за крутое приложение!</string>
     <string name="agreement_url">https://yandex.ru/legal/practicum_offer/</string>
 
     <string name="search_hint">Поиск</string> // 🔎
-    <string name="clear_search">Очистить поисковый запрос📌</string>
-    <string name="empty_space">🔸Пространство заполнитель</string>
-    <string name="dropdown_option1">Опция 1🅰️</string>
-    <string name="dropdown_option2">Опция 2🅱️</string>
+    <string name="clear_search">Очистить поисковый запрос</string>
+    <string name="empty_space">Пространство заполнитель</string>
+    <string name="dropdown_option1">Опция 1</string>
+    <string name="dropdown_option2">Опция 2</string>
 
     <!--    выборно, опция для выбора цветов, опций релаизации в гите-->
-    <string name="set_titleColor">Заглавия✨</string>
-    <string name="set_backgroundColor">🌈Фона</string>
-    <string name="set_btnTextColor">✍️Текста</string>
-    <string name="set_iconColor">👨Иконки</string>
-    <string name="set_btnBackgroundColor">🎨Кнопки</string>
+    <string name="set_titleColor">Заглавия</string>
+    <string name="set_backgroundColor">Фона</string>
+    <string name="set_btnTextColor">Текста</string>
+    <string name="set_iconColor">Иконки</string>
+    <string name="set_btnBackgroundColor">Кнопки</string>
 
-    <string name="dropdown_header">Выберите элемент💪</string>
+    <string name="dropdown_header">Выберите элемент</string>
 
-    <string name="switch_short">😎Тема</string>
-    <string name="share_short">💌Поделиться</string>
-    <string name="support_short">🐶Поддержка</string>
-    <string name="agreement_short">📝Соглашение</string>
-    <string name="navigation">🌐Навигация</string>
-    <string name="change">🎨Цвет</string>
-    <string name="language">🧠Язык</string>
+    <string name="switch_short">Тема</string>
+    <string name="share_short">Поделиться</string>
+    <string name="support_short">Поддержка</string>
+    <string name="agreement_short">Соглашение</string>
+    <string name="navigation">Навигация</string>
+    <string name="change">Цвет</string>
+    <string name="language">Язык</string>
 
-    <string name="toDefault">Базовый👨‍🔧</string>
+    <string name="toDefault">Базовый</string>
 
-    <string name="searchFail">Ничего не нашлось🤔</string>
-    <string name="networkFail">Проблемы со связью👇\n\nЗагрузка не удалась. 🔧Проверьте\n подключение к интернету</string>
-    <string name="update">Обновить🔁</string>
+    <string name="searchFail">Ничего не нашлось</string>
+    <string name="networkFail">Проблемы со связью\n\nЗагрузка не удалась. Проверьте\n подключение к интернету</string>
+    <string name="update">Обновить</string>
 
-    <string name="supportEmail">💥Не найдено приложение\n для открытия электронной почты🤔</string>
-    <string name="movie">🍿Кино</string>
-    <string name="weather">🌤️Погода</string> // 🌧️ ☀️ ⛅ 🌩️ ❄️
+    <string name="supportEmail">Не найдено приложение\n для открытия электронной почты</string>
+    <string name="movie">Кино</string>
+    <string name="weather">Погода</string> // 🌧️ ☀️ ⛅ 🌩️ ❄️
 
-    <string name="clean">🧩Очистить историю</string>
-    <string name="search_history">🔍Вы искали 🎵</string>
+    <string name="clean">Очистить историю</string>
+    <string name="search_history">Вы искали </string>
 
-    <string name="option">📂Опция</string>
+    <string name="option">Опция</string>
 
-    <string name="movie_picture">🍿Кино-фильм</string>
-    <string name="nothing_found">Кинофильм не найден🛑</string>
-    <string name="something_went_wrong">📛Произошла ошибка</string>
-    <string name="enter_movie_name">✍️ название(❓) ➡️ 🎞️🍿</string>
+    <string name="movie_picture">Кино-фильм</string>
+    <string name="nothing_found">Кинофильм не найден</string>
+    <string name="something_went_wrong">Произошла ошибка</string>
+    <string name="enter_movie_name"> Название фильма</string>
 
-    <string name="nothing_found_city">Город не найден🚫</string>
-    <string name="enter_city_name">✍️ название(❓) ➡️ 🏡</string>
+    <string name="nothing_found_city">Город не найден</string>
+    <string name="enter_city_name">Название насел.пункта</string>
 
-    <string name="movie_search_button">Кнопка поиска🧐</string>
-    <string name="cover">👉Обложка</string>
-    <string name="movie_rating">IMDb 7.9/10⭐</string>
-    <string name="description">📝Описание</string>
-    <string name="movie_genre">📚Драма, Комедия</string>
-    <string name="register">Регистрация👈</string>
-    <string name="favorite">Избранное✨</string>
+    <string name="movie_search_button">Кнопка поиска</string>
+    <string name="cover">Обложка</string>
+    <string name="movie_rating">IMDb 7.9/10</string>
+    <string name="description">Описание</string>
+    <string name="movie_genre">Драма, Комедия</string>
+    <string name="register">Регистрация</string>
+    <string name="favorite">Избранное</string>
 
-    <string name="duration">🗂️Длительность</string>
-    <string name="album">Альбом📀</string>
-    <string name="year">📅Год</string>
-    <string name="genre">Жанр📚</string>
-    <string name="country">🌐Страна</string>
-    <string name="add_track">🎁Добавить Трек</string>
-    <string name="add_favorite">Добавить в Избранное🙂</string>
-    <string name="play_track">🙂Воспроизвести Трек</string>
-    <string name="placeholder">🧱Заглушка</string>
-    <string name="temp_fix_time">🕒0:30</string>
+    <string name="duration">Длительность</string>
+    <string name="album">Альбом</string>
+    <string name="year">Год</string>
+    <string name="genre">Жанр</string>
+    <string name="country">Страна</string>
+    <string name="add_track">Добавить Трек</string>
+    <string name="add_favorite">Добавить в Избранное</string>
+    <string name="play_track">Воспроизвести Трек</string>
+    <string name="placeholder">Заглушка</string>
+    <string name="temp_fix_time">0:30</string>
 
-    <string name="track_story_empty">Track history is empty😌</string>
-    <string name="history_track">Треки из Истории 🎵 🎵</string>
-    <string name="empty_track">Пустой Трек😌</string>
-    <string name="track_share">🎵Поделиться Треком</string>
-    <string name="track_detail_title">🎶Трек(и)👉💿🎧📀🎵👇</string>
+    <string name="track_story_empty">Track history is empty</string>
+    <string name="history_track">Треки из Истории</string>
+    <string name="empty_track">Пустой Трек</string>
+    <string name="track_share">Поделиться Треком</string>
+    <string name="track_detail_title">Треки</string>
 
-    <string name="set_time">🕒0:00</string>
+    <string name="set_time">0:00</string>
 
-    <string name="recycle_full_screen_track">🎵Трек на полный экан📱</string>
+    <string name="recycle_full_screen_track">Трек на полный экан</string>
+
+    <!--    for Ok people -->
+<!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
+<!--    <string name="search">🧐Поиск</string>-->
+<!--    <string name="media">🎶Медиатека</string>-->
+<!--    <string name="settings">🛠Настройки</string>-->
+<!--    <string name="playlist_maker" translatable="false">Playlist maker💯</string>-->
+<!--    <string name="switch_r">😎Темная тема</string>-->
+<!--    <string name="share_r">💌Поделиться приложением</string>-->
+<!--    <string name="support_r">🐶Написать в поддержку</string>-->
+<!--    <string name="agreement_r">📝Пользовательское соглашение</string>-->
+
+<!--    <string name="share">💌Поделиться</string>-->
+<!--    <string name="support">📦Поддержка</string>-->
+<!--    <string name="agreement">👨‍🔧Соглашение</string>-->
+<!--    <string name="hidden">⚠️Скрытый</string>-->
+<!--    <string name="filter">💡Фильтр</string>-->
+<!--    <string name="dropdown">✌️Выпадающие списки</string>-->
+<!--    <string name="arrow_back">🎯Стрелка_назад</string>-->
+
+<!--    <string name="share_message">🏁Курс по Андроид-разработке в Практикуме: https://practicum.yandex.kz/catalog/mobilnaya-razrabotka/</string>-->
+<!--    <string name="support_email">amanzholaimov@gmail.com</string>-->
+<!--    <string name="support_subject">😅Сообщение разработчикам и разработчицам приложения Playlist Maker</string>-->
+<!--    <string name="support_body">🧰Спасибо разработчикам и разработчицам за крутое приложение!</string>-->
+<!--    <string name="agreement_url">https://yandex.ru/legal/practicum_offer/</string>-->
+
+<!--    <string name="search_hint">Поиск</string> // 🔎-->
+<!--    <string name="clear_search">Очистить поисковый запрос📌</string>-->
+<!--    <string name="empty_space">🔸Пространство заполнитель</string>-->
+<!--    <string name="dropdown_option1">Опция 1🅰️</string>-->
+<!--    <string name="dropdown_option2">Опция 2🅱️</string>-->
+
+<!--    &lt;!&ndash;    выборно, опция для выбора цветов, опций релаизации в гите&ndash;&gt;-->
+<!--    <string name="set_titleColor">Заглавия✨</string>-->
+<!--    <string name="set_backgroundColor">🌈Фона</string>-->
+<!--    <string name="set_btnTextColor">✍️Текста</string>-->
+<!--    <string name="set_iconColor">👨Иконки</string>-->
+<!--    <string name="set_btnBackgroundColor">🎨Кнопки</string>-->
+
+<!--    <string name="dropdown_header">Выберите элемент💪</string>-->
+
+<!--    <string name="switch_short">😎Тема</string>-->
+<!--    <string name="share_short">💌Поделиться</string>-->
+<!--    <string name="support_short">🐶Поддержка</string>-->
+<!--    <string name="agreement_short">📝Соглашение</string>-->
+<!--    <string name="navigation">🌐Навигация</string>-->
+<!--    <string name="change">🎨Цвет</string>-->
+<!--    <string name="language">🧠Язык</string>-->
+
+<!--    <string name="toDefault">Базовый👨‍🔧</string>-->
+
+<!--    <string name="searchFail">Ничего не нашлось🤔</string>-->
+<!--    <string name="networkFail">Проблемы со связью👇\n\nЗагрузка не удалась. 🔧Проверьте\n подключение к интернету</string>-->
+<!--    <string name="update">Обновить🔁</string>-->
+
+<!--    <string name="supportEmail">💥Не найдено приложение\n для открытия электронной почты🤔</string>-->
+<!--    <string name="movie">🍿Кино</string>-->
+<!--    <string name="weather">🌤️Погода</string> // 🌧️ ☀️ ⛅ 🌩️ ❄️-->
+
+<!--    <string name="clean">🧩Очистить историю</string>-->
+<!--    <string name="search_history">🔍Вы искали 🎵</string>-->
+
+<!--    <string name="option">📂Опция</string>-->
+
+<!--    <string name="movie_picture">🍿Кино-фильм</string>-->
+<!--    <string name="nothing_found">Кинофильм не найден🛑</string>-->
+<!--    <string name="something_went_wrong">📛Произошла ошибка</string>-->
+<!--    <string name="enter_movie_name">✍️ название(❓) ➡️ 🎞️🍿</string>-->
+
+<!--    <string name="nothing_found_city">Город не найден🚫</string>-->
+<!--    <string name="enter_city_name">✍️ название(❓) ➡️ 🏡</string>-->
+
+<!--    <string name="movie_search_button">Кнопка поиска🧐</string>-->
+<!--    <string name="cover">👉Обложка</string>-->
+<!--    <string name="movie_rating">IMDb 7.9/10⭐</string>-->
+<!--    <string name="description">📝Описание</string>-->
+<!--    <string name="movie_genre">📚Драма, Комедия</string>-->
+<!--    <string name="register">Регистрация👈</string>-->
+<!--    <string name="favorite">Избранное✨</string>-->
+
+<!--    <string name="duration">🗂️Длительность</string>-->
+<!--    <string name="album">Альбом📀</string>-->
+<!--    <string name="year">📅Год</string>-->
+<!--    <string name="genre">Жанр📚</string>-->
+<!--    <string name="country">🌐Страна</string>-->
+<!--    <string name="add_track">🎁Добавить Трек</string>-->
+<!--    <string name="add_favorite">Добавить в Избранное🙂</string>-->
+<!--    <string name="play_track">🙂Воспроизвести Трек</string>-->
+<!--    <string name="placeholder">🧱Заглушка</string>-->
+<!--    <string name="temp_fix_time">🕒0:30</string>-->
+
+<!--    <string name="track_story_empty">Track history is empty😌</string>-->
+<!--    <string name="history_track">Треки из Истории 🎵 🎵</string>-->
+<!--    <string name="empty_track">Пустой Трек😌</string>-->
+<!--    <string name="track_share">🎵Поделиться Треком</string>-->
+<!--    <string name="track_detail_title">🎶Трек(и)👉💿🎧📀🎵👇</string>-->
+
+<!--    <string name="set_time">🕒0:00</string>-->
+
+<!--    <string name="recycle_full_screen_track">🎵Трек на полный экан📱</string>-->
 
 </resources>

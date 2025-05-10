@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.data.utils.AudioPlayerImpl
-import com.example.playlistmaker.domain.api.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
+import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModelFactory
@@ -35,7 +35,7 @@ class TrackPreviewActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_track_preview)
 
-        val audioPlayer: AudioPlayer = AudioPlayerImpl()
+        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl.getInstance()
         val factory = TrackPreviewViewModelFactory(audioPlayer)
 
         viewModel = ViewModelProvider(this, factory)[TrackPreviewViewModel::class.java]

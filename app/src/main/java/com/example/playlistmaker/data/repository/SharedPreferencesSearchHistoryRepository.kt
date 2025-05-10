@@ -23,9 +23,7 @@ class SharedPreferencesSearchHistoryRepository(
 
     override fun addTrackToHistory(track: Track) {
         val current = getHistory().toMutableList()
-        // Удаляем одинаковый трек, если есть
         current.removeAll { it.trackId == track.trackId }
-        // Ограничение по длине
         if (current.size >= MAX_HISTORY_SIZE) {
             current.removeAt(current.lastIndex)
         }

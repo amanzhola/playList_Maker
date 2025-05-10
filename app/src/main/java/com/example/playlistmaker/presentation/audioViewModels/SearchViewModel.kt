@@ -4,8 +4,8 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.*
 import com.example.playlistmaker.domain.api.AudioInteraction
+import com.example.playlistmaker.domain.api.SearchHistoryInteraction
 import com.example.playlistmaker.domain.models.Track
-import com.example.playlistmaker.domain.repository.SearchHistoryRepository
 import com.example.playlistmaker.domain.util.Resource
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ enum class ErrorState {
 
 class SearchViewModel( // 🖼️
     private val audioInteraction: AudioInteraction,
-    private val searchHistoryRepository: SearchHistoryRepository,
+    private val searchHistoryInteraction: SearchHistoryInteraction,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
@@ -28,7 +28,7 @@ class SearchViewModel( // 🖼️
     private val _trackList = MutableLiveData<MutableList<Track>>(mutableListOf())
     val trackList: LiveData<MutableList<Track>> = _trackList
 
-    private val _trackHistoryList = MutableLiveData(searchHistoryRepository.getHistory())
+    private val _trackHistoryList = MutableLiveData(searchHistoryInteraction.getHistory())
     private val _isHistory = MutableLiveData(false)
     val isHistory: LiveData<Boolean> = _isHistory
 
@@ -73,7 +73,7 @@ class SearchViewModel( // 🖼️
 
     init {
         sharedPreferences.registerOnSharedPreferenceChangeListener(prefsChangeListener)
-        _trackHistoryList.value = searchHistoryRepository.getHistory()
+        _trackHistoryList.value = searchHistoryInteraction.getHistory()
     }
 
     override fun onCleared() {
@@ -102,7 +102,7 @@ class SearchViewModel( // 🖼️
     private fun updateHistoryVisibility() {
         Log.d("SearchViewModel", "👁 History visible: ${_isHistory.value}")
         val query = _searchQuery.value ?: ""
-        val history = searchHistoryRepository.getHistory()
+        val history = searchHistoryInteraction.getHistory()
         _isHistory.value = _isInputFocused.value == true && query.isEmpty() && history.isNotEmpty()
     }
 
@@ -114,16 +114,16 @@ class SearchViewModel( // 🖼️
     }
 
     fun onTrackClicked(track: Track) { // 🎵
-        searchHistoryRepository.addTrackToHistory(track)
-        _trackHistoryList.value = searchHistoryRepository.getHistory()
+        searchHistoryInteraction.addTrackToHistory(track)
+        _trackHistoryList.value = searchHistoryInteraction.getHistory()
     }
 
     fun removeTrack(track: Track) {
         if (_isHistory.value == true) {
-            val current = searchHistoryRepository.getHistory().toMutableList()
+            val current = searchHistoryInteraction.getHistory().toMutableList()
             val removed = current.removeIf { it.trackId == track.trackId }
             if (removed) {
-                searchHistoryRepository.saveHistory(current)
+                searchHistoryInteraction.saveHistory(current)
                 _trackHistoryList.value = current
             }
         } else {

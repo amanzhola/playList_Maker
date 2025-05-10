@@ -19,7 +19,8 @@ data class Track( // 🧱
     val previewUrl: String, // 🎧
     val trackId: Int, // 🆔
     var isPlaying: Boolean = false,
-    var playTime: String? = "🕒0:00"
+    var playTime: String? = "0:00"
+//    var playTime: String? = "🕒0:00" // ❌ (☝️ for OK people)
 ): Parcelable, Identifiable<Int> {
 
     override val id: Int

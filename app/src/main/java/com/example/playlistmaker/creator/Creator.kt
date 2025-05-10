@@ -10,21 +10,33 @@ import com.example.playlistmaker.data.network.RetrofitAudioNetworkClient
 import com.example.playlistmaker.data.network.RetrofitWeatherNetworkClient
 import com.example.playlistmaker.data.repository.AudioRepositoryImpl
 import com.example.playlistmaker.data.repository.SharedPreferencesSearchHistoryRepository
+import com.example.playlistmaker.data.repository.ThemeRepositoryImpl
 import com.example.playlistmaker.data.repository.WeatherRepositoryImpl
 import com.example.playlistmaker.domain.api.AudioInteraction
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.AudioRepository
 import com.example.playlistmaker.domain.api.MoviesRepository
+import com.example.playlistmaker.domain.api.SearchHistoryInteraction
+import com.example.playlistmaker.domain.api.ThemeInteraction
 import com.example.playlistmaker.domain.api.WeatherInteraction
 import com.example.playlistmaker.domain.api.WeatherRepository
 import com.example.playlistmaker.domain.api.weatherNetworkClient
 import com.example.playlistmaker.domain.impl.AudioInteractionImpl
+import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.impl.MoviesInteractionImpl
+import com.example.playlistmaker.domain.impl.SearchHistoryInteractionImpl
+import com.example.playlistmaker.domain.impl.ThemeInteractionImpl
 import com.example.playlistmaker.domain.impl.WeatherInteractionImpl
-import com.example.playlistmaker.domain.repository.SearchHistoryRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object Creator {
+
+    private lateinit var appContext: Context
+
+    fun init(context: Context) {
+        appContext = context.applicationContext
+    }
 
     private fun getImdbService(): IMDbApi {
         val imdbBaseUrl = "https://tv-api.com"
@@ -93,17 +105,27 @@ object Creator {
         return AudioRepositoryImpl(getITunesService())
     }
 
-    // --- Метод для получения SearchHistoryRepository ---
-    fun getSearchHistoryRepository(context: Context): SearchHistoryRepository {
-        val sharedPreferences = context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
-        return SharedPreferencesSearchHistoryRepository(sharedPreferences)
+    fun getSearchHistoryInteraction(): SearchHistoryInteraction {
+        val sharedPreferences = appContext.getSharedPreferences("search_history", Context.MODE_PRIVATE)
+        val repository = SharedPreferencesSearchHistoryRepository(sharedPreferences)
+        return SearchHistoryInteractionImpl(repository)
     }
 
     // --- Метод для предоставления AudioInteraction с учетом SearchHistoryRepository ---
-    fun provideAudioInteraction(context: Context): AudioInteraction {
+    fun provideAudioInteraction(): AudioInteraction {
+        val searchHistoryInteraction = getSearchHistoryInteraction()
         val audioRepository = getAudioRepository()
-        val searchHistoryRepository = getSearchHistoryRepository(context)
-        return AudioInteractionImpl(audioRepository, searchHistoryRepository)
+        return AudioInteractionImpl(audioRepository, searchHistoryInteraction)
+    }
+
+    // --- Метод для предоставления AudioPlayer ---
+    fun provideAudioPlayer(): AudioPlayerInteraction {
+        return AudioPlayerInteractionImpl.getInstance()
+    }
+
+    // --- Метод для предоставления SettingsActivity переключение темы ---
+    fun provideThemeInteraction(): ThemeInteraction {
+        return ThemeInteractionImpl(ThemeRepositoryImpl(appContext))
     }
 
 }

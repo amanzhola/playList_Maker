@@ -102,7 +102,8 @@ class TrackAdapterAudio(
         }
 
         fun updatePlayTime(track: Track) {
-            playTime.text = track.playTime ?: "🕒0:00"
+//            playTime.text = track.playTime ?: "🕒0:00" // ❌ (👇 for OK people)
+            playTime.text = track.playTime ?: "0:00"
         }
 
         fun updatePlayState(track: Track) {

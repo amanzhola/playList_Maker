@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
 import android.app.Application
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.data.repository.ThemeRepositoryImpl
 import com.example.playlistmaker.domain.usecases.ThemeManager
 // ☀️ 🔁 🌙 👉 🧼🏗️✅
@@ -13,5 +14,6 @@ class App : Application() { // ☀️ 🔁 🌙
         val repository = ThemeRepositoryImpl(this)
         themeManager = ThemeManager(repository)
         themeManager.applyTheme()
+        Creator.init(this)
     }
 }

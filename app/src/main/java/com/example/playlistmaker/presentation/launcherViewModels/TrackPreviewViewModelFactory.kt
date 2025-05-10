@@ -2,11 +2,11 @@ package com.example.playlistmaker.presentation.launcherViewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.playlistmaker.domain.api.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 
 @Suppress("UNCHECKED_CAST")
 class TrackPreviewViewModelFactory( // 🖼️
-    private val audioPlayer: AudioPlayer
+    private val audioPlayer: AudioPlayerInteraction
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TrackPreviewViewModel::class.java)) {

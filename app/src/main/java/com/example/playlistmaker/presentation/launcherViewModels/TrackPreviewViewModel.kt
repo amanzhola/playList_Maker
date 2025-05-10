@@ -3,13 +3,13 @@ package com.example.playlistmaker.presentation.launcherViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.domain.api.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.models.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class TrackPreviewViewModel( // 🖼️
-    private val audioPlayer: AudioPlayer // 🎧 🕒
+    private val audioPlayer: AudioPlayerInteraction // 🎧 🕒
 ) : ViewModel() {
 
     private val _trackList = MutableLiveData<List<Track>>(emptyList())
@@ -21,8 +21,8 @@ class TrackPreviewViewModel( // 🖼️
     private val _isHorizontal = MutableLiveData<Boolean>(true)
     val isHorizontal: LiveData<Boolean> get() = _isHorizontal
 
-    private val _playbackState = MutableLiveData<AudioPlayer.PlaybackState>(AudioPlayer.PlaybackState.IDLE)
-    val playbackState: LiveData<AudioPlayer.PlaybackState> get() = _playbackState
+    private val _playbackState = MutableLiveData<AudioPlayerInteraction.PlaybackState>(AudioPlayerInteraction.PlaybackState.IDLE)
+    val playbackState: LiveData<AudioPlayerInteraction.PlaybackState> get() = _playbackState
 
     private val _scrollPosition = MutableLiveData<Int>(-1)
     val scrollPosition: LiveData<Int> get() = _scrollPosition
@@ -46,12 +46,12 @@ class TrackPreviewViewModel( // 🖼️
             _trackList.postValue(_trackList.value?.map {
                 if (it.trackId == trackId) {
                     when (state) {
-                        AudioPlayer.PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
-                        AudioPlayer.PlaybackState.PREPARED -> it.copy(isPlaying = false)
-                        AudioPlayer.PlaybackState.PLAYING -> it.copy(isPlaying = true)
-                        AudioPlayer.PlaybackState.PAUSED -> it.copy(isPlaying = false)
-                        AudioPlayer.PlaybackState.STOPPED,
-                        AudioPlayer.PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
+                        AudioPlayerInteraction.PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
+                        AudioPlayerInteraction.PlaybackState.PREPARED -> it.copy(isPlaying = false)
+                        AudioPlayerInteraction.PlaybackState.PLAYING -> it.copy(isPlaying = true)
+                        AudioPlayerInteraction.PlaybackState.PAUSED -> it.copy(isPlaying = false)
+                        AudioPlayerInteraction.PlaybackState.STOPPED,
+                        AudioPlayerInteraction.PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
                     }
                 } else {
                     it.copy(isPlaying = false, playTime = "🕒0:00")
@@ -91,7 +91,7 @@ class TrackPreviewViewModel( // 🖼️
             audioPlayer.isCurrentTrackPlaying(track.trackId) -> {
                 audioPlayer.pause()
             }
-            audioPlayer.playbackState == AudioPlayer.PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> {
+            audioPlayer.playbackState == AudioPlayerInteraction.PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> {
                 audioPlayer.resume()
             }
             else -> {

@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ToolbarConfig
-import com.example.playlistmaker.data.utils.AudioPlayerImpl
-import com.example.playlistmaker.domain.api.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
+import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModelFactory
@@ -36,7 +36,7 @@ class ExtraOption : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val audioPlayer: AudioPlayer = AudioPlayerImpl()
+        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl.getInstance()
         val factory = ExtraOptionViewModelFactory(audioPlayer)
 
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]

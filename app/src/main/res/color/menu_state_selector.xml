@@ -2,6 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true" android:color="@color/red" />
     <item android:state_focused="true" android:color="@color/red" />
-<!--    <item android:color="@color/transparent" />-->
-    <item android:color="@color/red1" />
+    <item android:color="@color/transparent" />
+<!--    <item android:color="@color/red1" />-->
+    <!--    для ❌ (not for OK people)-->
 </selector>

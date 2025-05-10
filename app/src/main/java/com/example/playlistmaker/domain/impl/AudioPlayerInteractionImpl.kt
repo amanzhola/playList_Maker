@@ -1,22 +1,22 @@
-package com.example.playlistmaker.data.utils
+package com.example.playlistmaker.domain.impl
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import com.example.playlistmaker.domain.api.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import java.util.Locale
 
-class AudioPlayerImpl : AudioPlayer {
+class AudioPlayerInteractionImpl : AudioPlayerInteraction {
 
     private var mediaPlayer: MediaPlayer? = null
     private val handler = Handler(Looper.getMainLooper()) // 🚑
     private var onTimeUpdateCallback: ((String) -> Unit)? = null
-    private var onStateChangeCallback: ((AudioPlayer.PlaybackState) -> Unit)? = null
+    private var onStateChangeCallback: ((AudioPlayerInteraction.PlaybackState) -> Unit)? = null
 
     override var currentTrackId: Int = -1
         private set
-    override var playbackState: AudioPlayer.PlaybackState = AudioPlayer.PlaybackState.IDLE
+    override var playbackState: AudioPlayerInteraction.PlaybackState = AudioPlayerInteraction.PlaybackState.IDLE
         private set
 
     private val updateRunnable = object : Runnable {
@@ -33,11 +33,11 @@ class AudioPlayerImpl : AudioPlayer {
 
     companion object { // 💯 🏗
         @Volatile
-        private var instance: AudioPlayer? = null
+        private var instance: AudioPlayerInteraction? = null
 
-        fun getInstance(): AudioPlayer {
+        fun getInstance(): AudioPlayerInteraction {
             return instance ?: synchronized(this) {
-                instance ?: AudioPlayerImpl().also { instance = it }
+                instance ?: AudioPlayerInteractionImpl().also { instance = it }
             }
         }
     }
@@ -46,14 +46,14 @@ class AudioPlayerImpl : AudioPlayer {
         this.onTimeUpdateCallback = callback
     }
 
-    override fun setStateChangeCallback(callback: (AudioPlayer.PlaybackState) -> Unit) { // 🔁 🧩
+    override fun setStateChangeCallback(callback: (AudioPlayerInteraction.PlaybackState) -> Unit) { // 🔁 🧩
         this.onStateChangeCallback = callback
     }
 
     override fun setTrack(previewUrl: String, trackId: Int) { // 🎵 ✅ ✨🔄
         stop()
         currentTrackId = trackId
-        playbackState = AudioPlayer.PlaybackState.PREPARING
+        playbackState = AudioPlayerInteraction.PlaybackState.PREPARING
         onStateChangeCallback?.invoke(playbackState)
 
         mediaPlayer = MediaPlayer().apply { // 💡 ⏭️
@@ -65,29 +65,29 @@ class AudioPlayerImpl : AudioPlayer {
                     .build()
             )
             setOnPreparedListener {// 📌
-                playbackState = AudioPlayer.PlaybackState.PREPARED
+                playbackState = AudioPlayerInteraction.PlaybackState.PREPARED
                 onStateChangeCallback?.invoke(playbackState)
                 start() // ▶️ 💃 ⏭️
-                playbackState = AudioPlayer.PlaybackState.PLAYING
+                playbackState = AudioPlayerInteraction.PlaybackState.PLAYING
                 onStateChangeCallback?.invoke(playbackState)
                 handler.post(updateRunnable)
             }
             setOnCompletionListener {// ⚠️ 📦
-                onStateChangeCallback?.invoke(AudioPlayer.PlaybackState.STOPPED)
+                onStateChangeCallback?.invoke(AudioPlayerInteraction.PlaybackState.STOPPED)
                 onTimeUpdateCallback?.invoke("00:00")
                 stop()
             }
             prepareAsync()
         }
         // отправляем статус PREPARING
-        onStateChangeCallback?.invoke(AudioPlayer.PlaybackState.PREPARING)
+        onStateChangeCallback?.invoke(AudioPlayerInteraction.PlaybackState.PREPARING)
     }
 
     override fun pause() { // ⏸️
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.pause()
-                playbackState = AudioPlayer.PlaybackState.PAUSED
+                playbackState = AudioPlayerInteraction.PlaybackState.PAUSED
                 onStateChangeCallback?.invoke(playbackState)
                 handler.removeCallbacks(updateRunnable)
             }
@@ -96,9 +96,9 @@ class AudioPlayerImpl : AudioPlayer {
 
     override fun resume() { // ⏹️ ▶️ + 🛑 00:00
         mediaPlayer?.let {
-            if (!it.isPlaying && playbackState == AudioPlayer.PlaybackState.PAUSED) {
+            if (!it.isPlaying && playbackState == AudioPlayerInteraction.PlaybackState.PAUSED) {
                 it.start()
-                playbackState = AudioPlayer.PlaybackState.PLAYING
+                playbackState = AudioPlayerInteraction.PlaybackState.PLAYING
                 onStateChangeCallback?.invoke(playbackState)
                 handler.post(updateRunnable)
             }
@@ -109,14 +109,14 @@ class AudioPlayerImpl : AudioPlayer {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
-                onStateChangeCallback?.invoke(AudioPlayer.PlaybackState.STOPPED)
+                onStateChangeCallback?.invoke(AudioPlayerInteraction.PlaybackState.STOPPED)
                 handler.removeCallbacks(updateRunnable)
             }
             release()
         }
         mediaPlayer = null
         currentTrackId = -1
-        playbackState = AudioPlayer.PlaybackState.IDLE
+        playbackState = AudioPlayerInteraction.PlaybackState.IDLE
     }
 
     private fun release() { // 🧹

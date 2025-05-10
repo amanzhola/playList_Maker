@@ -2,10 +2,10 @@ package com.example.playlistmaker.presentation.audioPostersViewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.playlistmaker.domain.api.AudioPlayer
+import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 
 class ExtraOptionViewModelFactory( // 🖼️
-    private val audioPlayer: AudioPlayer
+    private val audioPlayer: AudioPlayerInteraction
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")

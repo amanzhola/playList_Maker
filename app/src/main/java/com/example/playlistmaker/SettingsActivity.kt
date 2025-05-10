@@ -5,12 +5,18 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.TextView
+import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.presentation.utils.ThemeViewModel
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : BaseActivity() {
 
     private lateinit var switchControl: SwitchMaterial
     private var isBottomNavVisible: Boolean = true
+
+    private val viewModel: ThemeViewModel by lazy {
+        ThemeViewModel(Creator.provideThemeInteraction())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +38,7 @@ class SettingsActivity : BaseActivity() {
 
     private fun initViews() {
         switchControl = findViewById(R.id.switch_control)
-        switchControl.isChecked = isDarkThemeEnabled()
+        switchControl.isChecked = viewModel.isDarkTheme()
     }
 
     override fun shouldEnableEdgeToEdge(): Boolean = false
@@ -43,8 +49,7 @@ class SettingsActivity : BaseActivity() {
     private fun setupClickListeners() {
 
         switchControl.setOnCheckedChangeListener { _, checked ->
-            themeManager.repository.setDarkTheme(checked)
-            themeManager.applyTheme()
+            viewModel.toggleTheme(checked)
         } // 🌞 ⇄ 🌚
 
         setupViewClickListener<TextView>(R.id.share) { shareApp() }

@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -57,7 +58,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
         findViewById<TextView>(R.id.bottom1).isSelected = true
 
-        audioInteraction = Creator.provideAudioInteraction(this)
+        audioInteraction = Creator.provideAudioInteraction()
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = TrackAdapter(mutableListOf(), this, this)
@@ -65,7 +66,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
         val viewModelFactory = SearchViewModelFactory(
             audioInteraction = audioInteraction,
-            searchHistoryRepository = Creator.getSearchHistoryRepository(this),
+            searchHistoryInteraction  = Creator.getSearchHistoryInteraction(),
             sharedPreferences = getSharedPreferences("search_history", Context.MODE_PRIVATE)
         )
         viewModel = ViewModelProvider(this, viewModelFactory)[SearchViewModel::class.java]
@@ -102,8 +103,10 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
                     viewModel.isHistory.observe(this) { isInHistory ->
                         if (isInHistory) {
-                            history.visibility = VISIBLE
-                            update.visibility = VISIBLE
+//                            history.visibility = VISIBLE
+//                            update.visibility = VISIBLE
+                            history.isVisible = true // для показа
+                            update.isVisible = true
                         } else {
                             history.visibility = GONE
                             update.visibility = GONE
@@ -112,7 +115,8 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
                     viewModel.isInputFocused.observe(this) { isFocused ->
                         searchInputLayout.hint = if (isFocused) null else getString(R.string.search_hint)
-                        if (isFocused) hideBottomNavigation() else showBottomNavigation()
+//                        if (isFocused) hideBottomNavigation() else showBottomNavigation()
+                        hideBottomNavigation() // адекватам убрать
                     }
 
                     viewModel.searchQuery.observe(this) { query ->
