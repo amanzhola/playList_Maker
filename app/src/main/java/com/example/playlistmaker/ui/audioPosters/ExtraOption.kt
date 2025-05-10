@@ -18,11 +18,8 @@ import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ToolbarConfig
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.api.AudioPlayerInteraction
-import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModel
-import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModelFactory
 import com.google.gson.Gson
 
 class ExtraOption : BaseActivity() {
@@ -37,8 +34,7 @@ class ExtraOption : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val audioPlayer = Creator.provideAudioPlayer()
-        val factory = ExtraOptionViewModelFactory(audioPlayer)
+        val factory = Creator.provideExtraOptionViewModelFactory()
 
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]
 

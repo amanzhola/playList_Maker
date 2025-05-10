@@ -13,6 +13,7 @@ import com.example.playlistmaker.data.repository.SharedPreferencesSearchHistoryR
 import com.example.playlistmaker.data.repository.ThemeRepositoryImpl
 import com.example.playlistmaker.data.repository.WeatherRepositoryImpl
 import com.example.playlistmaker.domain.api.AudioInteraction
+import com.example.playlistmaker.domain.api.AudioNetworkClient
 import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.AudioRepository
 import com.example.playlistmaker.domain.api.MoviesRepository
@@ -27,6 +28,8 @@ import com.example.playlistmaker.domain.impl.MoviesInteractionImpl
 import com.example.playlistmaker.domain.impl.SearchHistoryInteractionImpl
 import com.example.playlistmaker.domain.impl.ThemeInteractionImpl
 import com.example.playlistmaker.domain.impl.WeatherInteractionImpl
+import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModelFactory
+import com.example.playlistmaker.presentation.audioViewModels.SearchViewModelFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -96,13 +99,12 @@ object Creator {
         return retrofit.create(ITunesApi::class.java)
     }
 
-    private fun getAudioNetworkClient(): RetrofitAudioNetworkClient {
-        val iTunesApi = getITunesService()
-        return RetrofitAudioNetworkClient(iTunesApi)
+    private fun getAudioNetworkClient(): AudioNetworkClient {
+        return RetrofitAudioNetworkClient(getITunesService())
     }
 
     private fun getAudioRepository(): AudioRepository {
-        return AudioRepositoryImpl(getITunesService())
+        return AudioRepositoryImpl(getAudioNetworkClient())
     }
 
     fun getSearchHistoryInteraction(): SearchHistoryInteraction {
@@ -126,6 +128,19 @@ object Creator {
             audioPlayerInstance = AudioPlayerInteractionImpl()
         }
         return audioPlayerInstance!!
+    }
+
+    fun provideSearchViewModelFactory(): SearchViewModelFactory {
+        return SearchViewModelFactory(
+            audioInteraction = provideAudioInteraction(),
+            searchHistoryInteraction = getSearchHistoryInteraction()
+        )
+    }
+
+    fun provideExtraOptionViewModelFactory(): ExtraOptionViewModelFactory {
+        return ExtraOptionViewModelFactory(
+            provideAudioPlayer()
+        )
     }
 
     // --- Метод для предоставления SettingsActivity переключение темы ---

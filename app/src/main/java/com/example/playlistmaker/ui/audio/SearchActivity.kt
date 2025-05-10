@@ -19,11 +19,9 @@ import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ToolbarConfig
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.api.AudioInteraction
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioViewModels.ErrorState
 import com.example.playlistmaker.presentation.audioViewModels.SearchViewModel
-import com.example.playlistmaker.presentation.audioViewModels.SearchViewModelFactory
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
@@ -48,7 +46,6 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
     private lateinit var viewModel: SearchViewModel
     private lateinit var debounce: Debounce
 
-    private lateinit var audioInteraction: AudioInteraction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,17 +54,12 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
         findViewById<TextView>(R.id.bottom1).isSelected = true
 
-        audioInteraction = Creator.provideAudioInteraction()
+        val viewModelFactory = Creator.provideSearchViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory)[SearchViewModel::class.java]
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = TrackAdapter(mutableListOf(), this, this)
         recyclerView.adapter = adapter
-
-        val viewModelFactory = SearchViewModelFactory(
-            audioInteraction = audioInteraction,
-            searchHistoryInteraction  = Creator.getSearchHistoryInteraction()
-        )
-        viewModel = ViewModelProvider(this, viewModelFactory)[SearchViewModel::class.java]
 
         setupObservers()
         setupListeners()
