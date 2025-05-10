@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
@@ -28,11 +27,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
-import com.example.playlistmaker.ExtraOption.Companion.PREFS_NAME1
-import com.example.playlistmaker.ExtraOption.Companion.TRACK_KEY
-import com.example.playlistmaker.search.SearchHistory
-import com.example.playlistmaker.search.Track
-import com.example.playlistmaker.search.TrackAdapter
+import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.usecases.ThemeManager
+import com.example.playlistmaker.ui.audio.TrackAdapter
+import com.example.playlistmaker.ui.audioPosters.ExtraOption
+import com.example.playlistmaker.ui.movie.SearchMovie
+import com.example.playlistmaker.ui.weather.SearchWeather
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -88,7 +88,6 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private var currentLanguage: String = ""
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var colorPreferences: SharedPreferences
-    private lateinit var historyPreferences: SharedPreferences
     private var isDialogVisible = false
     private val baseSegmentColors = intArrayOf(
         R.color.hintFieldColor,
@@ -100,7 +99,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         intArrayOf( // 1️⃣ 👉 💾
             R.drawable.switch_24,
             when (this) {
-                is SearchActivity -> R.drawable.queue_music_24
+                is _root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity -> R.drawable.queue_music_24
                 is ExtraOption -> R.drawable.music_note_24
                 else -> R.drawable.share
             },
@@ -138,17 +137,17 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private val langKey = "language"
 
     private val failTextView: TextView by lazy { findViewById(R.id.fail) }
-    private lateinit var gson: Gson
-    private lateinit var searchHistory: SearchHistory
+    lateinit var gson: Gson
+
+    protected val themeManager: ThemeManager // 😎
+        get() = (application as App).themeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        (application as App).switchTheme((application as App).isDarkTheme)
+        themeManager.applyTheme() // 🌓 ↔️ 🌗
         super.onCreate(savedInstanceState)
         buttonIndex = intent.getIntExtra("buttonIndex", -1)
 
         sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
-        historyPreferences = getSharedPreferences(SearchHistory.PREFS_NAME, Context.MODE_PRIVATE)
         applySettings()
         colorPreferences = getColorSharedPreferences()
 
@@ -184,7 +183,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         )
 
         gson = Gson()
-        searchHistory = SearchHistory(historyPreferences) // 👌 null for 2 more 😉 parameters
+    // SearchHisory done 👌 null for 2 more 😉 parameters to have 1 out of 3
     }
 
     private fun getColorSharedPreferences(): SharedPreferences {
@@ -239,7 +238,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             when (segmentIndex) {
                 0 -> toggleTheme()
                 1 -> when (this) {
-                    is SearchActivity -> shareTrackHistory()
+                    is _root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity -> shareTrackHistoryFromViewModel()
                     is ExtraOption -> shareSingleTrack()
                     else -> shareApp()
                 }
@@ -252,65 +251,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         }
     }
 
-    private fun shareSingleTrack() { // 🎵
-        val prefs = getSharedPreferences(PREFS_NAME1, Context.MODE_PRIVATE)
-        val json = prefs.getString(TRACK_KEY, null)
-
-        if (json.isNullOrEmpty()) {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.empty_track))
-            }
-            startActivity(Intent.createChooser(intent, null))
-            return
-        }
-
-        val selectedTrack = gson.fromJson(json, Track::class.java)
-        val jsonFile = createJsonFile(listOf(selectedTrack))
-
-        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/json"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, getString(R.string.track_share))
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        startActivity(Intent.createChooser(shareIntent, null))
-    }
-
-
-    private fun shareTrackHistory() { // 🎵 🎵 🎵 // 🎶
-        val json = historyPreferences.getString(SearchHistory.TRACK_HISTORY_LIST_KEY, null)
-
-        val tracks = if (!json.isNullOrEmpty()) {
-            gson.fromJson(json, Array<Track>::class.java).toList()
-        } else {
-            emptyList()
-        }
-
-        if (tracks.isEmpty()) {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.track_story_empty))
-            }
-            startActivity(Intent.createChooser(intent, null))
-            return
-        }
-
-        val jsonFile = createJsonFile(tracks)
-        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/json"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, getString(R.string.history_track)) // 💥 R.string.history_track
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        startActivity(Intent.createChooser(shareIntent, null)) // 💥 🧠 👉 🤔
-    }
-
-    private fun createJsonFile(tracks: List<Track>): File {
+    protected fun createJsonFile(tracks: List<Track>): File {
         val file = File(cacheDir, "track_history.json")
         file.printWriter().use { out ->
             out.print(gson.toJson(tracks))
@@ -321,20 +262,18 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     open fun onSegment4Clicked() {} // by btm navig 🔥
 
     private fun toggleTheme() {
-        val app = application as App
-        app.switchTheme(!app.isDarkTheme)
+        themeManager.toggleTheme() // 🌓
         applySettings()
         if (this is SettingsActivity) {
             val switchControl: SwitchMaterial = findViewById(R.id.switch_control)
-            switchControl.isChecked = app.isDarkTheme
+            switchControl.isChecked = themeManager.repository.isDarkTheme()
         }
 
     }
 
     private fun applySettings() {
-        val app = application as App
         currentLanguage = sharedPreferences.getString(langKey, "ru") ?: "ru"
-        app.switchTheme(app.isDarkTheme)
+        themeManager.applyTheme() // 🌓
         applyLanguage(currentLanguage)
     }
 
@@ -349,13 +288,13 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             1 -> mainLayout.setBackgroundColor(color)
             2 -> when (this) {
                 is MainActivity -> mainLayout.changeBtnTextColor(color)
-                is SearchActivity -> this.getAdapter().also { it.setTextColor(color) } // 🛠
+                is _root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity -> this.getAdapter().also { it.setTextColor(color) } // 🛠
                 else -> mainLayout.changeColor(color, true, ignoreViewId = R.id.toolbar)
             }
             3 -> when (this) {
                 is MainActivity -> mainLayout.changeBtnIconColor(color)
                 is SettingsActivity -> mainLayout.changeColor(color, false, ignoreViewId = R.id.toolbar)
-                is SearchActivity -> {
+                is _root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity -> {
                     val adapter: TrackAdapter = this.getAdapter()
                     adapter.setArrowColor(color)
                 }
@@ -375,12 +314,11 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         val activityName = when (this) {
             is MainActivity -> "MainActivity"
             is SettingsActivity -> "SettingsActivity"
-            is SearchActivity -> "SearchActivity"
+            is _root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity -> "SearchActivity"
             is MediaLibraryActivity -> "MediaLibraryActivity"
             else -> "UnknownActivity"
         }
-        val app = application as App
-        val themeSuffix = if (app.isDarkTheme) "_dark" else "_light"
+        val themeSuffix = if (isDarkThemeEnabled()) "_dark" else "_light" // 🌓
         return "${activityName}_segment_$segmentIndex$themeSuffix"
     }
 
@@ -431,7 +369,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
     protected fun getNavigationList(): List<NavigationData> {
         return listOf( // 🏃‍♀️
-            NavigationData(SearchActivity::class.java, 0, 0),
+            NavigationData(_root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity::class.java, 0, 0),
             NavigationData(MediaLibraryActivity::class.java, 0, 0),
             NavigationData(SettingsActivity::class.java, 0, 0),
             NavigationData(SearchMovie::class.java, 0, 0),
@@ -525,9 +463,8 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         navigationLine.visibility = visibility
     }
 
-    fun isDarkThemeEnabled(): Boolean {
-        val app = application as App
-        return app.isDarkTheme
+    fun isDarkThemeEnabled(): Boolean { // 🌓 ↔️ 🌗
+        return themeManager.repository.isDarkTheme()
     }
 
     protected open fun shouldEnableEdgeToEdge(): Boolean = true
@@ -696,7 +633,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
                     }
                 }
                 is RecyclerView -> {
-                    if (this is SearchActivity) {
+                    if (this is _root_ide_package_.com.example.playlistmaker.ui.audio.SearchActivity) {
                         if (check) view.visibility = View.INVISIBLE
                         else view.visibility = VISIBLE
                     }

@@ -7,7 +7,7 @@
     android:background="@color/white_textColor"
     android:orientation="vertical"
     android:id="@+id/main"
-    tools:context=".ExtraOption">
+    tools:context=".ui.audioPosters.ExtraOption">
 
     <include layout="@layout/toolbar" />
 

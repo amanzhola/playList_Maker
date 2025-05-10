@@ -42,5 +42,8 @@
     <color name="dark_red">#D32F2F</color>
     <color name="eeeee">#eeeeee</color>
 
+    Track
+    <color name="play_red">#F56B6C</color>
+
 
 </resources>
