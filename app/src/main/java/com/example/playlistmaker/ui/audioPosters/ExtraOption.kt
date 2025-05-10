@@ -36,7 +36,7 @@ class ExtraOption : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl.getInstance()
+        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl()
         val factory = ExtraOptionViewModelFactory(audioPlayer)
 
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]

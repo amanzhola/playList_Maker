@@ -1,8 +1,11 @@
 package com.example.playlistmaker.presentation.audioViewModels
 
-import android.content.SharedPreferences
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.api.AudioInteraction
 import com.example.playlistmaker.domain.api.SearchHistoryInteraction
 import com.example.playlistmaker.domain.models.Track
@@ -18,8 +21,7 @@ enum class ErrorState {
 
 class SearchViewModel( // 🖼️
     private val audioInteraction: AudioInteraction,
-    private val searchHistoryInteraction: SearchHistoryInteraction,
-    private val sharedPreferences: SharedPreferences
+    private val searchHistoryInteraction: SearchHistoryInteraction
 ) : ViewModel() {
 
     private val _searchQuery = MutableLiveData("")
@@ -57,28 +59,18 @@ class SearchViewModel( // 🖼️
         addSource(_trackList) { update() }
     }
 
-    private val prefsChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { prefs, key -> // 📦
-            if (key == "track_history_list") {
-                val json = prefs.getString("track_history_list", "")
-                val list = if (!json.isNullOrEmpty()) {
-                    Gson().fromJson(json, Array<Track>::class.java).toList()
-                } else {
-                    emptyList()
-                }
-                _trackHistoryList.value = list // 📜
-                if (list.isEmpty()) _isHistory.value = false
-            }
+    init {
+        searchHistoryInteraction.subscribeToHistoryChanges { updatedHistory ->
+            _trackHistoryList.postValue(updatedHistory)
+            if (updatedHistory.isEmpty()) _isHistory.postValue(false)
         }
 
-    init {
-        sharedPreferences.registerOnSharedPreferenceChangeListener(prefsChangeListener)
         _trackHistoryList.value = searchHistoryInteraction.getHistory()
     }
 
     override fun onCleared() {
         super.onCleared()
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(prefsChangeListener)
+        searchHistoryInteraction.unsubscribeFromHistoryChanges()
     }
 
     fun clearSearchInput() {
@@ -169,5 +161,10 @@ class SearchViewModel( // 🖼️
     fun getTrackHistoryJson(): String {
         val list = _trackHistoryList.value ?: emptyList()
         return Gson().toJson(list)
+    }
+
+    fun clearHistory() {
+        searchHistoryInteraction.clearHistory()
+        _isHistory.value = false
     }
 }

@@ -120,7 +120,7 @@ object Creator {
 
     // --- Метод для предоставления AudioPlayer ---
     fun provideAudioPlayer(): AudioPlayerInteraction {
-        return AudioPlayerInteractionImpl.getInstance()
+        return AudioPlayerInteractionImpl()
     }
 
     // --- Метод для предоставления SettingsActivity переключение темы ---

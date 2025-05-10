@@ -1,6 +1,5 @@
 package com.example.playlistmaker.ui.audio
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -66,8 +65,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
         val viewModelFactory = SearchViewModelFactory(
             audioInteraction = audioInteraction,
-            searchHistoryInteraction  = Creator.getSearchHistoryInteraction(),
-            sharedPreferences = getSharedPreferences("search_history", Context.MODE_PRIVATE)
+            searchHistoryInteraction  = Creator.getSearchHistoryInteraction()
         )
         viewModel = ViewModelProvider(this, viewModelFactory)[SearchViewModel::class.java]
 
@@ -103,14 +101,16 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
                     viewModel.isHistory.observe(this) { isInHistory ->
                         if (isInHistory) {
-//                            history.visibility = VISIBLE
-//                            update.visibility = VISIBLE
-                            history.isVisible = true // для показа
+                            history.isVisible = true // для показухи
                             update.isVisible = true
                         } else {
                             history.visibility = GONE
                             update.visibility = GONE
                         }
+                    }
+
+                    update.setOnClickListener {
+                        viewModel.clearHistory()
                     }
 
                     viewModel.isInputFocused.observe(this) { isFocused ->

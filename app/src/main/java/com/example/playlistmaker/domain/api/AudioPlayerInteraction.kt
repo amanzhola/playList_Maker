@@ -1,20 +1,23 @@
 package com.example.playlistmaker.domain.api
 
+enum class PlaybackState {
+    IDLE, PREPARING, PREPARED, PLAYING, PAUSED, STOPPED
+}
+
 interface AudioPlayerInteraction {
-    enum class PlaybackState {
-        IDLE, PREPARING, PREPARED, PLAYING, PAUSED, STOPPED
-    }
 
-    val currentTrackId: Int
-    val playbackState: PlaybackState
+    var currentTrackId: Int
+    var lastPlayedTrackId: Int
+    var playbackState: PlaybackState
 
+    fun setOnTimeUpdateCallback(callback: (String) -> Unit)
+    fun setStateChangeCallback(callback: (PlaybackState) -> Unit)
     fun setTrack(previewUrl: String, trackId: Int)
     fun pause()
     fun resume()
-    fun stop()
-    fun setOnTimeUpdateCallback(callback: (String) -> Unit)
-    fun setStateChangeCallback(callback: (PlaybackState) -> Unit)
+    fun stopPlayback()
+    fun isPlaying(): Boolean
     fun isCurrentTrackPlaying(trackId: Int): Boolean
-    fun clearCallbacks()
     fun getValidTrackId(): Int
+    fun clearCallbacks()
 }

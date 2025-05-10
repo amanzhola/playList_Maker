@@ -23,4 +23,12 @@ class SearchHistoryInteractionImpl(
     override fun clearHistory() {
         repository.clearHistory()
     }
+
+    override fun subscribeToHistoryChanges(callback: (List<Track>) -> Unit) {
+        repository.subscribeToHistoryChanges(callback)
+    }
+
+    override fun unsubscribeFromHistoryChanges() {
+        repository.unsubscribeFromHistoryChanges()
+    }
 }

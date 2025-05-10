@@ -57,4 +57,29 @@ class SharedPreferencesSearchHistoryRepository(
         const val TRACK_HISTORY_LIST_KEY = "trackHistoryList"
         private const val MAX_HISTORY_SIZE = 10
     }
+
+    override fun subscribeToHistoryChanges(callback: (List<Track>) -> Unit) {
+        this.historyChangeCallback = callback
+        sharedPreferences.registerOnSharedPreferenceChangeListener(prefsListener)
+    }
+
+    override fun unsubscribeFromHistoryChanges() {
+        historyChangeCallback = null
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(prefsListener)
+    }
+
+    private var historyChangeCallback: ((List<Track>) -> Unit)? = null
+
+    private val prefsListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+            if (key == TRACK_HISTORY_LIST_KEY) {
+                val json = prefs.getString(TRACK_HISTORY_LIST_KEY, null)
+                val history = if (!json.isNullOrEmpty()) {
+                    gson.fromJson(json, Array<Track>::class.java).toList()
+                } else {
+                    emptyList()
+                }
+                historyChangeCallback?.invoke(history)
+            }
+        }
 }

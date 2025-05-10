@@ -5,19 +5,21 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import com.example.playlistmaker.domain.api.AudioPlayerInteraction
+import com.example.playlistmaker.domain.api.PlaybackState
 import java.util.Locale
 
 class AudioPlayerInteractionImpl : AudioPlayerInteraction {
 
+
     private var mediaPlayer: MediaPlayer? = null
     private val handler = Handler(Looper.getMainLooper()) // 🚑
     private var onTimeUpdateCallback: ((String) -> Unit)? = null
-    private var onStateChangeCallback: ((AudioPlayerInteraction.PlaybackState) -> Unit)? = null
+    private var stateChangeCallback: ((PlaybackState) -> Unit)? = null
+
 
     override var currentTrackId: Int = -1
-        private set
-    override var playbackState: AudioPlayerInteraction.PlaybackState = AudioPlayerInteraction.PlaybackState.IDLE
-        private set
+    override var lastPlayedTrackId: Int = -1
+    override var playbackState: PlaybackState = PlaybackState.IDLE
 
     private val updateRunnable = object : Runnable {
         override fun run() {
@@ -25,36 +27,25 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
                 if (player.isPlaying) {
                     val currentPos = player.currentPosition
                     onTimeUpdateCallback?.invoke(getFormattedTime(currentPos))
-                    handler.postDelayed(this, 1000)
+                    handler.postDelayed(this, 1000) // 💬
                 }
             }
         }
     }
 
-    companion object { // 💯 🏗
-        @Volatile
-        private var instance: AudioPlayerInteraction? = null
-
-        fun getInstance(): AudioPlayerInteraction {
-            return instance ?: synchronized(this) {
-                instance ?: AudioPlayerInteractionImpl().also { instance = it }
-            }
-        }
-    }
-
     override fun setOnTimeUpdateCallback(callback: (String) -> Unit) { // 🔁 🧩
-        this.onTimeUpdateCallback = callback
+        onTimeUpdateCallback = callback
     }
 
-    override fun setStateChangeCallback(callback: (AudioPlayerInteraction.PlaybackState) -> Unit) { // 🔁 🧩
-        this.onStateChangeCallback = callback
+    override fun setStateChangeCallback(callback: (PlaybackState) -> Unit) { // 🔁 🧩
+        stateChangeCallback = callback
     }
 
     override fun setTrack(previewUrl: String, trackId: Int) { // 🎵 ✅ ✨🔄
-        stop()
+        stopPlayback()
         currentTrackId = trackId
-        playbackState = AudioPlayerInteraction.PlaybackState.PREPARING
-        onStateChangeCallback?.invoke(playbackState)
+        playbackState = PlaybackState.PREPARING
+        stateChangeCallback?.invoke(playbackState)
 
         mediaPlayer = MediaPlayer().apply { // 💡 ⏭️
             setDataSource(previewUrl)
@@ -64,31 +55,41 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .build()
             )
-            setOnPreparedListener {// 📌
-                playbackState = AudioPlayerInteraction.PlaybackState.PREPARED
-                onStateChangeCallback?.invoke(playbackState)
-                start() // ▶️ 💃 ⏭️
-                playbackState = AudioPlayerInteraction.PlaybackState.PLAYING
-                onStateChangeCallback?.invoke(playbackState)
-                handler.post(updateRunnable)
+
+            setOnPreparedListener { // 📌
+                playbackState = PlaybackState.PREPARED
+                stateChangeCallback?.invoke(playbackState)
+                startPlayback()
             }
-            setOnCompletionListener {// ⚠️ 📦
-                onStateChangeCallback?.invoke(AudioPlayerInteraction.PlaybackState.STOPPED)
+
+            setOnCompletionListener { // ⚠️ 📦
+                stateChangeCallback?.invoke(PlaybackState.STOPPED)
                 onTimeUpdateCallback?.invoke("00:00")
-                stop()
+
+                stopPlayback()
             }
+
             prepareAsync()
         }
-        // отправляем статус PREPARING
-        onStateChangeCallback?.invoke(AudioPlayerInteraction.PlaybackState.PREPARING)
+    }
+
+    private fun startPlayback() { // ▶️ 💃 ⏭️
+        mediaPlayer?.let {
+            if (!it.isPlaying) {
+                it.start()
+                playbackState = PlaybackState.PLAYING
+                stateChangeCallback?.invoke(playbackState)
+                handler.post(updateRunnable)
+            }
+        }
     }
 
     override fun pause() { // ⏸️
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.pause()
-                playbackState = AudioPlayerInteraction.PlaybackState.PAUSED
-                onStateChangeCallback?.invoke(playbackState)
+                playbackState = PlaybackState.PAUSED
+                stateChangeCallback?.invoke(playbackState)
                 handler.removeCallbacks(updateRunnable)
             }
         }
@@ -96,46 +97,39 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
 
     override fun resume() { // ⏹️ ▶️ + 🛑 00:00
         mediaPlayer?.let {
-            if (!it.isPlaying && playbackState == AudioPlayerInteraction.PlaybackState.PAUSED) {
+            if (!it.isPlaying && playbackState == PlaybackState.PAUSED) {
                 it.start()
-                playbackState = AudioPlayerInteraction.PlaybackState.PLAYING
-                onStateChangeCallback?.invoke(playbackState)
-                handler.post(updateRunnable)
+                playbackState = PlaybackState.PLAYING
+                stateChangeCallback?.invoke(playbackState)
+                handler.post(updateRunnable) // 🧵 🤓
             }
         }
     }
 
-    override fun stop() { // 📛
+    override fun stopPlayback() { // 📛
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
-                onStateChangeCallback?.invoke(AudioPlayerInteraction.PlaybackState.STOPPED)
+                playbackState = PlaybackState.STOPPED
+                stateChangeCallback?.invoke(playbackState)
                 handler.removeCallbacks(updateRunnable)
             }
-            release()
+            releasePlayer()
         }
-        mediaPlayer = null
-        currentTrackId = -1
-        playbackState = AudioPlayerInteraction.PlaybackState.IDLE
     }
 
-    private fun release() { // 🧹
+    private fun releasePlayer() { // 🧹
         mediaPlayer?.release()
         mediaPlayer = null
+        currentTrackId = -1
+        playbackState = PlaybackState.IDLE
+        stateChangeCallback?.invoke(playbackState)
     }
+
+    override fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true // ☕
 
     override fun isCurrentTrackPlaying(trackId: Int): Boolean { // ⛷️
-        return mediaPlayer?.isPlaying == true && currentTrackId == trackId // ☕
-    }
-
-    override fun getValidTrackId(): Int { // 🔥 100%
-        return if (currentTrackId != -1) currentTrackId else -1
-    }
-
-    override fun clearCallbacks() { //  🤘
-        onTimeUpdateCallback = null
-        onStateChangeCallback = null
-        handler.removeCallbacks(updateRunnable)
+        return isPlaying() && currentTrackId == trackId
     }
 
     private fun getFormattedTime(milliseconds: Int): String { // 🌼
@@ -145,4 +139,13 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
     }
 
+    override fun getValidTrackId(): Int { // 🔥 100%
+        return if (currentTrackId != -1) currentTrackId else lastPlayedTrackId
+    }
+
+    override fun clearCallbacks() { //  🤘
+        onTimeUpdateCallback = null
+        stateChangeCallback = null
+        handler.removeCallbacks(updateRunnable)
+    }
 }

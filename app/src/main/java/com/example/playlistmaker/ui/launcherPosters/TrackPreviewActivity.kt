@@ -35,7 +35,7 @@ class TrackPreviewActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_track_preview)
 
-        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl.getInstance()
+        val audioPlayer: AudioPlayerInteraction = AudioPlayerInteractionImpl()
         val factory = TrackPreviewViewModelFactory(audioPlayer)
 
         viewModel = ViewModelProvider(this, factory)[TrackPreviewViewModel::class.java]
@@ -44,7 +44,6 @@ class TrackPreviewActivity : AppCompatActivity() {
             val json = intent.getStringExtra("track_list_json") ?: return
             viewModel.setTrackList(json)
             viewModel.setCurrentTrackIndex(intent.getIntExtra("track_index", 0))
-
         }
 
         recyclerView = findViewById(R.id.track_detail_recycler)

@@ -7,4 +7,6 @@ interface SearchHistoryInteraction {
     fun addTrackToHistory(track: Track)
     fun saveHistory(tracks: List<Track>)
     fun clearHistory()
+    fun subscribeToHistoryChanges(callback: (List<Track>) -> Unit)
+    fun unsubscribeFromHistoryChanges()
 }
