@@ -7,6 +7,11 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="menuTintColor">@color/transparent</item>
+        <!--❌ ревьюер(иначе убрать изопа en\themes + values\attr + AppTheme + Manifest)-->
+    </style>
+
     <style name="Text22">
         <item name="android:textSize">@dimen/Title_text_22</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>

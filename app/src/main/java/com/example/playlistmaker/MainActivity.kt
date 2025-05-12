@@ -46,19 +46,26 @@ open class MainActivity : BaseActivity() {
             R.id.button5,
             R.id.button6
         )
+
         buttonIds.forEachIndexed { index, buttonId ->
             if (index < buttonPairs.size) {
                 val buttonData = buttonPairs[index]
                 val button: MaterialButton = findViewById(buttonId)
                 button.text = buttonData.first
-                button.setIconResource(buttonData.second) // ?
-//                button.setIconResource(0) // OK people
+
+                if (currentLanguage == "ru") {
+                    button.setIconResource(buttonData.second)
+                } else {
+                    button.setIconResource(0)
+                }
+
                 button.setOnClickListener {
                     onButtonClicked(index)
                 }
             }
         }
     }
+
 
     private fun setInitialButtonVisibility() {
         toggleButtonGroup()

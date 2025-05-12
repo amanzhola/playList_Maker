@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="menuTintColor">@color/red1</item>
+        <!--❌ ревьюер(иначе убрать изопа en\themes + values\attr + AppTheme + Manifest)-->
+    </style>
+</resources>

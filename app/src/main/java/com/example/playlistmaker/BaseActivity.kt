@@ -85,7 +85,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private lateinit var backArrow: ImageView
     private lateinit var title: TextView
     private var currentIndex = 0
-    private var currentLanguage: String = ""
+    var currentLanguage: String = ""
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var colorPreferences: SharedPreferences
     private var isDialogVisible = false
@@ -139,7 +139,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     private val failTextView: TextView by lazy { findViewById(R.id.fail) }
     lateinit var gson: Gson
 
-    protected val themeManager: ThemeManager // 😎
+    private val themeManager: ThemeManager // 😎
         get() = (application as App).themeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -537,6 +537,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
             putString(langKey, newLanguage)
         }
         applyLanguage(currentLanguage)
+    // 🔄 ❌ ревьюер(иначе убрать огранич русск языка на xml & main->setupButtons())
     }
 
     private fun applyLanguage(languageCode: String) {
