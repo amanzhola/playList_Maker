@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="duration_margin_top">45dp</dimen> // 👈
+    <dimen name="duration_margin_top">42dp</dimen> // 👈
     <dimen name="album_margin_top">8dp</dimen> // 👈
     <dimen name="author_margin_top">8dp</dimen>
     <dimen name="author_margin_button">10dp</dimen>
@@ -12,4 +12,6 @@
     <dimen name="text_size_small">12sp</dimen>
     <dimen name="text_size_large">14sp</dimen>
     <dimen name="icon_size">28dp</dimen>
+
+    <dimen name="marginBottom_4">4dp</dimen>
 </resources>
