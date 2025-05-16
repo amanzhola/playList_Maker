@@ -16,10 +16,10 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ToolbarConfig
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModel
+import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.gson.Gson
 
 class ExtraOption : BaseActivity() {
@@ -31,18 +31,13 @@ class ExtraOption : BaseActivity() {
     private lateinit var viewModel: ExtraOptionViewModel
     private lateinit var snapHelper: PagerSnapHelper
 
+    private var isBottomNavVisible: Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val factory = Creator.provideExtraOptionViewModelFactory()
-
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]
-
-        if (savedInstanceState == null) {   // 🎵 👉 📦 💾
-            val json = intent.getStringExtra("TRACK_LIST_JSON") ?: return
-            viewModel.setTrackList(json) // 📜 🎵
-            viewModel.setCurrentTrackIndex(intent.getIntExtra("TRACK_INDEX", 0))
-        }
 
         recyclerView = findViewById(R.id.tracks_recycler_view)
         snapHelper = PagerSnapHelper()
@@ -104,22 +99,32 @@ class ExtraOption : BaseActivity() {
             }
         })
 
-        // 📝 📂
-        val isFromSearch = intent.getBooleanExtra("IS_FROM_SEARCH", false)
-        viewModel.isBottomNavVisible = !isFromSearch // 😕 🚗
+        viewModel.isBottomNavVisible.observe(this) { isVisible -> // 📝 📂
+            recyclerView.visibility = if (isVisible) View.GONE else VISIBLE // 😕 🚗
+        }
+
+        if (savedInstanceState == null) {   // 🎵 👉 📦 💾
+            val json = intent.getStringExtra("TRACK_LIST_JSON") ?: return // 📝 📂
+            viewModel.setTrackList(json) // 📜 🎵
+            viewModel.setCurrentTrackIndex(intent.getIntExtra("TRACK_INDEX", 0))
+        }
+
         titleAndHeight() // 🏆
+        findViewById<TextView>(R.id.bottom6).isSelected = true
     }
 
     override fun onPause() {
         super.onPause()
-        val currentPosition = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-        viewModel.setScrollPosition(currentPosition)  // 📝 📂 👉 📦 💾
+        if (::recyclerView.isInitialized) { // ✅
+            val currentPosition = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            viewModel.setScrollPosition(currentPosition)  // 📝 📂 👉 📦 💾
+        }
     }
 
     private fun titleAndHeight() {
         titleTextView = findViewById(R.id.title)
         toolbar = findViewById(R.id.toolbar)
-        if (!viewModel.isBottomNavVisible) titleTextView.visibility = View.INVISIBLE // 🚗
+        if (viewModel.isBottomNavVisible.value == false) titleTextView.visibility = View.INVISIBLE // 🚗
         val fixedHeightInDp = 45 // ❓
         val fixedHeightInPx = fixedHeightInDp.convertDpToPx(this)
 
@@ -132,11 +137,16 @@ class ExtraOption : BaseActivity() {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, toFloat(), context.resources.displayMetrics).toInt()
     }
 
+    override fun onSegment4Clicked() {
+        if (isBottomNavVisible) hideBottomNavigation()
+        else showBottomNavigation()
+        isBottomNavVisible = !isBottomNavVisible
+    }
+
     override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.option) {
-        if (viewModel.isBottomNavVisible) navigateToMainActivity() else { // 💎
+        if (viewModel.isBottomNavVisible.value == true) navigateToMainActivity() else { // 💎
             viewModel.stopAudioPlay()
             finish()
-
         }
     }
 

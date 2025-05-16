@@ -7,6 +7,7 @@ import android.view.View.VISIBLE
 import android.widget.TextView
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.presentation.utils.ThemeViewModel
+import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : BaseActivity() {

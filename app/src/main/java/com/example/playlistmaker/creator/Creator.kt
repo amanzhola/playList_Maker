@@ -9,6 +9,7 @@ import com.example.playlistmaker.data.network.ITunesApi
 import com.example.playlistmaker.data.network.RetrofitAudioNetworkClient
 import com.example.playlistmaker.data.network.RetrofitWeatherNetworkClient
 import com.example.playlistmaker.data.repository.AudioRepositoryImpl
+import com.example.playlistmaker.data.repository.LanguageRepositoryImpl
 import com.example.playlistmaker.data.repository.SharedPreferencesSearchHistoryRepository
 import com.example.playlistmaker.data.repository.ThemeRepositoryImpl
 import com.example.playlistmaker.data.repository.WeatherRepositoryImpl
@@ -16,6 +17,7 @@ import com.example.playlistmaker.domain.api.AudioInteraction
 import com.example.playlistmaker.domain.api.AudioNetworkClient
 import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.AudioRepository
+import com.example.playlistmaker.domain.api.LanguageInteraction
 import com.example.playlistmaker.domain.api.MoviesRepository
 import com.example.playlistmaker.domain.api.SearchHistoryInteraction
 import com.example.playlistmaker.domain.api.ThemeInteraction
@@ -24,6 +26,7 @@ import com.example.playlistmaker.domain.api.WeatherRepository
 import com.example.playlistmaker.domain.api.weatherNetworkClient
 import com.example.playlistmaker.domain.impl.AudioInteractionImpl
 import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
+import com.example.playlistmaker.domain.impl.LanguageInteractionImpl
 import com.example.playlistmaker.domain.impl.MoviesInteractionImpl
 import com.example.playlistmaker.domain.impl.SearchHistoryInteractionImpl
 import com.example.playlistmaker.domain.impl.ThemeInteractionImpl
@@ -146,6 +149,10 @@ object Creator {
     // --- Метод для предоставления SettingsActivity переключение темы ---
     fun provideThemeInteraction(): ThemeInteraction {
         return ThemeInteractionImpl(ThemeRepositoryImpl(appContext))
+    }
+
+    fun provideLanguageInteraction(): LanguageInteraction {
+        return LanguageInteractionImpl(LanguageRepositoryImpl(appContext))
     }
 
 }

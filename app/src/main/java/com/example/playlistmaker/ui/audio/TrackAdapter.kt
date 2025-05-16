@@ -120,7 +120,6 @@ class TrackAdapter(
             val intent = Intent(context, ExtraOption::class.java).apply {
                 putExtra("TRACK_LIST_JSON", trackListJson)
                 putExtra("TRACK_INDEX", holder.bindingAdapterPosition)
-                putExtra("IS_FROM_SEARCH", true)
             }
             context.startActivity(intent)
         }

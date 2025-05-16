@@ -17,19 +17,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ToolbarConfig
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioViewModels.ErrorState
 import com.example.playlistmaker.presentation.audioViewModels.SearchViewModel
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
+import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
-class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
+class SearchActivity : BaseActivity(), OnTrackClickListener {
 
     private lateinit var adapter: TrackAdapter
     private var isBottomNavVisible = true
@@ -45,7 +45,6 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
     private lateinit var viewModel: SearchViewModel
     private lateinit var debounce: Debounce
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,8 +106,8 @@ class SearchActivity : BaseActivity(), OnTrackClickListener { // ? ? ?????
 
                     viewModel.isInputFocused.observe(this) { isFocused ->
                         searchInputLayout.hint = if (isFocused) null else getString(R.string.search_hint)
-//                        if (isFocused) hideBottomNavigation() else showBottomNavigation()
-                        hideBottomNavigation() // // (адекватам убрать)
+                        if (isFocused) hideBottomNavigation() else showBottomNavigation()
+//                        hideBottomNavigation() // (адекватным убрать)
                     }
 
                     viewModel.searchQuery.observe(this) { query ->

@@ -12,10 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ToolbarConfig
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.WeatherInteraction
 import com.example.playlistmaker.domain.models.ForecastLocation
+import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.UIUpdater

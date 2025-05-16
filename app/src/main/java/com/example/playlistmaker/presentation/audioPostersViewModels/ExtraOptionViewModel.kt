@@ -25,7 +25,7 @@ class ExtraOptionViewModel(
     private val _playbackState = MutableLiveData<PlaybackState>(PlaybackState.IDLE)
     val playbackState: LiveData<PlaybackState> get() = _playbackState
 
-    var isBottomNavVisible: Boolean = true
+    val isBottomNavVisible = MutableLiveData<Boolean>(true)
 
     private val _scrollPosition = MutableLiveData<Int>(-1)
     val scrollPosition: LiveData<Int> get() = _scrollPosition
@@ -70,6 +70,8 @@ class ExtraOptionViewModel(
     fun setTrackList(json: String) {
         val type = object : TypeToken<List<Track>>() {}.type
         _trackList.value = Gson().fromJson(json, type) ?: emptyList()
+
+        isBottomNavVisible.value = _trackList.value?.isEmpty() == true
     }
 
     fun setCurrentTrackIndex(index: Int) {
@@ -78,10 +80,6 @@ class ExtraOptionViewModel(
 
     fun toggleIsHorizontal() {
         _isHorizontal.value = _isHorizontal.value?.not() ?: true
-    }
-
-    fun toggleBottomNavVisibility() { // 🚗
-        isBottomNavVisible = !isBottomNavVisible
     }
 
     fun setScrollPosition(position: Int) {

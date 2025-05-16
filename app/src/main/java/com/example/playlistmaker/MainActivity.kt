@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.core.app.ActivityOptionsCompat
+import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.presentation.utils.NavigationConfigProvider
+import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.button.MaterialButton
 
 open class MainActivity : BaseActivity() {
@@ -36,7 +39,7 @@ open class MainActivity : BaseActivity() {
     override fun shouldEnableEdgeToEdge(): Boolean = false
 
     private fun setupButtons() {
-        val buttonPairs = getButtonPairs()
+        val buttonPairs = NavigationConfigProvider.getButtonPairs(this)
 
         val buttonIds: List<Int> = listOf(
             R.id.button1,
@@ -53,8 +56,8 @@ open class MainActivity : BaseActivity() {
                 val button: MaterialButton = findViewById(buttonId)
                 button.text = buttonData.first
 
-                if (currentLanguage == "ru") {
-                    button.setIconResource(buttonData.second)
+                if (Creator.provideLanguageInteraction().getLanguage() == "ru") {
+                    button.setIconResource(buttonData.second) // Ru can be add also
                 } else {
                     button.setIconResource(0)
                 }
@@ -72,7 +75,7 @@ open class MainActivity : BaseActivity() {
     }
 
     private fun onButtonClicked(index: Int) {
-        val navigationList = getNavigationList()
+        val navigationList = NavigationConfigProvider.getNavigationList()
 
         if (index in navigationList.indices) {
             val activityClass = navigationList[index].activityClass

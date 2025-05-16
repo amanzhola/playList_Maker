@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white_textColor"
-    tools:context=".SearchActivity">
+    tools:context=".ui.audio.SearchActivity">
 
     <include layout="@layout/toolbar"/>
 
