@@ -1,26 +1,28 @@
 package com.example.playlistmaker
 
 import android.app.Application
-import androidx.appcompat.app.AppCompatDelegate
+import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.data.repository.ThemeRepositoryImpl
+import com.example.playlistmaker.domain.usecases.ThemeManager
+import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 
-class App: Application() {
-
-    var isDarkTheme = false
+// ☀️ 🔁 🌙 👉 🧼🏗️✅
+class App : Application() { // ☀️ 🔁 🌙
+    lateinit var themeManager: ThemeManager // 😎
         private set
 
     override fun onCreate() {
         super.onCreate()
-        switchTheme(isDarkTheme)
+
+        Creator.init(this)
+
+        ThemeLanguageHelper.applySavedLanguage(this)
+
+        val repository = ThemeRepositoryImpl(this)
+        themeManager = ThemeManager(repository)
+        themeManager.applyTheme()
+
     }
 
-    fun switchTheme(darkThemeEnabled: Boolean) {
-        isDarkTheme = darkThemeEnabled
-        AppCompatDelegate.setDefaultNightMode(
-            if (darkThemeEnabled) {
-                AppCompatDelegate.MODE_NIGHT_YES
-            } else {
-                AppCompatDelegate.MODE_NIGHT_NO
-            }
-        )
-    }
+    fun isDarkThemeEnabled() = themeManager.repository.isDarkTheme()
 }
