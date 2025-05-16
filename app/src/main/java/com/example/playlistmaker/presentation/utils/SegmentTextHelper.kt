@@ -1,10 +1,10 @@
 package com.example.playlistmaker.presentation.utils
 
 import android.content.Context
-import com.example.playlistmaker.MainActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ui.audio.SearchActivity
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
+import com.example.playlistmaker.ui.main.MainActivity
 
 object SegmentTextHelper {
 

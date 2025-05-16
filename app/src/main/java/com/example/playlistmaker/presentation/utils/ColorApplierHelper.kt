@@ -2,14 +2,14 @@ package com.example.playlistmaker.presentation.utils
 
 import android.widget.LinearLayout
 import com.example.playlistmaker.BaseActivity
-import com.example.playlistmaker.MainActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.SettingsActivity
+import com.example.playlistmaker.ui.settings.SettingsActivity
 import com.example.playlistmaker.presentation.utils.ColorHelper.changeBackgroundColor
 import com.example.playlistmaker.presentation.utils.ColorHelper.changeCompoundDrawableColor
 import com.example.playlistmaker.presentation.utils.ColorHelper.changeIconColor
 import com.example.playlistmaker.presentation.utils.ColorHelper.changeTextColor
 import com.example.playlistmaker.ui.audio.SearchActivity
+import com.example.playlistmaker.ui.main.MainActivity
 
 class ColorApplierHelper(
     private val activity: BaseActivity,

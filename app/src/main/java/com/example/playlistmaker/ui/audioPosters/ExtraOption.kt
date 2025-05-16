@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.data.utils.JsonFileWriter
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
@@ -36,10 +37,12 @@ class ExtraOption : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         val factory = Creator.provideExtraOptionViewModelFactory()
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]
 
         recyclerView = findViewById(R.id.tracks_recycler_view)
+        findViewById<TextView>(R.id.bottom6).isSelected = true
         snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView) // 1️⃣
 
@@ -110,7 +113,6 @@ class ExtraOption : BaseActivity() {
         }
 
         titleAndHeight() // 🏆
-        findViewById<TextView>(R.id.bottom6).isSelected = true
     }
 
     override fun onPause() {
@@ -172,7 +174,7 @@ class ExtraOption : BaseActivity() {
         }
 
         // Создаём JSON файл для текущего трека
-        val jsonFile = createJsonFile(listOf(currentTrack))
+        val jsonFile = JsonFileWriter.writeTracksToCache(this, listOf(currentTrack))
         val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {

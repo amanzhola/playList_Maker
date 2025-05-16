@@ -3,6 +3,8 @@ package com.example.playlistmaker.creator
 import MoviesInteraction
 import MoviesRepositoryImpl
 import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.data.network.ForecaApi
 import com.example.playlistmaker.data.network.IMDbApi
 import com.example.playlistmaker.data.network.ITunesApi
@@ -19,6 +21,7 @@ import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.AudioRepository
 import com.example.playlistmaker.domain.api.LanguageInteraction
 import com.example.playlistmaker.domain.api.MoviesRepository
+import com.example.playlistmaker.domain.api.NavigationUseCase
 import com.example.playlistmaker.domain.api.SearchHistoryInteraction
 import com.example.playlistmaker.domain.api.ThemeInteraction
 import com.example.playlistmaker.domain.api.WeatherInteraction
@@ -28,11 +31,13 @@ import com.example.playlistmaker.domain.impl.AudioInteractionImpl
 import com.example.playlistmaker.domain.impl.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.impl.LanguageInteractionImpl
 import com.example.playlistmaker.domain.impl.MoviesInteractionImpl
+import com.example.playlistmaker.data.repository.NavigationUseCaseImpl
 import com.example.playlistmaker.domain.impl.SearchHistoryInteractionImpl
 import com.example.playlistmaker.domain.impl.ThemeInteractionImpl
 import com.example.playlistmaker.domain.impl.WeatherInteractionImpl
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModelFactory
 import com.example.playlistmaker.presentation.audioViewModels.SearchViewModelFactory
+import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -153,6 +158,23 @@ object Creator {
 
     fun provideLanguageInteraction(): LanguageInteraction {
         return LanguageInteractionImpl(LanguageRepositoryImpl(appContext))
+    }
+
+    // --- Метод для предоставления MainActivity ---
+    private fun provideNavigationUseCase(): NavigationUseCase {
+        return NavigationUseCaseImpl(appContext)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun provideMainViewModelFactory(): ViewModelProvider.Factory {
+        val useCase = provideNavigationUseCase()
+        val lang = provideLanguageInteraction()
+
+        return object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MainViewModel(useCase, lang) as T
+            }
+        }
     }
 
 }

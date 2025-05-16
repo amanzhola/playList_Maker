@@ -1,22 +1,31 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.ui.main
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.playlistmaker.BaseActivity
+import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.presentation.utils.NavigationConfigProvider
+import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.button.MaterialButton
 
-open class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity() { // ??
 
+    private lateinit var viewModel: MainViewModel
     private var isGroupOneVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         buttonIndex = intent.getIntExtra("buttonIndex", -1)
+
+        viewModel = ViewModelProvider(
+            this,
+            Creator.provideMainViewModelFactory()
+        )[MainViewModel::class.java]
 
         setupButtons()
         setInitialButtonVisibility()
@@ -27,6 +36,8 @@ open class MainActivity : BaseActivity() {
         return ToolbarConfig(GONE, R.string.app_name) { toggleButtonGroup() }
     }
 
+    override fun shouldEnableEdgeToEdge(): Boolean = false
+
     private fun toggleButtonGroup() {
         val groupOneIds = listOf(R.id.button1, R.id.button2, R.id.button3)
         val groupTwoIds = listOf(R.id.button4, R.id.button5, R.id.button6)
@@ -36,12 +47,8 @@ open class MainActivity : BaseActivity() {
         isGroupOneVisible = !isGroupOneVisible
     }
 
-    override fun shouldEnableEdgeToEdge(): Boolean = false
-
     private fun setupButtons() {
-        val buttonPairs = NavigationConfigProvider.getButtonPairs(this)
-
-        val buttonIds: List<Int> = listOf(
+        val buttonIds = listOf(
             R.id.button1,
             R.id.button2,
             R.id.button3,
@@ -51,38 +58,31 @@ open class MainActivity : BaseActivity() {
         )
 
         buttonIds.forEachIndexed { index, buttonId ->
-            if (index < buttonPairs.size) {
-                val buttonData = buttonPairs[index]
-                val button: MaterialButton = findViewById(buttonId)
-                button.text = buttonData.first
+            val buttonModel = viewModel.getButtonUiModel(index)
+            val button: MaterialButton = findViewById(buttonId)
 
-                if (Creator.provideLanguageInteraction().getLanguage() == "ru") {
-                    button.setIconResource(buttonData.second) // Ru can be add also
-                } else {
-                    button.setIconResource(0)
-                }
+            if (buttonModel != null) {
+                button.text = buttonModel.text
+                button.setIconResource(buttonModel.iconResId ?: 0)
 
                 button.setOnClickListener {
                     onButtonClicked(index)
                 }
+            } else {
+                button.visibility = GONE
             }
         }
     }
-
 
     private fun setInitialButtonVisibility() {
         toggleButtonGroup()
     }
 
     private fun onButtonClicked(index: Int) {
-        val navigationList = NavigationConfigProvider.getNavigationList()
+        val targetActivity = viewModel.getActivityClass(index) ?: return
+        val (enterAnim, exitAnim) = getAnimations(index)
 
-        if (index in navigationList.indices) {
-            val activityClass = navigationList[index].activityClass
-            val (enterAnim, exitAnim) = getAnimations(index)
-
-            launchActivityWithAnimation(activityClass, enterAnim, exitAnim, index)
-        }
+        launchActivityWithAnimation(targetActivity, enterAnim, exitAnim, index)
     }
 
     private fun getAnimations(index: Int): Pair<Int, Int> {
@@ -93,11 +93,11 @@ open class MainActivity : BaseActivity() {
             3 -> Pair(R.anim.fade_in, R.anim.fade_out)
             4 -> Pair(R.anim.enter_from_right, R.anim.exit_to_left)
             5 -> Pair(R.anim.zoom_in, R.anim.zoom_out)
-            else -> Pair(0, 0) // Если индекс выходит за пределы
+            else -> Pair(0, 0)
         }
     }
 
-    private fun launchActivityWithAnimation(activityClass: Class<*>, enterAnim: Int, exitAnim: Int,  buttonIndex: Int) {
+    private fun launchActivityWithAnimation(activityClass: Class<*>, enterAnim: Int, exitAnim: Int, buttonIndex: Int) {
         val intent = Intent(this, activityClass).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("buttonIndex", buttonIndex)

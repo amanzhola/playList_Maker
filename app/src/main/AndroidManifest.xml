@@ -76,7 +76,7 @@
             android:name=".ui.moviePosters.MoviePager"
             android:exported="false" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.audioPosters.ExtraOption"
@@ -94,7 +94,7 @@
             android:name=".MediaLibraryActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -2,14 +2,12 @@ package com.example.playlistmaker.presentation.utils
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import com.example.playlistmaker.R
-import com.example.playlistmaker.SettingsActivity
 import com.example.playlistmaker.ui.audio.SearchActivity
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.example.playlistmaker.ui.settings.SettingsActivity
 
 class SegmentManager(
-    private val context: Context,
+                      private val context: Context,
     private val colorApplierHelper: ColorApplierHelper,
     private val colorPersistenceHelper: ColorPersistenceHelper,
     private val isMainActivity: Boolean,
@@ -20,7 +18,7 @@ class SegmentManager(
     private val shareTrackHistoryFromViewModel: () -> Unit,
     private val shareSingleTrack: () -> Unit,
     private val recreate: () -> Unit,
-    private val colorManager: ColorManager, // <-- добавляем сюда
+    private val colorManager: ColorManager,
     private val changeLanguage: () -> Unit
 ) {
 
@@ -42,8 +40,7 @@ class SegmentManager(
                 0 -> { // Toggle theme
                     ThemeLanguageHelper.toggleTheme()
                     if (currentActivity is SettingsActivity) {
-                        val switchControl: SwitchMaterial? = currentActivity.findViewById(R.id.switch_control)
-                        switchControl?.isChecked = ThemeLanguageHelper.isDarkTheme()
+                        currentActivity.syncThemeSwitchState()
                     }
                 }
                 1 -> {

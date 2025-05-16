@@ -4,7 +4,7 @@ import android.content.Context
 import com.example.playlistmaker.MediaLibraryActivity
 import com.example.playlistmaker.NavigationData
 import com.example.playlistmaker.R
-import com.example.playlistmaker.SettingsActivity
+import com.example.playlistmaker.ui.settings.SettingsActivity
 import com.example.playlistmaker.ui.audio.SearchActivity
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.movie.SearchMovie

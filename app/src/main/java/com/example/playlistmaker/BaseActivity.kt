@@ -1,8 +1,6 @@
 package com.example.playlistmaker
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,8 +15,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.ThemeInteraction
-import com.example.playlistmaker.domain.models.Track
-import com.example.playlistmaker.presentation.utils.ActivityHelper
 import com.example.playlistmaker.presentation.utils.BottomNavigationHelper
 import com.example.playlistmaker.presentation.utils.BottomNavigationProvider
 import com.example.playlistmaker.presentation.utils.ColorApplierHelper
@@ -31,16 +27,20 @@ import com.example.playlistmaker.presentation.utils.SegmentTextHelper
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
+import com.example.playlistmaker.presentation.utils.activityHelper.AppShareHelper
+import com.example.playlistmaker.presentation.utils.activityHelper.FailUiController
+import com.example.playlistmaker.presentation.utils.activityHelper.LegalHelper
+import com.example.playlistmaker.presentation.utils.activityHelper.NetworkChecker
+import com.example.playlistmaker.presentation.utils.activityHelper.SupportHelper
+import com.example.playlistmaker.ui.main.MainActivity
 import com.google.gson.Gson
-import java.io.File
 
-// 🏆
+// 🏆 🤔
     data class NavigationData(val activityClass: Class<*>, val enterAnim: Int, val exitAnim: Int)
     // 🏆 ➡️ 🔄 📦 🤖 📈
     open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClickListener {
 
         private lateinit var mainLayout: LinearLayout
-        private lateinit var colorPreferences: SharedPreferences
         private var isDialogVisible = false
         private val baseSegmentColors = intArrayOf(
             R.color.hintFieldColor,
@@ -72,7 +72,6 @@ import java.io.File
             Creator.provideThemeInteraction()
         }
 
-        private lateinit var helper: ActivityHelper
         private lateinit var toolbarHelper: ToolbarHelper
         private lateinit var bottomNavigationHelper: BottomNavigationHelper
         private lateinit var segmentHelper: SegmentHelper
@@ -80,16 +79,19 @@ import java.io.File
         private lateinit var colorPersistenceHelper: ColorPersistenceHelper
         private lateinit var segmentManager: SegmentManager
         private lateinit var colorManager: ColorManager
+        lateinit var appShareHelper: AppShareHelper
+        lateinit var supportHelper: SupportHelper
+        lateinit var legalHelper: LegalHelper
+
 
         override fun onCreate(savedInstanceState: Bundle?) {
             ThemeLanguageHelper.applySavedLanguage(this) // 🌓 ↔️ 🌗
-            super.onCreate(savedInstanceState) // 🔜 🔚
+            super.onCreate(savedInstanceState) // 🔜 🔝 🔚
 
             setContentView(getLayoutId())
             mainLayout = findViewById(getMainLayoutId())
 
             buttonIndex = intent.getIntExtra("buttonIndex", -1)
-            colorPreferences = getColorSharedPreferences()
             val activityName = this::class.simpleName ?: "UnknownActivity"
             colorPersistenceHelper = ColorPersistenceHelper(this, activityName, isDarkThemeEnabled())
 
@@ -108,7 +110,11 @@ import java.io.File
             newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, this is MainActivity)
             gson = Gson()
             // SearchHisory done 👌 null for 2 more 😉 parameters to have 1 out of 3
-            helper = ActivityHelper(this, mainLayout, failTextView)
+            val failUiController = FailUiController(this, mainLayout, failTextView)
+            appShareHelper = AppShareHelper(this)
+            supportHelper = SupportHelper(this, failUiController)
+            legalHelper = LegalHelper(this, NetworkChecker(), failUiController)
+
             segmentHelper = SegmentHelper(this, this)
 
             colorManager = ColorManager(
@@ -132,10 +138,6 @@ import java.io.File
             )
 
             colorManager.applySavedColors()
-        }
-
-        private fun getColorSharedPreferences(): SharedPreferences {
-            return this.getSharedPreferences("color_preferences", Context.MODE_PRIVATE)
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -172,16 +174,7 @@ import java.io.File
             segmentManager.onSegmentClicked(segmentIndex, isChangedState, this)
         }
 
-        protected fun createJsonFile(tracks: List<Track>): File {
-            val file = File(cacheDir, "track_history.json")
-            file.printWriter().use { out ->
-                out.print(gson.toJson(tracks))
-            }
-            return file
-        }
-
         open fun onSegment4Clicked() {} // by btm navig 🔥
-
         override fun onResume() {
             super.onResume()
             segmentManager.applySavedColors()
@@ -243,7 +236,7 @@ import java.io.File
             recreate() // 👈 ⚠️ (перезапуск) 🔄
         }
 
-        fun shareApp() = helper.shareApp()
-        fun writeToSupport() = helper.writeToSupport()
-        fun openAgreement() = helper.openAgreement()
+        fun shareApp() = appShareHelper.shareApp()
+        fun writeToSupport() = supportHelper.writeToSupport()
+        fun openAgreement() = legalHelper.openAgreement()
     }

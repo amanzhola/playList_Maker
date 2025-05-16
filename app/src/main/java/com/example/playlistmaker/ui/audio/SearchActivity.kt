@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.data.utils.JsonFileWriter
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.audioViewModels.ErrorState
 import com.example.playlistmaker.presentation.audioViewModels.SearchViewModel
@@ -107,7 +108,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                     viewModel.isInputFocused.observe(this) { isFocused ->
                         searchInputLayout.hint = if (isFocused) null else getString(R.string.search_hint)
                         if (isFocused) hideBottomNavigation() else showBottomNavigation()
-//                        hideBottomNavigation() // (адекватным убрать)
+//                        hideBottomNavigation() // (вынуждении)
                     }
 
                     viewModel.searchQuery.observe(this) { query ->
@@ -191,7 +192,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
             return
         }
 
-        val jsonFile = createJsonFile(tracks)
+        val jsonFile = JsonFileWriter.writeTracksToCache(this, tracks)
         val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {

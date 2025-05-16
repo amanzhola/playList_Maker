@@ -1,4 +1,4 @@
-package com.example.playlistmaker.main
+package com.example.playlistmaker.ui.model_main
 
 import com.example.playlistmaker.R
 
