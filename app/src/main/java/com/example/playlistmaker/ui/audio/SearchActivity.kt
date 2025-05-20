@@ -2,7 +2,6 @@ package com.example.playlistmaker.ui.audio
 
 import android.os.Bundle
 import android.text.Editable
-import android.text.SpannableString
 import android.text.TextWatcher
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
@@ -81,8 +80,8 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
                 ErrorState.FAILURE -> {
                     errorManager.showFailure()
                     update.setOnClickListener {
-                        errorManager.hideError()
                         viewModel.onSearchActionDone()
+                        errorManager.hideError()
                     }
                 }
                 ErrorState.NONE -> {
@@ -96,10 +95,7 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
 
             /* 🔁 Текст 🧹 🛠 🔄 ✍️ */
             val buttonText = if (state.error == ErrorState.NONE) R.string.clean else R.string.update
-            val text = getString(buttonText)
-            val spannable = SpannableString(text)
-            update.text = spannable
-            // SearchActivity refactoring2 -> see updateButton underline fails 💥
+            update.text = getString(buttonText)
 
             /* 🧾 Список треков */
             adapter.updateTracks(state.displayedTracks.toMutableList())

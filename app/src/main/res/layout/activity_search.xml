@@ -65,6 +65,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUpdate"
         style="@style/SearchUpdate"
+        android:inputType="textNoSuggestions"
         tools:text="@string/clean"
         tools:visibility="visible"/>
 
