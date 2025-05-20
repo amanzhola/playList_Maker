@@ -61,8 +61,8 @@ class TrackPreviewViewModel( // 🖼️
         }
     }
 
-    fun setTrackList(json: String) {
-        _trackList.value = deserializeTrackList(json)
+    fun setTrackList(tracks: List<Track>) {
+        _trackList.value = tracks
     }
 
     fun setCurrentTrackIndex(index: Int) {

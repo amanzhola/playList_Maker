@@ -4,26 +4,28 @@ import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Movie
-import com.google.gson.Gson
+import com.example.playlistmaker.domain.repository.ShareMovie
 
 class MoviePager : AppCompatActivity() {
 
-    private lateinit var selectedMovie: Movie
     private lateinit var backImageButton: ImageButton
     private lateinit var titleTextView: TextView
     private lateinit var coverImageView: ImageView
     private lateinit var genreTextView: TextView
     private lateinit var ratingTextView: TextView
     private lateinit var descriptionTextView: TextView
-
-    private var movieJson: String? = null //  🎓
+    private lateinit var shareButton: ImageButton
+    private lateinit var shareMovieHelper: ShareMovie
+    private lateinit var selectedMovie: Movie //  🎓
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,16 +38,20 @@ class MoviePager : AppCompatActivity() {
         genreTextView = findViewById(R.id.genre)
         ratingTextView = findViewById(R.id.rating)
         descriptionTextView = findViewById(R.id.description)
+        shareButton = findViewById(R.id.shareButton)
 
-        val gson = Gson() // 🌼
+        shareMovieHelper = Creator.provideShareMovieHelper(this) // 🌼
 
-        movieJson = if (savedInstanceState != null) savedInstanceState.getString("selected_movie")
-        else intent.getStringExtra("selected_movie")
+        val helper = Creator.provideMovieStorageHelper(this)
+        val movie = helper.getMovie()
 
-        val movieJson = intent.getStringExtra("selected_movie")
-        if (movieJson != null) selectedMovie = gson.fromJson(movieJson, Movie::class.java)
-
-        displayMovieDetails(selectedMovie)
+        if (movie != null) {
+            selectedMovie = movie
+            displayMovieDetails(selectedMovie)
+        } else {
+            Toast.makeText(this, "Не удалось загрузить фильм", Toast.LENGTH_SHORT).show()
+            finish()
+        }
 
         setupClickListeners()
 
@@ -71,13 +77,13 @@ class MoviePager : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
+
+        shareButton.setOnClickListener {// 🎥 📤 🔜 🍿 ✨ 💃
+            shareMovieHelper.shareMovieOrNotify(selectedMovie)
+        }
+
         backImageButton.setOnClickListener {
             finish()
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("selected_movie", movieJson)
     }
 }

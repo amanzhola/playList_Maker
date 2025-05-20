@@ -8,9 +8,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ui.audio.OnTrackClickListener
+import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.domain.api.TrackStorageHelper
 import com.example.playlistmaker.domain.models.Track
-import com.google.gson.Gson
+import com.example.playlistmaker.ui.audio.OnTrackClickListener
 
 
 class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
@@ -18,6 +19,7 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
     private lateinit var adapter: TrackAdapterTD
     private val tracks: MutableList<Track> = mutableListOf()
     private var trackIndex: Int = 0
+    private lateinit var trackStorageHelper: TrackStorageHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,20 +35,12 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
 
         val recyclerView = findViewById<RecyclerView>(R.id.track_detail_recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
+        trackStorageHelper = Creator.provideTrackStorageHelper(this)
 
-        if (savedInstanceState != null) {
-            val json = savedInstanceState.getString("track_list_json")
-            trackIndex = savedInstanceState.getInt("track_index", 0)
-            json?.let {
-                tracks.addAll(Gson().fromJson(it, Array<Track>::class.java).toList())
-            }
-        } else {
-            trackIndex = intent.getIntExtra("track_index", 0)
-            val trackListJson = intent.getStringExtra("track_list_json")
-            trackListJson?.let {
-                tracks.addAll(Gson().fromJson(it, Array<Track>::class.java).toList())
-            }
-        }
+        val savedTracks = trackStorageHelper.getTrackList()
+        trackIndex = trackStorageHelper.getCurrentIndex()
+
+        tracks.addAll(savedTracks)
 
         adapter = TrackAdapterTD(tracks, this)
         recyclerView.adapter = adapter
@@ -57,12 +51,6 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("track_list_json", Gson().toJson(tracks))
-        outState.putInt("track_index", trackIndex)
     }
 
     override fun onTrackClicked(track: Track) {

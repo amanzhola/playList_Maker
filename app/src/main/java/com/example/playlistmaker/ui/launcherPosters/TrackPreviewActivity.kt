@@ -1,7 +1,6 @@
 package com.example.playlistmaker.ui.launcherPosters
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,12 +12,12 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.domain.api.TrackStorageHelper
 import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModelFactory
 import com.example.playlistmaker.ui.audioPosters.OnTrackAudioClickListener
 import com.example.playlistmaker.ui.audioPosters.TrackAdapterAudio
-import com.google.gson.Gson
 
 //🎶👉💿🎧📀🎵👇
 class TrackPreviewActivity : AppCompatActivity() {
@@ -28,6 +27,7 @@ class TrackPreviewActivity : AppCompatActivity() {
 
     private lateinit var viewModel: TrackPreviewViewModel
     private lateinit var snapHelper: PagerSnapHelper
+    private lateinit var trackStorageHelper: TrackStorageHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +36,15 @@ class TrackPreviewActivity : AppCompatActivity() {
 
         val audioPlayer = Creator.provideAudioPlayer()
         val factory = TrackPreviewViewModelFactory(audioPlayer)
+        trackStorageHelper = Creator.provideTrackStorageHelper(this)
 
         viewModel = ViewModelProvider(this, factory)[TrackPreviewViewModel::class.java]
 
-        if (savedInstanceState == null) {
-            val json = intent.getStringExtra("track_list_json") ?: return
-            viewModel.setTrackList(json)
-            viewModel.setCurrentTrackIndex(intent.getIntExtra("track_index", 0))
+        if (savedInstanceState == null) { // 🎵 👉 📦 💾
+            val tracks = trackStorageHelper.getTrackList() // 📝 📂
+            val index = trackStorageHelper.getCurrentIndex() // 📜 🎵
+            viewModel.setTrackList(tracks)
+            viewModel.setCurrentTrackIndex(index)
         }
 
         recyclerView = findViewById(R.id.track_detail_recycler)
@@ -94,13 +96,6 @@ class TrackPreviewActivity : AppCompatActivity() {
                     val position = (recyclerView.layoutManager as LinearLayoutManager)
                         .findFirstVisibleItemPosition()
                     viewModel.setCurrentTrackIndex(position)
-
-                    val currentTrack = viewModel.trackList.value?.getOrNull(position)
-                    if (currentTrack != null) {
-                        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                        val trackJson = Gson().toJson(currentTrack)
-                        prefs.edit().putString(TRACK_KEY, trackJson).apply()
-                    }
                 }
             }
         })
@@ -116,10 +111,5 @@ class TrackPreviewActivity : AppCompatActivity() {
         super.onPause()
         val currentPosition = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         viewModel.setScrollPosition(currentPosition)
-    }
-
-    companion object {
-        const val PREFS_NAME = "SelectedTrackPrefs"
-        const val TRACK_KEY = "selectedTrack"
     }
 }

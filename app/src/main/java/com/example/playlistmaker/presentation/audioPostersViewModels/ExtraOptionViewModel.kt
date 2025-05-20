@@ -6,8 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.example.playlistmaker.domain.api.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.PlaybackState
 import com.example.playlistmaker.domain.models.Track
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.example.playlistmaker.domain.models.TrackListInputData
 
 class ExtraOptionViewModel(
     private val audioPlayer: AudioPlayerInteraction // 🎧
@@ -67,11 +66,10 @@ class ExtraOptionViewModel(
         }
     }
 
-    fun setTrackList(json: String) {
-        val type = object : TypeToken<List<Track>>() {}.type
-        _trackList.value = Gson().fromJson(json, type) ?: emptyList()
-
-        isBottomNavVisible.value = _trackList.value?.isEmpty() == true
+    fun initializeWith(inputData: TrackListInputData) {
+        _trackList.value = inputData.trackList
+        _currentTrackIndex.value = inputData.initialIndex
+        isBottomNavVisible.value = inputData.trackList.isEmpty()
     }
 
     fun setCurrentTrackIndex(index: Int) {

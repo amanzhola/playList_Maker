@@ -5,6 +5,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.ui.audio.SearchActivity
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.main.MainActivity
+import com.example.playlistmaker.ui.movie.SearchMovie
 
 object SegmentTextHelper {
 
@@ -36,6 +37,7 @@ object SegmentTextHelper {
             when (context) {
                 is SearchActivity -> R.drawable.queue_music_24
                 is ExtraOption -> R.drawable.music_note_24
+                is SearchMovie -> R.drawable.move_down_24
                 else -> R.drawable.share
             },
             R.drawable.group,

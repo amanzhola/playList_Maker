@@ -2,14 +2,12 @@ package com.example.playlistmaker.ui.audioPosters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -17,11 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.data.utils.JsonFileWriter
+import com.example.playlistmaker.domain.api.TrackStorageHelper
 import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.repository.AudioSingleTrackShare
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
-import com.google.gson.Gson
 
 class ExtraOption : BaseActivity() {
 
@@ -33,16 +31,17 @@ class ExtraOption : BaseActivity() {
     private lateinit var snapHelper: PagerSnapHelper
 
     private var isBottomNavVisible: Boolean = true
+    private lateinit var shareHelper: AudioSingleTrackShare
+    private lateinit var trackStorageHelper: TrackStorageHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         val factory = Creator.provideExtraOptionViewModelFactory()
         viewModel = ViewModelProvider(this, factory)[ExtraOptionViewModel::class.java]
 
         recyclerView = findViewById(R.id.tracks_recycler_view)
-        findViewById<TextView>(R.id.bottom6).isSelected = true
+
         snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView) // 1️⃣
 
@@ -61,6 +60,9 @@ class ExtraOption : BaseActivity() {
                 viewModel.audioPlay(track) // ✨
             }
         })
+        findViewById<TextView>(R.id.bottom6).isSelected = true
+        shareHelper = Creator.provideShareHelper(this)
+        trackStorageHelper = Creator.provideTrackStorageHelper(this)
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this,
@@ -89,15 +91,8 @@ class ExtraOption : BaseActivity() {
 
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     val position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                    viewModel.setCurrentTrackIndex(position)
-                    viewModel.setScrollPosition(position)
-
-                    val currentTrack = viewModel.trackList.value?.getOrNull(position)
-                    currentTrack?.let { // 🎵 👉 📦 💾
-                        val prefs = getSharedPreferences(PREFS_NAME1, Context.MODE_PRIVATE)  // 💾 📥
-                        val trackJson = Gson().toJson(it)
-                        prefs.edit().putString(TRACK_KEY, trackJson).apply()
-                    }
+                    viewModel.setCurrentTrackIndex(position) // 🎵 👉 📦 💾
+                    viewModel.setScrollPosition(position) // 💾 📥
                 }
             }
         })
@@ -106,12 +101,12 @@ class ExtraOption : BaseActivity() {
             recyclerView.visibility = if (isVisible) View.GONE else VISIBLE // 😕 🚗
         }
 
-        if (savedInstanceState == null) {   // 🎵 👉 📦 💾
-            val json = intent.getStringExtra("TRACK_LIST_JSON") ?: return // 📝 📂
-            viewModel.setTrackList(json) // 📜 🎵
-            viewModel.setCurrentTrackIndex(intent.getIntExtra("TRACK_INDEX", 0))
+        if (savedInstanceState == null) { // 🎵 👉 📦 💾
+            val inputData = Creator.provideTrackListIntentParser().parse(intent)
+            inputData?.let {
+                viewModel.initializeWith(it) // 📝 📂 + 📜 🎵
+            }
         }
-
         titleAndHeight() // 🏆
     }
 
@@ -152,37 +147,12 @@ class ExtraOption : BaseActivity() {
         }
     }
 
-    override fun shouldEnableEdgeToEdge(): Boolean = false
+    override fun shouldEnableEdgeToEdge(): Boolean = false // 💥
     override fun getLayoutId(): Int = R.layout.activity_extra_option
-    override fun getMainLayoutId(): Int = R.id.main
-
-    companion object { // 😎
-        const val PREFS_NAME1 = "SelectedTrackPrefs" // PREFS_NAME 💥 with History
-        const val TRACK_KEY = "selectedTrack"
-    }
+    override fun getMainLayoutId(): Int = R.id.main // 😎
 
     fun shareSingleTrack() { // 🎵
         val currentTrack = viewModel.getCurrentTrack()
-        if (currentTrack == null) {
-            // Обработка случая, когда трек не найден
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.empty_track))
-            }
-            startActivity(Intent.createChooser(intent, null))
-            return
-        }
-
-        // Создаём JSON файл для текущего трека
-        val jsonFile = JsonFileWriter.writeTracksToCache(this, listOf(currentTrack))
-        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", jsonFile)
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/json"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, getString(R.string.track_share))
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        startActivity(Intent.createChooser(shareIntent, null))
+        shareHelper.shareTrackOrNotify(currentTrack)
     }
 }

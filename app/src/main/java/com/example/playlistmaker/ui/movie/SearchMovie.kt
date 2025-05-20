@@ -13,11 +13,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Movie
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModelFactory
+import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import com.example.playlistmaker.ui.moviePosters.MoviePagerList
 import com.example.playlistmaker.utils.Debounce
@@ -63,19 +63,22 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Выберите опцию")
             .setItems(options) { dialog, which ->
+
+                val movieStorageHelper = Creator.provideMovieStorageHelper(this)
+                // provideMovieStorageHelper shows fail -> see TrackAdapter newFiles  💥
+
                 when (which) {
                     0 -> {
-                        val movieJson = gson.toJson(selectedMovie)
+                        movieStorageHelper.saveMovie(selectedMovie)
                         val intent = Intent(this, MoviePager::class.java)
-                        intent.putExtra("selected_movie", movieJson)
                         startActivity(intent)
                     }
                     1 -> {
                         val movieList: List<Movie> = adapter.getMovies()
-                        val movieJsonList = gson.toJson(movieList)
+                        movieStorageHelper.saveMovieList(movieList)
+                        movieStorageHelper.setCurrentIndex(position)
+
                         val intent = Intent(this, MoviePagerList::class.java)
-                        intent.putExtra("MOVIE_LIST_JSON", movieJsonList)
-                        intent.putExtra("MOVIE_INDEX", position)
                         startActivity(intent)
                     }
                 }
@@ -90,7 +93,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Инициализация UIUpdater
         uiUpdater = UIUpdater(
             progressBar = findViewById(R.id.progressBar),
             placeholderMessage = findViewById(R.id.placeholderMessage),
@@ -124,7 +126,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
                 MoviesViewModel.UiState.Default -> { /* Ничего не делаем, или сбрасываем состояние */ }
             }
         }
-
 
         debounce = Debounce(CLICK_DEBOUNCE_DELAY)
 

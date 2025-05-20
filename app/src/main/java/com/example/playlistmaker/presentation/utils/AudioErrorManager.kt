@@ -30,7 +30,6 @@ class AudioErrorManager(
         textView.isEnabled = false
         textView.setText(R.string.networkFail)
         update.visibility = VISIBLE
-        update.setText(R.string.update)
     }
 
     fun hideError(){

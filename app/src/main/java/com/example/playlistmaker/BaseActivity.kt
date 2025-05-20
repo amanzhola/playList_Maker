@@ -15,6 +15,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.ThemeInteraction
+import com.example.playlistmaker.domain.repository.Agreement
+import com.example.playlistmaker.domain.repository.Support
 import com.example.playlistmaker.presentation.utils.BottomNavigationHelper
 import com.example.playlistmaker.presentation.utils.BottomNavigationProvider
 import com.example.playlistmaker.presentation.utils.ColorApplierHelper
@@ -27,11 +29,6 @@ import com.example.playlistmaker.presentation.utils.SegmentTextHelper
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
-import com.example.playlistmaker.presentation.utils.activityHelper.AppShareHelper
-import com.example.playlistmaker.presentation.utils.activityHelper.FailUiController
-import com.example.playlistmaker.presentation.utils.activityHelper.LegalHelper
-import com.example.playlistmaker.presentation.utils.activityHelper.NetworkChecker
-import com.example.playlistmaker.presentation.utils.activityHelper.SupportHelper
 import com.example.playlistmaker.ui.main.MainActivity
 import com.google.gson.Gson
 
@@ -79,14 +76,13 @@ import com.google.gson.Gson
         private lateinit var colorPersistenceHelper: ColorPersistenceHelper
         private lateinit var segmentManager: SegmentManager
         private lateinit var colorManager: ColorManager
-        lateinit var appShareHelper: AppShareHelper
-        lateinit var supportHelper: SupportHelper
-        lateinit var legalHelper: LegalHelper
-
+        private val share by lazy { Creator.provideShare(this) }
+        private lateinit var support: Support
+        private lateinit var agreement: Agreement
 
         override fun onCreate(savedInstanceState: Bundle?) {
             ThemeLanguageHelper.applySavedLanguage(this) // 🌓 ↔️ 🌗
-            super.onCreate(savedInstanceState) // 🔜 🔝 🔚
+            super.onCreate(savedInstanceState) // 🔜 🔝 🔚 ⬇️ ⬅️ 🔙
 
             setContentView(getLayoutId())
             mainLayout = findViewById(getMainLayoutId())
@@ -101,42 +97,20 @@ import com.google.gson.Gson
             bottomNavigationHelper.setupBottomNavigation()
             bottomNavigationHelper.setBottomNavigationVisibility()
 
-            if (shouldEnableEdgeToEdge()) {
-                enableEdgeToEdge()
-            }
+            if (shouldEnableEdgeToEdge()) { enableEdgeToEdge() }
             setupWindowInsets()
 
             segmentTexts = SegmentTextHelper.getSegmentTexts(this, this is MainActivity)
             newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, this is MainActivity)
-            gson = Gson()
-            // SearchHisory done 👌 null for 2 more 😉 parameters to have 1 out of 3
-            val failUiController = FailUiController(this, mainLayout, failTextView)
-            appShareHelper = AppShareHelper(this)
-            supportHelper = SupportHelper(this, failUiController)
-            legalHelper = LegalHelper(this, NetworkChecker(), failUiController)
-
+            gson = Gson() // 👌 for 2 more 😉 parameters by default to have 1 out of 3
+            support = Creator.provideSupport(this,mainLayout,failTextView)
+            agreement = Creator.provideAgreement(this, mainLayout, failTextView)
             segmentHelper = SegmentHelper(this, this)
-
-            colorManager = ColorManager(
-                colorApplierHelper = colorApplierHelper,
-                colorPersistenceHelper = colorPersistenceHelper,
-                recreateActivity = { recreate() }
-            )
-
-            segmentManager = SegmentManagerProvider.provide(
-                activity = this,
-                colorApplierHelper = colorApplierHelper,
-                colorPersistenceHelper = colorPersistenceHelper,
-                colorManager = colorManager
-            )
-
-            segmentManager = SegmentManagerProvider.provide(
-                activity = this,
-                colorApplierHelper = colorApplierHelper,
-                colorPersistenceHelper = colorPersistenceHelper,
-                colorManager = colorManager
-            )
-
+            colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
+            segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
+                colorPersistenceHelper, colorManager)
+            segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
+                colorPersistenceHelper, colorManager)
             colorManager.applySavedColors()
         }
 
@@ -236,7 +210,7 @@ import com.google.gson.Gson
             recreate() // 👈 ⚠️ (перезапуск) 🔄
         }
 
-        fun shareApp() = appShareHelper.shareApp()
-        fun writeToSupport() = supportHelper.writeToSupport()
-        fun openAgreement() = legalHelper.openAgreement()
+        fun shareApp() = share.shareApp()
+        fun writeToSupport() = support.writeToSupport()
+        fun openAgreement() = agreement.openAgreement()
     }

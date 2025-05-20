@@ -1,6 +1,5 @@
 package com.example.playlistmaker.ui.audio
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.util.TypedValue
@@ -13,8 +12,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.data.utils.NetworkUtils.isNetworkAvailable
+import com.example.playlistmaker.domain.api.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.repository.ResourceColorProvider
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
@@ -28,12 +28,13 @@ interface OnTrackClickListener {
 
 class TrackAdapter(
     private var tracks: MutableList<Track>,
-    context: Context,
+    resourceProvider: ResourceColorProvider,
+    private val networkStatusChecker: NetworkStatusChecker,
     private val listener: OnTrackClickListener
 ) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
 
-    private val defaultTextColor: Int = context.resources.getColor(R.color.hintColor_white, context.theme)
-    private val defaultTextNameColor: Int = context.resources.getColor(R.color.black_white, context.theme)
+    private val defaultTextColor: Int = resourceProvider.getColor(R.color.hintColor_white, null)
+    private val defaultTextNameColor: Int = resourceProvider.getColor(R.color.black_white, null)
     private var textNameColor: Int = defaultTextNameColor
     private var textColor: Int = defaultTextColor
     private var arrowColor: Int = defaultTextColor
@@ -48,7 +49,7 @@ class TrackAdapter(
         private val artworkImageView: ImageView = itemView.findViewById(R.id.track_image)
         val arrowImageView: ShapeableImageView = itemView.findViewById(R.id.arrow_fw)
 
-        fun bind(track: Track, context: Context, arrowColor: Int, textColor: Int, textNameColor: Int) {
+        fun bind(track: Track,networkStatusChecker: NetworkStatusChecker, arrowColor: Int, textColor: Int, textNameColor: Int) {
             trackNameTextView.text = track.trackName
             artistNameTextView.text = track.artistName
             trackTimeTextView.text = track.trackDuration
@@ -57,14 +58,16 @@ class TrackAdapter(
                 TypedValue.COMPLEX_UNIT_DIP, 2f, itemView.context.resources.displayMetrics
             ).toInt()
 
-            if (isNetworkAvailable(context)) {
-                Glide.with(context)
+            val imageViewContext = artworkImageView.context
+
+            if (networkStatusChecker.isNetworkAvailable()) {
+                Glide.with(imageViewContext)
                     .load(track.artworkUrlSmall)
                     .placeholder(R.drawable.placeholder)
                     .transform(RoundedCorners(radius))
                     .into(artworkImageView)
             } else {
-                Glide.with(context)
+                Glide.with(imageViewContext)
                     .load(R.drawable.placeholder)
                     .error(R.drawable.placeholder)
                     .transform(RoundedCorners(radius))
@@ -104,7 +107,7 @@ class TrackAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val track: Track = tracks[position]
-        holder.bind(track, holder.itemView.context, arrowColor, textColor, textNameColor)
+        holder.bind(track, networkStatusChecker, arrowColor, textColor, textNameColor)
 
         holder.arrowImageView.setOnClickListener {
             listener.onArrowClicked(track)

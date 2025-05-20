@@ -153,13 +153,13 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_marginTop">@dimen/arrow_back_24</item>
-        <item name="android:text">@string/clean</item>
         <item name="android:textColor">@color/white_textColor</item>
         <item name="backgroundTint">@color/textColor_white</item>
         <item name="cornerRadius">@dimen/track_45</item>
         <item name="android:inputType">text</item>
         <item name="android:visibility">gone</item>
     </style>
+<!--    <item name="android:text">@string/clean</item>-->
 
     <style name="track_author" parent="Text11">
         <item name="android:maxLines">1</item>

@@ -11,13 +11,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Movie
+import com.example.playlistmaker.domain.repository.ShareMovie
 
-class MoviesAdapterList(private val movies: List<Movie>,
+class MoviesAdapterList(private val movies: List<Movie>, // 🎥✨ 📤🎬
                         private val orientationToggle: () -> Unit,
                         private val activity: AppCompatActivity) : RecyclerView.Adapter<MoviesAdapterList.MovieViewHolder>() {
 
     private var isVertical: Boolean = false
+    private val shareMovieHelper: ShareMovie = Creator.provideShareMovieHelper(activity) // 📽️🍿💃
 
     class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val menuButton: ImageButton = itemView.findViewById(R.id.menu_button)
@@ -27,6 +30,7 @@ class MoviesAdapterList(private val movies: List<Movie>,
         val rating: TextView = itemView.findViewById(R.id.rating)
         val description: TextView = itemView.findViewById(R.id.description)
         val direction: ImageButton = itemView.findViewById(R.id.directionButton)
+        val shareButton: ImageButton = itemView.findViewById(R.id.shareButton) // (✨ 📽️ 🔜 💃)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
@@ -63,6 +67,9 @@ class MoviesAdapterList(private val movies: List<Movie>,
             notifyDataSetChanged()
         }
 
+        holder.shareButton.setOnClickListener {// 🎥 📤 🔜 🍿 ✨ 💃
+            shareMovieHelper.shareMovieOrNotify(movie)
+        }
     }
 
     override fun getItemCount(): Int {

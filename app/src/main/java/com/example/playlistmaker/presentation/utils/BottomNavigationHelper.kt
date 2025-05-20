@@ -82,26 +82,11 @@ class BottomNavigationHelper(
         }
     }
 
-//    fun showBottomNavigation() {
-//        setBottomNavigationVisibility()
-//        setNavigationLineVisibility(View.VISIBLE)
-//    }
-//
-//    fun hideBottomNavigation() {
-//        setBottomNavigationVisibility(View.GONE)
-//        setNavigationLineVisibility(View.GONE)
-//    }
-//
-//    private fun setBottomNavigationVisibility(visibility: Int) {
-//        val bottomNavigation: LinearLayout = activity.findViewById(R.id.bottom_navigation)
-//        bottomNavigation.visibility = visibility
-//    }
-
     private fun setNavigationLineVisibility(visibility: Int) {
         val navigationLine: View = activity.findViewById(R.id.navigationLine)
         navigationLine.visibility = visibility
     }
-    // В BottomNavigationHelper
+
     fun showBottomNavigation() {
         setBottomNavigationContainerVisibility(View.VISIBLE)
         setNavigationLineVisibility(View.VISIBLE)

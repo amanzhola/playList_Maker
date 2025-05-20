@@ -65,7 +65,9 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUpdate"
         style="@style/SearchUpdate"
+        tools:text="@string/clean"
         tools:visibility="visible"/>
+
 
     </LinearLayout>
 

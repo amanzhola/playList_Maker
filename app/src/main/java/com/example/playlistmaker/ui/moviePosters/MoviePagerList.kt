@@ -2,22 +2,21 @@ package com.example.playlistmaker.ui.moviePosters
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.example.playlistmaker.R
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Movie
 import com.example.playlistmaker.ui.movie.MoviesAdapterList
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class MoviePagerList : AppCompatActivity() {
 
-    private lateinit var movieViewPager: ViewPager2
+    private lateinit var movieViewPager: ViewPager2 // 🎓
     private lateinit var moviesAdapter: MoviesAdapterList
-    private val gson = Gson()
     private var movies: List<Movie> = emptyList()
     private var isVertical = false
 
@@ -28,19 +27,34 @@ class MoviePagerList : AppCompatActivity() {
 
         movieViewPager = findViewById(R.id.movie_view_pager)
 
-        if (savedInstanceState != null) {
-            val movieJsonList = savedInstanceState.getString("MOVIE_LIST_JSON")
-            movies = gson.fromJson(movieJsonList, object : TypeToken<List<Movie>>() {}.type)
+        val movieStorageHelper = Creator.provideMovieStorageHelper(this)
+
+        if (savedInstanceState == null) {
+            // 📥 Получаем список и индекс из хранилища
+            val movieList = movieStorageHelper.getMovieList()
+            val selectedIndex = movieStorageHelper.getCurrentIndex()
+
+            if (movieList.isNotEmpty()) {
+                movies = movieList
+                setupViewPager(movies, selectedIndex, isVertical)
+            } else {
+                Toast.makeText(this, "Не удалось загрузить список фильмов", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+
+        } else {
+            // 🔄 Восстанавливаем UI состояние (index, orientation)
             val selectedIndex = savedInstanceState.getInt("SELECTED_INDEX", 0)
             isVertical = savedInstanceState.getBoolean("IS_VERTICAL", false)
-            setupViewPager(movies, selectedIndex, isVertical)
-        } else {
-            val movieJsonList = intent.getStringExtra("MOVIE_LIST_JSON")
-            val selectedIndex = intent.getIntExtra("MOVIE_INDEX", 0)
 
-            movies = gson.fromJson(movieJsonList, object : TypeToken<List<Movie>>() {}.type)
-
-            setupViewPager(movies, selectedIndex, isVertical)
+            val movieList = movieStorageHelper.getMovieList()
+            if (movieList.isNotEmpty()) {
+                movies = movieList
+                setupViewPager(movies, selectedIndex, isVertical)
+            } else {
+                Toast.makeText(this, "Список фильмов пуст при восстановлении", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -66,8 +80,6 @@ class MoviePagerList : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        val movieJsonList = gson.toJson(movies)
-        outState.putString("MOVIE_LIST_JSON", movieJsonList)
         outState.putInt("SELECTED_INDEX", movieViewPager.currentItem)
         outState.putBoolean("IS_VERTICAL", isVertical)
     }
