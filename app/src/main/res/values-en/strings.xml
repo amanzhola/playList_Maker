@@ -65,10 +65,10 @@
     <string name="movie_picture">🍿Movie</string>
     <string name="nothing_found">Movie not found🛑</string>
     <string name="something_went_wrong">📛An error occurred</string>
-    <string name="enter_movie_name">❓Enter movie name\n</string>
+    <string name="enter_movie_name">✍️ name(❓) of ➡️ 🎞️🍿</string>
 
     <string name="nothing_found_city">City not found🚫</string>
-    <string name="enter_city_name">✨Enter the city name</string>
+    <string name="enter_city_name">✍️ location(❓) ➡️ 🏡</string>
 
     <string name="movie_search_button">Search button🧐</string>
     <string name="cover">👉Cover</string>
@@ -98,5 +98,12 @@
     <string name="set_time">🕒0:00</string>
 
     <string name="recycle_full_screen_track">🎵Full screen Track📱</string>
+
+    <string name="share_movie">✨📽️💃Movie share!</string>
+    <string name="empty_movie">😕 Movie not found😌</string>
+
+    <string name="share_movie_question">✨📽️💃Movie share?</string>
+    <string name="instruction_movie">🌼Share option located inside Move(track🎬)</string>
+    <string name="ok">👌OK</string>
 
 </resources>

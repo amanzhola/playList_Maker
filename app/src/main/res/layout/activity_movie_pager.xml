@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".movie.MoviePager"
+    tools:context=".ui.moviePosters.MoviePager"
     android:background="@color/white_textColor">
 
     <androidx.constraintlayout.widget.Guideline
@@ -119,6 +119,20 @@
         android:layout_height="wrap_content"
         android:visibility="visible"
         app:constraint_referenced_ids="seenButton,favoriteButton" />
+
+    <ImageButton
+        android:id="@+id/shareButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="8dp"
+        android:elevation="8dp"
+        android:contentDescription="@string/register"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/share"
+        app:tint="@color/switch_track_on_color1"
+        android:background="@drawable/round_button"
+        app:layout_constraintBottom_toTopOf="@+id/seenButton"
+        android:checked="false"/>
 
     <ImageButton
         android:id="@+id/seenButton"

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white_textColor"
-    tools:context=".SearchMovie">
+    tools:context=".ui.movie.SearchMovie">
 
     <include layout="@layout/toolbar"/>
 
@@ -44,6 +44,9 @@
             android:contentDescription="@string/movie_search_button"
             android:maxWidth="320dp"/>
     </LinearLayout>
+
+    <include
+        layout="@layout/fail"/>
 
     <FrameLayout
         android:layout_width="match_parent"

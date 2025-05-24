@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white_textColor"
-    tools:context=".SearchActivity">
+    tools:context=".ui.audio.SearchActivity">
 
     <include layout="@layout/toolbar"/>
 
@@ -65,10 +65,16 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUpdate"
         style="@style/SearchUpdate"
+        tools:text="@string/clean"
         tools:visibility="visible"/>
 
     </LinearLayout>
 
-    <include layout="@layout/bottom_navigation" />
+<!--    <include-->
+<!--        layout="@layout/bottom_navigation" />-->
+
+    <include
+        android:id="@+id/bottomNavigation"
+        layout="@layout/bottom_navigation" />
 
 </LinearLayout>
