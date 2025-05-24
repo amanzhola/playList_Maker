@@ -86,7 +86,8 @@ class MoviesRepositoryImpl(
                     genres = advancedSearchMovieDto?.genres,
                     plot = advancedSearchMovieDto?.plot,
                     imDbRating = advancedSearchMovieDto?.imDbRating,
-                    year = advancedSearchMovieDto?.description // 📅
+                    year = advancedSearchMovieDto?.description, // 📅
+                    inFavorite = false
                 )
             } ?: emptyList()
 

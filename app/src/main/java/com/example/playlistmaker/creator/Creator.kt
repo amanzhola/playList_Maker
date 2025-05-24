@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.playlistmaker.data.local.LocalStorage
 import com.example.playlistmaker.data.network.ForecaApi
 import com.example.playlistmaker.data.network.IMDbApi
 import com.example.playlistmaker.data.network.ITunesApi
@@ -18,6 +19,7 @@ import com.example.playlistmaker.data.repository.AgreementImpl
 import com.example.playlistmaker.data.repository.AudioRepositoryImpl
 import com.example.playlistmaker.data.repository.AudioSingleTrackImpl
 import com.example.playlistmaker.data.repository.AudioTracksImpl
+import com.example.playlistmaker.data.repository.FavoritesRepositoryImpl
 import com.example.playlistmaker.data.repository.GsonMovieSerializer
 import com.example.playlistmaker.data.repository.GsonTrackSerializer
 import com.example.playlistmaker.data.repository.LanguageRepositoryImpl
@@ -61,6 +63,7 @@ import com.example.playlistmaker.domain.impl.WeatherInteractionImpl
 import com.example.playlistmaker.domain.repository.Agreement
 import com.example.playlistmaker.domain.repository.AudioSingleTrackShare
 import com.example.playlistmaker.domain.repository.AudioTracksShare
+import com.example.playlistmaker.domain.repository.FavoritesRepository
 import com.example.playlistmaker.domain.repository.NetworkRepository
 import com.example.playlistmaker.domain.repository.ResourceColorProvider
 import com.example.playlistmaker.domain.repository.Share
@@ -68,9 +71,11 @@ import com.example.playlistmaker.domain.repository.ShareMovie
 import com.example.playlistmaker.domain.repository.Support
 import com.example.playlistmaker.domain.repository.TrackListIntentParser
 import com.example.playlistmaker.domain.usecases.CheckInternetConnectionUseCase
+import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
 import com.example.playlistmaker.presentation.audioPostersViewModels.ExtraOptionViewModelFactory
 import com.example.playlistmaker.presentation.audioViewModels.SearchViewModelFactory
 import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
+import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModelFactory
 import com.example.playlistmaker.presentation.utils.activityHelper.FailUiController
 import com.google.gson.Gson
 import retrofit2.Retrofit
@@ -283,5 +288,38 @@ object Creator {
 
     fun provideTrackListIntentParser(): TrackListIntentParser {
         return TrackListIntentParserImpl()
+    }
+// movie Favorite //  (❤️)
+    private var localStorage: LocalStorage? = null
+    private var favoritesRepository: FavoritesRepository? = null
+    private var toggleFavoriteUseCase: ToggleFavoriteUseCase? = null
+
+    private fun provideLocalStorage(context: Context): LocalStorage {
+        if (localStorage == null) {
+            val prefs = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+            localStorage = LocalStorage(prefs)
+        }
+        return localStorage!!
+    }
+
+    private fun provideFavoritesRepository(context: Context): FavoritesRepository {
+        if (favoritesRepository == null) {
+            favoritesRepository = FavoritesRepositoryImpl(provideLocalStorage(context))
+        }
+        return favoritesRepository!!
+    }
+
+    fun provideToggleFavoriteUseCase(context: Context): ToggleFavoriteUseCase {
+        if (toggleFavoriteUseCase == null) {
+            toggleFavoriteUseCase = ToggleFavoriteUseCase(provideFavoritesRepository(context))
+        }
+        return toggleFavoriteUseCase!!
+    }
+
+    fun provideMoviesViewModelFactory(context: Context): MoviesViewModelFactory {
+        return MoviesViewModelFactory(
+            provideMoviesInteraction(),
+            provideToggleFavoriteUseCase(context)
+        )
     }
 }

@@ -114,6 +114,11 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        debounce.cancel()
+    }
+
     private fun setupListeners() {
         inputEditText.addTextChangedListener(createTextWatcher())
         clearIcon.setOnClickListener { clearSearchInput() }

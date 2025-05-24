@@ -11,6 +11,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Movie
+import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
 import com.example.playlistmaker.ui.movie.MoviesAdapterList
 
 class MoviePagerList : AppCompatActivity() {
@@ -19,6 +20,7 @@ class MoviePagerList : AppCompatActivity() {
     private lateinit var moviesAdapter: MoviesAdapterList
     private var movies: List<Movie> = emptyList()
     private var isVertical = false
+    private lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,7 @@ class MoviePagerList : AppCompatActivity() {
         movieViewPager = findViewById(R.id.movie_view_pager)
 
         val movieStorageHelper = Creator.provideMovieStorageHelper(this)
+        toggleFavoriteUseCase = Creator.provideToggleFavoriteUseCase(this)
 
         if (savedInstanceState == null) {
             // 📥 Получаем список и индекс из хранилища
@@ -35,7 +38,10 @@ class MoviePagerList : AppCompatActivity() {
             val selectedIndex = movieStorageHelper.getCurrentIndex()
 
             if (movieList.isNotEmpty()) {
-                movies = movieList
+                val favoriteIds = toggleFavoriteUseCase.getFavorites()
+                movies = movieList.map { movie ->
+                    movie.copy(inFavorite = favoriteIds.contains(movie.id))
+                }
                 setupViewPager(movies, selectedIndex, isVertical)
             } else {
                 Toast.makeText(this, "Не удалось загрузить список фильмов", Toast.LENGTH_SHORT).show()
@@ -49,7 +55,10 @@ class MoviePagerList : AppCompatActivity() {
 
             val movieList = movieStorageHelper.getMovieList()
             if (movieList.isNotEmpty()) {
-                movies = movieList
+                val favoriteIds = toggleFavoriteUseCase.getFavorites()
+                movies = movieList.map { movie ->
+                    movie.copy(inFavorite = favoriteIds.contains(movie.id))
+                }
                 setupViewPager(movies, selectedIndex, isVertical)
             } else {
                 Toast.makeText(this, "Список фильмов пуст при восстановлении", Toast.LENGTH_SHORT).show()
@@ -64,8 +73,19 @@ class MoviePagerList : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setupViewPager(movies: List<Movie>, selectedIndex: Int, isVertical: Boolean) {
-        moviesAdapter = MoviesAdapterList(movies, ::toggleOrientation, this)
+        moviesAdapter = MoviesAdapterList(movies, ::toggleOrientation, this){ movieId ->
+
+            // Здесь вызываем toggleFavoriteUseCase
+            val isNowFavorite = toggleFavoriteUseCase(movieId)
+
+            // Обновляем состояние фильма в списке
+            movies.find { it.id == movieId }?.inFavorite = isNowFavorite
+
+            // Обновляем UI (лучше обновлять только элемент по позиции, но для простоты — notifyDataSetChanged)
+            moviesAdapter.notifyDataSetChanged()
+        }
         movieViewPager.adapter = moviesAdapter
 
         movieViewPager.setCurrentItem(selectedIndex, false)

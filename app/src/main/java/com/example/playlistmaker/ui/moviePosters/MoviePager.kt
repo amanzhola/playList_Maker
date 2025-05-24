@@ -1,5 +1,6 @@
 package com.example.playlistmaker.ui.moviePosters
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -14,6 +15,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.Movie
 import com.example.playlistmaker.domain.repository.ShareMovie
+import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
 
 class MoviePager : AppCompatActivity() {
 
@@ -26,6 +28,8 @@ class MoviePager : AppCompatActivity() {
     private lateinit var shareButton: ImageButton
     private lateinit var shareMovieHelper: ShareMovie
     private lateinit var selectedMovie: Movie //  🎓
+    private lateinit var favoriteButton: ImageButton //(❤️)
+    private lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase //(❤️)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +43,10 @@ class MoviePager : AppCompatActivity() {
         ratingTextView = findViewById(R.id.rating)
         descriptionTextView = findViewById(R.id.description)
         shareButton = findViewById(R.id.shareButton)
+        favoriteButton = findViewById(R.id.favoriteButton)
 
         shareMovieHelper = Creator.provideShareMovieHelper(this) // 🌼
+        toggleFavoriteUseCase = Creator.provideToggleFavoriteUseCase(this) //(❤️)
 
         val helper = Creator.provideMovieStorageHelper(this)
         val movie = helper.getMovie()
@@ -52,6 +58,7 @@ class MoviePager : AppCompatActivity() {
             Toast.makeText(this, "Не удалось загрузить фильм", Toast.LENGTH_SHORT).show()
             finish()
         }
+
 
         setupClickListeners()
 
@@ -74,6 +81,15 @@ class MoviePager : AppCompatActivity() {
         ratingTextView.text = formattedRating
         val description = "${movie.year}\n${movie.plot ?: ""}"
         descriptionTextView.text = description
+
+        // 👇 Установка иконки избранного при отображении
+        val isFavorite = toggleFavoriteUseCase.getFavorites().contains(movie.id)
+        favoriteButton.setImageResource(
+            if (isFavorite)
+                R.drawable.baseline_favorite2_border_24
+            else
+                R.drawable.baseline_favorite_border_24
+        )
     }
 
     private fun setupClickListeners() {
@@ -83,7 +99,18 @@ class MoviePager : AppCompatActivity() {
         }
 
         backImageButton.setOnClickListener {
+            setResult(Activity.RESULT_OK)
             finish()
+        }
+
+        favoriteButton.setOnClickListener { //(❤️)
+            val isNowFavorite = toggleFavoriteUseCase(selectedMovie.id)
+            favoriteButton.setImageResource(
+                if (isNowFavorite)
+                    R.drawable.baseline_favorite2_border_24
+                else
+                    R.drawable.baseline_favorite_border_24
+            )
         }
     }
 }

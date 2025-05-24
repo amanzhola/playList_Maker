@@ -81,9 +81,9 @@ class TrackAdapter(
         }
     }
 
-    fun getTracks(): List<Track> {
-        return tracks
-    }
+//    fun getTracks(): List<Track> {
+//        return tracks
+//    }
 
     fun updateTracks(newTracks: MutableList<Track>) {
         val diffCallback = GenericDiffCallback(tracks, newTracks)

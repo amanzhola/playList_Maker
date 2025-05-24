@@ -111,6 +111,10 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
         findViewById<TextView>(R.id.bottom5).isSelected = true
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        debounce.cancel()
+    }
 
     override fun onSaveInstanceState(outState: Bundle) { // 👉 🔒 🗄️ 📝
         super.onSaveInstanceState(outState)

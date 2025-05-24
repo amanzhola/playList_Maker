@@ -11,5 +11,6 @@ data class Movie( // 📦 🎥
     val genres: String? = null, // 📚
     val plot: String? = null, // 📝
     val imDbRating: String? = null, // ⭐
-    val year: String? // 📅
+    val year: String?, // 📅
+    var inFavorite: Boolean = false,
 ) : Identifiable<String>

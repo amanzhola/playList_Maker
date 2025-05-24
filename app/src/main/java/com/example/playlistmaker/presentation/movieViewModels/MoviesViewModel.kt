@@ -6,11 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.models.Movie
+import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
 import com.example.playlistmaker.domain.util.Resource
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(
-    private val moviesInteraction: MoviesInteraction
+    private val moviesInteraction: MoviesInteraction,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     sealed class UiState {
@@ -26,6 +28,32 @@ class MoviesViewModel(
 
     private val _uiState = MutableLiveData<UiState>(UiState.Default)
     val uiState: LiveData<UiState> = _uiState
+
+    fun refreshFavorites() {
+        val currentList = _movies.value ?: return
+
+        val updatedList = currentList.map { movie ->
+            movie.copy(inFavorite = toggleFavoriteUseCase.isFavorite(movie.id))
+        }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
+
+        _movies.value = updatedList
+    }
+
+    fun toggleFavorite(movieId: String) {
+        val currentMovies = _movies.value ?: return
+
+        val updatedMovies = currentMovies.map { movie ->
+            if (movie.id == movieId) {
+                val updatedMovie = movie.copy(inFavorite = !movie.inFavorite)
+
+                toggleFavoriteUseCase(updatedMovie.id)
+
+                updatedMovie
+            } else movie
+        }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
+
+        _movies.value = updatedMovies
+    }
 
     fun searchMovies(query: String) {
         if (query.isEmpty()) {
@@ -46,18 +74,23 @@ class MoviesViewModel(
                             _movies.value = emptyList()
                             _uiState.value = UiState.Empty
                         } else {
-                            _movies.value = moviesList
-                            _uiState.value = UiState.Success(moviesList)
+                            val favoriteIds = toggleFavoriteUseCase.getFavorites()
+
+                            val updatedList = moviesList.map { movie ->
+                                movie.copy(inFavorite = favoriteIds.contains(movie.id))
+                            }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
+
+                            _movies.value = updatedList
+                            _uiState.value = UiState.Success(updatedList)
                         }
                     }
-                    is Resource.Error -> {
-                        _movies.value = emptyList() // 🧼 🔁  📝
+                    is Resource.Error -> { // 🧼 🔁  📝
+                        _movies.value = emptyList()
                         val errorMessage = result.message ?: "Неизвестная ошибка"
                         _uiState.value = UiState.Error(errorMessage)
                     }
                 }
             }
         }
-
     }
 }
