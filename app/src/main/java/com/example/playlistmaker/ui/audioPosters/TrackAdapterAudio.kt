@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.utils.TracksDiffCallbackAudio
 
 interface OnTrackAudioClickListener {
@@ -20,13 +20,13 @@ interface OnTrackAudioClickListener {
     fun onBackArrowClicked()
 }
 
-class TrackAdapterAudio(
+class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
     private var tracks: List<Track>,
     private val listener: OnTrackAudioClickListener,
     private val layoutId: Int = R.layout.track_item1
 ) : RecyclerView.Adapter<TrackAdapterAudio.TrackViewHolder>() {
 
-    fun update(newItems: List<Track>) {
+    fun update(newItems: List<Track>) { // 🌟 💖
         val diffCallback = TracksDiffCallbackAudio(tracks, newItems)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         tracks = newItems
@@ -102,16 +102,16 @@ class TrackAdapterAudio(
             updatePlayState(track)
         }
 
-        fun updatePlayTime(track: Track) {
+        fun updatePlayTime(track: Track) { // 📥🔄
 //            playTime.text = track.playTime ?: "🕒0:00" // ❌ (👇 for OK people)
             playTime.text = track.playTime ?: "0:00"
         }
 
-        fun updatePlayState(track: Track) {
+        fun updatePlayState(track: Track) { // 🏆
             playButton.setImageResource(
                 if (track.isPlaying) R.drawable.pause else R.drawable.play
             )
-            favorite?.setImageResource(
+            favorite?.setImageResource( // ❤️
                 if (track.isPlaying) R.drawable.favorite1 else R.drawable.favorite
             )
         }

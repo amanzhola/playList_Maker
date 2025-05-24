@@ -1,12 +1,12 @@
 package com.example.playlistmaker.presentation.movieViewModels
 
-import MoviesInteraction
+import com.example.playlistmaker.domain.api.movie.MoviesInteraction
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.playlistmaker.domain.models.Movie
-import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
+import com.example.playlistmaker.domain.models.movie.Movie
+import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 import com.example.playlistmaker.domain.util.Resource
 import kotlinx.coroutines.launch
 

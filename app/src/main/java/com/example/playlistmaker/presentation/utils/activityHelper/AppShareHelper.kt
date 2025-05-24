@@ -5,8 +5,8 @@
 //import androidx.core.content.FileProvider
 //import com.example.playlistmaker.R
 //import com.example.playlistmaker.data.utils.JsonFileWriter
-//import com.example.playlistmaker.domain.models.Movie
-//import com.example.playlistmaker.domain.models.Track
+//import com.example.playlistmaker.domain.models.movie.Movie
+//import com.example.playlistmaker.domain.models.search.Track
 //
 //class AppShareHelper(private val activity: Activity) {
 //

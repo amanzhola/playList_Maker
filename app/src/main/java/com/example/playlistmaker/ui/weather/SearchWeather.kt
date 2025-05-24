@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.api.WeatherInteraction
-import com.example.playlistmaker.domain.models.ForecastLocation
+import com.example.playlistmaker.domain.api.weather.WeatherInteraction
+import com.example.playlistmaker.domain.models.weather.ForecastLocation
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY

@@ -6,8 +6,8 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.models.Movie
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.models.movie.Movie
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.launcherPosters.TrackDetailActivity
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import java.io.FileNotFoundException

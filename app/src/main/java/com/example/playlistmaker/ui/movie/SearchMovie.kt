@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.models.Movie
+import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.moviePosters.MoviePager

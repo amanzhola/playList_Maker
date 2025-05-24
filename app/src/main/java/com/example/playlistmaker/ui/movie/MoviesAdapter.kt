@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.playlistmaker.domain.models.Movie
+import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
 

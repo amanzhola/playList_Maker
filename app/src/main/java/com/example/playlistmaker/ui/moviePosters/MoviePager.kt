@@ -13,9 +13,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.models.Movie
-import com.example.playlistmaker.domain.repository.ShareMovie
-import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
+import com.example.playlistmaker.domain.models.movie.Movie
+import com.example.playlistmaker.domain.repository.base.ShareMovie
+import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 
 class MoviePager : AppCompatActivity() {
 

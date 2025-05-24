@@ -3,9 +3,9 @@ package com.example.playlistmaker.presentation.launcherViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.domain.api.AudioPlayerInteraction
-import com.example.playlistmaker.domain.api.PlaybackState
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
+import com.example.playlistmaker.domain.api.player.PlaybackState
+import com.example.playlistmaker.domain.models.search.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

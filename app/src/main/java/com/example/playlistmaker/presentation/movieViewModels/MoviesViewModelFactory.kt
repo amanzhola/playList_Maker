@@ -1,9 +1,9 @@
 package com.example.playlistmaker.presentation.movieViewModels
 
-import MoviesInteraction
+import com.example.playlistmaker.domain.api.movie.MoviesInteraction
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.playlistmaker.domain.usecases.ToggleFavoriteUseCase
+import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 
 class MoviesViewModelFactory(private val moviesInteractor: MoviesInteraction,
                              private val toggleFavoriteUseCase: ToggleFavoriteUseCase

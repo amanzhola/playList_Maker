@@ -70,6 +70,11 @@
 
     </LinearLayout>
 
-    <include layout="@layout/bottom_navigation" />
+<!--    <include-->
+<!--        layout="@layout/bottom_navigation" />-->
+
+    <include
+        android:id="@+id/bottomNavigation"
+        layout="@layout/bottom_navigation" />
 
 </LinearLayout>

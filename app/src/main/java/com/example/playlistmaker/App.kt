@@ -3,8 +3,8 @@ package com.example.playlistmaker
 import android.app.Application
 import android.util.Log
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.data.repository.ThemeRepositoryImpl
-import com.example.playlistmaker.domain.usecases.ThemeManager
+import com.example.playlistmaker.data.repository.base.ThemeRepositoryImpl
+import com.example.playlistmaker.domain.usecases.base.ThemeManager
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 
 // ☀️ 🔁 🌙 👉 🧼🏗️✅

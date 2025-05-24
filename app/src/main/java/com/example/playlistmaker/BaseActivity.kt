@@ -14,9 +14,9 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.api.ThemeInteraction
-import com.example.playlistmaker.domain.repository.Agreement
-import com.example.playlistmaker.domain.repository.Support
+import com.example.playlistmaker.domain.api.base.ThemeInteraction
+import com.example.playlistmaker.domain.repository.base.Agreement
+import com.example.playlistmaker.domain.repository.base.Support
 import com.example.playlistmaker.presentation.utils.BottomNavigationHelper
 import com.example.playlistmaker.presentation.utils.BottomNavigationProvider
 import com.example.playlistmaker.presentation.utils.ColorApplierHelper
@@ -30,7 +30,6 @@ import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
 import com.example.playlistmaker.ui.main.MainActivity
-import com.google.gson.Gson
 
 // 🏆 🤔
     data class NavigationData(val activityClass: Class<*>, val enterAnim: Int, val exitAnim: Int)
@@ -63,7 +62,6 @@ import com.google.gson.Gson
         var buttonIndex: Int = -1
 
         private val failTextView: TextView by lazy { findViewById(R.id.fail) }
-        lateinit var gson: Gson
 
         private val themeInteraction: ThemeInteraction by lazy { // 😎
             Creator.provideThemeInteraction()
@@ -102,7 +100,7 @@ import com.google.gson.Gson
 
             segmentTexts = SegmentTextHelper.getSegmentTexts(this, this is MainActivity)
             newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, this is MainActivity)
-            gson = Gson() // 👌 for 2 more 😉 parameters by default to have 1 out of 3
+            // 👌 for 2 more 😉 parameters by default to have 1 out of 3
             support = Creator.provideSupport(this,mainLayout,failTextView)
             agreement = Creator.provideAgreement(this, mainLayout, failTextView)
             segmentHelper = SegmentHelper(this, this)
@@ -165,7 +163,7 @@ import com.google.gson.Gson
                 }
             }
         }
-
+        // ⬇️ 🚗  💖
         protected fun showBottomNavigation() = bottomNavigationHelper.showBottomNavigation()
         protected fun hideBottomNavigation() = bottomNavigationHelper.hideBottomNavigation()
         fun isDarkThemeEnabled() = themeInteraction.isDarkTheme() // 🌓 ↔️ 🌗

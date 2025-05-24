@@ -2,7 +2,7 @@ package com.example.playlistmaker.ui.weather
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.playlistmaker.domain.models.ForecastLocation
+import com.example.playlistmaker.domain.models.weather.ForecastLocation
 
 class LocationsAdapter(private val clickListener: LocationClickListener) : RecyclerView.Adapter<LocationViewHolder>() {
 

@@ -4,21 +4,18 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.domain.api.NetworkStatusChecker
-import com.example.playlistmaker.domain.models.Track
-import com.example.playlistmaker.domain.repository.ResourceColorProvider
+import com.example.playlistmaker.databinding.TrackItemBinding
+import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
+import com.example.playlistmaker.domain.models.search.Track
+import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
-import com.google.android.material.imageview.ShapeableImageView
 import com.google.gson.Gson
 
 interface OnTrackClickListener {
@@ -42,55 +39,79 @@ class TrackAdapter(
     private val debounce = Debounce(1000L) // ✨
     private var isClickAllowed = true
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val trackNameTextView: TextView = itemView.findViewById(R.id.track_name)
-        private val artistNameTextView: TextView = itemView.findViewById(R.id.track_author)
-        private val trackTimeTextView: TextView = itemView.findViewById(R.id.track_duration)
-        private val artworkImageView: ImageView = itemView.findViewById(R.id.track_image)
-        val arrowImageView: ShapeableImageView = itemView.findViewById(R.id.arrow_fw)
+    inner class ViewHolder(private val binding: TrackItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(track: Track,networkStatusChecker: NetworkStatusChecker, arrowColor: Int, textColor: Int, textNameColor: Int) {
-            trackNameTextView.text = track.trackName
-            artistNameTextView.text = track.artistName
-            trackTimeTextView.text = track.trackDuration
+        fun bind(track: Track) {
+            binding.trackName.text = track.trackName
+            binding.trackAuthor.text = track.artistName
+            binding.trackDuration.text = track.trackDuration
 
             val radius: Int = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 2f, itemView.context.resources.displayMetrics
             ).toInt()
 
-            val imageViewContext = artworkImageView.context
+            val imageViewContext = binding.trackImage.context
 
             if (networkStatusChecker.isNetworkAvailable()) {
                 Glide.with(imageViewContext)
                     .load(track.artworkUrlSmall)
                     .placeholder(R.drawable.placeholder)
                     .transform(RoundedCorners(radius))
-                    .into(artworkImageView)
+                    .into(binding.trackImage)
             } else {
                 Glide.with(imageViewContext)
                     .load(R.drawable.placeholder)
                     .error(R.drawable.placeholder)
                     .transform(RoundedCorners(radius))
-                    .into(artworkImageView)
+                    .into(binding.trackImage)
             }
 
-            arrowImageView.imageTintList = ColorStateList.valueOf(arrowColor)
-            trackNameTextView.setTextColor(textNameColor)
-            artistNameTextView.setTextColor(textColor)
-            trackTimeTextView.setTextColor(textColor)
+            binding.arrowFw.imageTintList = ColorStateList.valueOf(arrowColor)
+            binding.trackName.setTextColor(textNameColor)
+            binding.trackAuthor.setTextColor(textColor)
+            binding.trackDuration.setTextColor(textColor)
+
+            // Кнопка-стрелка
+            binding.arrowFw.setOnClickListener {
+                listener.onArrowClicked(track)
+            }
+
+            // Сам item
+            binding.root.setOnClickListener { // ✨
+                if (!clickDebounceAllowed()) return@setOnClickListener
+
+                listener.onTrackClicked(track)
+
+                val context = binding.root.context
+                val trackListJson = Gson().toJson(tracks)
+
+                val intent = Intent(context, ExtraOption::class.java).apply {
+                    putExtra("TRACK_LIST_JSON", trackListJson)
+                    putExtra("TRACK_INDEX", bindingAdapterPosition)
+                }
+                context.startActivity(intent)
+            }
         }
     }
 
-//    fun getTracks(): List<Track> {
-//        return tracks
-//    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = TrackItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(tracks[position])
+    }
+
+    override fun getItemCount(): Int = tracks.size
 
     fun updateTracks(newTracks: MutableList<Track>) {
         val diffCallback = GenericDiffCallback(tracks, newTracks)
         val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(diffCallback)
 
-        this.tracks.clear()
-        this.tracks.addAll(newTracks)
+        tracks.clear()
+        tracks.addAll(newTracks)
 
         diffResult.dispatchUpdatesTo(this)
     }
@@ -100,51 +121,19 @@ class TrackAdapter(
         updateTracks(reversedTracks)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemView: View = LayoutInflater.from(parent.context).inflate(R.layout.track_item, parent, false)
-        return ViewHolder(itemView)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val track: Track = tracks[position]
-        holder.bind(track, networkStatusChecker, arrowColor, textColor, textNameColor)
-
-        holder.arrowImageView.setOnClickListener {
-            listener.onArrowClicked(track)
-        }
-
-        holder.itemView.setOnClickListener {
-            if (!clickDebounceAllowed()) return@setOnClickListener// ✨
-
-            listener.onTrackClicked(track)
-            val context = holder.itemView.context
-            val trackListJson = Gson().toJson(tracks)
-
-            val intent = Intent(context, ExtraOption::class.java).apply {
-                putExtra("TRACK_LIST_JSON", trackListJson)
-                putExtra("TRACK_INDEX", holder.bindingAdapterPosition)
-            }
-            context.startActivity(intent)
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return tracks.size
-    }
-
     fun setArrowColor(color: Int) {
-        this.arrowColor = color
+        arrowColor = color
         notifyItemRangeChanged(0, itemCount) // 🧐
     }
 
     fun setTextColor(color: Int) {
-        this.textColor = color
-        this.textNameColor = color
+        textColor = color
+        textNameColor = color
         notifyItemRangeChanged(0, itemCount) // 🧐
     }
 
     private fun clickDebounceAllowed(): Boolean {
-        if (isClickAllowed) {
+        if (isClickAllowed) { // ✨
             isClickAllowed = false
             debounce.debounce {
                 isClickAllowed = true

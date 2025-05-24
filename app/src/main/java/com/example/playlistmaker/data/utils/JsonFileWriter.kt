@@ -1,8 +1,8 @@
 package com.example.playlistmaker.data.utils
 
 import android.content.Context
-import com.example.playlistmaker.domain.models.Movie
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.models.movie.Movie
+import com.example.playlistmaker.domain.models.search.Track
 import com.google.gson.Gson
 import java.io.File
 

@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.api.TrackStorageHelper
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.api.base.TrackStorageHelper
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.audio.OnTrackClickListener
 
 

@@ -1,8 +1,8 @@
 package com.example.playlistmaker.presentation.mainViewModels
 
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.domain.api.LanguageInteraction
-import com.example.playlistmaker.domain.api.NavigationUseCase
+import com.example.playlistmaker.domain.api.base.LanguageInteraction
+import com.example.playlistmaker.domain.api.base.NavigationUseCase
 import com.example.playlistmaker.ui.model_main.ButtonUiModel
 
 

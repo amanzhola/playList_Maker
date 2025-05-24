@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
-import com.example.playlistmaker.domain.api.TrackStorageHelper
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.api.base.TrackStorageHelper
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModelFactory
 import com.example.playlistmaker.ui.audioPosters.OnTrackAudioClickListener
