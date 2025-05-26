@@ -13,7 +13,7 @@ import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.button.MaterialButton
 
-class MainActivity : BaseActivity() { // ??
+class MainActivity : BaseActivity() { /* 🧭 */
 
     private lateinit var viewModel: MainViewModel
     private var isGroupOneVisible = false

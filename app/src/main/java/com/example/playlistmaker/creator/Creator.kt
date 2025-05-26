@@ -1,7 +1,5 @@
 package com.example.playlistmaker.creator
 
-import com.example.playlistmaker.domain.api.movie.MoviesInteraction
-import com.example.playlistmaker.data.repository.movie.MoviesRepositoryImpl
 import android.app.Activity
 import android.content.Context
 import android.view.ViewGroup
@@ -9,14 +7,13 @@ import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.data.local.LocalStorage
-import com.example.playlistmaker.data.network.weather.ForecaApi
+import com.example.playlistmaker.data.network.base.RetrofitInstance
 import com.example.playlistmaker.data.network.movie.IMDbApi
 import com.example.playlistmaker.data.network.search.ITunesApi
 import com.example.playlistmaker.data.network.search.RetrofitAudioNetworkClient
-import com.example.playlistmaker.data.network.base.RetrofitInstance
+import com.example.playlistmaker.data.network.weather.ForecaApi
 import com.example.playlistmaker.data.network.weather.RetrofitWeatherNetworkClient
 import com.example.playlistmaker.data.repository.base.AgreementImpl
-import com.example.playlistmaker.data.repository.search.AudioRepositoryImpl
 import com.example.playlistmaker.data.repository.base.AudioSingleTrackImpl
 import com.example.playlistmaker.data.repository.base.AudioTracksImpl
 import com.example.playlistmaker.data.repository.base.FavoritesRepositoryImpl
@@ -35,30 +32,33 @@ import com.example.playlistmaker.data.repository.base.SharedPrefsTrackStorage
 import com.example.playlistmaker.data.repository.base.SupportImpl
 import com.example.playlistmaker.data.repository.base.ThemeRepositoryImpl
 import com.example.playlistmaker.data.repository.base.TrackListIntentParserImpl
+import com.example.playlistmaker.data.repository.movie.MoviesRepositoryImpl
+import com.example.playlistmaker.data.repository.search.AudioRepositoryImpl
 import com.example.playlistmaker.data.repository.weather.WeatherRepositoryImpl
-import com.example.playlistmaker.domain.api.search.AudioInteraction
-import com.example.playlistmaker.domain.api.search.AudioNetworkClient
-import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
-import com.example.playlistmaker.domain.api.search.AudioRepository
 import com.example.playlistmaker.domain.api.base.LanguageInteraction
-import com.example.playlistmaker.domain.api.movie.MovieSerializer
-import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
-import com.example.playlistmaker.domain.api.movie.MoviesRepository
 import com.example.playlistmaker.domain.api.base.NavigationUseCase
 import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.api.base.SearchHistoryInteraction
 import com.example.playlistmaker.domain.api.base.ThemeInteraction
 import com.example.playlistmaker.domain.api.base.TrackSerializer
 import com.example.playlistmaker.domain.api.base.TrackStorageHelper
+import com.example.playlistmaker.domain.api.movie.MovieSerializer
+import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
+import com.example.playlistmaker.domain.api.movie.MoviesInteraction
+import com.example.playlistmaker.domain.api.movie.MoviesRepository
+import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
+import com.example.playlistmaker.domain.api.search.AudioInteraction
+import com.example.playlistmaker.domain.api.search.AudioNetworkClient
+import com.example.playlistmaker.domain.api.search.AudioRepository
 import com.example.playlistmaker.domain.api.weather.WeatherInteraction
 import com.example.playlistmaker.domain.api.weather.WeatherRepository
 import com.example.playlistmaker.domain.api.weather.weatherNetworkClient
-import com.example.playlistmaker.domain.impl.search.AudioInteractionImpl
-import com.example.playlistmaker.domain.impl.player.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.impl.base.LanguageInteractionImpl
-import com.example.playlistmaker.domain.impl.movie.MoviesInteractionImpl
 import com.example.playlistmaker.domain.impl.base.SearchHistoryInteractionImpl
 import com.example.playlistmaker.domain.impl.base.ThemeInteractionImpl
+import com.example.playlistmaker.domain.impl.movie.MoviesInteractionImpl
+import com.example.playlistmaker.data.repository.player.AudioPlayerInteractionImpl
+import com.example.playlistmaker.domain.impl.search.AudioInteractionImpl
 import com.example.playlistmaker.domain.impl.weather.WeatherInteractionImpl
 import com.example.playlistmaker.domain.repository.base.Agreement
 import com.example.playlistmaker.domain.repository.base.AudioSingleTrackShare
@@ -72,10 +72,10 @@ import com.example.playlistmaker.domain.repository.base.Support
 import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
 import com.example.playlistmaker.domain.usecases.base.CheckInternetConnectionUseCase
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
-import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModelFactory
-import com.example.playlistmaker.presentation.searchViewModels.SearchViewModelFactory
 import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModelFactory
+import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModelFactory
+import com.example.playlistmaker.presentation.searchViewModels.SearchViewModelFactory
 import com.example.playlistmaker.presentation.utils.activityHelper.FailUiController
 import com.google.gson.Gson
 import retrofit2.Retrofit
@@ -104,7 +104,7 @@ object Creator {
         return MoviesRepositoryImpl(imdbService, apiKey)
     }
 
-    fun provideMoviesInteraction(): MoviesInteraction {
+    private fun provideMoviesInteraction(): MoviesInteraction {
         return MoviesInteractionImpl(getMoviesRepository())
     }
 

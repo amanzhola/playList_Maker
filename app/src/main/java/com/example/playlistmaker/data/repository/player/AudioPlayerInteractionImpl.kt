@@ -1,4 +1,4 @@
-package com.example.playlistmaker.domain.impl.player
+package com.example.playlistmaker.data.repository.player
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
