@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.playlistmaker.domain.api.search.AudioInteraction
 import com.example.playlistmaker.domain.api.base.SearchHistoryInteraction
+import com.example.playlistmaker.domain.api.search.AudioInteraction
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.util.Resource
 import com.example.playlistmaker.presentation.searchViewModels.models.SearchUiState
@@ -28,8 +28,15 @@ class SearchViewModel( // 🖼️
     private val currentState: SearchUiState
         get() = _uiState.value ?: SearchUiState()
 
+    private var ignoreNextHistoryUpdate = false
+
     init {
         searchHistoryInteraction.subscribeToHistoryChanges { updatedHistory ->
+            if (ignoreNextHistoryUpdate) {
+                ignoreNextHistoryUpdate = false
+                return@subscribeToHistoryChanges
+            }
+
             val shouldShow = currentState.query.isEmpty() &&
                     currentState.isInputFocused && updatedHistory.isNotEmpty()
 
@@ -142,7 +149,9 @@ class SearchViewModel( // 🖼️
     }
 
     fun clearHistory() {
+        ignoreNextHistoryUpdate = true
         searchHistoryInteraction.clearHistory()
+
         _uiState.value = currentState.copy(
             showHistory = false,
             historyTracks = emptyList()

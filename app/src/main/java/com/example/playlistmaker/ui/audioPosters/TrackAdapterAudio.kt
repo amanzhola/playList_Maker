@@ -145,4 +145,6 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
     override fun getItemCount(): Int {
         return tracks.size
     }
+
+    fun getItems(): List<Track> = tracks
 }
