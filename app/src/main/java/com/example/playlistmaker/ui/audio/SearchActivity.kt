@@ -20,8 +20,6 @@ import com.example.playlistmaker.presentation.searchViewModels.ErrorState
 import com.example.playlistmaker.presentation.searchViewModels.SearchViewModel
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
-import com.example.playlistmaker.utils.Debounce
-import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 
 class SearchActivity : BaseActivity(), OnTrackClickListener {
 
@@ -33,7 +31,6 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
     private lateinit var errorManager: AudioErrorManager
     private lateinit var trackShareService: AudioTracksShare
     private lateinit var viewModel: SearchViewModel
-    private val debounce = Debounce(SEARCH_DEBOUNCE_DELAY)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,11 +107,9 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
         return object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.setSearchQuery(s.toString())
-                debounce.debounce { // ✨
-                    viewModel.onSearchActionDone() // 🎯
-                }
+                viewModel.onQueryChanged(s.toString())
             }
+
             override fun afterTextChanged(s: Editable?) {}
         }
     }
@@ -153,10 +148,5 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
     fun shareTrackHistoryFromViewModel() { // 💖  🔝 ⭐
         val tracks = viewModel.getTrackHistoryList()
         trackShareService.shareTracks(tracks, R.string.history_track)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        debounce.cancel() // 🧼➖🧹
     }
 }

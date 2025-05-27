@@ -1,13 +1,15 @@
 package com.example.playlistmaker.presentation.movieViewModels
 
-import com.example.playlistmaker.domain.api.movie.MoviesInteraction
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playlistmaker.domain.api.movie.MoviesInteraction
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 import com.example.playlistmaker.domain.util.Resource
+import com.example.playlistmaker.utils.Debounce
+import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(
@@ -28,6 +30,24 @@ class MoviesViewModel(
 
     private val _uiState = MutableLiveData<UiState>(UiState.Default)
     val uiState: LiveData<UiState> = _uiState
+
+    private val searchDebounce = Debounce(SEARCH_DEBOUNCE_DELAY)
+
+    fun onSearchQueryEntered(rawQuery: String) {
+        searchDebounce.debounce {
+            val query = rawQuery.trim()
+            if (query.isNotEmpty()) {
+                searchMovies(query)
+            } else {
+                _uiState.postValue(UiState.Empty) // Или другое состояние, если нужно
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        searchDebounce.cancel()
+    }
 
     fun refreshFavorites() {
         val currentList = _movies.value ?: return

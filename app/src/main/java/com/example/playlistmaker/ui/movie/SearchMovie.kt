@@ -3,6 +3,8 @@ package com.example.playlistmaker.ui.movie
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
@@ -20,7 +22,6 @@ import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import com.example.playlistmaker.ui.moviePosters.MoviePagerList
-import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.UIUpdater
 
 class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
@@ -29,7 +30,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
         private const val CLICK_DEBOUNCE_DELAY = 2000L
     }
 
-    private lateinit var debounce: Debounce
     private var isClickable = true
 
     private lateinit var uiUpdater: UIUpdater
@@ -141,22 +141,11 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
             }
         }
 
-        debounce = Debounce(CLICK_DEBOUNCE_DELAY)
-
         searchButton.setOnClickListener {
-
-            debounce.debounce {
-                val query = queryInput.text.toString()
-                runOnUiThread {
-                    if (query.isNotEmpty()) {
-                        viewModel.searchMovies(query)
-                    } else {
-                        uiUpdater.showMessage(getString(R.string.enter_movie_name))
-                    }
-                }
-            }
-
+            val query = queryInput.text.toString()
+            viewModel.onSearchQueryEntered(query)
         }
+
 
         findViewById<TextView>(R.id.bottom4).isSelected = true
     }
@@ -166,19 +155,13 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
     }
 
     private fun clickDebounce(): Boolean {
-        if (isClickable) {
+        return if (isClickable) {
             isClickable = false
-            debounce.debounce {
-                isClickable = true
-            }
-            return true
+            Handler(Looper.getMainLooper()).postDelayed({ isClickable = true }, CLICK_DEBOUNCE_DELAY)
+            true
+        } else {
+            false
         }
-        return false
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        debounce.cancel()
     }
 
     override fun reverseList() {

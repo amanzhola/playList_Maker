@@ -9,6 +9,8 @@ import com.example.playlistmaker.domain.api.search.AudioInteraction
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.util.Resource
 import com.example.playlistmaker.presentation.searchViewModels.models.SearchUiState
+import com.example.playlistmaker.utils.Debounce
+import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import kotlinx.coroutines.launch
 
 enum class ErrorState {
@@ -29,6 +31,8 @@ class SearchViewModel( // 🖼️
         get() = _uiState.value ?: SearchUiState()
 
     private var ignoreNextHistoryUpdate = false
+
+    private val debounce = Debounce(SEARCH_DEBOUNCE_DELAY)
 
     init {
         searchHistoryInteraction.subscribeToHistoryChanges { updatedHistory ->
@@ -57,9 +61,17 @@ class SearchViewModel( // 🖼️
     override fun onCleared() {
         super.onCleared()
         searchHistoryInteraction.unsubscribeFromHistoryChanges()
+        debounce.cancel() // 🧼 Очистка таймера // 🧼➖🧹
     }
 
-    fun setSearchQuery(query: String) {
+    fun onQueryChanged(query: String) {
+        setSearchQuery(query)
+        debounce.debounce { // ✨
+            onSearchActionDone() // 🎯
+        }
+    }
+
+    private fun setSearchQuery(query: String) {
         val showClear = query.isNotEmpty()
         val isFocused = currentState.isInputFocused
         val history = currentState.historyTracks
