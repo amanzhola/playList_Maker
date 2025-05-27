@@ -1,6 +1,6 @@
 package com.example.playlistmaker.utils
 
-import com.example.playlistmaker.domain.models.Track
+import com.example.playlistmaker.domain.models.search.Track
 
 class TracksDiffCallbackAudio(
     oldList: List<Track>,

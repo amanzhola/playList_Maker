@@ -59,14 +59,15 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/arrow_fw"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/arrow_back_24"
+        android:layout_height="@dimen/arrow_back_24"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/agreement"
         android:src="@drawable/vector"
         android:layout_marginEnd="@dimen/Icon_12"
-        app:layout_constraintTop_toTopOf="@id/track_image"
-        app:layout_constraintBottom_toBottomOf="@id/track_image"
         style="@style/arrow_fw"/>
+
+<!--    app:layout_constraintTop_toTopOf="@id/track_image"-->
+<!--    app:layout_constraintBottom_toBottomOf="@id/track_image"-->
 
 </LinearLayout>

@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:enabled="false"
-        android:text="PLAY"/>
+        android:text="@string/play_track"/>
 
     <include layout="@layout/bottom_navigation" />
 

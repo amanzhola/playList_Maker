@@ -5,9 +5,12 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Window
 
-class CircleSegmentsDialog(context: Context, private val listener: BaseActivity) : Dialog(context) {
+// 💐 (U+1F490) 🌸(U+1F338) 🌺 (U+1F33A) 🌼(U+1F33) 🌻(U+1F33B) 🌷(U+1F337)
+class CircleSegmentsDialog(context: Context, private val listener: CircleSegmentsView.OnSegmentClickListener) : Dialog(context) {
+    // ☝️ 💯 интерфейс OnSegmentClickListener <-> BaseActivity(done)
 
     private lateinit var circleSegmentsView: CircleSegmentsView
+    private var pendingData: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,7 +18,6 @@ class CircleSegmentsDialog(context: Context, private val listener: BaseActivity)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.dialog_circle_segments)
 
-        // Устанавливаем прозрачный фон
         window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         circleSegmentsView = findViewById(R.id.circleSegmentsView)
@@ -27,12 +29,24 @@ class CircleSegmentsDialog(context: Context, private val listener: BaseActivity)
                 dismiss()
             }
         })
+
+        pendingData?.invoke()
+        pendingData = null
     }
 
-    fun setSegmentData(colors: IntArray, texts: Array<String>, icons: IntArray, newColors: IntArray, newTexts: Array<String>, newIcons: IntArray, total: Int, newTotal: Int) {
-        if (::circleSegmentsView.isInitialized) {
+    fun setSegmentData(
+        colors: IntArray, texts: Array<String>, icons: IntArray,
+        newColors: IntArray, newTexts: Array<String>, newIcons: IntArray,
+        total: Int, newTotal: Int
+    ) {
+        val applyData = {
             circleSegmentsView.setSegmentData(colors, texts, icons, newColors, newTexts, newIcons, total, newTotal)
         }
-    }
 
+        if (::circleSegmentsView.isInitialized) {
+            applyData()
+        } else {
+            pendingData = applyData
+        }
+    }
 }

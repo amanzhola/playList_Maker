@@ -99,6 +99,13 @@
 
     <string name="recycle_full_screen_track">Трек на полный экан</string>
 
+    <string name="share_movie">🎥💃 Поделиться фильмом!</string>
+    <string name="empty_movie">Фильм не найден</string>
+
+    <string name="share_movie_question">✨📽️💃Поделиться фильмом?</string>
+    <string name="instruction_movie">🌼Опция находиться внутри трека(🎬)</string>
+    <string name="ok">👌OK</string>
+
     <!--    for Ok people -->
 <!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
 <!--    <string name="search">🧐Поиск</string>-->
@@ -198,5 +205,12 @@
 <!--    <string name="set_time">🕒0:00</string>-->
 
 <!--    <string name="recycle_full_screen_track">🎵Трек на полный экан📱</string>-->
+
+<!--    <string name="share_movie">Поделиться фильмом ✨📽️💃!</string>-->
+<!--    <string name="empty_movie">😕 Фильм не найден 😌</string>-->
+
+<!--    <string name="share_movie_question">✨📽️💃Поделиться фильмом?</string>-->
+<!--    <string name="instruction_movie">🌼 Опция находиться внутри трека(🎬)</string>-->
+<!--    <string name="ok">👌OK</string>-->
 
 </resources>

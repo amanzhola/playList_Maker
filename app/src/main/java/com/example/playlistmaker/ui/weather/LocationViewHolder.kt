@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.domain.models.ForecastLocation
+import com.example.playlistmaker.domain.models.weather.ForecastLocation
 
 class LocationViewHolder(parent: ViewGroup) :
     RecyclerView.ViewHolder(

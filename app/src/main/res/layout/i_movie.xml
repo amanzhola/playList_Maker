@@ -36,8 +36,18 @@
             android:textSize="16sp"
             android:textStyle="italic"
             tools:text="2202 - TV Series of Yandex Practikum, Mosсow"/>
-
 <!--        android:textColor="@android:color/black"-->
+
+        <ImageView
+            android:id="@+id/favorite"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/favorite"
+            android:src="@drawable/baseline_favorite1_border_24"
+            android:backgroundTint="@color/eeeee_black"
+            android:background="@drawable/round_button" />
 
     </LinearLayout>
 </LinearLayout>

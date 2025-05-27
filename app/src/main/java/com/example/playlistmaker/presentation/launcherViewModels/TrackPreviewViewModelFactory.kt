@@ -2,7 +2,7 @@ package com.example.playlistmaker.presentation.launcherViewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.playlistmaker.domain.api.AudioPlayerInteraction
+import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
 
 @Suppress("UNCHECKED_CAST")
 class TrackPreviewViewModelFactory( // 🖼️

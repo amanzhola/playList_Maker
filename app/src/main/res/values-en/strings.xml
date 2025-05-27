@@ -99,4 +99,11 @@
 
     <string name="recycle_full_screen_track">🎵Full screen Track📱</string>
 
+    <string name="share_movie">✨📽️💃Movie share!</string>
+    <string name="empty_movie">😕 Movie not found😌</string>
+
+    <string name="share_movie_question">✨📽️💃Movie share?</string>
+    <string name="instruction_movie">🌼Share option located inside Move(track🎬)</string>
+    <string name="ok">👌OK</string>
+
 </resources>

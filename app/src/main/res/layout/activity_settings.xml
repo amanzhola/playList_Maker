@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white_textColor"
-    tools:context=".SettingsActivity">
+    tools:context=".ui.settings.SettingsActivity">
 
     <include layout="@layout/toolbar" />
 
@@ -41,7 +41,5 @@
         app:drawableEndCompat="@drawable/vector"/>
 
     <include layout="@layout/bottom_navigation" />
-
-
 
 </LinearLayout>

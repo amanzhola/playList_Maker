@@ -1,7 +1,7 @@
 package com.example.playlistmaker.presentation.utils
 
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.domain.api.ThemeInteraction
+import com.example.playlistmaker.domain.api.base.ThemeInteraction
 
 class ThemeViewModel(private val interaction: ThemeInteraction) : ViewModel() {
 
