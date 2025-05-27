@@ -15,7 +15,6 @@ import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.base.TrackStorageHelper
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
-import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModelFactory
 import com.example.playlistmaker.ui.audioPosters.OnTrackAudioClickListener
 import com.example.playlistmaker.ui.audioPosters.TrackAdapterAudio
 
@@ -34,8 +33,7 @@ class TrackPreviewActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_track_preview)
 
-        val audioPlayer = Creator.provideAudioPlayer()
-        val factory = TrackPreviewViewModelFactory(audioPlayer)
+        val factory = Creator.provideTrackPreviewViewModelFactory()
         trackStorageHelper = Creator.provideTrackStorageHelper(this)
 
         viewModel = ViewModelProvider(this, factory)[TrackPreviewViewModel::class.java]

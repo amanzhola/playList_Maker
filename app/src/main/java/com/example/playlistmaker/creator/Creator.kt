@@ -33,6 +33,7 @@ import com.example.playlistmaker.data.repository.base.SupportImpl
 import com.example.playlistmaker.data.repository.base.ThemeRepositoryImpl
 import com.example.playlistmaker.data.repository.base.TrackListIntentParserImpl
 import com.example.playlistmaker.data.repository.movie.MoviesRepositoryImpl
+import com.example.playlistmaker.data.repository.player.AudioPlayerInteractionImpl
 import com.example.playlistmaker.data.repository.search.AudioRepositoryImpl
 import com.example.playlistmaker.data.repository.weather.WeatherRepositoryImpl
 import com.example.playlistmaker.domain.api.base.LanguageInteraction
@@ -57,7 +58,6 @@ import com.example.playlistmaker.domain.impl.base.LanguageInteractionImpl
 import com.example.playlistmaker.domain.impl.base.SearchHistoryInteractionImpl
 import com.example.playlistmaker.domain.impl.base.ThemeInteractionImpl
 import com.example.playlistmaker.domain.impl.movie.MoviesInteractionImpl
-import com.example.playlistmaker.data.repository.player.AudioPlayerInteractionImpl
 import com.example.playlistmaker.domain.impl.search.AudioInteractionImpl
 import com.example.playlistmaker.domain.impl.weather.WeatherInteractionImpl
 import com.example.playlistmaker.domain.repository.base.Agreement
@@ -72,6 +72,7 @@ import com.example.playlistmaker.domain.repository.base.Support
 import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
 import com.example.playlistmaker.domain.usecases.base.CheckInternetConnectionUseCase
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
+import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModelFactory
 import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModelFactory
 import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModelFactory
@@ -321,5 +322,9 @@ object Creator {
             provideMoviesInteraction(),
             provideToggleFavoriteUseCase(context)
         )
+    }
+    // + added after removing 2 Launcher (.Main and .LAUNCHER)
+    fun provideTrackPreviewViewModelFactory(): TrackPreviewViewModelFactory {
+        return TrackPreviewViewModelFactory(provideAudioPlayer())
     }
 }

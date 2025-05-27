@@ -5,8 +5,111 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.player.PlaybackState
-import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.models.player.TrackListInputData
+import com.example.playlistmaker.domain.models.search.Track
+
+//
+//class ExtraOptionViewModel(
+//    private val audioPlayer: AudioPlayerInteraction
+//) : ViewModel() {
+//
+//    private val _screenState = MutableLiveData(TrackScreenState())
+//    val screenState: LiveData<TrackScreenState> = _screenState
+//
+//    init {
+//        initAudioCallbacks()
+//    }
+//
+//    private fun initAudioCallbacks() {
+//        audioPlayer.setOnTimeUpdateCallback { time ->
+//            val trackId = audioPlayer.currentTrackId
+//            val currentState = _screenState.value ?: return@setOnTimeUpdateCallback
+//            _screenState.postValue(
+//                currentState.copy(
+//                    trackList = currentState.trackList.map {
+//                        if (it.trackId == trackId) it.copy(playTime = time) else it
+//                    }
+//                )
+//            )
+//        }
+//
+//        audioPlayer.setStateChangeCallback { state ->
+//            val currentState = _screenState.value ?: return@setStateChangeCallback
+//            val trackId = audioPlayer.getValidTrackId()
+//            _screenState.postValue(
+//                currentState.copy(
+//                    playbackState = state,
+//                    trackList = currentState.trackList.map {
+//                        if (it.trackId == trackId) {
+//                            when (state) {
+//                                PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "...")
+//                                PlaybackState.PREPARED -> it.copy(isPlaying = false)
+//                                PlaybackState.PLAYING -> it.copy(isPlaying = true)
+//                                PlaybackState.PAUSED -> it.copy(isPlaying = false)
+//                                PlaybackState.STOPPED,
+//                                PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "0:00")
+//                            }
+//                        } else {
+//                            it.copy(isPlaying = false, playTime = "0:00")
+//                        }
+//                    }
+//                )
+//            )
+//        }
+//    }
+//
+//    fun initializeWith(inputData: TrackListInputData) {
+//        _screenState.value = _screenState.value?.copy(
+//            trackList = inputData.trackList,
+//            currentTrackIndex = inputData.initialIndex,
+//            isBottomNavVisible = inputData.trackList.isEmpty()
+//        )
+//    }
+//
+//    fun setCurrentTrackIndex(index: Int) {
+//        _screenState.value = _screenState.value?.copy(currentTrackIndex = index)
+//    }
+//
+//    fun toggleIsHorizontal() {
+//        _screenState.value = _screenState.value?.copy(
+//            isHorizontal = !(_screenState.value?.isHorizontal ?: true)
+//        )
+//    }
+//
+//    fun setScrollPosition(position: Int) {
+//        _screenState.value = _screenState.value?.copy(scrollPosition = position)
+//    }
+//
+//    fun clearScrollPosition() {
+//        _screenState.value = _screenState.value?.copy(scrollPosition = -1)
+//    }
+//
+//    fun audioPlay(track: Track) {
+//        when {
+//            audioPlayer.isCurrentTrackPlaying(track.trackId) -> audioPlayer.pause()
+//            audioPlayer.playbackState == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
+//            else -> audioPlayer.setTrack(track.previewUrl, track.trackId)
+//        }
+//    }
+//
+//    fun stopAudioPlay() {
+//        audioPlayer.stopPlayback()
+//    }
+//
+//    override fun onCleared() {
+//        super.onCleared()
+//        audioPlayer.clearCallbacks()
+//    }
+//
+//    fun getCurrentTrack(): Track? {
+//        val state = _screenState.value
+//        val index = state?.currentTrackIndex
+//        return if (state != null && index != null && index in state.trackList.indices) {
+//            state.trackList[index]
+//        } else null
+//    }
+//}
+//
 
 class ExtraOptionViewModel(
     private val audioPlayer: AudioPlayerInteraction // 🎧
