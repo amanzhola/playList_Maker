@@ -8,7 +8,7 @@ import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.models.player.TrackListInputData
 import com.example.playlistmaker.domain.models.search.Track
 
-//
+// // создает моргание экрана
 //class ExtraOptionViewModel(
 //    private val audioPlayer: AudioPlayerInteraction
 //) : ViewModel() {
