@@ -7,39 +7,33 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.base.TrackStorageHelper
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.ui.audioPosters.OnTrackAudioClickListener
 import com.example.playlistmaker.ui.audioPosters.TrackAdapterAudio
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TrackPreviewActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TrackAdapterAudio
-    private lateinit var viewModel: TrackPreviewViewModel
+    private val viewModel: TrackPreviewViewModel by viewModel()
     private lateinit var snapHelper: PagerSnapHelper
-    private lateinit var trackStorageHelper: TrackStorageHelper
+    private val trackStorageHelper: TrackStorageHelper by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_track_preview)
 
-        val factory = Creator.provideTrackPreviewViewModelFactory()
-        viewModel = ViewModelProvider(this, factory)[TrackPreviewViewModel::class.java]
-
-        trackStorageHelper = Creator.provideTrackStorageHelper(this)
         recyclerView = findViewById(R.id.track_detail_recycler)
-
         snapHelper = PagerSnapHelper()
-
         adapter = TrackAdapterAudio(emptyList(), object : OnTrackAudioClickListener {
             override fun onTrackClicked(track: Track, position: Int) {
                 viewModel.setCurrentTrackIndex(position)

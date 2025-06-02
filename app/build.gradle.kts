@@ -83,6 +83,8 @@ dependencies {
 
     implementation (libs.androidx.viewpager2)
 
+    implementation (libs.koin.android)
+
     // previous mess for info
 
 

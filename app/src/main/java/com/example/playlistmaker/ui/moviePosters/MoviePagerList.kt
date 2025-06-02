@@ -9,10 +9,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
+import com.example.playlistmaker.domain.repository.base.ShareMovie
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 import com.example.playlistmaker.ui.movie.MoviesAdapterList
+import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 class MoviePagerList : AppCompatActivity() {
 
@@ -20,17 +24,14 @@ class MoviePagerList : AppCompatActivity() {
     private lateinit var moviesAdapter: MoviesAdapterList
     private var movies: List<Movie> = emptyList()
     private var isVertical = false
-    private lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val movieStorageHelper: MovieStorageHelper by inject()  // 👉 📦
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase by inject() //(❤️)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_movie_pager_list)
-
         movieViewPager = findViewById(R.id.movie_view_pager)
-
-        val movieStorageHelper = Creator.provideMovieStorageHelper(this)
-        toggleFavoriteUseCase = Creator.provideToggleFavoriteUseCase(this)
 
         if (savedInstanceState == null) {
             // 📥 Получаем список и индекс из хранилища
@@ -75,7 +76,10 @@ class MoviePagerList : AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun setupViewPager(movies: List<Movie>, selectedIndex: Int, isVertical: Boolean) {
-        moviesAdapter = MoviesAdapterList(movies, ::toggleOrientation, this){ movieId ->
+        // 🔑 Получаем ShareMovie через Koin (с передачей activity как параметра)
+        val shareMovieHelper: ShareMovie = getKoin().get { parametersOf(this) } // 📽️🍿💃
+
+        moviesAdapter = MoviesAdapterList(movies, ::toggleOrientation, this, shareMovieHelper ){ movieId ->
 
             // Здесь вызываем toggleFavoriteUseCase
             val isNowFavorite = toggleFavoriteUseCase(movieId)

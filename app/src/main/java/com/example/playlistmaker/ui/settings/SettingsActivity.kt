@@ -5,30 +5,18 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.presentation.settingsViewModels.SettingsViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.switchmaterial.SwitchMaterial
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : BaseActivity() { // ♻️
 
     private lateinit var switchControl: SwitchMaterial
     private var isBottomNavVisible = true
-
-    @Suppress("UNCHECKED_CAST")
-    private val viewModel: SettingsViewModel by lazy {
-        ViewModelProvider(
-            this,
-            object : ViewModelProvider.Factory {
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    return SettingsViewModel(Creator.provideThemeInteraction()) as T
-                }
-            }
-        )[SettingsViewModel::class.java]
-    }
+    private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

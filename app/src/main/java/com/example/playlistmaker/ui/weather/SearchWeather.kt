@@ -2,6 +2,7 @@ package com.example.playlistmaker.ui.weather
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
@@ -12,14 +13,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.weather.WeatherInteraction
 import com.example.playlistmaker.domain.models.weather.ForecastLocation
+import com.example.playlistmaker.domain.util.Resource
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.UIUpdater
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+
 
 class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
 
@@ -30,10 +33,12 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
     // ❌ private val forecaService = retrofit.create(ForecaApi::class.java)
     // ❌ private val networkService = NetworkService() // ✅ 📜
 
+    // ✅ Получаем WeatherInteraction из Koin
+    private val weatherInteraction: WeatherInteraction by inject()
     // ✅ Получаем WeatherInteraction из Creator
-    private val weatherInteraction: WeatherInteraction by lazy {
-        Creator.provideWeatherInteraction()
-    }
+//    private val weatherInteraction: WeatherInteraction by lazy {
+//        Creator.provideWeatherInteraction()
+//    }
 
     private lateinit var uiUpdater: UIUpdater // ✅ 📜
     // 2️⃣ 🅰️ ⌨️ 📋 👉 🔤 🔍 👇
@@ -130,7 +135,8 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
         lifecycleScope.launch {
             weatherInteraction.searchLocations(query).collect { result ->
                 when (result) {
-                    is com.example.playlistmaker.domain.util.Resource.Success -> {
+                    is Resource.Success -> {
+                        Log.d("RESULT", "Success: ${result.data}")
                         val foundLocations = result.data
                         if (!foundLocations.isNullOrEmpty()) {
                             locations.clear()
@@ -141,7 +147,8 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
                             uiUpdater.showMessage(getString(R.string.nothing_found_city))
                         }
                     }
-                    is com.example.playlistmaker.domain.util.Resource.Error -> {
+                    is Resource.Error -> {
+                        Log.e("RESULT", "Error: ${result.message}")
                         uiUpdater.showMessage(getString(R.string.something_went_wrong))
                     }
                 }
@@ -154,14 +161,14 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
         lifecycleScope.launch {
             weatherInteraction.getCurrentWeather(location.id).collect { result ->
                 when (result) {
-                    is com.example.playlistmaker.domain.util.Resource.Success -> {
+                    is Resource.Success -> {
                         val weatherData = result.data
                         if (weatherData != null) {
                             val message = "${location.name}: ${weatherData.temperature}°C\n(Ощущается как ${weatherData.feelsLikeTemp}°C)"
                             Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
                         }
                     }
-                    is com.example.playlistmaker.domain.util.Resource.Error -> {
+                    is Resource.Error -> {
                         Toast.makeText(applicationContext, getString(R.string.something_went_wrong), Toast.LENGTH_LONG).show()
                     }
                 }

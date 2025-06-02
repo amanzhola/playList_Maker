@@ -55,6 +55,3 @@ class ToolbarHelper(private val activity: Activity) {
         backArrow?.imageTintList = android.content.res.ColorStateList.valueOf(color)
     }
 }
-
-
-

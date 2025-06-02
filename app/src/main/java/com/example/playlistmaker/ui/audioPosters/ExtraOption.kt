@@ -5,38 +5,35 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivityExtraOptionBinding
-import com.example.playlistmaker.domain.api.base.TrackStorageHelper
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.AudioSingleTrackShare
+import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
 import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class ExtraOption : BaseActivity() {
 
     private lateinit var binding: ActivityExtraOptionBinding
     private lateinit var adapter: TrackAdapterAudio
-    private lateinit var viewModel: ExtraOptionViewModel
+    private val viewModel: ExtraOptionViewModel by viewModel()
     private lateinit var snapHelper: PagerSnapHelper
-    private lateinit var shareHelper: AudioSingleTrackShare
-    private lateinit var trackStorageHelper: TrackStorageHelper
+    private val shareHelper: AudioSingleTrackShare by inject { parametersOf(this) } // 👨‍💻
+    private val trackListIntentParser: TrackListIntentParser by inject() // 👉 📦 🔄
 
     private var currentLayoutOrientation: Int = LinearLayoutManager.HORIZONTAL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExtraOptionBinding.bind(findViewById(getMainLayoutId()))
-
-        viewModel = ViewModelProvider(this, Creator.provideExtraOptionViewModelFactory())[ExtraOptionViewModel::class.java]
-        shareHelper = Creator.provideShareHelper(this)
-        trackStorageHelper = Creator.provideTrackStorageHelper(this)
 
         adapter = TrackAdapterAudio(emptyList(), object : OnTrackAudioClickListener {
             override fun onTrackClicked(track: Track, position: Int) {
@@ -74,8 +71,7 @@ class ExtraOption : BaseActivity() {
 
             // Показываем/скрываем элементы навигации
             binding.tracksRecyclerView.visibility = if (state.isBottomNavVisible) View.GONE else View.VISIBLE
-            findViewById<TextView>(R.id.title).visibility = if (state.isBottomNavVisible) View.INVISIBLE else View.VISIBLE
-
+            findViewById<TextView>(R.id.title).visibility = if (state.isBottomNavVisible) View.VISIBLE else View.INVISIBLE
 
             findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)?.apply {
                 val fixedHeightInPx = 45.convertDpToPx(this@ExtraOption)
@@ -98,7 +94,7 @@ class ExtraOption : BaseActivity() {
 
         // Обработка первого запуска
         if (savedInstanceState == null) {
-            Creator.provideTrackListIntentParser().parse(intent)?.let { viewModel.initializeWith(it) }
+            trackListIntentParser.parse(intent)?.let { viewModel.initializeWith(it) }
         }
 
         // Выделение кнопки в нижней навигации

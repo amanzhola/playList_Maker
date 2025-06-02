@@ -5,15 +5,24 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.domain.api.base.TrackSerializer
+import com.example.playlistmaker.domain.api.base.TrackStorageHelper
+import com.example.playlistmaker.domain.api.movie.MovieSerializer
+import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.launcherPosters.TrackDetailActivity
 import com.example.playlistmaker.ui.moviePosters.MoviePager
+import org.koin.android.ext.android.inject
 import java.io.FileNotFoundException
 import java.io.IOException
 
 class LauncherActivity : AppCompatActivity() {
+
+    private val trackStorageHelper: TrackStorageHelper by inject() // 👉 📦
+    private val movieStorageHelper: MovieStorageHelper by inject() // 👉 📦
+    private val trackSerializer: TrackSerializer by inject() // 🎶 ↔️ 🎵
+    private val movieSerializer: MovieSerializer by inject() // 🎥💃 ↔️ 💃🎬
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +42,7 @@ class LauncherActivity : AppCompatActivity() {
                     if (!sharedText.isNullOrEmpty()) {
                         handleTrackFromText(sharedText)
                     } else {
-                        showAlertDialog("Ошибка", "Получен пустой текст.") // 😕
+                        "Ошибка".showAlertDialog("Получен пустой текст.") // 😕
                     }
                 }
             }
@@ -43,7 +52,7 @@ class LauncherActivity : AppCompatActivity() {
                 if (uri != null) {
                     handleTrackFromUri(uri)
                 } else {
-                    showAlertDialog("Ошибка", "Некорректный Uri.") // 🤔 😬
+                    "Ошибка".showAlertDialog("Некорректный Uri.") // 🤔 😬
                 }
             }
 
@@ -52,17 +61,16 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private fun handleTrackFromText(sharedText: String) {
-        val trackSerializer = Creator.provideTrackSerializer()
 
         try {
             val tracks = trackSerializer.deserializeList(sharedText)
             if (!tracks.isNullOrEmpty()) {
-                openTrackDetail(tracks.toTypedArray(), 0)
+                0.openTrackDetail(tracks.toTypedArray())
             } else {
-                showAlertDialog("Ошибка", "Список треков пуст.")  // 😕
+                "Ошибка".showAlertDialog("Список треков пуст.")  // 😕
             }
         } catch (e: Exception) { // 🤔 😬
-            showAlertDialog("Ошибка", "Не удалось обработать трек: ${e.message}") // 😌
+            "Ошибка".showAlertDialog("Не удалось обработать трек: ${e.message}") // 😌
         }
     }
 
@@ -73,18 +81,15 @@ class LauncherActivity : AppCompatActivity() {
             val json = inputStream?.bufferedReader().use { it?.readText() }
 
             if (json.isNullOrEmpty()) {
-                showAlertDialog("Ошибка", "Получен пустой JSON-файл.") // 😕
+                "Ошибка".showAlertDialog("Получен пустой JSON-файл.") // 😕
                 return
             }
-
-            val trackSerializer = Creator.provideTrackSerializer()
-            val movieSerializer = Creator.provideMovieSerializer()
 
             // 2. Пробуем как один фильм 🔙
             try { // ❓ 🔜  📽️🍿💃
                 val movie = movieSerializer.deserialize(json)
                 if (movie != null) {
-                    openMovieDetail(arrayOf(movie), 0)
+                    0.openMovieDetail(arrayOf(movie))
                     return
                 }
             } catch (_: Exception) {}
@@ -93,7 +98,7 @@ class LauncherActivity : AppCompatActivity() {
             try { // ❓ 🔜  🎧 🎵 💿 ↔️ 📀 🎶
                 val trackList = trackSerializer.deserializeList(json)
                 if (!trackList.isNullOrEmpty()) {
-                    openTrackDetail(trackList.toTypedArray(), 0)
+                    0.openTrackDetail(trackList.toTypedArray())
                     return
                 }
             } catch (_: Exception) {}
@@ -102,46 +107,44 @@ class LauncherActivity : AppCompatActivity() {
             try { // ❓ 🔜  📽️+🎥+🎬 🔚 ✨💃
                 val movieList = movieSerializer.deserializeList(json)
                 if (!movieList.isNullOrEmpty()) {
-                    openMovieDetail(movieList.toTypedArray(), 0)
+                    0.openMovieDetail(movieList.toTypedArray())
                     return
                 }
             } catch (_: Exception) {}
 
-            showAlertDialog("Ошибка", "Не удалось распознать содержимое файла.") // 🤔 😬
+            "Ошибка".showAlertDialog("Не удалось распознать содержимое файла.") // 🤔 😬
         } catch (e: FileNotFoundException) {
-            showAlertDialog("Ошибка", "Файл не найден.") // 😕
+            "Ошибка".showAlertDialog("Файл не найден.") // 😕
         } catch (e: IOException) {
-            showAlertDialog("Ошибка", "Ошибка чтения JSON-файла.") // 😌
+            "Ошибка".showAlertDialog("Ошибка чтения JSON-файла.") // 😌
         } catch (e: Exception) {
-            showAlertDialog("Ошибка", "Произошла ошибка при обработке Uri.") // ❌
+            "Ошибка".showAlertDialog("Произошла ошибка при обработке Uri.") // ❌
         }
     }
 
-    private fun showAlertDialog(title: String, message: String) { //  👨‍💻✨
-        AlertDialog.Builder(this)
-            .setTitle(title)
+    private fun String.showAlertDialog(message: String) { //  👨‍💻✨
+        AlertDialog.Builder(this@LauncherActivity)
+            .setTitle(this)
             .setMessage(message)
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
     }
 
-    private fun openTrackDetail(tracks: Array<Track>, trackIndex: Int) { // 👌 😉 🎵
-        val trackStorageHelper = Creator.provideTrackStorageHelper(this)
+    private fun Int.openTrackDetail(tracks: Array<Track>) { // 👌 😉 🎵
         trackStorageHelper.saveTrackList(tracks.toList())  // ⬅️ 🎶 📜 👉 📝 📦 💾 (сохраняем список)
-        trackStorageHelper.setCurrentIndex(trackIndex)     // ⬅️ 🎵 📜 👉 📝 📦 💾 (сохраняем индекс)
+        trackStorageHelper.setCurrentIndex(this)     // ⬅️ 🎵 📜 👉 📝 📦 💾 (сохраняем индекс)
 
-        val intent = Intent(this, TrackDetailActivity::class.java)
+        val intent = Intent(this@LauncherActivity, TrackDetailActivity::class.java)
         startActivity(intent)
         finish()
     } // provideTrackStorageHelper shows fail -> see TrackAdapter newFiles  💥
 
-    private fun openMovieDetail(movies: Array<Movie>, index: Int) { // 👌 😉 📽️
-        val selectedMovie = movies[index]
+    private fun Int.openMovieDetail(movies: Array<Movie>) { // 👌 😉 📽️
+        val selectedMovie = movies[this]
 
-        val movieStorageHelper = Creator.provideMovieStorageHelper(this)
         movieStorageHelper.saveMovie(selectedMovie)
 
-        val intent = Intent(this, MoviePager::class.java)
+        val intent = Intent(this@LauncherActivity, MoviePager::class.java)
         startActivity(intent)
         finish()
     } // provideTrackStorageHelper shows fail -> see TrackAdapter newFiles  💥

@@ -11,18 +11,19 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import com.example.playlistmaker.ui.moviePosters.MoviePagerList
 import com.example.playlistmaker.utils.UIUpdater
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
@@ -31,7 +32,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
     }
 
     private var isClickable = true
-
     private lateinit var uiUpdater: UIUpdater
 
     private lateinit var searchButton: Button
@@ -39,7 +39,9 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
     private lateinit var placeholderMessage: TextView
     private lateinit var moviesList: RecyclerView
 
-    private lateinit var viewModel: MoviesViewModel
+    private val viewModel: MoviesViewModel by viewModel()
+    private val movieStorageHelper: MovieStorageHelper by inject() // 👉 📦
+    // provideMovieStorageHelper shows fail -> see TrackAdapter newFiles  💥
 
     private val adapter by lazy {
         MoviesAdapter(
@@ -66,9 +68,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Выберите опцию")
             .setItems(options) { dialog, which ->
-
-                val movieStorageHelper = Creator.provideMovieStorageHelper(this)
-                // provideMovieStorageHelper shows fail -> see TrackAdapter newFiles  💥
 
                 when (which) {
                     0 -> {
@@ -101,12 +100,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
             placeholderMessage = findViewById(R.id.placeholderMessage),
             recyclerView = findViewById(R.id.movies)
         )
-
-        viewModel = ViewModelProvider(
-            this,
-            Creator.provideMoviesViewModelFactory(this)
-        )[MoviesViewModel::class.java] //  (❤️)
-
 
         placeholderMessage = findViewById(R.id.placeholderMessage)
         searchButton = findViewById(R.id.searchButton)
