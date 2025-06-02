@@ -3,30 +3,19 @@ package com.example.playlistmaker.presentation.launcherViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.playlistmaker.domain.api.AudioPlayerInteraction
-import com.example.playlistmaker.domain.api.PlaybackState
-import com.example.playlistmaker.domain.models.Track
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
+import com.example.playlistmaker.domain.api.player.PlaybackState
+import com.example.playlistmaker.domain.models.search.Track
 
-class TrackPreviewViewModel( // 🖼️
-    private val audioPlayer: AudioPlayerInteraction // 🎧 🕒
+class TrackPreviewViewModel(
+    private val audioPlayer: AudioPlayerInteraction
 ) : ViewModel() {
 
-    private val _trackList = MutableLiveData<List<Track>>(emptyList())
-    val trackList: LiveData<List<Track>> get() = _trackList
+    private val _state = MutableLiveData(TrackPreviewViewState())
+    val state: LiveData<TrackPreviewViewState> get() = _state
 
-    private val _currentTrackIndex = MutableLiveData<Int>(0)
-    val currentTrackIndex: LiveData<Int> get() = _currentTrackIndex
-
-    private val _isHorizontal = MutableLiveData<Boolean>(true)
-    val isHorizontal: LiveData<Boolean> get() = _isHorizontal
-
-    private val _playbackState = MutableLiveData<PlaybackState>(PlaybackState.IDLE)
-    val playbackState: LiveData<PlaybackState> get() = _playbackState
-
-    private val _scrollPosition = MutableLiveData<Int>(-1)
-    val scrollPosition: LiveData<Int> get() = _scrollPosition
+    private val currentState: TrackPreviewViewState
+        get() = _state.value ?: TrackPreviewViewState()
 
     init {
         initAudioCallbacks()
@@ -34,19 +23,17 @@ class TrackPreviewViewModel( // 🖼️
 
     private fun initAudioCallbacks() {
         audioPlayer.setOnTimeUpdateCallback { time ->
-            val trackId = audioPlayer.currentTrackId
-            _trackList.postValue(_trackList.value?.map {
-                if (it.trackId == trackId) it.copy(playTime = "🕒$time") else it
-            })
+            val updatedTracks = currentState.trackList.map {
+                if (it.trackId == audioPlayer.currentTrackId) it.copy(playTime = "🕒$time") else it
+            }
+            updateState { it.copy(trackList = updatedTracks) }
         }
 
-        audioPlayer.setStateChangeCallback { state ->
-            _playbackState.postValue(state)
-
+        audioPlayer.setStateChangeCallback { newState ->
             val trackId = audioPlayer.getValidTrackId()
-            _trackList.postValue(_trackList.value?.map {
+            val updatedTracks = currentState.trackList.map {
                 if (it.trackId == trackId) {
-                    when (state) {
+                    when (newState) {
                         PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
                         PlaybackState.PREPARED -> it.copy(isPlaying = false)
                         PlaybackState.PLAYING -> it.copy(isPlaying = true)
@@ -57,47 +44,43 @@ class TrackPreviewViewModel( // 🖼️
                 } else {
                     it.copy(isPlaying = false, playTime = "🕒0:00")
                 }
-            })
+            }
+            updateState {
+                it.copy(
+                    playbackState = newState,
+                    trackList = updatedTracks
+                )
+            }
         }
     }
 
-    fun setTrackList(json: String) {
-        _trackList.value = deserializeTrackList(json)
+    fun initialize(tracks: List<Track>, index: Int) {
+        updateState {
+            it.copy(trackList = tracks, currentTrackIndex = index)
+        }
     }
 
     fun setCurrentTrackIndex(index: Int) {
-        _currentTrackIndex.value = index
+        updateState { it.copy(currentTrackIndex = index) }
     }
 
     fun toggleIsHorizontal() {
-        _isHorizontal.value = _isHorizontal.value?.not() ?: true
-    }
-
-    private fun deserializeTrackList(json: String): List<Track> {
-        val gson = Gson()
-        val trackType = object : TypeToken<List<Track>>() {}.type
-        return gson.fromJson(json, trackType)
+        updateState { it.copy(isHorizontal = !it.isHorizontal) }
     }
 
     fun setScrollPosition(position: Int) {
-        _scrollPosition.value = position
+        updateState { it.copy(scrollPosition = position) }
     }
 
     fun clearScrollPosition() {
-        _scrollPosition.value = -1
+        updateState { it.copy(scrollPosition = -1) }
     }
 
     fun audioPlay(track: Track) {
         when {
-            audioPlayer.isCurrentTrackPlaying(track.trackId) -> {
-                audioPlayer.pause()
-            }
-            audioPlayer.playbackState == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> {
-                audioPlayer.resume()
-            }
-            else -> {
-                audioPlayer.setTrack(track.previewUrl, track.trackId)
-            }
+            audioPlayer.isCurrentTrackPlaying(track.trackId) -> audioPlayer.pause()
+            audioPlayer.playbackState == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
+            else -> audioPlayer.setTrack(track.previewUrl, track.trackId)
         }
     }
 
@@ -105,8 +88,18 @@ class TrackPreviewViewModel( // 🖼️
         audioPlayer.stopPlayback()
     }
 
+    fun getCurrentTrack(): Track? {
+        val list = currentState.trackList
+        val index = currentState.currentTrackIndex
+        return list.getOrNull(index)
+    }
+
     override fun onCleared() {
         super.onCleared()
         audioPlayer.clearCallbacks()
+    }
+
+    private fun updateState(transform: (TrackPreviewViewState) -> TrackPreviewViewState) {
+        _state.value = transform(currentState)
     }
 }

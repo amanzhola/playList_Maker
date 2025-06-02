@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.audio.OnTrackClickListener
-import com.example.playlistmaker.domain.models.Track
 import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
 import com.google.android.material.imageview.ShapeableImageView
@@ -79,6 +79,10 @@ class TrackAdapterTD(
                 listener.onArrowClicked(track)
             }
         }
+    }
+
+    fun cancelDebounce() {
+        debounce.cancel()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
