@@ -162,7 +162,7 @@
 ![Экран Поиска](screenshots/search.png)
 
 ### ✨📽️💃 Экран Кино
-![Экран Кино](screenshots/movie(share_favorite_horizScrol)
+![Экран Кино](screenshots/movie(share_favorite_horizScrol).png)
 
 ### 🌧️ ☀️ ⛅ 🌩️ ❄️ Экран Погода 
 ![Экран Погода](screenshots/weather.png)
