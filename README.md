@@ -157,22 +157,12 @@
 
 ### 🏠 Главный экран
 ![Главный экран](screenshots/home.png)
-![Главный экран](screenshots/home(en).png)
-![Главный экран](screenshots/home1.png)
-![Главный экран](screenshots/home2(dark).png)
 
 ### 🔎 Экран Поиска
 ![Экран Поиска](screenshots/search.png)
-![Экран Поиска](screenshots/search(dropdown).png)
-![Экран Поиска](screenshots/search(HistoryTracksShare).png)
-![Экран Поиска](screenshots/search(playMusic_horizScroll_onClickToVerticalScrolling).png)
-![Экран Поиска](screenshots/search(trackShare).png)
 
 ### ✨📽️💃 Экран Кино
-![Экран Кино](screenshots/movie(dark).png)
-![Экран Кино](screenshots/movie(SearchToView).png)
-![Экран Кино](screenshots/movie(share_favorite_horizScrol).png)
-![Экран Кино](screenshots/movie(share_favorite_verticalScrol).png)
+![Экран Кино](screenshots/movie(share_favorite_horizScrol)
 
 ### 🌧️ ☀️ ⛅ 🌩️ ❄️ Экран Погода 
 ![Экран Погода](screenshots/weather.png)
@@ -182,7 +172,6 @@
 
 ### 🌼 Тулбар(dropdown)
 ![DropDown](screenshots/dropdown(toolbar1).png)
-![DropDown](screenshots/dropdown(toolbar2).png)
 
 ---
 
