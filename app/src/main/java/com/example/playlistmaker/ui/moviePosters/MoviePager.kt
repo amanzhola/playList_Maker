@@ -12,10 +12,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.repository.base.ShareMovie
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 class MoviePager : AppCompatActivity() {
 
@@ -26,10 +28,11 @@ class MoviePager : AppCompatActivity() {
     private lateinit var ratingTextView: TextView
     private lateinit var descriptionTextView: TextView
     private lateinit var shareButton: ImageButton
-    private lateinit var shareMovieHelper: ShareMovie
     private lateinit var selectedMovie: Movie //  🎓
     private lateinit var favoriteButton: ImageButton //(❤️)
-    private lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase //(❤️)
+    private val movieStorageHelper: MovieStorageHelper by inject()  // 👉 📦
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase by inject() //(❤️)
+    private val shareMovieHelper: ShareMovie by inject { parametersOf(this) } // 👨‍💻 ⬇️ // 🌼
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,11 +48,7 @@ class MoviePager : AppCompatActivity() {
         shareButton = findViewById(R.id.shareButton)
         favoriteButton = findViewById(R.id.favoriteButton)
 
-        shareMovieHelper = Creator.provideShareMovieHelper(this) // 🌼
-        toggleFavoriteUseCase = Creator.provideToggleFavoriteUseCase(this) //(❤️)
-
-        val helper = Creator.provideMovieStorageHelper(this)
-        val movie = helper.getMovie()
+        val movie = movieStorageHelper.getMovie()
 
         if (movie != null) {
             selectedMovie = movie

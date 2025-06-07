@@ -13,9 +13,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.base.ThemeInteraction
 import com.example.playlistmaker.domain.repository.base.Agreement
+import com.example.playlistmaker.domain.repository.base.Share
 import com.example.playlistmaker.domain.repository.base.Support
 import com.example.playlistmaker.presentation.utils.BottomNavigationHelper
 import com.example.playlistmaker.presentation.utils.BottomNavigationProvider
@@ -30,6 +30,11 @@ import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
 import com.example.playlistmaker.ui.main.MainActivity
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
+
 
 // 🏆 🤔
     data class NavigationData(val activityClass: Class<*>, val enterAnim: Int, val exitAnim: Int)
@@ -62,11 +67,7 @@ import com.example.playlistmaker.ui.main.MainActivity
         var buttonIndex: Int = -1
 
         private val failTextView: TextView by lazy { findViewById(R.id.fail) }
-
-        private val themeInteraction: ThemeInteraction by lazy { // 😎
-            Creator.provideThemeInteraction()
-        }
-
+        private val themeInteraction: ThemeInteraction by inject() // 😎
         private lateinit var toolbarHelper: ToolbarHelper
         private lateinit var bottomNavigationHelper: BottomNavigationHelper
         private lateinit var segmentHelper: SegmentHelper
@@ -74,9 +75,13 @@ import com.example.playlistmaker.ui.main.MainActivity
         private lateinit var colorPersistenceHelper: ColorPersistenceHelper
         private lateinit var segmentManager: SegmentManager
         private lateinit var colorManager: ColorManager
-        private val share by lazy { Creator.provideShare(this) }
-        private lateinit var support: Support
-        private lateinit var agreement: Agreement
+        private val share: Share by inject { parametersOf(this) }
+        private val support by lazy {
+            getKoin().get<Support> { parametersOf(this, mainLayout, failTextView) }
+        }
+        private val agreement by lazy {
+            getKoin().get<Agreement> { parametersOf(this, mainLayout, failTextView) }
+        }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             ThemeLanguageHelper.applySavedLanguage(this) // 🌓 ↔️ 🌗
@@ -87,7 +92,7 @@ import com.example.playlistmaker.ui.main.MainActivity
 
             buttonIndex = intent.getIntExtra("buttonIndex", -1)
             val activityName = this::class.simpleName ?: "UnknownActivity"
-            colorPersistenceHelper = ColorPersistenceHelper(this, activityName, isDarkThemeEnabled())
+            colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(activityName, isDarkThemeEnabled()) }
 
             initializeToolbar()
             colorApplierHelper = ColorApplierHelper(this, mainLayout, toolbarHelper)
@@ -101,8 +106,6 @@ import com.example.playlistmaker.ui.main.MainActivity
             segmentTexts = SegmentTextHelper.getSegmentTexts(this, this is MainActivity)
             newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, this is MainActivity)
             // 👌 for 2 more 😉 parameters by default to have 1 out of 3
-            support = Creator.provideSupport(this,mainLayout,failTextView)
-            agreement = Creator.provideAgreement(this, mainLayout, failTextView)
             segmentHelper = SegmentHelper(this, this)
             colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
             segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
@@ -163,7 +166,7 @@ import com.example.playlistmaker.ui.main.MainActivity
                 }
             }
         }
-        // ⬇️ 🚗  💖
+        // ⬇️ 🚗 💖
         protected fun showBottomNavigation() = bottomNavigationHelper.showBottomNavigation()
         protected fun hideBottomNavigation() = bottomNavigationHelper.hideBottomNavigation()
         fun isDarkThemeEnabled() = themeInteraction.isDarkTheme() // 🌓 ↔️ 🌗

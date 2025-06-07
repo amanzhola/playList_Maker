@@ -1,8 +1,9 @@
 package com.example.playlistmaker.data.repository.movie
 
+import android.util.Log
+import com.example.playlistmaker.data.dto.SearchResponse
 import com.example.playlistmaker.data.dto.movie.MovieAdvancedSearchDto
 import com.example.playlistmaker.data.dto.movie.MovieSearchDto
-import com.example.playlistmaker.data.dto.SearchResponse
 import com.example.playlistmaker.data.network.movie.IMDbApi
 import com.example.playlistmaker.domain.api.movie.MoviesRepository
 import com.example.playlistmaker.domain.models.movie.Movie
@@ -19,6 +20,10 @@ class MoviesRepositoryImpl(
     private val apiService: IMDbApi,
     private val apiKey: String
 ) : MoviesRepository {
+
+    init {
+        Log.d("MoviesRepo", "MoviesRepositoryImpl created")
+    }
 
     override fun searchMovies(expression: String): Flow<Resource<List<Movie>>> = flow {
         try {

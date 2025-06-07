@@ -8,18 +8,22 @@ import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivitySearchBinding
+import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.AudioTracksShare
+import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
 import com.example.playlistmaker.presentation.searchViewModels.ErrorState
 import com.example.playlistmaker.presentation.searchViewModels.SearchViewModel
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
+import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class SearchActivity : BaseActivity(), OnTrackClickListener {
 
@@ -28,29 +32,21 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
     private lateinit var adapter: TrackAdapter
     private var isBottomNavVisible = true
 
-    private lateinit var errorManager: AudioErrorManager
-    private lateinit var trackShareService: AudioTracksShare
-    private lateinit var viewModel: SearchViewModel
+    private lateinit var errorManager: AudioErrorManager // 🐞➖ ➡️ 🚫 ➡️ 😎 (binding.btnUpdate)
+    private val viewModel: SearchViewModel by viewModel()
+    private val resourceColorProvider: ResourceColorProvider by inject { parametersOf(this) } // 🎨
+    private val networkChecker: NetworkStatusChecker by inject { parametersOf(this) } // 🌐
+    private val trackShareService: AudioTracksShare by inject { parametersOf(this) } // 👨‍💻
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySearchBinding.bind(findViewById(getMainLayoutId()))
         setContentView(binding.root)
 
-        val updateButton = binding.btnUpdate // 🐞➖ ➡️ 🚫 ➡️ 😎
-        val recyclerView = binding.tracksRecyclerView
-
-        errorManager = AudioErrorManager(failTextView, updateButton, recyclerView)
-
+        errorManager = getKoin().get { parametersOf(failTextView, binding.btnUpdate, binding.tracksRecyclerView) }
         binding.root.findViewById<View>(R.id.bottom1).isSelected = true // ⬇️ 🚗
-        trackShareService = Creator.provideTrackShareService(this)
-
-        val viewModelFactory = Creator.provideSearchViewModelFactory()
-        viewModel = ViewModelProvider(this, viewModelFactory)[SearchViewModel::class.java]
-
         binding.tracksRecyclerView.layoutManager = LinearLayoutManager(this)
-        val resourceColorProvider = Creator.provideResourceColorProvider(this)
-        val networkChecker = Creator.provideNetworkStatusChecker(this)
 
         adapter = TrackAdapter(mutableListOf(), resourceColorProvider, networkChecker, this)
         binding.tracksRecyclerView.adapter = adapter
@@ -109,7 +105,6 @@ class SearchActivity : BaseActivity(), OnTrackClickListener {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 viewModel.onQueryChanged(s.toString())
             }
-
             override fun afterTextChanged(s: Editable?) {}
         }
     }

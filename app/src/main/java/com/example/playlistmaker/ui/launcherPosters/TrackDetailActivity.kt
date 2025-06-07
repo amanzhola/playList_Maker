@@ -8,18 +8,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.api.base.TrackStorageHelper
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.audio.OnTrackClickListener
-
+import org.koin.android.ext.android.inject
 
 class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
 
     private lateinit var adapter: TrackAdapterTD
     private val tracks: MutableList<Track> = mutableListOf()
     private var trackIndex: Int = 0
-    private lateinit var trackStorageHelper: TrackStorageHelper
+    private val trackStorageHelper: TrackStorageHelper by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +34,6 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
 
         val recyclerView = findViewById<RecyclerView>(R.id.track_detail_recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        trackStorageHelper = Creator.provideTrackStorageHelper(this)
 
         val savedTracks = trackStorageHelper.getTrackList()
         trackIndex = trackStorageHelper.getCurrentIndex()

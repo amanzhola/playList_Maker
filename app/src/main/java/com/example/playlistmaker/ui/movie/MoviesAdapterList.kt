@@ -12,18 +12,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.repository.base.ShareMovie
 
 class MoviesAdapterList(private val movies: List<Movie>, // 🎥✨ 📤🎬
                         private val orientationToggle: () -> Unit,
                         private val activity: AppCompatActivity,
+                        private val shareMovieHelper: ShareMovie, // 💡 // 📽️🍿💃
                         private val onFavoriteClick: (movieId: String) -> Unit
 ) : RecyclerView.Adapter<MoviesAdapterList.MovieViewHolder>() {
 
     private var isVertical: Boolean = false
-    private val shareMovieHelper: ShareMovie = Creator.provideShareMovieHelper(activity) // 📽️🍿💃
 
     class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val menuButton: ImageButton = itemView.findViewById(R.id.menu_button)

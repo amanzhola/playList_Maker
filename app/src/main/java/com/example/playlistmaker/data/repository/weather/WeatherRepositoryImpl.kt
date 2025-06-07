@@ -3,8 +3,8 @@ package com.example.playlistmaker.data.repository.weather
 import com.example.playlistmaker.data.dto.weather.CurrentWeatherDto
 import com.example.playlistmaker.data.dto.weather.ForecastResponse
 import com.example.playlistmaker.data.network.response.CustomNetworkResponse
+import com.example.playlistmaker.domain.api.weather.WeatherNetworkClient
 import com.example.playlistmaker.domain.api.weather.WeatherRepository
-import com.example.playlistmaker.domain.api.weather.weatherNetworkClient
 import com.example.playlistmaker.domain.models.weather.CurrentWeather
 import com.example.playlistmaker.domain.models.weather.ForecastLocation
 import com.example.playlistmaker.domain.util.Resource
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class WeatherRepositoryImpl(
-    private val networkClient: weatherNetworkClient
+    private val networkClient: WeatherNetworkClient
 ) : WeatherRepository {
 
     override fun searchLocations(query: String): Flow<Resource<List<ForecastLocation>>> = flow {

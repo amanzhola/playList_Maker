@@ -5,27 +5,21 @@ import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.core.app.ActivityOptionsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.button.MaterialButton
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : BaseActivity() { /* 🧭 */
 
-    private lateinit var viewModel: MainViewModel
+    private val viewModel: MainViewModel by viewModel()
     private var isGroupOneVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         buttonIndex = intent.getIntExtra("buttonIndex", -1)
-
-        viewModel = ViewModelProvider(
-            this,
-            Creator.provideMainViewModelFactory()
-        )[MainViewModel::class.java]
 
         setupButtons()
         setInitialButtonVisibility()

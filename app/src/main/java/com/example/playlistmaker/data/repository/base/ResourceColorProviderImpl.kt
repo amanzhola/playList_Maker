@@ -6,6 +6,12 @@ import android.content.res.Resources
 import android.os.Build
 import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
 
+/**
+ * WARNING: context должен быть Activity, иначе context.theme не будет отражать текущую тему.
+ * Использовать только с Koin factory, не single!
+ */
+
+
 class ResourceColorProviderImpl(private val context: Context) : ResourceColorProvider {
     @SuppressLint("ObsoleteSdkInt")
     override fun getColor(id: Int, theme: Resources.Theme?): Int {
