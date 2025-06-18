@@ -42,4 +42,7 @@
         Track
         <color name="play_red">#F56B6C</color>
 
+<!--        &lt;!&ndash; <movie fragments> &ndash;&gt;-->
+<!--        <color name="light_gray">#FF000000</color>-->
+
 </resources>

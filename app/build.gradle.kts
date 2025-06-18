@@ -41,6 +41,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        dataBinding = true
     }
 }
 
@@ -84,6 +85,13 @@ dependencies {
     implementation (libs.androidx.viewpager2)
 
     implementation (libs.koin.android)
+
+    // drunk author sprint 18 so we do double steps
+//    val fragment_version = "1.5.5"
+//    implementation ("androidx.fragment:fragment-ktx:$fragment_version")
+//    после обновить -> в toml fragmentKtx = "1.7.1"
+
+    implementation (libs.androidx.fragment.ktx)
 
     // previous mess for info
 

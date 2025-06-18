@@ -106,4 +106,28 @@
     <string name="instruction_movie">🌼Share option located inside Move(track🎬)</string>
     <string name="ok">👌OK</string>
 
+    <!-- <movie fragments> -->
+    <string name="poster">🖼️ Poster</string>
+    <string name="details">🎬 About Movie</string>
+    <string name="rating">⭐ Rating IMDb:</string>
+    <string name="director">🎥 Director:</string>
+    <string name="writer">✍️ Writer:</string>
+    <string name="cast">🧑‍🤝‍🧑 Cast:</string>
+    <string name="plot">📖 Plot:</string>
+
+    <!-- <update SearchMovie showChoiceDialog> -->
+    <string name="first">1️⃣ 🖼️ 🎬 One movie 💃</string>
+    <string name="second">2️⃣ ✍️ 🧾 List of movies 📚 🎥</string>
+    <string name="third">3️⃣ ✨📽️💃 Details (🔍 using fragments 📖 🧑‍🤝‍🧑) </string>
+
+    <!-- <activity_media_library> -->
+    <string name="TableLayout">TableLayout</string>
+
+    <!-- <favourite and playlist> -->
+    <string name="emptyMedia">📭Your media is empty❌🎶</string>
+    <string name="newPlaylist">➕🆕PlayList📀🎼</string>
+    <string name="noPlayList">😌You haven not created\nany playlists yet😕</string>
+    <string name="favourites">❤️Favourite⭐</string>
+    <string name="playlists">🎶Playlists🎼</string>
+
 </resources>

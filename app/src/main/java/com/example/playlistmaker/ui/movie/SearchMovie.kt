@@ -19,6 +19,7 @@ import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
+import com.example.playlistmaker.ui.moviePosters.DetailsActivity
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import com.example.playlistmaker.ui.moviePosters.MoviePagerList
 import com.example.playlistmaker.utils.UIUpdater
@@ -63,7 +64,8 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
     private fun showChoiceDialog(selectedMovie: Movie, position: Int) {
         if (!clickDebounce()) return
-        val options = arrayOf("Один фильм", "Список фильмов")
+//        val options = arrayOf("Один фильм", "Список фильмов", "Подробнее (с фрагментами)")
+        val options = arrayOf(getString(R.string.first),getString(R.string.second),getString(R.string.third))
 
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Выберите опцию")
@@ -82,6 +84,13 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
                         val intent = Intent(this, MoviePagerList::class.java)
                         moviePagerLauncher.launch(intent)
+                    }
+                    2 -> {
+                         // Новый пункт: переход в DetailsActivity
+                        val intent = Intent(this, DetailsActivity::class.java)
+                        intent.putExtra("poster", selectedMovie.image)
+                        intent.putExtra("id", selectedMovie.id)
+                        startActivity(intent)
                     }
                 }
             }

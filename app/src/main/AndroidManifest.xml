@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Разрешения для работы приложения -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -8,60 +8,96 @@
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
-
-        <!-- =========================
+        <activity
+            android:name=".ui.mediaFragments.FragmentPlaylist"
+            android:exported="false" />
+        <activity
+            android:name=".ui.mediaFragments.FragmentFavouriteTracks"
+            android:exported="false" />
+        <activity
+            android:name=".ui.moviePosters.DetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.moviePosters.AboutFragment"
+            android:exported="false" />
+        <activity
+            android:name=".ui.moviePosters.PosterFragment"
+            android:exported="false" />
+        <!--
+         =========================
              Стартовая активность — MainActivity
-             ========================= -->
+             =========================
+        -->
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.launcher.LauncherActivity"
             android:exported="true"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
 
             <!-- SHARE INTENT (текст) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
             <!-- OPEN FILE (json) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:mimeType="application/json" />
             </intent-filter>
-        </activity>
-
-        <!-- Другие активности без LAUNCHER -->
-        <activity android:name=".ui.audio.SearchActivity" android:exported="false" />
-        <activity android:name=".ui.settings.SettingsActivity" android:exported="false" />
-        <activity android:name=".MediaLibraryActivity" android:exported="false" />
-        <activity android:name=".ui.launcherPosters.TrackDetailActivity" android:exported="false" />
-        <activity android:name=".ui.moviePosters.MoviePager" android:exported="false" />
-        <activity android:name=".ui.moviePosters.MoviePagerList" android:exported="false" />
-        <activity android:name=".ui.weather.SearchWeather" android:exported="false" />
-        <activity android:name=".ui.movie.SearchMovie" android:exported="false" />
-        <activity android:name=".ui.audioPosters.ExtraOption" android:exported="false" />
-        <activity android:name=".ui.launcherPosters.TrackPreviewActivity" android:exported="false" />
-
-        <!-- FileProvider для доступа к файлам -->
+        </activity> <!-- Другие активности без LAUNCHER -->
+        <activity
+            android:name=".ui.audio.SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.media.MediaLibraryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.launcherPosters.TrackDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.moviePosters.MoviePager"
+            android:exported="false" />
+        <activity
+            android:name=".ui.moviePosters.MoviePagerList"
+            android:exported="false" />
+        <activity
+            android:name=".ui.weather.SearchWeather"
+            android:exported="false" />
+        <activity
+            android:name=".ui.movie.SearchMovie"
+            android:exported="false" />
+        <activity
+            android:name=".ui.audioPosters.ExtraOption"
+            android:exported="false" />
+        <activity
+            android:name=".ui.launcherPosters.TrackPreviewActivity"
+            android:exported="false" /> <!-- FileProvider для доступа к файлам -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -72,4 +108,5 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
+
 </manifest>

@@ -1,7 +1,7 @@
 package com.example.playlistmaker.presentation.utils
 
 import android.content.Context
-import com.example.playlistmaker.MediaLibraryActivity
+import com.example.playlistmaker.ui.media.MediaLibraryActivity
 import com.example.playlistmaker.NavigationData
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ui.settings.SettingsActivity
