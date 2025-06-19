@@ -8,6 +8,7 @@ import com.example.playlistmaker.di.extraOption.extraOptionDataModule
 import com.example.playlistmaker.di.extraOption.extraOptionInteractionModule
 import com.example.playlistmaker.di.extraOption.extraOptionViewModelModule
 import com.example.playlistmaker.di.mainActivity.mainActivityModule
+import com.example.playlistmaker.di.media.mediaViewModelModule
 import com.example.playlistmaker.di.movie.movieDataModule
 import com.example.playlistmaker.di.movie.movieInteractionModule
 import com.example.playlistmaker.di.movie.movieRepositoryModule
@@ -58,7 +59,8 @@ class App : Application() { // ☀️ 🔁 🌙
                     settingsActivityDataModule,
                     settingsActivityInteractionModule,
                     settingsActivityViewModelModule,
-                    mainActivityModule
+                    mainActivityModule,
+                    mediaViewModelModule
                 )
             )
         }

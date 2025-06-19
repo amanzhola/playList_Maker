@@ -219,5 +219,44 @@
     <color name="hintFieldColor1">@color/hintFieldColor</color>
     <color name="switch_track_on_color1">@color/switch_track_on_color</color>
 
+    <!-- <movie fragments> -->
+
+    <style name="TitleTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/title_text_size</item>
+        <item name="android:textColor">@color/black_white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="LabelTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/label_text_size</item>
+        <item name="android:textColor">@color/black_white</item>
+    </style>
+
+    <style name="ValueTextStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/value_text_size</item>
+        <item name="android:textColor">@color/black_white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- <activity_media_library> -->
+    <style name="TabLayout" parent="Text14">
+        <item name="tabIndicatorColor">@color/textColor_white</item>
+        <item name="android:background">@color/white_textColor</item>
+        <item name="tabTextColor">@color/textColor_white</item>
+        <item name="android:contentDescription">@string/TableLayout</item>
+        <item name="android:layout_marginStart">@dimen/Padding_16</item>
+        <item name="android:layout_marginEnd">@dimen/Padding_16</item>
+    </style>
+
+    <!-- <viewPager2 activity_media_library> -->
+    <style name="viewPager">
+        <item name="android:background">@color/white_textColor</item>
+    </style>
 
 </resources>
