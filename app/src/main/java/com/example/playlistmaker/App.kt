@@ -2,6 +2,8 @@ package com.example.playlistmaker
 
 import android.app.Application
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import com.example.playlistmaker.data.repository.base.ThemeRepositoryImpl
 import com.example.playlistmaker.di.appModule
 import com.example.playlistmaker.di.extraOption.extraOptionDataModule
@@ -13,6 +15,9 @@ import com.example.playlistmaker.di.movie.movieDataModule
 import com.example.playlistmaker.di.movie.movieInteractionModule
 import com.example.playlistmaker.di.movie.movieRepositoryModule
 import com.example.playlistmaker.di.movie.movieViewModelModule
+import com.example.playlistmaker.di.movie.namesInteractorModule
+import com.example.playlistmaker.di.movie.namesRepositoryModule
+import com.example.playlistmaker.di.navigation.navigationModule
 import com.example.playlistmaker.di.search.searchDataModule
 import com.example.playlistmaker.di.search.searchInteractionModule
 import com.example.playlistmaker.di.search.searchRepositoryModule
@@ -32,7 +37,10 @@ import org.koin.core.context.GlobalContext.startKoin
 // ☀️ 🔁 🌙 👉 🧼🏗️✅
 class App : Application() { // ☀️ 🔁 🌙
     private lateinit var themeManager: ThemeManager // 😎
-        private set
+
+    companion object {
+        var wasInitialLaunchDone: Boolean = false
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -60,7 +68,10 @@ class App : Application() { // ☀️ 🔁 🌙
                     settingsActivityInteractionModule,
                     settingsActivityViewModelModule,
                     mainActivityModule,
-                    mediaViewModelModule
+                    mediaViewModelModule,
+                    navigationModule,
+                    namesRepositoryModule,      // 👈 добавили
+                    namesInteractorModule       // 👈 добавили
                 )
             )
         }
@@ -86,4 +97,13 @@ class App : Application() { // ☀️ 🔁 🌙
     }
 
     fun isDarkThemeEnabled() = themeManager.repository.isDarkTheme()
+
+    fun View.traverse(action: (View) -> Unit) {
+        action(this)
+        if (this is ViewGroup) {
+            for (i in 0 until childCount) {
+                getChildAt(i).traverse(action)
+            }
+        }
+    }
 }

@@ -11,7 +11,7 @@ import com.example.playlistmaker.R
 data class ToolbarConfig( // 📍 👏
     val backArrowVisibility: Int,
     val titleResId: Int,
-    val titleClickListener: (() -> Unit)? = null
+    val titleClickListener: (() -> Unit)? = null,
 )
 
 class ToolbarHelper(private val activity: Activity) {
@@ -30,6 +30,7 @@ class ToolbarHelper(private val activity: Activity) {
         appCompatActivity?.supportActionBar?.setDisplayShowTitleEnabled(false)
 
         title?.isEnabled = isMainActivity || config.backArrowVisibility != View.VISIBLE
+
         updateToolbar(config)
     }
 
@@ -53,5 +54,9 @@ class ToolbarHelper(private val activity: Activity) {
 
     fun setBackArrowColor(color: Int) {
         backArrow?.imageTintList = android.content.res.ColorStateList.valueOf(color)
+    }
+    // add background color
+    fun setToolbarBackgroundColor(color: Int) {
+        toolbar?.setBackgroundColor(color)
     }
 }

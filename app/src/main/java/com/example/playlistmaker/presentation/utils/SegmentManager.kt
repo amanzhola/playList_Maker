@@ -1,13 +1,14 @@
 package com.example.playlistmaker.presentation.utils
 
-import android.app.AlertDialog
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ui.audio.SearchActivity
+import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.movie.SearchMovie
-import com.example.playlistmaker.ui.settings.SettingsActivity
+import com.example.playlistmaker.ui.settings.SettingsFragment
 
 class SegmentManager(
     private val context: Context,
@@ -42,27 +43,30 @@ class SegmentManager(
             when (segmentIndex) {
                 0 -> { // Toggle theme
                     ThemeLanguageHelper.toggleTheme()
-                    if (currentActivity is SettingsActivity) {
-                        currentActivity.syncThemeSwitchState()
+                    val currentFragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
+                    if (currentFragment is SettingsFragment) {
+                        currentFragment.syncThemeSwitchState()
                     }
                 }
                 1 -> {
-                    when (currentActivity) {
-                        is SearchActivity -> shareTrackHistoryFromViewModel()
-                        is ExtraOption -> shareSingleTrack()
-                        is SearchMovie ->  {
+                    val fragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
+                    when {
+                        currentActivity is ExtraOption -> shareSingleTrack()
+                        currentActivity is SearchMovie -> {
                             AlertDialog.Builder(currentActivity)
                                 .setTitle(currentActivity.getString(R.string.share_movie_question))
                                 .setMessage(currentActivity.getString(R.string.instruction_movie))
                                 .setPositiveButton(currentActivity.getString(R.string.ok)) { dialog, _ -> dialog.dismiss() }
                                 .show()
                         }
+                        fragment is SearchFragment -> fragment.shareTrackHistoryFromViewModel()
                         else -> shareApp()
                     }
                 }
+
                 2 -> writeToSupport()
                 3 -> openAgreement()
-                4 -> if (isMainActivity) colorManager.clearAllColors()
+                4 -> if (isMainActivity) colorManager.clearAllColors() else (context as? BaseActivity)?.onSegment4Clicked()
                 5 -> changeLanguage()
             }
         }

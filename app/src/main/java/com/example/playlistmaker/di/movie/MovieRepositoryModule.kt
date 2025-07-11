@@ -1,5 +1,6 @@
 package com.example.playlistmaker.di.movie
 
+import com.example.playlistmaker.data.converters.MovieCastConverter
 import com.example.playlistmaker.data.network.movie.IMDbApi
 import com.example.playlistmaker.data.network.movieDetails.IMDbApiService
 import com.example.playlistmaker.data.network.movieDetails.NetworkClient
@@ -8,7 +9,7 @@ import com.example.playlistmaker.data.repository.base.FavoritesRepositoryImpl
 import com.example.playlistmaker.data.repository.movie.MoviesRepositoryImpl
 import com.example.playlistmaker.data.repository.movieDetails.MoviesRepositoryImplPoster
 import com.example.playlistmaker.domain.api.movie.MoviesRepository
-import com.example.playlistmaker.domain.api.moviesDetials.PosterMovieRepository
+import com.example.playlistmaker.domain.api.moviesDetails.PosterMovieRepository
 import com.example.playlistmaker.domain.repository.base.FavoritesRepository
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 import org.koin.dsl.module
@@ -50,8 +51,19 @@ val movieRepositoryModule = module {// 🎥 💃 🎬 // 🎥  from 🏠 🔍 �
         RetrofitNetworkClient(get(), get()) // IMDbApiService, Context
     }
 
+//    // 🌟 PosterMovieRepository использует NetworkClient
+//    single<PosterMovieRepository> {
+//        MoviesRepositoryImplPoster(get())
+//    }
+
+    // Добавили фабрику для конвертера
+    factory { MovieCastConverter() }
+
     // 🌟 PosterMovieRepository использует NetworkClient
     single<PosterMovieRepository> {
-        MoviesRepositoryImplPoster(get())
+        // Добавили ещё один `get()`, чтобы количество
+        // аргументов совпадало
+        MoviesRepositoryImplPoster(get(), get())
     }
+
 }

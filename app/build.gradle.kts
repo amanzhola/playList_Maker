@@ -2,7 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.parcelize")
+    id("androidx.navigation.safeargs.kotlin") version "2.9.1"
 }
+
+// id("androidx.navigation.safeargs") version "2.9.1"
 
 android {
     namespace = "com.example.playlistmaker"
@@ -41,7 +44,7 @@ android {
 
     buildFeatures {
         viewBinding = true
-        dataBinding = true
+        this.dataBinding = true
     }
 }
 
@@ -80,10 +83,11 @@ dependencies {
 //    implementation ("androidx.constraintlayout:constraintlayout:2.0.0")
 
     // ViewPager2
-//    implementation "androidx.viewpager2:viewpager2:1.0.0"
+//    implementation ("androidx.viewpager2:viewpager2:1.0.0")
 
     implementation (libs.androidx.viewpager2)
 
+//    implementation("io.insert-koin:koin-android:3.5.3")
     implementation (libs.koin.android)
 
     // drunk author sprint 18 so we do double steps
@@ -92,6 +96,19 @@ dependencies {
 //    после обновить -> в toml fragmentKtx = "1.7.1"
 
     implementation (libs.androidx.fragment.ktx)
+
+//    // Подключаем основную библиотеку
+//    implementation 'com.hannesdorfmann:adapterdelegates4-kotlin-dsl:4.3.2'
+//    implementation ("com.hannesdorfmann:adapterdelegates4-kotlin-dsl:4.3.2")
+
+    implementation (libs.adapterdelegates4.kotlin.dsl)
+
+//    // Подключаем модуль для работы с ViewBinding
+//    implementation 'com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding:4.3.2'
+//    implementation ("com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding:4.3.2")
+
+    implementation (libs.adapterdelegates4.kotlin.dsl.viewbinding)
+
 
     // previous mess for info
 
@@ -122,5 +139,19 @@ dependencies {
 
 //    implementation ("com.github.bumptech.glide:glide:4.14.2")
 //    annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
+
+    implementation (libs.androidx.navigation.fragment.ktx)
+    implementation (libs.androidx.navigation.ui.ktx)
+//    implementation (libs.androidx.fragment.ktx.v156) // doubling -> implementation(libs.koin.androidx.fragment)
+
+//    implementation ("androidx.navigation:navigation-fragment-ktx:2.5.3")
+//    implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
+//    implementation ("androidx.fragment:fragment-ktx:1.5.6")
+
+//    implementation(libs.koin.androidx.fragment) -> лишний создает конфликт
+//    Но! 💡 Даже если implementation(libs.koin.android) подключен, тебе нужно убедиться,
+//    что модуль для fragment тоже включён — потому что by viewModel() в фрагменте требует
+//    отдельного артефакта, а koin-android по умолчанию не содержит расширения для фрагментов.
+//    implementation("io.insert-koin:koin-androidx-fragment:3.5.3") // или актуальная версия
 
 }

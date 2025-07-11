@@ -1,10 +1,11 @@
 package com.example.playlistmaker.presentation.utils
 
 import android.content.Context
+import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ui.audio.SearchActivity
+import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.example.playlistmaker.ui.main.MainActivity
+import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.movie.SearchMovie
 
 object SegmentTextHelper {
@@ -32,14 +33,19 @@ object SegmentTextHelper {
     }
 
     fun getSegmentIcons(context: Context): IntArray {
-        return intArrayOf( // 1️⃣ 👉 💾
+        val currentActivity = context as? BaseActivity
+        val currentFragment = currentActivity?.getCurrentFragment()
+
+        return intArrayOf(
             R.drawable.switch_24,
-            when (context) {
-                is SearchActivity -> R.drawable.queue_music_24
-                is ExtraOption -> R.drawable.music_note_24
-                is SearchMovie -> R.drawable.move_down_24
+
+            when {
+                currentFragment is SearchFragment -> R.drawable.queue_music_24
+                context is ExtraOption -> R.drawable.music_note_24
+                context is SearchMovie -> R.drawable.move_down_24
                 else -> R.drawable.share
             },
+
             R.drawable.group,
             R.drawable.vector,
             if (context is MainActivity) R.drawable.color_24 else R.drawable.navigation_24,
@@ -48,6 +54,7 @@ object SegmentTextHelper {
     }
 
     fun getNewSegmentIcons(context: Context): IntArray {
+
         return intArrayOf( // 2️⃣ 👉 💾
             R.drawable.text_color_24,
             R.drawable.background_24,

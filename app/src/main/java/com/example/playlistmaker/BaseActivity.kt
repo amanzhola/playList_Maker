@@ -1,18 +1,22 @@
 package com.example.playlistmaker
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.LinearLayout
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
 import com.example.playlistmaker.domain.api.base.ThemeInteraction
 import com.example.playlistmaker.domain.repository.base.Agreement
 import com.example.playlistmaker.domain.repository.base.Share
@@ -29,19 +33,43 @@ import com.example.playlistmaker.presentation.utils.SegmentTextHelper
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
-import com.example.playlistmaker.ui.main.MainActivity
+import com.example.playlistmaker.roots.main.MainActivity
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 
-
 // 🏆 🤔
-    data class NavigationData(val activityClass: Class<*>, val enterAnim: Int, val exitAnim: Int)
-    // 🏆 ➡️ 🔄 📦 🤖 📈
+sealed class NavigationData {
+    data class ActivityData(
+        val activityClass: Class<out Activity>,
+        val enterAnim: Int,
+        val exitAnim: Int,
+        val buttonIndex: Int? = null // ✅ добавили
+    ) : NavigationData()
+
+//    data class FragmentData(
+//        val fragmentProvider: () -> Fragment,
+//        val tag: String,
+//        val enterAnim: Int,
+//        val exitAnim: Int
+//    ) : NavigationData()
+
+    data class FragmentData(
+        val destinationId: Int, // <-- ID из navigation_graph.xml
+        val args: Bundle? = null,
+        val enterAnim: Int,
+        val exitAnim: Int
+    ) : NavigationData()
+}
+
+// 🏆 ➡️ 🔄 📦 🤖 📈
     open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClickListener {
 
-        private lateinit var mainLayout: LinearLayout
+//        private lateinit var mainLayout: LinearLayout // -> 🏆 🤔
+        // 👉 вот почему мне приходилось оборачивать constrain в linearlayout
+        private lateinit var mainLayout: ViewGroup // 🔄 LinearLayout etc
+
         private var isDialogVisible = false
         private val baseSegmentColors = intArrayOf(
             R.color.hintFieldColor,
@@ -68,8 +96,8 @@ import org.koin.core.parameter.parametersOf
 
         private val failTextView: TextView by lazy { findViewById(R.id.fail) }
         private val themeInteraction: ThemeInteraction by inject() // 😎
-        private lateinit var toolbarHelper: ToolbarHelper
-        private lateinit var bottomNavigationHelper: BottomNavigationHelper
+        lateinit var toolbarHelper: ToolbarHelper
+        lateinit var bottomNavigationHelper: BottomNavigationHelper
         private lateinit var segmentHelper: SegmentHelper
         private lateinit var colorApplierHelper: ColorApplierHelper
         private lateinit var colorPersistenceHelper: ColorPersistenceHelper
@@ -88,6 +116,7 @@ import org.koin.core.parameter.parametersOf
             super.onCreate(savedInstanceState) // 🔜 🔝 🔚 ⬇️ ⬅️ 🔙
 
             setContentView(getLayoutId())
+
             mainLayout = findViewById(getMainLayoutId())
 
             buttonIndex = intent.getIntExtra("buttonIndex", -1)
@@ -115,7 +144,7 @@ import org.koin.core.parameter.parametersOf
             colorManager.applySavedColors()
         }
 
-        override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.dropdown -> {
                     segmentHelper.showSegmentDialog( // 📈 🎨
@@ -155,25 +184,16 @@ import org.koin.core.parameter.parametersOf
             segmentManager.applySavedColors()
         }
 
-        protected fun setBottomNavigationVisibility() { // 🧠
-
-            for (i in bottomViewIds.indices) {
-                val bottomView: TextView? = findViewById(bottomViewIds[i])
-                bottomView?.visibility = when {
-                    buttonIndex in 0..2 && i in 0..2 -> VISIBLE
-                    buttonIndex in 3..5 && i in 3..5 -> VISIBLE
-                    else -> GONE
-                }
-            }
-        }
         // ⬇️ 🚗 💖
-        protected fun showBottomNavigation() = bottomNavigationHelper.showBottomNavigation()
-        protected fun hideBottomNavigation() = bottomNavigationHelper.hideBottomNavigation()
+        fun showBottomNavigation() = bottomNavigationHelper.showBottomNavigation()
+        fun hideBottomNavigation() = bottomNavigationHelper.hideBottomNavigation()
         fun isDarkThemeEnabled() = themeInteraction.isDarkTheme() // 🌓 ↔️ 🌗
 
         protected open fun shouldEnableEdgeToEdge(): Boolean = true
-        protected open fun getLayoutId(): Int = R.layout.activity_main
-        protected open fun getMainLayoutId(): Int = R.id.main
+        protected open fun getLayoutId(): Int = R.layout.base_main
+//        protected open fun getMainLayoutId(): Int = R.id.rootContainer
+        protected open fun getMainLayoutId(): Int = R.id.nav_host_container
+
         override fun onCreateOptionsMenu(menu: Menu): Boolean {
             menuInflater.inflate(R.menu.menu, menu)
             return true
@@ -196,7 +216,7 @@ import org.koin.core.parameter.parametersOf
             return ToolbarConfig(VISIBLE, R.string.app_name)
         }
 
-        protected fun navigateToMainActivity() {
+        fun navigateToMainActivity() {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
@@ -206,12 +226,58 @@ import org.koin.core.parameter.parametersOf
             startActivity(intent, options.toBundle())
         }
 
-        fun changeLanguage() {
-            ThemeLanguageHelper.toggleLanguage(this)
-            recreate() // 👈 ⚠️ (перезапуск) 🔄
+    // 🔧 BaseActivity
+    fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {
+        val context = when (host) {
+            is AppCompatActivity -> host
+            is Fragment -> host.requireContext()
+            else -> throw IllegalArgumentException("Unsupported host")
         }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            putExtra("buttonIndex", buttonIndex)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            context, R.anim.enter_from_left, R.anim.exit_to_right
+        )
+
+        ContextCompat.startActivity(context, intent, options.toBundle())
+    }
+
+    fun changeLanguage() {
+                ThemeLanguageHelper.toggleLanguage(this)
+                recreate() // 👈 ⚠️ (перезапуск) 🔄
+            }
 
         fun shareApp() = share.shareApp()
         fun writeToSupport() = support.writeToSupport()
         fun openAgreement() = agreement.openAgreement()
+
+
+//********************************************************************************
+        // tranfer main to fragment
+
+    // no-op: handled by navController.navigate()
+    protected open fun setupInitialFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(getMainLayoutId(), fragment)
+            .commit()
+    }
+
+    fun updateToolbar(config: ToolbarConfig) {
+        toolbarHelper.updateToolbar(config)
+    }
+
+    fun enableEdgeToEdge(enabled: Boolean) {
+        WindowCompat.setDecorFitsSystemWindows(window, !enabled)
+    }
+
+    fun getCurrentFragment(): Fragment? {
+//        return supportFragmentManager.findFragmentById(R.id.nav_host_container)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container) as? NavHostFragment
+        return navHostFragment?.childFragmentManager?.primaryNavigationFragment
+    }
+
     }

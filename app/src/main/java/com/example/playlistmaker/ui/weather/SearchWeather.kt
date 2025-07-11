@@ -187,7 +187,7 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
 
     override fun getToolbarConfig(): ToolbarConfig { // 👈 ⚙️
         return ToolbarConfig(VISIBLE, R.string.weather) {
-            navigateToMainActivity()
+            navigateToMainScreen(this@SearchWeather, -1)
         }
     }
 

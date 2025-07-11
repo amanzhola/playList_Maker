@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.playlistmaker.domain.models.movieDetails.MovieDetails
-import com.example.playlistmaker.domain.repository.base.movieDetails.MoviesInteractor
+import com.example.playlistmaker.domain.repository.movieDetails.MoviesInteractor
 
 class AboutViewModel(private val movieId: String,
                      private val moviesInteractor: MoviesInteractor, ) : ViewModel() {

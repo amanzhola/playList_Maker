@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/media_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white_textColor"
+    tools:context=".ui.media.MediaLibraryFragment">
+
+    <!-- ✅ Fail layout -->
+    <include layout="@layout/fail" />
+
+    <!-- ✅ TabLayout + ViewPager2 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/TabLayout"
+        app:tabMode="fixed"
+        app:tabIndicatorHeight="@dimen/radius_2dp"
+        app:tabIndicatorFullWidth="true"
+        app:tabRippleColor="@android:color/transparent" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        style="@style/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+<!--    &lt;!&ndash; ✅ Нижняя навигация &ndash;&gt;-->
+<!--    <include-->
+<!--        android:id="@+id/bottomNavigation"-->
+<!--        layout="@layout/bottom_navigation1" />-->
+
+</LinearLayout>
+
+
+    <!--<LinearLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:orientation="vertical"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent">-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_weight="1"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:orientation="vertical">-->
+
+<!--        <com.google.android.material.tabs.TabLayout-->
+<!--            android:id="@+id/tabLayout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content" />-->
+
+<!--        <androidx.viewpager2.widget.ViewPager2-->
+<!--            android:id="@+id/viewPager"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="1" />-->
+<!--    </LinearLayout>-->
+
+<!--</LinearLayout>-->
+
+
+
+    <!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    android:id="@+id/media_root"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    android:orientation="vertical"-->
+<!--    android:background="@color/white_textColor"-->
+<!--    tools:context=".ui.media.MediaLibraryFragment">-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; ✅ Тулбар (будет управляться из BaseActivity через Fragment) &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <include&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/toolbar"&ndash;&gt;-->
+<!--&lt;!&ndash;        layout="@layout/toolbar" />&ndash;&gt;-->
+
+<!--    &lt;!&ndash; ✅ Fail layout &ndash;&gt;-->
+<!--    <include layout="@layout/fail" />-->
+
+<!--    &lt;!&ndash; ✅ TabLayout + ViewPager2 &ndash;&gt;-->
+<!--    <com.google.android.material.tabs.TabLayout-->
+<!--        android:id="@+id/tabLayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        style="@style/TabLayout"-->
+<!--        app:tabMode="fixed"-->
+<!--        app:tabIndicatorHeight="@dimen/radius_2dp"-->
+<!--        app:tabIndicatorFullWidth="true"-->
+<!--        app:tabRippleColor="@android:color/transparent" />-->
+
+<!--    <androidx.viewpager2.widget.ViewPager2-->
+<!--        android:id="@+id/viewPager"-->
+<!--        style="@style/viewPager"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_weight="1" />-->
+
+<!--&lt;!&ndash;    <androidx.viewpager2.widget.ViewPager2&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/viewPager"&ndash;&gt;-->
+<!--&lt;!&ndash;        style="@style/viewPager"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"/>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; ✅ Нижняя навигация &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <include&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/bottomNavigation"&ndash;&gt;-->
+<!--&lt;!&ndash;        layout="@layout/bottom_navigation" />&ndash;&gt;-->
+
+
+<!--&lt;!&ndash;    &lt;!&ndash; Тут кастомный навигатор &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <include&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/bottomNavigation"&ndash;&gt;-->
+<!--&lt;!&ndash;        layout="@layout/bottom_navigation"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"/>&ndash;&gt;-->
+
+<!--</LinearLayout>-->
+
+
+<!--<LinearLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:orientation="vertical"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent">-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_weight="1"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:orientation="vertical">-->
+
+<!--        <com.google.android.material.tabs.TabLayout-->
+<!--            android:id="@+id/tabLayout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content" />-->
+
+<!--        <androidx.viewpager2.widget.ViewPager2-->
+<!--            android:id="@+id/viewPager"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="1" />-->
+<!--    </LinearLayout>-->
+
+<!--    &lt;!&ndash; custom bottom navigation &ndash;&gt;-->
+<!--    <include-->
+<!--        android:id="@+id/bottomNavigation"-->
+<!--        layout="@layout/bottom_navigation"-->
+<!--        />-->
+<!--</LinearLayout>-->
+
+

@@ -14,29 +14,38 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
+<!--        <activity-->
+<!--            android:name=".roots.main.RootActivityMain"-->
+<!--            android:exported="false" />-->
         <activity
-            android:name=".ui.mediaFragments.FragmentPlaylist"
-            android:exported="false" />
-        <activity
-            android:name=".ui.mediaFragments.FragmentFavouriteTracks"
-            android:exported="false" />
-        <activity
-            android:name=".ui.moviePosters.DetailsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.moviePosters.AboutFragment"
-            android:exported="false" />
-        <activity
-            android:name=".ui.moviePosters.PosterFragment"
-            android:exported="false" />
+            android:name=".roots.movie.MovieRootActivity"
+            android:exported="false" /> <!-- <activity -->
+        <!-- android:name=".ui.movieCast.MoviesCastActivity" -->
+        <!-- android:exported="true" /> &lt;!&ndash; <activity &ndash;&gt; -->
+        <!-- android:name=".ui.mediaFragments.FragmentPlaylist" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".ui.mediaFragments.FragmentFavouriteTracks" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".ui.moviePosters.DetailsActivity" -->
+        <!-- android:exported="false" /> &lt;!&ndash; <activity &ndash;&gt; -->
+        <!-- android:name=".ui.moviePosters.AboutFragment" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".ui.moviePosters.PosterFragment" -->
+        <!-- android:exported="false" /> -->
         <!--
          =========================
              Стартовая активность — MainActivity
              =========================
         -->
+<!--        android:name=".ui.main.MainActivity"-->
+<!--        android:name=".roots.main.RootActivityMain"-->
         <activity
-            android:name=".ui.main.MainActivity"
-            android:exported="true">
+            android:name=".roots.main.MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,9 +1,9 @@
 package com.example.playlistmaker.presentation.utils
 
 import com.example.playlistmaker.BaseActivity
-import com.example.playlistmaker.ui.audio.SearchActivity
+import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.example.playlistmaker.ui.main.MainActivity
+import com.example.playlistmaker.roots.main.MainActivity
 
 object SegmentManagerProvider {
 
@@ -25,9 +25,13 @@ object SegmentManagerProvider {
             writeToSupport = { activity.writeToSupport() },
             openAgreement = { activity.openAgreement() },
             shareTrackHistoryFromViewModel = {
-                if (activity is SearchActivity) activity.shareTrackHistoryFromViewModel()
+                val fragment = activity.getCurrentFragment()
+                if (fragment is SearchFragment) {
+                    fragment.shareTrackHistoryFromViewModel()
+                }
             },
-            shareSingleTrack = {
+
+                    shareSingleTrack = {
                 if (activity is ExtraOption) activity.shareSingleTrack()
             },
             recreate = { activity.recreate() },
