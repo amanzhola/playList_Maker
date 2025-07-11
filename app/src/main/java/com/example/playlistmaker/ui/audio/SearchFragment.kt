@@ -24,8 +24,8 @@ import com.example.playlistmaker.presentation.searchViewModels.ErrorState
 import com.example.playlistmaker.presentation.searchViewModels.SearchViewModel
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
-import com.example.playlistmaker.ui.main.BottomNavConfig
 import com.example.playlistmaker.roots.main.MainActivity
+import com.example.playlistmaker.ui.main.BottomNavConfig
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -64,6 +64,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
 
         binding.tracksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = TrackAdapter(mutableListOf(), resourceColorProvider, networkChecker, this)
+
         binding.tracksRecyclerView.adapter = adapter
 
         setupObservers()
@@ -81,7 +82,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
 
     }
 
-    override fun getBottomNavButtonIndex(): Int? = 0
+    override fun getBottomNavButtonIndex(): Int = 0
     override fun shouldShowFullBottomNav(): Boolean = false
     override fun shouldShowBottomNav(): Boolean = true
 

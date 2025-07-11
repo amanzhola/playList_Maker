@@ -3,9 +3,9 @@ package com.example.playlistmaker.presentation.utils
 import android.content.Context
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
+import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.movie.SearchMovie
 
 object SegmentTextHelper {

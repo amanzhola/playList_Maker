@@ -31,6 +31,10 @@ class BottomNavigationHelper(
                 bottomView.setCompoundDrawablesWithIntrinsicBounds(0, buttonPairs[index].second, 0, 0)
 
                 bottomView.setOnClickListener {
+
+                    // 🔒 Ограничиваем только первыми тремя кнопками (0, 1, 2)
+                    if (index > 2) return@setOnClickListener
+
                     val navigationData = navigationList[index]
 
                     when (navigationData) {
@@ -41,12 +45,13 @@ class BottomNavigationHelper(
 
                                 if (currentButtonIndex != newButtonIndex && activity is MainActivity) {
                                     this.buttonIndex = newButtonIndex ?: 0
-                                    (activity as MainActivity).switchFragment(buttonIndex)
+                                    activity.switchFragment(buttonIndex)
                                     selectButton(buttonIndex)
                                     setBottomNavigationVisibility()
                                 } else {
-                                    updateVisibilityForButtons(index)
-                                    bottomViewState = if (bottomViewState == 0) 1 else 0
+                                    // 🔒 Временно отключаем показ кнопок 3–5
+//                                    updateVisibilityForButtons(index)
+//                                    bottomViewState = if (bottomViewState == 0) 1 else 0
                                 }
                             } else {
                                 buttonIndex = index
@@ -79,15 +84,6 @@ class BottomNavigationHelper(
         )
         activity.startActivity(intent, options.toBundle())
     }
-
-//    private fun showFragment(data: NavigationData.FragmentData) {
-//        val fragment = data.fragmentProvider()
-//
-//        activity.supportFragmentManager.beginTransaction()
-//            .setCustomAnimations(data.enterAnim, data.exitAnim)
-//            .replace(R.id.rootContainer, fragment, data.tag)
-//            .commit()
-//    }
 
     private fun showFragment(data: NavigationData.FragmentData) {
         val navHostFragment = activity.supportFragmentManager.findFragmentById(R.id.nav_host_container)

@@ -3,8 +3,9 @@ package com.example.playlistmaker.presentation.utils
 import android.content.Context
 import com.example.playlistmaker.NavigationData
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ui.audioPosters.ExtraOption
+//import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.roots.main.MainActivity
+import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.movie.SearchMovie
 import com.example.playlistmaker.ui.weather.SearchWeather
 
@@ -58,7 +59,7 @@ object NavigationConfigProvider {
                 enterAnim = 0,
                 exitAnim = 0,
                 buttonIndex = 5
-            )
+            ),
         )
     }
 }

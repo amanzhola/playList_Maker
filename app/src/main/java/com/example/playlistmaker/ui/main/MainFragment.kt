@@ -92,7 +92,7 @@ class MainFragment : BaseFragment(), BottomNavConfig {
                     onButtonClicked(index)
                 }
             } else {
-                button.visibility = View.GONE
+                button.visibility = GONE
             }
         }
     }
@@ -117,14 +117,6 @@ class MainFragment : BaseFragment(), BottomNavConfig {
                 )
                 startActivity(intent, options.toBundle())
             }
-
-//            is NavigationTarget.FragmentTarget -> {
-//                parentFragmentManager.beginTransaction()
-//                    .setCustomAnimations(enterAnim, exitAnim, enterAnim, exitAnim)
-//                    .replace(R.id.rootContainer, navigationTarget.fragmentProvider(), navigationTarget.tag)
-//                    .addToBackStack(navigationTarget.tag)
-//                    .commit()
-//            }
 
             is NavigationTarget.FragmentTarget -> {
                 findNavController().navigate(
@@ -158,7 +150,7 @@ class MainFragment : BaseFragment(), BottomNavConfig {
     }
 
     private fun setButtonsVisibility(view: View, buttonIds: List<Int>, isVisible: Boolean) {
-        val visibility = if (isVisible) View.VISIBLE else View.GONE
+        val visibility = if (isVisible) View.VISIBLE else GONE
         buttonIds.forEach { id ->
             view.findViewById<MaterialButton>(id).visibility = visibility
         }

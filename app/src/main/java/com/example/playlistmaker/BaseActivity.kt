@@ -48,13 +48,6 @@ sealed class NavigationData {
         val buttonIndex: Int? = null // ✅ добавили
     ) : NavigationData()
 
-//    data class FragmentData(
-//        val fragmentProvider: () -> Fragment,
-//        val tag: String,
-//        val enterAnim: Int,
-//        val exitAnim: Int
-//    ) : NavigationData()
-
     data class FragmentData(
         val destinationId: Int, // <-- ID из navigation_graph.xml
         val args: Bundle? = null,
@@ -216,16 +209,6 @@ sealed class NavigationData {
             return ToolbarConfig(VISIBLE, R.string.app_name)
         }
 
-        fun navigateToMainActivity() {
-            val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val options = ActivityOptionsCompat.makeCustomAnimation(
-                this, R.anim.enter_from_left, R.anim.exit_to_right
-            )
-            startActivity(intent, options.toBundle())
-        }
-
     // 🔧 BaseActivity
     fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {
         val context = when (host) {
@@ -275,7 +258,6 @@ sealed class NavigationData {
     }
 
     fun getCurrentFragment(): Fragment? {
-//        return supportFragmentManager.findFragmentById(R.id.nav_host_container)
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container) as? NavHostFragment
         return navHostFragment?.childFragmentManager?.primaryNavigationFragment
     }
