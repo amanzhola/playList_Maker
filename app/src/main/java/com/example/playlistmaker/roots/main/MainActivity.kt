@@ -11,6 +11,9 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.presentation.utils.BottomNavigationHelper
 import com.example.playlistmaker.presentation.utils.NavigationConfigProvider
 import com.example.playlistmaker.ui.audio.ReversableList
+import com.example.playlistmaker.ui.audio.SearchFragment
+import com.example.playlistmaker.ui.media.MediaLibraryFragment
+import com.example.playlistmaker.ui.settings.SettingsFragment
 
 class MainActivity : BaseActivity() {
 
@@ -19,7 +22,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        navController = findNavController(R.id.nav_host_container)
         navController = (supportFragmentManager
             .findFragmentById(R.id.nav_host_container) as NavHostFragment).navController
 
@@ -45,16 +47,6 @@ class MainActivity : BaseActivity() {
 
         // Обновляем Intent, чтобы сохранить index при recreate()
         intent.putExtra("buttonIndex", buttonIndex)
-
-//        if (savedInstanceState == null) {
-//            val initialFragment = when (buttonIndex) {
-//                0 -> SearchFragment()
-//                1 -> MediaLibraryFragment()
-//                2 -> SettingsFragment()
-//                else -> MainFragment()
-//            }
-//            setupInitialFragment(initialFragment)
-//        }
 
         if (savedInstanceState == null) {
             val destinationId = when (buttonIndex) {
@@ -99,13 +91,6 @@ class MainActivity : BaseActivity() {
     fun switchFragment(index: Int) {
         buttonIndex = index
 
-//        val fragment = when (index) {
-//            0 -> SearchFragment()
-//            1 -> MediaLibraryFragment()
-//            2 -> SettingsFragment()
-//            else -> MainFragment()
-//        }
-
         val destinationId = when (index) {
             0 -> R.id.searchFragment
             1 -> R.id.mediaLibraryFragment
@@ -113,20 +98,10 @@ class MainActivity : BaseActivity() {
             else -> R.id.mainFragment
         }
 
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.rootContainer, fragment)
-//            .commit()
         if (navController.currentDestination?.id != destinationId) {
             navController.navigate(destinationId)
         }
     }
-
-//    override fun onSegment4Clicked() {
-//        val fragment = supportFragmentManager.findFragmentById(R.id.rootContainer)
-//        if (fragment is BaseFragment) {
-//            fragment.onSegment4ClickedInternal()
-//        }
-//    }
 
     override fun onSegment4Clicked() {
         val fragment = getCurrentVisibleFragment()
@@ -144,14 +119,6 @@ class MainActivity : BaseActivity() {
         return navHostFragment?.childFragmentManager?.primaryNavigationFragment
     }
 
-
-//    override fun reverseList() {
-//        val currentFragment = supportFragmentManager.findFragmentById(R.id.rootContainer)
-//        if (currentFragment is ReversableList) {
-//            currentFragment.reverseList()
-//        }
-//    }
-
     override fun reverseList() {
         val fragment = getCurrentVisibleFragment()
         if (fragment is ReversableList) {
@@ -160,4 +127,23 @@ class MainActivity : BaseActivity() {
     }
 
     override fun shouldEnableEdgeToEdge(): Boolean = false
+
+    override fun onBackPressed() {
+        // Проверка: если отображается один из корневых фрагментов — выходим из приложения
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
+        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull()
+
+        if (currentFragment is SearchFragment ||
+            currentFragment is MediaLibraryFragment ||
+            currentFragment is SettingsFragment
+        ) {
+
+            // Закрываем приложение
+            finishAffinity() // ← завершает всё приложение
+        } else {
+            // Обычное поведение (вернуться назад)
+            super.onBackPressed()
+        }
+    }
+
 }
