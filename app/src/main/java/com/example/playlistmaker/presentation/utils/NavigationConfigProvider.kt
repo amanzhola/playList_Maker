@@ -1,11 +1,10 @@
 package com.example.playlistmaker.presentation.utils
 
 import android.content.Context
-import com.example.playlistmaker.ui.media.MediaLibraryActivity
 import com.example.playlistmaker.NavigationData
 import com.example.playlistmaker.R
-import com.example.playlistmaker.ui.settings.SettingsActivity
-import com.example.playlistmaker.ui.audio.SearchActivity
+//import com.example.playlistmaker.ui.audioPosters.ExtraOption
+import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.movie.SearchMovie
 import com.example.playlistmaker.ui.weather.SearchWeather
@@ -24,13 +23,43 @@ object NavigationConfigProvider {
     }
 
     fun getNavigationList(): List<NavigationData> {
-        return listOf( // 🏃‍♀️
-            NavigationData(SearchActivity::class.java, 0, 0),
-            NavigationData(MediaLibraryActivity::class.java, 0, 0),
-            NavigationData(SettingsActivity::class.java, 0, 0),
-            NavigationData(SearchMovie::class.java, 0, 0),
-            NavigationData(SearchWeather::class.java, 0, 0),
-            NavigationData(ExtraOption::class.java, 0, 0)
+        return listOf(
+            NavigationData.ActivityData(
+                activityClass = MainActivity::class.java,
+                enterAnim = 0,
+                exitAnim = 0,
+                buttonIndex = 0 // 🔹 Search
+            ),
+            NavigationData.ActivityData(
+                activityClass = MainActivity::class.java,
+                enterAnim = 0,
+                exitAnim = 0,
+                buttonIndex = 1 // 🔹 Media
+            ),
+            NavigationData.ActivityData(
+                activityClass = MainActivity::class.java,
+                enterAnim = 0,
+                exitAnim = 0,
+                buttonIndex = 2 // 🔹 Settings
+            ),
+            NavigationData.ActivityData(
+                activityClass = SearchMovie::class.java,
+                enterAnim = 0,
+                exitAnim = 0,
+                buttonIndex = 3
+            ),
+            NavigationData.ActivityData(
+                activityClass = SearchWeather::class.java,
+                enterAnim = 0,
+                exitAnim = 0,
+                buttonIndex = 4
+            ),
+            NavigationData.ActivityData(
+                activityClass = ExtraOption::class.java,
+                enterAnim = 0,
+                exitAnim = 0,
+                buttonIndex = 5
+            ),
         )
     }
 }

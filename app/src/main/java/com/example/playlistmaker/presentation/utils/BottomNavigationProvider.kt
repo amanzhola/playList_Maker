@@ -1,11 +1,11 @@
 package com.example.playlistmaker.presentation.utils
 
-import com.example.playlistmaker.BaseActivity
+import androidx.appcompat.app.AppCompatActivity
 
 object BottomNavigationProvider {
 
     fun createHelper(
-        activity: BaseActivity,
+        activity: AppCompatActivity, // ⚠️ вместо BaseActivity,
         bottomViewIds: List<Int>,
         buttonIndex: Int
     ): BottomNavigationHelper {
@@ -13,7 +13,7 @@ object BottomNavigationProvider {
         val navigationList = NavigationConfigProvider.getNavigationList()
 
         return BottomNavigationHelper(
-            activity,
+            activity as AppCompatActivity,
             bottomViewIds,
             buttonPairs,
             navigationList,

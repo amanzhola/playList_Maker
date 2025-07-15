@@ -5,4 +5,5 @@ import com.example.playlistmaker.domain.models.player.TrackListInputData
 
 interface TrackListIntentParser {
     fun parse(intent: Intent): TrackListInputData?
+    fun parse(json: String, index: Int): TrackListInputData? // 👈 добавили метод для Fragment
 }

@@ -3,8 +3,8 @@ package com.example.playlistmaker.presentation.mainViewModels
 import androidx.lifecycle.ViewModel
 import com.example.playlistmaker.domain.api.base.LanguageInteraction
 import com.example.playlistmaker.domain.api.base.NavigationUseCase
+import com.example.playlistmaker.domain.models.base.NavigationTarget
 import com.example.playlistmaker.ui.model_main.ButtonUiModel
-
 
 class MainViewModel(
     private val navigationUseCase: NavigationUseCase,
@@ -18,7 +18,7 @@ class MainViewModel(
         return ButtonUiModel(localizedText, icon)
     }
 
-    fun getActivityClass(index: Int): Class<*>? {
-        return navigationUseCase.getNavigationTargets().getOrNull(index)?.activityClass
+    fun getNavigationTarget(index: Int): NavigationTarget? {
+        return navigationUseCase.getNavigationTargets().getOrNull(index)
     }
 }

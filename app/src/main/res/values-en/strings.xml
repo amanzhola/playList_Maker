@@ -130,4 +130,10 @@
     <string name="favourites">❤️Favourite⭐</string>
     <string name="playlists">🎶Playlists🎼</string>
 
+    <!-- <adding Movies Cast Description> -->
+    <string name="moviesCastDescription">✨📽️💃Movies Cast Description🧑‍🤝‍🧑🌼</string>
+
+    <!-- <adding Movies Names Search> -->
+    <string name="moviesStars"> ✍️ Name of the actor or actress ✨📽️💃 👈</string>
+
 </resources>

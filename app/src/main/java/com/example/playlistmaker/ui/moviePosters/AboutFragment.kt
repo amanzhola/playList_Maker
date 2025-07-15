@@ -4,14 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentAboutBinding
 import com.example.playlistmaker.domain.models.movieDetails.MovieDetails
 import com.example.playlistmaker.presentation.movieDetails.AboutState
 import com.example.playlistmaker.presentation.movieDetails.AboutViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-
 
 class AboutFragment : Fragment() {
 
@@ -42,7 +44,6 @@ class AboutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        Log.d("AboutFragment", "onViewCreated: movieId = ${arguments?.getString("movie_id")}")
 
         aboutViewModel.observeState().observe(viewLifecycleOwner) {
             when(it) {
@@ -50,6 +51,15 @@ class AboutFragment : Fragment() {
                 is AboutState.Error -> showErrorMessage(it.message)
             }
         }
+
+        binding.showCastButton.setOnClickListener {
+            val movieId = requireArguments().getString(MOVIE_ID).orEmpty()
+            findNavController().navigate(
+                R.id.moviesCastFragment,
+                bundleOf("movie_id" to movieId)
+            )
+        }
+
     }
 
     private fun showErrorMessage(message: String) {
@@ -74,6 +84,5 @@ class AboutFragment : Fragment() {
             castValue.text = movieDetails.stars
             plot.text = movieDetails.plot
         }
-
     }
 }

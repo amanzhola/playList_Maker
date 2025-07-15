@@ -1,5 +1,6 @@
 package com.example.playlistmaker.ui.movie
 
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -19,7 +20,7 @@ import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
-import com.example.playlistmaker.ui.moviePosters.DetailsActivity
+import com.example.playlistmaker.roots.movie.MovieRootActivity
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import com.example.playlistmaker.ui.moviePosters.MoviePagerList
 import com.example.playlistmaker.utils.UIUpdater
@@ -87,7 +88,7 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
                     }
                     2 -> {
                          // Новый пункт: переход в DetailsActivity
-                        val intent = Intent(this, DetailsActivity::class.java)
+                        val intent = Intent(this, MovieRootActivity::class.java)
                         intent.putExtra("poster", selectedMovie.image)
                         intent.putExtra("id", selectedMovie.id)
                         startActivity(intent)
@@ -180,6 +181,10 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
     override fun getLayoutId() = R.layout.activity_search_movie
     override fun getMainLayoutId() = R.id.main
-    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.movie) { navigateToMainActivity() }
+    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.movie) {
+        navigateToMainScreen(this@SearchMovie, -1)
+//        navigateToMainScreen(this@SearchMovie)
+//        navigateToMainActivity()
+    }
     override fun shouldEnableEdgeToEdge(): Boolean = false
 }

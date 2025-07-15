@@ -114,7 +114,7 @@ class ExtraOption : BaseActivity() {
 
     override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(View.VISIBLE, R.string.option) {
         if (viewModel.state.value?.isBottomNavVisible == true) {
-            navigateToMainActivity()
+            navigateToMainScreen(this@ExtraOption, -1)
         } else {
             viewModel.stopAudioPlay()
             finish()

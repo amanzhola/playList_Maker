@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.playlistmaker.domain.api.moviesDetials.PosterMovieRepository
+import com.example.playlistmaker.domain.api.moviesDetails.PosterMovieRepository
 import com.example.playlistmaker.domain.models.movieDetails.MovieDetails
 import com.example.playlistmaker.domain.util.ResourceMovieDetials
 import kotlinx.coroutines.Dispatchers
