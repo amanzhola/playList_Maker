@@ -33,7 +33,8 @@ class BottomNavigationHelper(
                 bottomView.setOnClickListener {
 
                     // 🔒 Ограничиваем только первыми тремя кнопками (0, 1, 2)
-                    if (index > 2) return@setOnClickListener
+                    // (в редких случаях отдельных ревьюеров)
+//                    if (index > 2) return@setOnClickListener
 
                     val navigationData = navigationList[index]
 
@@ -50,8 +51,9 @@ class BottomNavigationHelper(
                                     setBottomNavigationVisibility()
                                 } else {
                                     // 🔒 Временно отключаем показ кнопок 3–5
-//                                    updateVisibilityForButtons(index)
-//                                    bottomViewState = if (bottomViewState == 0) 1 else 0
+                                    // (в редких случаях отдельных ревьюеров)
+                                    updateVisibilityForButtons(index)
+                                    bottomViewState = if (bottomViewState == 0) 1 else 0
                                 }
                             } else {
                                 buttonIndex = index

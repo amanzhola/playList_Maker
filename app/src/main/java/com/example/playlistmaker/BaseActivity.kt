@@ -11,7 +11,6 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -210,6 +209,26 @@ sealed class NavigationData {
         }
 
     // 🔧 BaseActivity
+//    fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {
+//        val context = when (host) {
+//            is AppCompatActivity -> host
+//            is Fragment -> host.requireContext()
+//            else -> throw IllegalArgumentException("Unsupported host")
+//        }
+//
+//        val intent = Intent(context, MainActivity::class.java).apply {
+//            putExtra("buttonIndex", buttonIndex)
+//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//        }
+//
+//        val options = ActivityOptionsCompat.makeCustomAnimation(
+//            context, R.anim.enter_from_left, R.anim.exit_to_right
+//        )
+//
+//        ContextCompat.startActivity(context, intent, options.toBundle())
+//    }
+
+    // 🔧 BaseActivity
     fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {
         val context = when (host) {
             is AppCompatActivity -> host
@@ -226,7 +245,15 @@ sealed class NavigationData {
             context, R.anim.enter_from_left, R.anim.exit_to_right
         )
 
-        ContextCompat.startActivity(context, intent, options.toBundle())
+        when (host) {
+            is AppCompatActivity -> {
+                host.startActivity(intent, options.toBundle())
+            }
+            is Fragment -> {
+                host.startActivity(intent, options.toBundle())
+            }
+            else -> throw IllegalArgumentException("Unsupported host")
+        }
     }
 
     fun changeLanguage() {
