@@ -33,6 +33,7 @@ import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
 import com.example.playlistmaker.roots.main.MainActivity
+import com.example.playlistmaker.ui.main.MainFragment
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
@@ -124,8 +125,10 @@ sealed class NavigationData {
             if (shouldEnableEdgeToEdge()) { enableEdgeToEdge() }
             setupWindowInsets()
 
-            segmentTexts = SegmentTextHelper.getSegmentTexts(this, this is MainActivity)
-            newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, this is MainActivity)
+            val isMainFragment = (getCurrentFragment() is MainFragment)
+            segmentTexts = SegmentTextHelper.getSegmentTexts(this, isMainFragment)
+            newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
+
             // 👌 for 2 more 😉 parameters by default to have 1 out of 3
             segmentHelper = SegmentHelper(this, this)
             colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
@@ -183,7 +186,6 @@ sealed class NavigationData {
 
         protected open fun shouldEnableEdgeToEdge(): Boolean = true
         protected open fun getLayoutId(): Int = R.layout.base_main
-//        protected open fun getMainLayoutId(): Int = R.id.rootContainer
         protected open fun getMainLayoutId(): Int = R.id.nav_host_container
 
         override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -207,26 +209,6 @@ sealed class NavigationData {
         protected open fun getToolbarConfig(): ToolbarConfig {
             return ToolbarConfig(VISIBLE, R.string.app_name)
         }
-
-    // 🔧 BaseActivity
-//    fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {
-//        val context = when (host) {
-//            is AppCompatActivity -> host
-//            is Fragment -> host.requireContext()
-//            else -> throw IllegalArgumentException("Unsupported host")
-//        }
-//
-//        val intent = Intent(context, MainActivity::class.java).apply {
-//            putExtra("buttonIndex", buttonIndex)
-//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        }
-//
-//        val options = ActivityOptionsCompat.makeCustomAnimation(
-//            context, R.anim.enter_from_left, R.anim.exit_to_right
-//        )
-//
-//        ContextCompat.startActivity(context, intent, options.toBundle())
-//    }
 
     // 🔧 BaseActivity
     fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {

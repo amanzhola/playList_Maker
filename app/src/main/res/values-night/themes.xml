@@ -18,6 +18,7 @@
         <color name="hintColor_textColor">@color/textColor</color>
         <color name="hintField_white">@color/white</color>
         <color name="hintColor_white">@color/white</color>
+        <color name="hintField_textColor">@color/textColor</color>
         <color name="white_textColor">@color/textColor</color>
         <color name="blue_blue">@color/backgroundDay</color>
         <color name="yellow_yellow">@color/bunColor</color>

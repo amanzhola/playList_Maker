@@ -19,6 +19,7 @@
 <!--            android:exported="false" />-->
         <activity
             android:name=".roots.movie.MovieRootActivity"
+            android:windowSoftInputMode="adjustNothing"
             android:exported="false" /> <!-- <activity -->
         <!-- android:name=".ui.movieCast.MoviesCastActivity" -->
         <!-- android:exported="true" /> &lt;!&ndash; <activity &ndash;&gt; -->
@@ -44,8 +45,8 @@
 <!--        android:name=".roots.main.RootActivityMain"-->
         <activity
             android:name=".roots.main.MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustNothing">
+            android:windowSoftInputMode="adjustNothing"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -77,15 +78,15 @@
                 <data android:mimeType="application/json" />
             </intent-filter>
         </activity> <!-- Другие активности без LAUNCHER -->
-        <activity
-            android:name=".ui.audio.SearchActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.settings.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.media.MediaLibraryActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ui.audio.SearchActivity"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".ui.settings.SettingsActivity"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".ui.media.MediaLibraryActivity"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".ui.launcherPosters.TrackDetailActivity"
             android:exported="false" />
@@ -100,6 +101,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.movie.SearchMovie"
+            android:windowSoftInputMode="adjustNothing"
             android:exported="false" />
         <activity
             android:name=".ui.audioPosters.ExtraOption"

@@ -3,10 +3,12 @@ package com.example.playlistmaker.presentation.searchPostersViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.models.player.TrackListInputData
 import com.example.playlistmaker.domain.models.search.Track
+import kotlinx.coroutines.launch
 
 
 class ExtraOptionViewModel(
@@ -20,31 +22,35 @@ class ExtraOptionViewModel(
         get() = _state.value ?: ExtraOptionViewState()
 
     init {
-        initAudioCallbacks()
+        observeAudioPlayer()
     }
 
-    private fun initAudioCallbacks() {
-        audioPlayer.setOnTimeUpdateCallback { time ->
-            updateState {
-                it.copy(trackList = it.trackList.map { track ->
-                    if (track.trackId == audioPlayer.currentTrackId) track.copy(playTime = time) else track
-                })
+    private fun observeAudioPlayer() {
+        viewModelScope.launch {
+            audioPlayer.playTime.collect { time ->
+                updateState {
+                    it.copy(trackList = it.trackList.map { track ->
+                        if (track.trackId == audioPlayer.currentTrackId) track.copy(playTime = time) else track
+                    })
+                }
             }
         }
 
-        audioPlayer.setStateChangeCallback { newState ->
-            val updatedTracks = currentState.trackList.map {
-                if (it.trackId == audioPlayer.getValidTrackId()) {
-                    when (newState) {
-                        PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "...")
-                        PlaybackState.PREPARED -> it.copy(isPlaying = false)
-                        PlaybackState.PLAYING -> it.copy(isPlaying = true)
-                        PlaybackState.PAUSED -> it.copy(isPlaying = false)
-                        else -> it.copy(isPlaying = false, playTime = "0:00")
-                    }
-                } else it.copy(isPlaying = false, playTime = "0:00")
+        viewModelScope.launch {
+            audioPlayer.playbackState.collect { newState ->
+                val updatedTracks = currentState.trackList.map {
+                    if (it.trackId == audioPlayer.getValidTrackId()) {
+                        when (newState) {
+                            PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "...")
+                            PlaybackState.PREPARED -> it.copy(isPlaying = false)
+                            PlaybackState.PLAYING -> it.copy(isPlaying = true)
+                            PlaybackState.PAUSED -> it.copy(isPlaying = false)
+                            else -> it.copy(isPlaying = false, playTime = "0:00")
+                        }
+                    } else it.copy(isPlaying = false, playTime = "0:00")
+                }
+                updateState { it.copy(trackList = updatedTracks, playbackState = newState) }
             }
-            updateState { it.copy(trackList = updatedTracks, playbackState = newState) }
         }
     }
 
@@ -73,7 +79,7 @@ class ExtraOptionViewModel(
     fun audioPlay(track: Track) {
         when {
             audioPlayer.isCurrentTrackPlaying(track.trackId) -> audioPlayer.pause()
-            audioPlayer.playbackState == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
+            audioPlayer.playbackState.value == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
             else -> audioPlayer.setTrack(track.previewUrl, track.trackId)
         }
     }
@@ -83,11 +89,6 @@ class ExtraOptionViewModel(
     }
 
     fun getCurrentTrack(): Track? = currentState.trackList.getOrNull(currentState.currentTrackIndex)
-
-    override fun onCleared() {
-        super.onCleared()
-        audioPlayer.clearCallbacks()
-    }
 
     fun updateState(transform: (ExtraOptionViewState) -> ExtraOptionViewState) {
         _state.value = transform(currentState)

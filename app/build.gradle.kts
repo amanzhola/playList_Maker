@@ -109,9 +109,14 @@ dependencies {
 
     implementation (libs.adapterdelegates4.kotlin.dsl.viewbinding)
 
+    // sprint 20 option 1
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation(libs.kotlinx.coroutines.android)
+
+    // coroutines sprint 20 optoin 2 to replace debounce
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
     // previous mess for info
-
 
 //    implementation (libs.material.v161)
 

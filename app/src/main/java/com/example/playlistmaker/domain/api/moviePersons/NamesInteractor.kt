@@ -1,12 +1,8 @@
 package com.example.playlistmaker.domain.api.moviePersons
 
 import com.example.playlistmaker.domain.models.moviePerson.Person
+import kotlinx.coroutines.flow.Flow
 
 interface NamesInteractor {
-
-    fun searchNames(expression: String, consumer: NamesConsumer)
-
-    interface NamesConsumer {
-        fun consume(foundNames: List<Person>?, errorMessage: String?)
-    }
+    fun searchNames(expression: String): Flow<Pair<List<Person>?, String?>>
 }

@@ -10,13 +10,6 @@ sealed class NavigationTarget {
         val exitAnim: Int
     ) : NavigationTarget()
 
-//    data class FragmentTarget(
-//        val fragmentProvider: () -> Fragment,
-//        val tag: String,
-//        val enterAnim: Int,
-//        val exitAnim: Int
-//    ) : NavigationTarget()
-
     data class FragmentTarget(
         val destinationId: Int,
         val args: Bundle? = null,

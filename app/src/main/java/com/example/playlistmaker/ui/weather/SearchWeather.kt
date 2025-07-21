@@ -2,6 +2,8 @@ package com.example.playlistmaker.ui.weather
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View.VISIBLE
 import android.widget.Button
@@ -17,9 +19,10 @@ import com.example.playlistmaker.domain.api.weather.WeatherInteraction
 import com.example.playlistmaker.domain.models.weather.ForecastLocation
 import com.example.playlistmaker.domain.util.Resource
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
-import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.UIUpdater
+import com.example.playlistmaker.utils.collectDebouncedIn
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -41,8 +44,12 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
 //    }
 
     private lateinit var uiUpdater: UIUpdater // ✅ 📜
-    // 2️⃣ 🅰️ ⌨️ 📋 👉 🔤 🔍 👇
-    private val debounce = Debounce(SEARCH_DEBOUNCE_DELAY)
+//    // 2️⃣ 🅰️ ⌨️ 📋 👉 🔤 🔍 👇
+//    private val debounce = Debounce_handler(SEARCH_DEBOUNCE_DELAY)
+
+    // 2️⃣ 🅰️ ⌨️ 📋 👉 🔤 🔍 👇 for coroutine
+    private val queryFlow = MutableStateFlow("")
+
 
     private val locations = ArrayList<ForecastLocation>()
     private val adapter = LocationsAdapter { showWeather(it) }
@@ -91,8 +98,13 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
 
         // 1️⃣ Обработка кнопки "Поиск" ✍️ 📝 👉 ❌ 🕒
         searchButton.setOnClickListener {
-            if (queryInput.text.isNotEmpty()) {
-                search()
+//            if (queryInput.text.isNotEmpty()) {
+//                search()
+//            }
+
+            val queryText = queryInput.text.toString()
+            if (queryText.isNotEmpty()) {
+                search(queryText)
             }
         }
 
@@ -111,15 +123,32 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
             }
         })
         */
+        // 2️⃣ 🅱️ Обработка текста с coroutine  ⌨️ 📋 👉 🔤 🔍 ☝️
+
+        queryInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                queryFlow.value = s.toString()
+            }
+        })
+
+        queryFlow
+            .collectDebouncedIn(lifecycleScope, SEARCH_DEBOUNCE_DELAY) { queryText ->
+                if (queryText.isNotEmpty()) {
+                    search(queryText)
+                }
+            }
+
 
         // 👈 ⚙️
         findViewById<TextView>(R.id.bottom5).isSelected = true
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        debounce.cancel()
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        debounce.cancel()
+//    }
 
     override fun onSaveInstanceState(outState: Bundle) { // 👉 🔒 🗄️ 📝
         super.onSaveInstanceState(outState)
@@ -149,6 +178,32 @@ class SearchWeather : BaseActivity() { // 🔁 👉 🌤️🧼🏗️✅
                     }
                     is Resource.Error -> {
                         Log.e("RESULT", "Error: ${result.message}")
+                        uiUpdater.showMessage(getString(R.string.something_went_wrong))
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun search(query: String) {
+        uiUpdater.showLoading()
+
+        lifecycleScope.launch {
+            weatherInteraction.searchLocations(query).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        val foundLocations = result.data
+                        if (!foundLocations.isNullOrEmpty()) {
+                            locations.clear()
+                            locations.addAll(foundLocations)
+                            adapter.notifyDataSetChanged()
+                            uiUpdater.showData()
+                        } else {
+                            uiUpdater.showMessage(getString(R.string.nothing_found_city))
+                        }
+                    }
+                    is Resource.Error -> {
                         uiUpdater.showMessage(getString(R.string.something_went_wrong))
                     }
                 }

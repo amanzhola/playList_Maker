@@ -13,8 +13,8 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentSettingsBinding
 import com.example.playlistmaker.presentation.settingsViewModels.SettingsViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
-import com.example.playlistmaker.ui.main.BottomNavConfig
 import com.example.playlistmaker.roots.main.MainActivity
+import com.example.playlistmaker.ui.main.BottomNavConfig
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsFragment : BaseFragment(), BottomNavConfig {
@@ -22,6 +22,8 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SettingsViewModel by viewModel()
+
+    private var isBottomNavVisible = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,6 +71,15 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
     override fun getBottomNavButtonIndex(): Int? = 2 // например, третий таб
     override fun shouldShowFullBottomNav(): Boolean = false
     override fun shouldShowBottomNav(): Boolean = true
+
+    override fun onSegment4ClickedInternal() {
+        if (isBottomNavVisible) {
+            getBaseActivity()?.hideBottomNavigation()
+        } else {
+            getBaseActivity()?.showBottomNavigation()
+        }
+        isBottomNavVisible = !isBottomNavVisible
+    }
 
     fun syncThemeSwitchState() {
         setSwitchCheckedWithoutTrigger(viewModel.isDarkTheme())

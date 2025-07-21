@@ -139,7 +139,6 @@ class MainFragment : BaseFragment(), BottomNavConfig {
         }
     }
 
-
     private fun getAnimations(index: Int): Pair<Int, Int> {
         return when (index) {
             0 -> Pair(R.anim.slide_in_right, R.anim.slide_out_left)
