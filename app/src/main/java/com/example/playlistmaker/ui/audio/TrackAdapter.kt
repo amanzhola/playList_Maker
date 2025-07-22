@@ -14,11 +14,9 @@ import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.example.playlistmaker.utils.CLICK_DEBOUNCE_DELAY
-import com.example.playlistmaker.utils.ClickDebouncer
+import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
 import com.google.gson.Gson
-import kotlinx.coroutines.MainScope
 
 interface OnTrackClickListener {
         fun onArrowClicked(track: Track)
@@ -38,8 +36,8 @@ interface OnTrackClickListener {
         private var textColor: Int = defaultTextColor
         private var arrowColor: Int = defaultTextColor
 
-        private val clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, MainScope())// ✨
-
+        private val debounce = Debounce(1000L) // ✨
+        private var isClickAllowed = true
 
         inner class ViewHolder(private val binding: TrackItemBinding) :
             RecyclerView.ViewHolder(binding.root) {
@@ -81,19 +79,18 @@ interface OnTrackClickListener {
 
                 // Сам item
                 binding.root.setOnClickListener { // ✨
+                    if (!clickDebounceAllowed()) return@setOnClickListener
 
-                    clickDebouncer.tryClick {
-                        listener.onTrackClicked(track)
+                    listener.onTrackClicked(track)
 
-                        val context = binding.root.context
-                        val trackListJson = Gson().toJson(tracks)
+                    val context = binding.root.context
+                    val trackListJson = Gson().toJson(tracks)
 
-                        val intent = Intent(context, ExtraOption::class.java).apply {
-                            putExtra("TRACK_LIST_JSON", trackListJson)
-                            putExtra("TRACK_INDEX", bindingAdapterPosition)
-                        }
-                        context.startActivity(intent)
+                    val intent = Intent(context, ExtraOption::class.java).apply {
+                        putExtra("TRACK_LIST_JSON", trackListJson)
+                        putExtra("TRACK_INDEX", bindingAdapterPosition)
                     }
+                    context.startActivity(intent)
                 }
             }
         }
@@ -133,5 +130,16 @@ interface OnTrackClickListener {
             textColor = color
             textNameColor = color
             notifyItemRangeChanged(0, itemCount) // 🧐
+        }
+
+        private fun clickDebounceAllowed(): Boolean {
+            if (isClickAllowed) { // ✨
+                isClickAllowed = false
+                debounce.debounce {
+                    isClickAllowed = true
+                }
+                return true
+            }
+            return false
         }
     }

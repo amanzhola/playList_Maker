@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.domain.models.movie.Movie
+import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
 
 sealed class MoviesEvent {
@@ -15,7 +16,7 @@ class MoviesAdapter(private val onItemClicked: (MoviesEvent) -> Unit,
                     private val onFavoriteClicked: (Movie) -> Unit
     ) : RecyclerView.Adapter<MovieViewHolder>() {
 
-//    private val debounce = Debounce_handler(1000L) // ⛔ 🕒 1 секунда задержки
+    private val debounce = Debounce(1000L) // ⛔ 🕒 1 секунда задержки
     var movies = ArrayList<Movie>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
@@ -27,12 +28,9 @@ class MoviesAdapter(private val onItemClicked: (MoviesEvent) -> Unit,
         holder.bind(movie)
 
         holder.itemView.setOnClickListener {
-
-            onItemClicked(MoviesEvent.SingleMovie(movie, position))
-
-//            debounce.debounce {
-//                onItemClicked(MoviesEvent.SingleMovie(movie, position))
-//            }
+            debounce.debounce {
+                onItemClicked(MoviesEvent.SingleMovie(movie, position))
+            }
         }
     }
 

@@ -31,9 +31,20 @@ class SharedPreferencesSearchHistoryRepository(
         saveHistory(current)
     }
 
+//    @SuppressLint("UseKtx")
+//    override fun clearHistory() {
+//        sharedPreferences.edit().remove(TRACK_HISTORY_LIST_KEY).apply()
+//    }
+
     override fun clearHistory() {
         saveHistory(emptyList())
     }
+
+//    @SuppressLint("UseKtx")
+//    override fun saveHistory(list: List<Track>) {
+//        val json = gson.toJson(list)
+//        sharedPreferences.edit().putString(TRACK_HISTORY_LIST_KEY, json).apply()
+//    }
 
     override fun saveHistory(tracks: List<Track>) {
         sharedPreferences.edit {

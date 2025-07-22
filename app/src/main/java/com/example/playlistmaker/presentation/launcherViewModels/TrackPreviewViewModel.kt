@@ -3,13 +3,9 @@ package com.example.playlistmaker.presentation.launcherViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.models.search.Track
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 class TrackPreviewViewModel(
     private val audioPlayer: AudioPlayerInteraction
@@ -22,44 +18,39 @@ class TrackPreviewViewModel(
         get() = _state.value ?: TrackPreviewViewState()
 
     init {
-        observeAudioPlayer()
+        initAudioCallbacks()
     }
 
-    private fun observeAudioPlayer() {
-        viewModelScope.launch {
-            combine(
-                audioPlayer.playbackState,
-                audioPlayer.playTime.onStart { emit("0:00") }
-            ) { state, time -> state to time }
-                .collect { (newState, time) ->
-                    updateTrackListByState(newState, time)
-                }
-        }
-    }
-
-    private fun updateTrackListByState(playbackState: PlaybackState, time: String) {
-        val trackId = audioPlayer.getValidTrackId()
-
-        val updatedTracks = currentState.trackList.map {
-            if (it.trackId == trackId) {
-                val playTime = "🕒$time"
-                when (playbackState) {
-                    PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
-                    PlaybackState.PREPARED -> it.copy(isPlaying = false, playTime = "🕒0:00")
-                    PlaybackState.PLAYING -> it.copy(isPlaying = true, playTime = playTime)
-                    PlaybackState.PAUSED -> it.copy(isPlaying = false, playTime = playTime)
-                    PlaybackState.STOPPED, PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
-                }
-            } else {
-                it.copy(isPlaying = false, playTime = "🕒0:00")
+    private fun initAudioCallbacks() {
+        audioPlayer.setOnTimeUpdateCallback { time ->
+            val updatedTracks = currentState.trackList.map {
+                if (it.trackId == audioPlayer.currentTrackId) it.copy(playTime = "🕒$time") else it
             }
+            updateState { it.copy(trackList = updatedTracks) }
         }
 
-        updateState {
-            it.copy(
-                playbackState = playbackState,
-                trackList = updatedTracks
-            )
+        audioPlayer.setStateChangeCallback { newState ->
+            val trackId = audioPlayer.getValidTrackId()
+            val updatedTracks = currentState.trackList.map {
+                if (it.trackId == trackId) {
+                    when (newState) {
+                        PlaybackState.PREPARING -> it.copy(isPlaying = false, playTime = "🕒...")
+                        PlaybackState.PREPARED -> it.copy(isPlaying = false)
+                        PlaybackState.PLAYING -> it.copy(isPlaying = true)
+                        PlaybackState.PAUSED -> it.copy(isPlaying = false)
+                        PlaybackState.STOPPED,
+                        PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
+                    }
+                } else {
+                    it.copy(isPlaying = false, playTime = "🕒0:00")
+                }
+            }
+            updateState {
+                it.copy(
+                    playbackState = newState,
+                    trackList = updatedTracks
+                )
+            }
         }
     }
 
@@ -81,16 +72,31 @@ class TrackPreviewViewModel(
         updateState { it.copy(scrollPosition = position) }
     }
 
+    fun clearScrollPosition() {
+        updateState { it.copy(scrollPosition = -1) }
+    }
+
     fun audioPlay(track: Track) {
         when {
             audioPlayer.isCurrentTrackPlaying(track.trackId) -> audioPlayer.pause()
-            audioPlayer.playbackState.value == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
+            audioPlayer.playbackState == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
             else -> audioPlayer.setTrack(track.previewUrl, track.trackId)
         }
     }
 
     fun stopAudioPlay() {
         audioPlayer.stopPlayback()
+    }
+
+    fun getCurrentTrack(): Track? {
+        val list = currentState.trackList
+        val index = currentState.currentTrackIndex
+        return list.getOrNull(index)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        audioPlayer.clearCallbacks()
     }
 
     private fun updateState(transform: (TrackPreviewViewState) -> TrackPreviewViewState) {

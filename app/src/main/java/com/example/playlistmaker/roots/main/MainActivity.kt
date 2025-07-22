@@ -1,6 +1,5 @@
 package com.example.playlistmaker.roots.main
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -18,7 +17,7 @@ import com.example.playlistmaker.ui.settings.SettingsFragment
 
 class MainActivity : BaseActivity() {
 
-    private lateinit var navController: NavController
+    lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +27,7 @@ class MainActivity : BaseActivity() {
 
 
         // Получаем переданный индекс (из Intent)
-//        val passedIndex = intent.getIntExtra("buttonIndex", -1)
+        val passedIndex = intent.getIntExtra("buttonIndex", -1)
 
         buttonIndex = when {
             savedInstanceState != null -> {
@@ -81,6 +80,7 @@ class MainActivity : BaseActivity() {
         bottomNavigationHelper.setupBottomNavigation()
         bottomNavigationHelper.selectButton(buttonIndex)
         bottomNavigationHelper.setBottomNavigationVisibility()
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -128,8 +128,6 @@ class MainActivity : BaseActivity() {
 
     override fun shouldEnableEdgeToEdge(): Boolean = false
 
-    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
-    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         // Проверка: если отображается один из корневых фрагментов — выходим из приложения
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
@@ -139,13 +137,13 @@ class MainActivity : BaseActivity() {
             currentFragment is MediaLibraryFragment ||
             currentFragment is SettingsFragment
         ) {
+
             // Закрываем приложение
             finishAffinity() // ← завершает всё приложение
-        }
-        else {
+        } else {
             // Обычное поведение (вернуться назад)
-//            super.onBackPressed()
-            onBackPressedDispatcher.onBackPressed()
+            super.onBackPressed()
         }
     }
+
 }

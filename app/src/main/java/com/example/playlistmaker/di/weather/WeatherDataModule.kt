@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 // Weather API URL
 private const val WEATHER_BASE_URL = "https://fnw-us.foreca.com"
-private const val WEATHER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9wZmEuZm9yZWNhLmNvbVwvYXV0aG9yaXplXC90b2tlbiIsImlhdCI6MTc1MjgyODM1OSwiZXhwIjo5OTk5OTk5OTk5LCJuYmYiOjE3NTI4MjgzNTksImp0aSI6IjZiZWM2ZWJlMDNmMTZjZDciLCJzdWIiOiJhbWFuemhvbGFpbW92IiwiZm10IjoiWERjT2hqQzQwK0FMamxZVHRqYk9pQT09In0.nACS9EvYRU486JnHkZSfTJCuH0gXmUZBn8VbaMW_kYY"
+private const val WEATHER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9mbnctdXMuZm9yZWNhLmNvbVwvYXV0aG9yaXplXC90b2tlbiIsImlhdCI6MTc0NjExNTY3MCwiZXhwIjo5OTk5OTk5OTk5LCJuYmYiOjE3NDYxMTU2NzAsImp0aSI6IjdhODU1ODA2MjQ5Yjk1ODQiLCJzdWIiOiJhbG11c2hhX3llcyIsImZtdCI6IlhEY09oakM0MCtBTGpsWVR0amJPaUE9PSJ9.h8xnf_MIoK9F5f4rL922g5Ts8bVsYoSx0hKZgiPqCsg"
 
 val weatherDataModule = module { // 🌧️ ☀️ ⛅ 🌩️ ❄️--> ☁️
 

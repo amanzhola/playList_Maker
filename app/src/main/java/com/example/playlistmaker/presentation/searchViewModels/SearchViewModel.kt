@@ -9,9 +9,8 @@ import com.example.playlistmaker.domain.api.search.AudioInteraction
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.util.Resource
 import com.example.playlistmaker.presentation.searchViewModels.models.SearchUiState
+import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
-import com.example.playlistmaker.utils.collectDebouncedIn
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 enum class ErrorState {
@@ -25,8 +24,6 @@ class SearchViewModel( // 🖼️
     private val searchHistoryInteraction: SearchHistoryInteraction
 ) : ViewModel() {
 
-    private val queryFlow = MutableStateFlow("")
-
     private val _uiState = MutableLiveData(SearchUiState())
     val uiState: LiveData<SearchUiState> = _uiState
 
@@ -34,7 +31,9 @@ class SearchViewModel( // 🖼️
         get() = _uiState.value ?: SearchUiState()
 
     private var ignoreNextHistoryUpdate = false
-    
+
+    private val debounce = Debounce(SEARCH_DEBOUNCE_DELAY)
+
     init {
         searchHistoryInteraction.subscribeToHistoryChanges { updatedHistory ->
             if (ignoreNextHistoryUpdate) {
@@ -54,14 +53,6 @@ class SearchViewModel( // 🖼️
             )
         }
 
-        // Новый debounce для поиска
-        queryFlow // ✨
-            .collectDebouncedIn(viewModelScope, SEARCH_DEBOUNCE_DELAY) { query ->
-                if (query.isNotBlank()) {
-                    onSearchActionDoneInternal(query)
-                }
-            }
-
         _uiState.value = currentState.copy(
             historyTracks = searchHistoryInteraction.getHistory()
         )
@@ -70,15 +61,15 @@ class SearchViewModel( // 🖼️
     override fun onCleared() {
         super.onCleared()
         searchHistoryInteraction.unsubscribeFromHistoryChanges()
-//        debounce.cancel() // 🧼 Очистка таймера // 🧼➖🧹
+        debounce.cancel() // 🧼 Очистка таймера // 🧼➖🧹
     }
-
 
     fun onQueryChanged(query: String) {
-        setSearchQuery(query) // 🎯
-        queryFlow.value = query
+        setSearchQuery(query)
+        debounce.debounce { // ✨
+            onSearchActionDone() // 🎯
+        }
     }
-
 
     private fun setSearchQuery(query: String) {
         val showClear = query.isNotEmpty()
@@ -106,36 +97,33 @@ class SearchViewModel( // 🖼️
         )
     }
 
-    fun onSearchActionDone() {
+    fun onSearchActionDone() { // 🔍
         val query = currentState.query.trim()
         if (query.isEmpty()) return
 
-        onSearchActionDoneInternal(query)
-    }
-
-    private fun onSearchActionDoneInternal(query: String) { // 🔍
-        _uiState.postValue(currentState.copy(
+        _uiState.value = currentState.copy(
             isLoading = true,
             showHistory = false
-        ))
+        )
 
         viewModelScope.launch {
             audioInteraction.searchTracks(query).collect { result ->
                 when (result) { // 🎯
                     is Resource.Success -> { // ✅
                         val tracks = result.data ?: emptyList()
-                        _uiState.postValue(currentState.copy(
+                        _uiState.value = currentState.copy(
                             isLoading = false,
                             searchTracks = tracks,
                             error = if (tracks.isEmpty()) ErrorState.ERROR else ErrorState.NONE
-                        ))
+                        )
                     }
+
                     is Resource.Error -> { // ⚠️
-                        _uiState.postValue(currentState.copy(
+                        _uiState.value = currentState.copy(
                             isLoading = false,
                             searchTracks = emptyList(),
                             error = ErrorState.FAILURE
-                        ))
+                        )
                     }
                 }
             }

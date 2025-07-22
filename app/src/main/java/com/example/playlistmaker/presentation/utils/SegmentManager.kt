@@ -8,7 +8,6 @@ import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.example.playlistmaker.ui.main.MainFragment
 import com.example.playlistmaker.ui.movie.SearchMovie
 import com.example.playlistmaker.ui.settings.SettingsFragment
 
@@ -31,16 +30,12 @@ class SegmentManager(
     fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean, currentActivity: AppCompatActivity)
     {
         val randomColor = ColorHelper.getNextColor(context)
-        val currentFragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
-        val isMainFragment = currentFragment is MainFragment
 
         if (isChangedState) {
-
             when (segmentIndex) {
-                4 -> if (!isMainFragment) changeLanguage()
-                5 -> if (isMainFragment) changeLanguage() else colorManager.clearAllColors()
+                4 -> if (!isMainActivity) changeLanguage()
+                5 -> if (isMainActivity) changeLanguage() else colorManager.clearAllColors()
             }
-
             if (segmentIndex != 5) {
                 colorPersistenceHelper.save(segmentIndex, randomColor)
                 colorApplierHelper.apply(segmentIndex, randomColor)
@@ -49,6 +44,7 @@ class SegmentManager(
             when (segmentIndex) {
                 0 -> { // Toggle theme
                     ThemeLanguageHelper.toggleTheme()
+                    val currentFragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
                     if (currentFragment is SettingsFragment) {
                         currentFragment.syncThemeSwitchState()
                     }
@@ -71,7 +67,7 @@ class SegmentManager(
 
                 2 -> writeToSupport()
                 3 -> openAgreement()
-                4 -> if (isMainFragment) colorManager.clearAllColors() else (context as? BaseActivity)?.onSegment4Clicked()
+                4 -> if (isMainActivity) colorManager.clearAllColors() else (context as? BaseActivity)?.onSegment4Clicked()
                 5 -> changeLanguage()
             }
         }

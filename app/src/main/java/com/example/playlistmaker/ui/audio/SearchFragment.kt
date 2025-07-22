@@ -123,6 +123,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
             binding.searchBox.hint = if (state.isInputFocused) null else getString(R.string.search_hint)
             binding.clearIcon.isVisible = state.isClearIconVisible
 
+            if (state.isInputFocused) getBaseActivity()?.hideBottomNavigation() else getBaseActivity()?.showBottomNavigation()
         }
     }
 

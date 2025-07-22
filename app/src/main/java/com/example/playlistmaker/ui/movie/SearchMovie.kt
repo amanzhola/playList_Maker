@@ -1,16 +1,17 @@
 package com.example.playlistmaker.ui.movie
 
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
@@ -22,17 +23,17 @@ import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.movie.MovieRootActivity
 import com.example.playlistmaker.ui.moviePosters.MoviePager
 import com.example.playlistmaker.ui.moviePosters.MoviePagerList
-import com.example.playlistmaker.utils.CLICK_DEBOUNCE_DELAY
-import com.example.playlistmaker.utils.ClickDebouncer
 import com.example.playlistmaker.utils.UIUpdater
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
-    private lateinit var clickDebouncer: ClickDebouncer
-    private var isDialogShown = false
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 2000L
+    }
 
+    private var isClickable = true
     private lateinit var uiUpdater: UIUpdater
 
     private lateinit var searchButton: Button
@@ -42,6 +43,7 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
 
     private val viewModel: MoviesViewModel by viewModel()
     private val movieStorageHelper: MovieStorageHelper by inject() // 👉 📦
+    // provideMovieStorageHelper shows fail -> see TrackAdapter newFiles  💥
 
     private val adapter by lazy {
         MoviesAdapter(
@@ -55,20 +57,15 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
         selectedEvent?.let {
             val selectedMovie = it.movie
             val position = it.position
-
-            clickDebouncer.tryClick { // ⛔ 🕒 1 секунда задержки
-                showChoiceDialog(selectedMovie, position)
-            }
+            showChoiceDialog(selectedMovie, position)
         }
     }
 
     private lateinit var moviePagerLauncher: ActivityResultLauncher<Intent>
 
     private fun showChoiceDialog(selectedMovie: Movie, position: Int) {
-
-        if (isDialogShown) return
-        isDialogShown = true
-
+        if (!clickDebounce()) return
+//        val options = arrayOf("Один фильм", "Список фильмов", "Подробнее (с фрагментами)")
         val options = arrayOf(getString(R.string.first),getString(R.string.second),getString(R.string.third))
 
         androidx.appcompat.app.AlertDialog.Builder(this)
@@ -99,7 +96,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
                 }
             }
             .setNegativeButton("Отмена") { d, _ -> d.dismiss() }
-            .setOnDismissListener { isDialogShown = false } // ✅ ДОБАВЛЯЕМ это!
             .show()
     }
 
@@ -109,7 +105,6 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, lifecycleScope)
         uiUpdater = UIUpdater(
             progressBar = findViewById(R.id.progressBar),
             placeholderMessage = findViewById(R.id.placeholderMessage),
@@ -149,22 +144,27 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
             }
         }
 
-        // sprint 20 replaced by Полный автоматический поиск EditText + Flow.debounce
-//        searchButton.setOnClickListener {
-//            val query = queryInput.text.toString()
-//            viewModel.onSearchQueryEntered(query)
-//        }
-
-        // add by sprint 20 -> Полный автоматический поиск EditText + Flow.debounce
-        queryInput.doAfterTextChanged { text ->
-            viewModel.onSearchQueryEntered(text.toString())
+        searchButton.setOnClickListener {
+            val query = queryInput.text.toString()
+            viewModel.onSearchQueryEntered(query)
         }
+
 
         findViewById<TextView>(R.id.bottom4).isSelected = true
     }
 
     private fun onFavoriteClicked(movie: Movie) {
         viewModel.toggleFavorite(movie.id) //  (❤️)
+    }
+
+    private fun clickDebounce(): Boolean {
+        return if (isClickable) {
+            isClickable = false
+            Handler(Looper.getMainLooper()).postDelayed({ isClickable = true }, CLICK_DEBOUNCE_DELAY)
+            true
+        } else {
+            false
+        }
     }
 
     override fun reverseList() {
@@ -183,6 +183,8 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
     override fun getMainLayoutId() = R.id.main
     override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.movie) {
         navigateToMainScreen(this@SearchMovie, -1)
+//        navigateToMainScreen(this@SearchMovie)
+//        navigateToMainActivity()
     }
     override fun shouldEnableEdgeToEdge(): Boolean = false
 }

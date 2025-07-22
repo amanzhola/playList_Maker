@@ -15,19 +15,21 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.audio.OnTrackClickListener
-import com.example.playlistmaker.utils.CLICK_DEBOUNCE_DELAY
-import com.example.playlistmaker.utils.ClickDebouncer
+import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.GenericDiffCallback
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.gson.Gson
-import kotlinx.coroutines.MainScope
 
 class TrackAdapterTD(
     private var tracks: List<Track>,
     private val listener: OnTrackClickListener
 ) : RecyclerView.Adapter<TrackAdapterTD.ViewHolder>() {
 
-    private val clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, MainScope())
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L // 1 секунда
+    }
+
+    private val debounce = Debounce(CLICK_DEBOUNCE_DELAY)
 
     fun updateTracks(newTracks: List<Track>) {
         val diffCallback = GenericDiffCallback(tracks, newTracks)
@@ -63,7 +65,7 @@ class TrackAdapterTD(
 
             // Обработка клика с защитой Debounce
             itemView.setOnClickListener {
-                clickDebouncer.tryClick {
+                debounce.debounce {
                     val intent = Intent(context, TrackPreviewActivity::class.java).apply {
                         putExtra("track", track)
                         putExtra("track_list_json", Gson().toJson(tracks))
@@ -77,6 +79,10 @@ class TrackAdapterTD(
                 listener.onArrowClicked(track)
             }
         }
+    }
+
+    fun cancelDebounce() {
+        debounce.cancel()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

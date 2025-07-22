@@ -19,8 +19,10 @@
 
         <EditText
             android:id="@+id/queryInput"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
+            android:layout_weight="2"
+            android:layout_marginEnd="16dp"
             android:layout_gravity="center_vertical"
             android:textColor="@color/black1"
             android:hint="@string/enter_movie_name"
@@ -32,33 +34,15 @@
             android:maxWidth="488dp"
             android:background="@color/hintField_white"/>
 
-<!--        <EditText-->
-<!--            android:id="@+id/queryInput"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="2"-->
-<!--            android:layout_marginEnd="16dp"-->
-<!--            android:layout_gravity="center_vertical"-->
-<!--            android:textColor="@color/black1"-->
-<!--            android:hint="@string/enter_movie_name"-->
-<!--            android:paddingHorizontal="8dp"-->
-<!--            android:inputType="text"-->
-<!--            android:autofillHints="text"-->
-<!--            android:textColorHint="@color/hintSearchIcon"-->
-<!--            android:minHeight="48dp"-->
-<!--            android:maxWidth="488dp"-->
-<!--            android:background="@color/hintField_white"/>-->
-
-
-<!--        <Button-->
-<!--            android:id="@+id/searchButton"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:layout_gravity="center_vertical"-->
-<!--            android:text="@string/search"-->
-<!--            android:contentDescription="@string/movie_search_button"-->
-<!--            android:maxWidth="320dp"/>-->
+        <Button
+            android:id="@+id/searchButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:text="@string/search"
+            android:contentDescription="@string/movie_search_button"
+            android:maxWidth="320dp"/>
     </LinearLayout>
 
     <include

@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,7 +34,6 @@ import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
 import com.example.playlistmaker.roots.main.MainActivity
-import com.example.playlistmaker.ui.main.MainFragment
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
@@ -125,10 +125,8 @@ sealed class NavigationData {
             if (shouldEnableEdgeToEdge()) { enableEdgeToEdge() }
             setupWindowInsets()
 
-            val isMainFragment = (getCurrentFragment() is MainFragment)
-            segmentTexts = SegmentTextHelper.getSegmentTexts(this, isMainFragment)
-            newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
-
+            segmentTexts = SegmentTextHelper.getSegmentTexts(this, this is MainActivity)
+            newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, this is MainActivity)
             // 👌 for 2 more 😉 parameters by default to have 1 out of 3
             segmentHelper = SegmentHelper(this, this)
             colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
@@ -186,6 +184,7 @@ sealed class NavigationData {
 
         protected open fun shouldEnableEdgeToEdge(): Boolean = true
         protected open fun getLayoutId(): Int = R.layout.base_main
+//        protected open fun getMainLayoutId(): Int = R.id.rootContainer
         protected open fun getMainLayoutId(): Int = R.id.nav_host_container
 
         override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -227,15 +226,7 @@ sealed class NavigationData {
             context, R.anim.enter_from_left, R.anim.exit_to_right
         )
 
-        when (host) {
-            is AppCompatActivity -> {
-                host.startActivity(intent, options.toBundle())
-            }
-            is Fragment -> {
-                host.startActivity(intent, options.toBundle())
-            }
-            else -> throw IllegalArgumentException("Unsupported host")
-        }
+        ContextCompat.startActivity(context, intent, options.toBundle())
     }
 
     fun changeLanguage() {

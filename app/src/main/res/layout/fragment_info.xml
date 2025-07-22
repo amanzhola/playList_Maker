@@ -4,13 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/white_textColor"
+    android:background="@color/white"
     tools:context="com.example.playlistmaker.ui.movieNames.InfoFragment">
 
     <TextView android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="@color/black_white"
+        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="32sp"
         android:text="IMDB Movies Search"
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="64dp"
-        android:textColor="@color/black_white"
+        android:textColor="@color/black"
         android:textSize="24sp"
         android:text="Версия: 1.0\nРазработчик: Хомяк Байт"
         android:textAlignment="center"/>

@@ -20,7 +20,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-
 class ExtraOption : BaseActivity() {
 
     private lateinit var binding: ActivityExtraOptionBinding
@@ -55,11 +54,14 @@ class ExtraOption : BaseActivity() {
         setLayoutManager(currentLayoutOrientation)
 
         viewModel.state.observe(this) { state ->
+
+            // Обновляем список треков, если изменился
             if (adapter.getItems() != state.trackList) {
                 adapter.update(state.trackList.map { it.copy() })
                 binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
             }
 
+            // Обновляем ориентацию layoutManager'а при необходимости
             val desiredOrientation = if (state.isHorizontal) LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL
             if (desiredOrientation != currentLayoutOrientation) {
                 currentLayoutOrientation = desiredOrientation
@@ -67,6 +69,7 @@ class ExtraOption : BaseActivity() {
                 binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
             }
 
+            // Показываем/скрываем элементы навигации
             binding.tracksRecyclerView.visibility = if (state.isBottomNavVisible) View.GONE else View.VISIBLE
             findViewById<TextView>(R.id.title).visibility = if (state.isBottomNavVisible) View.VISIBLE else View.INVISIBLE
 
@@ -75,8 +78,10 @@ class ExtraOption : BaseActivity() {
                 layoutParams.height = fixedHeightInPx
                 requestLayout()
             }
+
         }
 
+        // Сохраняем позицию скролла при остановке скроллинга
         binding.tracksRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -87,10 +92,12 @@ class ExtraOption : BaseActivity() {
             }
         })
 
+        // Обработка первого запуска
         if (savedInstanceState == null) {
             trackListIntentParser.parse(intent)?.let { viewModel.initializeWith(it) }
         }
 
+        // Выделение кнопки в нижней навигации
         binding.root.findViewById<View>(R.id.bottom6).isSelected = true
     }
 
