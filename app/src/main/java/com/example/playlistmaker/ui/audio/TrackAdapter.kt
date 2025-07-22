@@ -40,7 +40,6 @@ interface OnTrackClickListener {
 
         private val clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, MainScope())// ✨
 
-
         inner class ViewHolder(private val binding: TrackItemBinding) :
             RecyclerView.ViewHolder(binding.root) {
 
@@ -91,6 +90,7 @@ interface OnTrackClickListener {
                         val intent = Intent(context, ExtraOption::class.java).apply {
                             putExtra("TRACK_LIST_JSON", trackListJson)
                             putExtra("TRACK_INDEX", bindingAdapterPosition)
+                            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP // 🔥
                         }
                         context.startActivity(intent)
                     }
