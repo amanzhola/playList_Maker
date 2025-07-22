@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/white_textColor"
     android:orientation="vertical">
 
     <ProgressBar
@@ -11,7 +11,7 @@
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/black"
+        android:indeterminateTint="@color/blue"
         android:visibility="gone" />
 
     <TextView
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAlignment="center"
-        android:textColor="@color/black"
+        android:textColor="@color/textColor_white"
         android:textSize="32sp"
         android:textStyle="bold"
         android:visibility="gone" />
@@ -40,7 +40,7 @@
             android:layout_gravity="center"
             android:padding="10dp"
             android:textAlignment="center"
-            android:textColor="@color/black"
+            android:textColor="@color/black_white"
             android:textSize="32sp"
             android:textStyle="bold"
             tools:text="Moby-Dick or The Whale" />
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="20dp"
-            android:contentDescription="@string/moviesCastDescription"/>
+            android:contentDescription="@string/moviesCastDescription" />
 
     </LinearLayout>
 </FrameLayout>

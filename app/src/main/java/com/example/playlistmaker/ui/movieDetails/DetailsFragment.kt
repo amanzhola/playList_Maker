@@ -50,11 +50,8 @@ class DetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("DetailsFragment", "onViewCreated called")
 
-//        val posterUrl = requireArguments().getString(ARGS_POSTER_URL) ?: ""
-//        val movieId = requireArguments().getString(ARGS_MOVIE_ID) ?: ""
         val posterUrl = arguments?.getString("poster_url") ?: ""
         val movieId = arguments?.getString("movie_id") ?: ""
-
 
         // Установка адаптера
         binding.viewPager.adapter = DetailsViewPagerAdapter(
@@ -105,7 +102,6 @@ class DetailsFragment : Fragment() {
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

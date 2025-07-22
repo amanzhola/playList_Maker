@@ -21,13 +21,6 @@ class NavigationUseCaseImpl(private val context: Context) : NavigationUseCase {
                     exitAnim = data.exitAnim
                 )
 
-//                is NavigationData.FragmentData -> NavigationTarget.FragmentTarget(
-//                    fragmentProvider = data.fragmentProvider,
-//                    tag = data.tag,
-//                    enterAnim = data.enterAnim,
-//                    exitAnim = data.exitAnim
-//                )
-
                 is NavigationData.FragmentData -> NavigationTarget.FragmentTarget(
                     destinationId = data.destinationId,
                     args = data.args,

@@ -10,10 +10,11 @@
         android:id="@+id/headerTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000"
+        android:textColor="@color/black_white"
         android:textSize="30sp"
         android:textStyle="bold"
         tools:text="Режиссёры" />
+<!--    android:textColor="#000"-->
 
 </FrameLayout>
 

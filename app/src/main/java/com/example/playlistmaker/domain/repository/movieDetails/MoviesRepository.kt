@@ -3,8 +3,9 @@ package com.example.playlistmaker.domain.repository.movieDetails
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.models.movieDetails.MovieDetails
 import com.example.playlistmaker.domain.util.ResourceMovieDetials
+import kotlinx.coroutines.flow.Flow
 
 interface MoviesRepository {
-    fun searchMovies(expression: String): ResourceMovieDetials<List<Movie>>
-    fun getMovieDetails(movieId: String): ResourceMovieDetials<MovieDetails>
+    fun searchMovies(expression: String): Flow<ResourceMovieDetials<List<Movie>>>
+    fun getMovieDetails(movieId: String): Flow<ResourceMovieDetials<MovieDetails>>
 }

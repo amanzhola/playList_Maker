@@ -2,89 +2,80 @@ package com.example.playlistmaker.data.repository.player
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.os.Handler
-import android.os.Looper
 import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.player.PlaybackState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
 import java.util.Locale
 
+// 🚀 NEW Coroutine-based AudioPlayerInteractionImpl
 class AudioPlayerInteractionImpl : AudioPlayerInteraction {
 
-    private var mediaPlayer: MediaPlayer? = null
-    private val handler = Handler(Looper.getMainLooper()) // 🚑
-    private var onTimeUpdateCallback: ((String) -> Unit)? = null
-    private var stateChangeCallback: ((PlaybackState) -> Unit)? = null
-
+    private var mediaPlayer: MediaPlayer? = null // 📖 🎶
 
     override var currentTrackId: Int = -1
     override var lastPlayedTrackId: Int = -1
-    override var playbackState: PlaybackState = PlaybackState.IDLE
 
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            mediaPlayer?.let { player -> // 📖 🎶
+    private val _playbackState = MutableStateFlow(PlaybackState.IDLE) // 🔁 🧩
+    override val playbackState: StateFlow<PlaybackState> get() = _playbackState
+
+    override val playTime: Flow<String> = flow {  // 🔁 🧩 🚀
+        while (currentCoroutineContext().isActive) { // 📖 🎶
+            mediaPlayer?.let { player ->
                 if (player.isPlaying) {
-                    val currentPos = player.currentPosition
-                    onTimeUpdateCallback?.invoke(getFormattedTime(currentPos))
-                    handler.postDelayed(this, 1000) // 💬
+                    emit(getFormattedTime(player.currentPosition)) // 🌼
                 }
             }
+//            delay(1000)
+            delay(300)
         }
-    }
-
-    override fun setOnTimeUpdateCallback(callback: (String) -> Unit) { // 🔁 🧩
-        onTimeUpdateCallback = callback
-    }
-
-    override fun setStateChangeCallback(callback: (PlaybackState) -> Unit) { // 🔁 🧩
-        stateChangeCallback = callback
-    }
+    }.flowOn(Dispatchers.Main)
 
     override fun setTrack(previewUrl: String, trackId: Int) { // 🎵 ✅ ✨🔄
-        stopPlayback()
+        stopPlayback()  // 📛
         currentTrackId = trackId
-        playbackState = PlaybackState.PREPARING
-        stateChangeCallback?.invoke(playbackState)
+        _playbackState.value = PlaybackState.PREPARING
 
-        mediaPlayer = MediaPlayer().apply { // 💡 ⏭️
+        mediaPlayer = MediaPlayer().apply {// 📖 🎶
             setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .build()
             )
-
             setDataSource(previewUrl)
 
             setOnPreparedListener { // 📌
-                playbackState = PlaybackState.PREPARED
-                stateChangeCallback?.invoke(playbackState)
-                startPlayback()
+                _playbackState.value = PlaybackState.PREPARED
+                startPlayback() // ▶️ 💃 ⏭️
             }
 
             setOnCompletionListener {
-                stopPlayback() //  🛑 ❓ 🔁 🧩
+                stopPlayback() // 🛑 ❓ 🔁 🧩
             }
 
-            setOnErrorListener { _, what, extra -> // ⚠️ 📦
-                playbackState = PlaybackState.IDLE
-                stateChangeCallback?.invoke(playbackState)
-                releasePlayer()
+            setOnErrorListener { _, _, _ -> // 🛑 ❓ 🔁 🧩
+                _playbackState.value = PlaybackState.IDLE
+                releasePlayer() // 🧹
                 true
             }
 
             prepareAsync()
         }
-
     }
 
     private fun startPlayback() { // ▶️ 💃 ⏭️
         mediaPlayer?.let {
             if (!it.isPlaying) {
                 it.start()
-                playbackState = PlaybackState.PLAYING
-                stateChangeCallback?.invoke(playbackState)
-                handler.post(updateRunnable)
+                _playbackState.value = PlaybackState.PLAYING
             }
         }
     }
@@ -93,20 +84,16 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.pause()
-                playbackState = PlaybackState.PAUSED
-                stateChangeCallback?.invoke(playbackState)
-                handler.removeCallbacks(updateRunnable)
+                _playbackState.value = PlaybackState.PAUSED
             }
         }
     }
 
-    override fun resume() { // ⏹️ ▶️ + 🛑 00:00
+    override fun resume() { // ⏹️ ▶️ + 🛑
         mediaPlayer?.let {
-            if (!it.isPlaying && playbackState == PlaybackState.PAUSED) {
+            if (!it.isPlaying && _playbackState.value == PlaybackState.PAUSED) {
                 it.start()
-                playbackState = PlaybackState.PLAYING
-                stateChangeCallback?.invoke(playbackState)
-                handler.post(updateRunnable) // 🧵 🤓
+                _playbackState.value = PlaybackState.PLAYING
             }
         }
     }
@@ -115,11 +102,9 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
-                playbackState = PlaybackState.STOPPED
-                stateChangeCallback?.invoke(playbackState)
-                handler.removeCallbacks(updateRunnable)
+                _playbackState.value = PlaybackState.STOPPED
             }
-            releasePlayer()
+            releasePlayer() // 🧹
         }
     }
 
@@ -127,19 +112,16 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         mediaPlayer?.release()
         mediaPlayer = null
         currentTrackId = -1
-        playbackState = PlaybackState.IDLE
-        stateChangeCallback?.invoke(playbackState)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            stateChangeCallback?.invoke(playbackState)
-        }, 100) //  🛑 ❓ 🔁 🧩
+        _playbackState.value = PlaybackState.IDLE
     }
 
     override fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true // ☕
 
-    override fun isCurrentTrackPlaying(trackId: Int): Boolean { // ⛷️
-        return isPlaying() && currentTrackId == trackId
-    }
+    override fun isCurrentTrackPlaying(trackId: Int): Boolean = // ⛷️
+        isPlaying() && currentTrackId == trackId
+
+    override fun getValidTrackId(): Int = // 🔥 100%
+        if (currentTrackId != -1) currentTrackId else lastPlayedTrackId
 
     private fun getFormattedTime(milliseconds: Int): String { // 🌼
         val totalSeconds = milliseconds / 1000
@@ -148,13 +130,8 @@ class AudioPlayerInteractionImpl : AudioPlayerInteraction {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
     }
 
-    override fun getValidTrackId(): Int { // 🔥 100%
-        return if (currentTrackId != -1) currentTrackId else lastPlayedTrackId
-    }
-
-    override fun clearCallbacks() { //  🤘
-        onTimeUpdateCallback = null
-        stateChangeCallback = null
-        handler.removeCallbacks(updateRunnable)
-    }
+    // clean auto since by view model life coroutine close preventing memory leaks //  🤘
+    // 💤 OLD Callback-based AudioPlayerInteractionImpl
 }
+
+

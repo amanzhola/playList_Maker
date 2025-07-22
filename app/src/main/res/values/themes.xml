@@ -70,7 +70,10 @@
         <item name="android:fontFamily">@font/ys_display_regular</item>
     </style>
 
-    <style name="Title" parent="Text22">
+    <style name="Title" parent="Text19">
+    </style>
+
+    <style name="Title1" parent="Text22">
     </style>
 
     <style name="SettingsTextView" parent="Text16">
@@ -199,6 +202,7 @@
     <color name="hintColor_textColor">@color/hintColor</color>
     <color name="hintColor_white">@color/hintColor</color>
     <color name="hintField_white">@color/hintFieldColor</color>
+    <color name="hintField_textColor">@color/hintFieldColor</color>
     <color name="white_textColor">@color/white</color>
     <color name="blue_blue">@color/backgroundDay</color>
     <color name="yellow_yellow">@color/bunColor</color>

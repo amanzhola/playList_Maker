@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white"
+    android:background="@color/white_textColor"
     tools:context="com.example.playlistmaker.ui.movieNames.NamesFragment">
 
     <EditText android:id="@+id/queryInput"
@@ -12,9 +12,31 @@
         android:layout_margin="8dp"
         android:layout_gravity="center_vertical"
         android:hint="@string/moviesStars"
-        android:textColor="@color/black"
+        android:textColorHint="@color/hintColor_textColor"
+        android:textColor="@color/black1"
         android:imeOptions="actionDone"
-        android:singleLine="true"/>
+        android:singleLine="true"
+
+        android:minHeight="48dp"
+        android:maxWidth="488dp"
+        android:background="@color/hintField_white"
+        android:inputType="text"
+        android:autofillHints="text"/>
+
+    <!--        <EditText-->
+    <!--            android:id="@+id/queryInput"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_gravity="center_vertical"-->
+    <!--            android:textColor="@color/black1"-->
+    <!--            android:hint="@string/enter_movie_name"-->
+    <!--            android:paddingHorizontal="8dp"-->
+    <!--            android:inputType="text"-->
+    <!--            android:autofillHints="text"-->
+    <!--            android:textColorHint="@color/hintSearchIcon"-->
+    <!--            android:minHeight="48dp"-->
+    <!--            android:maxWidth="488dp"-->
+    <!--            android:background="@color/hintField_white"/>-->
 
     <FrameLayout android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -23,13 +45,14 @@
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:layout_gravity="center"
-            android:indeterminateTint="@color/black"
+            android:indeterminateTint="@color/blue"
             android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView android:id="@+id/personsList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/list_item_person"/>
+            tools:listitem="@layout/list_item_person"
+            android:contentDescription="@string/moviesStars" />
 
         <TextView android:id="@+id/placeholderMessage"
             android:layout_width="300dp"
@@ -38,6 +61,6 @@
             android:textAlignment="center"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black_white"/>
     </FrameLayout>
 </LinearLayout>

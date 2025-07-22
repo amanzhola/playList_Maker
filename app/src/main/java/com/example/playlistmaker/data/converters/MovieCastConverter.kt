@@ -11,49 +11,6 @@ import com.example.playlistmaker.domain.models.movieCast.MovieCastPerson
 
 class MovieCastConverter {
 
-//    fun convert(response: MovieCastResponse): MovieCast {
-//        return with(response) {
-//            MovieCast(
-//                imdbId = this.imDbId,
-//                fullTitle = this.fullTitle,
-//                directors = this.directors.items.map { director ->
-//                    MovieCastPerson(
-//                        id = director.id,
-//                        name = director.name,
-//                        description = director.description,
-//                        image = null,
-//                    )
-//                },
-//                others = this.others.flatMap { othersResponse ->
-//                    othersResponse.items.map { person ->
-//                        MovieCastPerson(
-//                            id = person.id,
-//                            name = person.name,
-//                            description = "${othersResponse.job} -- ${person.description}",
-//                            image = null,
-//                        )
-//                    }
-//                },
-//                writers = this.writers.items.map { writer ->
-//                    MovieCastPerson(
-//                        id = writer.id,
-//                        name = writer.name,
-//                        description = writer.description,
-//                        image = null,
-//                    )
-//                },
-//                actors = this.actors.map { actor ->
-//                    MovieCastPerson(
-//                        id = actor.id,
-//                        name = actor.name,
-//                        description = actor.asCharacter,
-//                        image = actor.image,
-//                    )
-//                }
-//            )
-//        }
-//    }
-
     fun convert(response: MovieCastResponse): MovieCast {
         return with(response) {
             MovieCast(

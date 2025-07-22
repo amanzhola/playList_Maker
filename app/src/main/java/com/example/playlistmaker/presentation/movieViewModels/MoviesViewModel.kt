@@ -8,8 +8,10 @@ import com.example.playlistmaker.domain.api.movie.MoviesInteraction
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 import com.example.playlistmaker.domain.util.Resource
-import com.example.playlistmaker.utils.Debounce
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
+import com.example.playlistmaker.utils.collectDebouncedIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(
@@ -18,11 +20,11 @@ class MoviesViewModel(
 ) : ViewModel() {
 
     sealed class UiState {
-        data object Default : UiState()
-        data object Loading : UiState()
+        object Default : UiState()
+        object Loading : UiState()
         data class Success(val movies: List<Movie>) : UiState()
         data class Error(val message: String) : UiState()
-        data object Empty : UiState()
+        object Empty : UiState()
     }
 
     private val _movies = MutableLiveData<List<Movie>>()
@@ -31,22 +33,68 @@ class MoviesViewModel(
     private val _uiState = MutableLiveData<UiState>(UiState.Default)
     val uiState: LiveData<UiState> = _uiState
 
-    private val searchDebounce = Debounce(SEARCH_DEBOUNCE_DELAY)
+    private val queryFlow = MutableStateFlow("")
+
+    init {
+
+        queryFlow
+            .map { it.trim() }
+            .collectDebouncedIn(viewModelScope, SEARCH_DEBOUNCE_DELAY) { query ->
+                if (query.isEmpty()) {
+                    _uiState.value = UiState.Default
+                    _movies.value = emptyList()
+                } else {
+                    searchMovies(query)
+                }
+            }
+    }
 
     fun onSearchQueryEntered(rawQuery: String) {
-        searchDebounce.debounce {
-            val query = rawQuery.trim()
-            if (query.isNotEmpty()) {
-                searchMovies(query)
-            } else {
-                _uiState.postValue(UiState.Empty) // Или другое состояние, если нужно
+        queryFlow.value = rawQuery
+    }
+
+    fun searchMovies(query: String) {
+        _uiState.value = UiState.Loading
+
+        viewModelScope.launch {
+            moviesInteraction.searchMovies(query).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        val moviesList = result.data ?: emptyList()
+                        if (moviesList.isEmpty()) {
+                            _movies.value = emptyList()
+                            _uiState.value = UiState.Empty
+                        } else {
+                            val favoriteIds = toggleFavoriteUseCase.getFavorites()
+                            val updatedList = moviesList.map { movie ->
+                                movie.copy(inFavorite = favoriteIds.contains(movie.id))
+                            }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
+
+                            _movies.value = updatedList
+                            _uiState.value = UiState.Success(updatedList)
+                        }
+                    }
+                    is Resource.Error -> { // 🧼 🔁  📝
+                        _movies.value = emptyList()
+                        val msg = result.message ?: "Неизвестная ошибка"
+                        _uiState.value = UiState.Error(msg)
+                    }
+                }
             }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        searchDebounce.cancel()
+    fun toggleFavorite(movieId: String) {
+        val currentMovies = _movies.value ?: return
+        val updatedMovies = currentMovies.map { movie ->
+            if (movie.id == movieId) {
+                val newFavorite = !movie.inFavorite
+                toggleFavoriteUseCase(movie.id)
+                movie.copy(inFavorite = newFavorite)
+            } else movie
+        }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
+
+        _movies.value = updatedMovies
     }
 
     fun refreshFavorites() {
@@ -59,58 +107,7 @@ class MoviesViewModel(
         _movies.value = updatedList
     }
 
-    fun toggleFavorite(movieId: String) {
-        val currentMovies = _movies.value ?: return
-
-        val updatedMovies = currentMovies.map { movie ->
-            if (movie.id == movieId) {
-                val updatedMovie = movie.copy(inFavorite = !movie.inFavorite)
-
-                toggleFavoriteUseCase(updatedMovie.id)
-
-                updatedMovie
-            } else movie
-        }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
-
-        _movies.value = updatedMovies
-    }
-
-    fun searchMovies(query: String) {
-        if (query.isEmpty()) {
-            _movies.value = emptyList()
-            _uiState.value = UiState.Default
-            return
-        }
-
-        _uiState.value = UiState.Loading
-
-        viewModelScope.launch {
-            moviesInteraction.searchMovies(query).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        val moviesList = result.data ?: emptyList()
-
-                        if (moviesList.isEmpty()) {
-                            _movies.value = emptyList()
-                            _uiState.value = UiState.Empty
-                        } else {
-                            val favoriteIds = toggleFavoriteUseCase.getFavorites()
-
-                            val updatedList = moviesList.map { movie ->
-                                movie.copy(inFavorite = favoriteIds.contains(movie.id))
-                            }.sortedByDescending { it.inFavorite } // 📥🔄 ❤️🧲🔝 🌟
-
-                            _movies.value = updatedList
-                            _uiState.value = UiState.Success(updatedList)
-                        }
-                    }
-                    is Resource.Error -> { // 🧼 🔁  📝
-                        _movies.value = emptyList()
-                        val errorMessage = result.message ?: "Неизвестная ошибка"
-                        _uiState.value = UiState.Error(errorMessage)
-                    }
-                }
-            }
-        }
+    fun setDefaultState() {
+        TODO("Not yet implemented")
     }
 }

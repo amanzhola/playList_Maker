@@ -36,7 +36,6 @@ class MainFragment : BaseFragment(), BottomNavConfig {
         super.onViewCreated(view, savedInstanceState)
 
         setupButtons(view)
-        setInitialButtonVisibility(view)
 
         // Цвет заголовка
         val whiteColor = ContextCompat.getColor(requireContext(), R.color.white_white)
@@ -64,6 +63,14 @@ class MainFragment : BaseFragment(), BottomNavConfig {
     private fun toggleButtonGroup(view: View) {
         val groupOneIds = listOf(R.id.button1, R.id.button2, R.id.button3)
         val groupTwoIds = listOf(R.id.button4, R.id.button5, R.id.button6)
+
+        val allButtonIds = groupOneIds + groupTwoIds
+
+        // Применяем стиль Title1 ко всем кнопкам
+        allButtonIds.forEach { id ->
+            val button = view.findViewById<MaterialButton>(id)
+            button.setTextAppearance(R.style.Title1)
+        }
 
         setButtonsVisibility(view, groupOneIds, !isGroupOneVisible)
         setButtonsVisibility(view, groupTwoIds, isGroupOneVisible)
@@ -95,10 +102,6 @@ class MainFragment : BaseFragment(), BottomNavConfig {
                 button.visibility = GONE
             }
         }
-    }
-
-    private fun setInitialButtonVisibility(view: View) {
-        toggleButtonGroup(view)
     }
 
     private fun onButtonClicked(index: Int) {
@@ -135,7 +138,6 @@ class MainFragment : BaseFragment(), BottomNavConfig {
 
         }
     }
-
 
     private fun getAnimations(index: Int): Pair<Int, Int> {
         return when (index) {

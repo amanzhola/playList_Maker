@@ -51,11 +51,6 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        adapter.cancelDebounce()
-    }
-
     override fun onTrackClicked(track: Track) {
         // TODO: Реализация клика по треку
     }
