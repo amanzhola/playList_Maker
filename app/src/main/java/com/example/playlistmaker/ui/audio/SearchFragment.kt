@@ -95,6 +95,10 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         viewModel.uiState.observe(viewLifecycleOwner) { state ->
             binding.progressBar.isVisible = state.isLoading
 
+            // 👇 используем метод для синхронизации ⬇️ 🚗 💖
+            val shouldShowBottomNav = state.query.isEmpty()
+            updateBottomNavVisibility(shouldShowBottomNav)
+
             when (state.error) {
                 ErrorState.ERROR -> errorManager.showError()
                 ErrorState.FAILURE -> {
@@ -165,12 +169,18 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
     }
 
     override fun onSegment4ClickedInternal() {
-        if (isBottomNavVisible) {
-            getBaseActivity()?.hideBottomNavigation()
-        } else {
-            getBaseActivity()?.showBottomNavigation()
+        updateBottomNavVisibility(!isBottomNavVisible)
+    }
+
+    private fun updateBottomNavVisibility(show: Boolean) {
+        if (isBottomNavVisible != show) {
+            if (show) {
+                getBaseActivity()?.showBottomNavigation()
+            } else {
+                getBaseActivity()?.hideBottomNavigation()
+            }
+            isBottomNavVisible = show
         }
-        isBottomNavVisible = !isBottomNavVisible
     }
 
     fun shareTrackHistoryFromViewModel() {
