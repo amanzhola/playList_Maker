@@ -26,10 +26,6 @@ class MainActivity : BaseActivity() {
         navController = (supportFragmentManager
             .findFragmentById(R.id.nav_host_container) as NavHostFragment).navController
 
-
-        // Получаем переданный индекс (из Intent)
-//        val passedIndex = intent.getIntExtra("buttonIndex", -1)
-
         buttonIndex = when {
             savedInstanceState != null -> {
                 // Восстановление после recreate()
@@ -54,6 +50,7 @@ class MainActivity : BaseActivity() {
                 0 -> R.id.searchFragment
                 1 -> R.id.mediaLibraryFragment
                 2 -> R.id.settingsFragment
+                5 -> R.id.extraOptionFragment // ✅ добавляем
                 else -> R.id.mainFragment
             }
             navController.navigate(destinationId)
@@ -95,6 +92,7 @@ class MainActivity : BaseActivity() {
             0 -> R.id.searchFragment
             1 -> R.id.mediaLibraryFragment
             2 -> R.id.settingsFragment
+            5 -> R.id.extraOptionFragment // ✅ добавляем
             else -> R.id.mainFragment
         }
 

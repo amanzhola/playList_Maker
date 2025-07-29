@@ -1,10 +1,11 @@
 package com.example.playlistmaker.ui.audio
 
-import android.content.Intent
 import android.content.res.ColorStateList
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -13,7 +14,6 @@ import com.example.playlistmaker.databinding.TrackItemBinding
 import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
-import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.utils.CLICK_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.ClickDebouncer
 import com.example.playlistmaker.utils.GenericDiffCallback
@@ -79,20 +79,18 @@ interface OnTrackClickListener {
                 }
 
                 // Сам item
-                binding.root.setOnClickListener { // ✨
-
+                binding.root.setOnClickListener {
                     clickDebouncer.tryClick {
-                        listener.onTrackClicked(track)
-
-                        val context = binding.root.context
                         val trackListJson = Gson().toJson(tracks)
-
-                        val intent = Intent(context, ExtraOption::class.java).apply {
-                            putExtra("TRACK_LIST_JSON", trackListJson)
-                            putExtra("TRACK_INDEX", bindingAdapterPosition)
-                            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP // 🔥
-                        }
-                        context.startActivity(intent)
+                        val bundle = bundleOf(
+                            "TRACK_LIST_JSON" to trackListJson,
+                            "TRACK_INDEX" to bindingAdapterPosition,
+                            "IS_FROM_SEARCH" to true // 🟢 Новый флаг!
+                        )
+                        binding.root.findNavController().navigate(
+                            R.id.action_searchFragment_to_extraOptionFragment,
+                            bundle
+                        )
                     }
                 }
             }

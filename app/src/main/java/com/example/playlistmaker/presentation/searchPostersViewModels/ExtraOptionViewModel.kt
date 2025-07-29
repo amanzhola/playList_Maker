@@ -55,6 +55,7 @@ class ExtraOptionViewModel(
     }
 
     fun initializeWith(inputData: TrackListInputData) {
+
         updateState {
             it.copy(
                 trackList = inputData.trackList,

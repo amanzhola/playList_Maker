@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -153,7 +154,7 @@ dependencies {
 //    implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
 //    implementation ("androidx.fragment:fragment-ktx:1.5.6")
 
-//    implementation(libs.koin.androidx.fragment) -> лишний создает конфликт
+//    implementation(libs.koin.androidx.fragment) -> создает лишний  конфликт
 //    Но! 💡 Даже если implementation(libs.koin.android) подключен, тебе нужно убедиться,
 //    что модуль для fragment тоже включён — потому что by viewModel() в фрагменте требует
 //    отдельного артефакта, а koin-android по умолчанию не содержит расширения для фрагментов.

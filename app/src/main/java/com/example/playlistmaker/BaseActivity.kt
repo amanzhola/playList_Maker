@@ -25,6 +25,7 @@ import com.example.playlistmaker.presentation.utils.BottomNavigationProvider
 import com.example.playlistmaker.presentation.utils.ColorApplierHelper
 import com.example.playlistmaker.presentation.utils.ColorManager
 import com.example.playlistmaker.presentation.utils.ColorPersistenceHelper
+import com.example.playlistmaker.presentation.utils.ScreenType
 import com.example.playlistmaker.presentation.utils.SegmentHelper
 import com.example.playlistmaker.presentation.utils.SegmentManager
 import com.example.playlistmaker.presentation.utils.SegmentManagerProvider
@@ -32,6 +33,7 @@ import com.example.playlistmaker.presentation.utils.SegmentTextHelper
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
+import com.example.playlistmaker.presentation.utils.toScreenType
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.MainFragment
 import org.koin.android.ext.android.get
@@ -271,4 +273,14 @@ sealed class NavigationData {
         return navHostFragment?.childFragmentManager?.primaryNavigationFragment
     }
 
+    fun updateSegmentTexts() {
+        val currentFragment = getCurrentFragment()
+        val screenType = currentFragment.toScreenType()
+        val isMainFragment = screenType == ScreenType.MAIN_FRAGMENT
+
+        segmentTexts = SegmentTextHelper.getSegmentTexts(this, isMainFragment)
+        newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
     }
+
+
+}
