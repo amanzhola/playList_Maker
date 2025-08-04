@@ -12,7 +12,7 @@ import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.launcherPosters.TrackDetailActivity
-import com.example.playlistmaker.ui.moviePosters.MoviePager
+import com.example.playlistmaker.ui.movie.moviePosters.MoviePager
 import org.koin.android.ext.android.inject
 import java.io.FileNotFoundException
 import java.io.IOException

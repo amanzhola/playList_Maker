@@ -31,7 +31,13 @@
         android:id="@+id/fragmentFavouriteTracks2"
         android:name="com.example.playlistmaker.ui.mediaFragments.FragmentFavouriteTracks"
         android:label="fragment_favourite_tracks"
-        tools:layout="@layout/fragment_favourite_tracks" />
+        tools:layout="@layout/fragment_favourite_tracks"/>
+
+    <!-- Новый action для перехода на extraOptionFragment -->
+    <action
+        android:id="@+id/action_global_to_extraOptionFragment"
+        app:destination="@id/extraOptionFragment" />
+
     <fragment
         android:id="@+id/fragmentPlaylist"
         android:name="com.example.playlistmaker.ui.mediaFragments.FragmentPlaylist"

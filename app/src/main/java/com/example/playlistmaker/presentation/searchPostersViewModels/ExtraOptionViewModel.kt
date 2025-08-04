@@ -6,13 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.api.player.AudioPlayerInteraction
 import com.example.playlistmaker.domain.api.player.PlaybackState
+import com.example.playlistmaker.domain.api.song_db.FavoriteTracksInteractor
 import com.example.playlistmaker.domain.models.player.TrackListInputData
 import com.example.playlistmaker.domain.models.search.Track
 import kotlinx.coroutines.launch
 
-
-class ExtraOptionViewModel(
-    private val audioPlayer: AudioPlayerInteraction
+class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудиоплеер)
+    private val audioPlayer: AudioPlayerInteraction,
+    private val favoriteTracksInteractor: FavoriteTracksInteractor // 🆕 интерактор для избранного
 ) : ViewModel() {
 
     private val _state = MutableLiveData(ExtraOptionViewState())
@@ -22,20 +23,24 @@ class ExtraOptionViewModel(
         get() = _state.value ?: ExtraOptionViewState()
 
     init {
-        observeAudioPlayer()
+        observeAudioPlayer() // 🔄 наблюдаем за плеером
     }
 
     private fun observeAudioPlayer() {
+        // ⏱️ наблюдаем за временем проигрывания
         viewModelScope.launch {
             audioPlayer.playTime.collect { time ->
                 updateState {
                     it.copy(trackList = it.trackList.map { track ->
-                        if (track.trackId == audioPlayer.currentTrackId) track.copy(playTime = time) else track
+                        if (track.trackId == audioPlayer.currentTrackId)
+                            track.copy(playTime = time)
+                        else track
                     })
                 }
             }
         }
 
+        // ▶️ наблюдаем за состоянием плеера
         viewModelScope.launch {
             audioPlayer.playbackState.collect { newState ->
                 val updatedTracks = currentState.trackList.map {
@@ -55,7 +60,6 @@ class ExtraOptionViewModel(
     }
 
     fun initializeWith(inputData: TrackListInputData) {
-
         updateState {
             it.copy(
                 trackList = inputData.trackList,
@@ -65,22 +69,50 @@ class ExtraOptionViewModel(
         }
     }
 
+    // 🆕 Логика для кнопки "лайк"
+    fun onFavoriteClicked() {
+        val track = getCurrentTrack() ?: return
+        viewModelScope.launch {
+            if (track.isFavorite) {
+                favoriteTracksInteractor.removeFromFavorites(track)
+            } else {
+                favoriteTracksInteractor.addToFavorites(track)
+            }
+            track.isFavorite = !track.isFavorite // переключаем флаг
+            updateCurrentTrack(track) // обновляем состояние списка
+        }
+    }
+
+    private fun updateCurrentTrack(updatedTrack: Track) {
+        updateState {
+            val updatedList = it.trackList.toMutableList()
+            if (it.currentTrackIndex in updatedList.indices) {
+                updatedList[it.currentTrackIndex] = updatedTrack
+            }
+            it.copy(trackList = updatedList)
+        }
+    }
+
     fun setCurrentTrackIndex(index: Int) {
         updateState { it.copy(currentTrackIndex = index) }
     }
 
+    // 🔄 Переключаем режим просмотра (горизонтальный / вертикальный)
     fun toggleIsHorizontal() {
         updateState { it.copy(isHorizontal = !it.isHorizontal) }
     }
 
+    // 💾 Сохраняем позицию скролла
     fun setScrollPosition(pos: Int) {
         updateState { it.copy(scrollPosition = pos) }
     }
 
+    // ▶️ Управляем воспроизведением
     fun audioPlay(track: Track) {
         when {
             audioPlayer.isCurrentTrackPlaying(track.trackId) -> audioPlayer.pause()
-            audioPlayer.playbackState.value == PlaybackState.PAUSED && track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
+            audioPlayer.playbackState.value == PlaybackState.PAUSED &&
+                    track.trackId == audioPlayer.currentTrackId -> audioPlayer.resume()
             else -> audioPlayer.setTrack(track.previewUrl, track.trackId)
         }
     }
@@ -89,7 +121,8 @@ class ExtraOptionViewModel(
         audioPlayer.stopPlayback()
     }
 
-    fun getCurrentTrack(): Track? = currentState.trackList.getOrNull(currentState.currentTrackIndex)
+    fun getCurrentTrack(): Track? =
+        currentState.trackList.getOrNull(currentState.currentTrackIndex)
 
     fun updateState(transform: (ExtraOptionViewState) -> ExtraOptionViewState) {
         _state.value = transform(currentState)

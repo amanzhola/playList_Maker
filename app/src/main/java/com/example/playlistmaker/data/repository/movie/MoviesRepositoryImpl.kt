@@ -3,6 +3,8 @@ package com.example.playlistmaker.data.repository.movie
 import android.util.Log
 import com.example.playlistmaker.data.dto.movie.MovieAdvancedSearchDto
 import com.example.playlistmaker.data.dto.movie.MovieSearchDto
+import com.example.playlistmaker.data.movie_db.MovieDbConvertor
+import com.example.playlistmaker.data.movie_db.MoviesDatabase
 import com.example.playlistmaker.data.network.movie.IMDbApi
 import com.example.playlistmaker.domain.api.movie.MoviesRepository
 import com.example.playlistmaker.domain.models.movie.Movie
@@ -16,7 +18,9 @@ import kotlinx.coroutines.flow.flowOn
 
 class MoviesRepositoryImpl(
     private val apiService: IMDbApi,
-    private val apiKey: String
+    private val apiKey: String,
+    private val appDatabase: MoviesDatabase,        // 👈 добавили БД
+    private val movieDbConvertor: MovieDbConvertor  // 👈 добавили конвертер
 ) : MoviesRepository {
 
     init {
@@ -77,6 +81,7 @@ class MoviesRepositoryImpl(
 
                 Movie(
                     id = id,
+                    resultType = searchMovie?.resultType,   // 👈 добавили resultType
                     image = advancedMovie?.image ?: "",
                     title = advancedMovie?.title ?: "",
                     description = searchMovie?.description.takeIf { !it.isNullOrEmpty() }
@@ -93,6 +98,7 @@ class MoviesRepositoryImpl(
             if (combinedMovies.isEmpty()) {
                 emit(Resource.Error("Ничего не найдено"))
             } else {
+                saveMovies(combinedMovies) // Сохраняем список фильмов в историю поиска (БД)
                 emit(Resource.Success(combinedMovies))
             }
 
@@ -100,4 +106,10 @@ class MoviesRepositoryImpl(
             emit(Resource.Error("Ошибка при выполнении запросов: ${e.localizedMessage ?: "Неизвестная ошибка"}"))
         }
     }.flowOn(Dispatchers.IO)
+
+    // Сохраняем в базу данных
+    private suspend fun saveMovies(movies: List<Movie>) {
+        val entities = movies.map { movie -> movieDbConvertor.map(movie) }
+        appDatabase.movieDao().insertMovies(entities)
+    }
 }

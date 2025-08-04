@@ -20,8 +20,8 @@ import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.movie.MovieRootActivity
-import com.example.playlistmaker.ui.moviePosters.MoviePager
-import com.example.playlistmaker.ui.moviePosters.MoviePagerList
+import com.example.playlistmaker.ui.movie.moviePosters.MoviePager
+import com.example.playlistmaker.ui.movie.moviePosters.MoviePagerList
 import com.example.playlistmaker.utils.CLICK_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.ClickDebouncer
 import com.example.playlistmaker.utils.UIUpdater

@@ -1,12 +1,13 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/movie_navigation_graph"
     app:startDestination="@id/detailsFragment">
 
     <!-- Главное меню -->
     <fragment
         android:id="@+id/detailsFragment"
-        android:name="com.example.playlistmaker.ui.movieDetails.DetailsFragment"
+        android:name="com.example.playlistmaker.ui.movie.movieDetails.DetailsFragment"
         android:label="Details">
         <argument
             android:name="movie_id"
@@ -18,22 +19,29 @@
 
     <fragment
         android:id="@+id/namesFragment"
-        android:name="com.example.playlistmaker.ui.movieNames.NamesFragment"
+        android:name="com.example.playlistmaker.ui.movie.movieNames.NamesFragment"
         android:label="Names" />
 
     <fragment
         android:id="@+id/infoFragment"
-        android:name="com.example.playlistmaker.ui.movieNames.InfoFragment"
+        android:name="com.example.playlistmaker.ui.movie.movieNames.InfoFragment"
         android:label="Info" />
 
     <!-- Второстепенный экран -->
     <fragment
         android:id="@+id/moviesCastFragment"
-        android:name="com.example.playlistmaker.ui.movieCast.MoviesCastFragment"
+        android:name="com.example.playlistmaker.ui.movie.movieCast.MoviesCastFragment"
         android:label="Movies Cast">
         <argument
             android:name="movie_id"
             app:argType="string" />
     </fragment>
+
+    <!-- Наш новый фрагмент Movies Data Base-->
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.example.playlistmaker.ui.movie.movieHistory.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
 
 </navigation>

@@ -6,6 +6,12 @@ import org.koin.dsl.module
 
 val extraOptionViewModelModule = module { // + from 🏠 🔍 🛠️ 🎧 ☁️ 🎥
 
-    // get() → AudioPlayerInteraction
-    viewModel { ExtraOptionViewModel(get()) }
+    // Экран Аудиоплеера после 💃❤️✨
+    viewModel {
+        ExtraOptionViewModel(
+            audioPlayer = get(),                // AudioPlayerInteraction
+            favoriteTracksInteractor = get()    // FavoriteTracksInteractor
+        )
+    }
+
 }

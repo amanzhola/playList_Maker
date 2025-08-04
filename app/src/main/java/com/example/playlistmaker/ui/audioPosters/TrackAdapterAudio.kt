@@ -1,6 +1,5 @@
 package com.example.playlistmaker.ui.audioPosters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +17,8 @@ interface OnTrackAudioClickListener {
     fun onTrackClicked(track: Track, position: Int)
     fun onPlayButtonClicked(track: Track)
     fun onBackArrowClicked()
+    // 🆕 Новый метод для клика по кнопке "Избранное"
+    fun onFavoriteClicked(track: Track) // ❤️
 }
 
 class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
@@ -49,23 +50,34 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         private val favorite: ImageView? = itemView.findViewById(R.id.favorite)
 
         init {
+            // ▶️ Кнопка воспроизведения
             playButton.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onPlayButtonClicked(tracks[position])
                 }
             }
+
+            // 🎵 Клик по элементу списка
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onTrackClicked(tracks[position], position)
                 }
             }
+
+            // ⬅️ Назад
             backArrow?.setOnClickListener {
-                Log.d("TrackAdapter", "backArrow: $backArrow")
+                if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                    listener.onBackArrowClicked()
+                }
+            }
+
+            // ❤️ Новый обработчик для избранного
+            favorite?.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    listener.onBackArrowClicked()
+                    listener.onFavoriteClicked(tracks[position])
                 }
             }
         }
@@ -100,19 +112,20 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
 
             updatePlayTime(track)
             updatePlayState(track)
+
+            // ❤️ Обновляем иконку избранного
+            favorite?.setImageResource(
+                if (track.isFavorite) R.drawable.favorite1 else R.drawable.favorite
+            )
         }
 
-        fun updatePlayTime(track: Track) { // 📥🔄
-//            playTime.text = track.playTime ?: "🕒0:00" // ❌ (👇 for OK people)
+        fun updatePlayTime(track: Track) {
             playTime.text = track.playTime ?: "0:00"
         }
 
-        fun updatePlayState(track: Track) { // 🏆
+        fun updatePlayState(track: Track) {
             playButton.setImageResource(
                 if (track.isPlaying) R.drawable.pause else R.drawable.play
-            )
-            favorite?.setImageResource( // ❤️
-                if (track.isPlaying) R.drawable.favorite1 else R.drawable.favorite
             )
         }
     }
@@ -142,9 +155,7 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         }
     }
 
-    override fun getItemCount(): Int {
-        return tracks.size
-    }
+    override fun getItemCount(): Int = tracks.size
 
     fun getItems(): List<Track> = tracks
 }

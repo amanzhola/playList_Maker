@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white_textColor"
-    tools:context="com.example.playlistmaker.ui.movieNames.NamesFragment">
+    tools:context="com.example.playlistmaker.ui.movie.movieNames.NamesFragment">
 
     <EditText android:id="@+id/queryInput"
         android:layout_width="match_parent"

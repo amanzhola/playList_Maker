@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:background="@color/white_textColor"
-    tools:context="com.example.playlistmaker.ui.movieNames.InfoFragment">
+    tools:context="com.example.playlistmaker.ui.movie.movieNames.InfoFragment">
 
     <TextView android:layout_width="wrap_content"
         android:layout_height="wrap_content"

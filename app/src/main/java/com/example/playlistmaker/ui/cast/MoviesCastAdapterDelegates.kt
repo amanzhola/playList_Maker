@@ -5,7 +5,7 @@ import com.bumptech.glide.Glide
 import com.example.playlistmaker.databinding.ListItemCastBinding
 import com.example.playlistmaker.databinding.ListItemHeaderBinding
 import com.example.playlistmaker.ui.core.ui.RVItem
-import com.example.playlistmaker.ui.movieCast.MoviesCastRVItem
+import com.example.playlistmaker.ui.movie.movieCast.MoviesCastRVItem
 import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegateViewBinding
 
 // Делегат для заголовков на экране состава участников

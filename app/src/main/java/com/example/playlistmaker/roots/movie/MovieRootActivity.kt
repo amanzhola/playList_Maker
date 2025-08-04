@@ -27,9 +27,13 @@ class MovieRootActivity : AppCompatActivity() {
 
         binding.bottomNavigationView.setupWithNavController(navController)
 
+        // ✅ Добавляем historyFragment
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.bottomNavigationView.visibility = when (destination.id) {
-                R.id.detailsFragment, R.id.namesFragment, R.id.infoFragment -> View.VISIBLE
+                R.id.detailsFragment,
+                R.id.namesFragment,
+                R.id.infoFragment,
+                R.id.historyFragment -> View.VISIBLE // 👈 добавили сюда
                 else -> View.GONE
             }
         }

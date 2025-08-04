@@ -4,6 +4,7 @@ import com.example.playlistmaker.utils.Identifiable
 
 data class Movie( // 📦 🎥
     override val id: String, // ️🌟
+    val resultType: String? = null,
     val image: String, // 💃
     val title: String, // 🌼
     val description: String?,// 👻
