@@ -9,7 +9,14 @@
         android:id="@+id/searchFragment"
         android:name="com.example.playlistmaker.ui.audio.SearchFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search"/>
+        tools:layout="@layout/fragment_search">
+
+    <!-- Добавь action здесь -->
+    <action
+        android:id="@+id/action_searchFragment_to_extraOptionFragment"
+        app:destination="@id/extraOptionFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.playlistmaker.ui.settings.SettingsFragment"
@@ -24,7 +31,13 @@
         android:id="@+id/fragmentFavouriteTracks2"
         android:name="com.example.playlistmaker.ui.mediaFragments.FragmentFavouriteTracks"
         android:label="fragment_favourite_tracks"
-        tools:layout="@layout/fragment_favourite_tracks" />
+        tools:layout="@layout/fragment_favourite_tracks"/>
+
+    <!-- Новый action для перехода на extraOptionFragment -->
+    <action
+        android:id="@+id/action_global_to_extraOptionFragment"
+        app:destination="@id/extraOptionFragment" />
+
     <fragment
         android:id="@+id/fragmentPlaylist"
         android:name="com.example.playlistmaker.ui.mediaFragments.FragmentPlaylist"
@@ -34,4 +47,18 @@
         android:id="@+id/mainFragment"
         android:name="com.example.playlistmaker.ui.main.MainFragment"
         android:label="MainFragment" />
+    <fragment
+        android:id="@+id/extraOptionFragment"
+        android:name="com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment"
+        android:label="fragment_extra_option"
+        tools:layout="@layout/fragment_extra_option">
+
+        <argument
+            android:name="TRACK_LIST_JSON"
+            app:argType="string" />
+        <argument
+            android:name="TRACK_INDEX"
+            app:argType="integer" />
+    </fragment>
+
 </navigation>

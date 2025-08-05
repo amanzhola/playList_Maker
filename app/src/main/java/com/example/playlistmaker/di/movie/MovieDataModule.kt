@@ -2,7 +2,9 @@ package com.example.playlistmaker.di.movie
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.example.playlistmaker.data.local.LocalStorage
+import com.example.playlistmaker.data.movie_db.MoviesDatabase
 import com.example.playlistmaker.data.repository.base.GsonMovieSerializer
 import com.example.playlistmaker.data.repository.base.SharedPrefsMovieStorage
 import com.example.playlistmaker.domain.api.movie.MovieSerializer
@@ -30,4 +32,13 @@ val movieDataModule = module { // 🎥 💃 🎬 // 🎥  from 🏠 🔍 🛠️
 
     // LocalStorage - зависит от SharedPreferences // 📥🔄 ❤️🧲🔝 🌟 (MoviesViewModel)
     single { LocalStorage(get(named("favorites_prefs"))) }
+
+    // Data Base for Movie
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            MoviesDatabase::class.java, // 👈 новый класс базы данных
+            "movies_database.db"        // 👈 можешь поменять имя файла БД
+        ).build()
+    }
 }

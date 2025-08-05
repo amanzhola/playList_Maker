@@ -1,14 +1,12 @@
 package com.example.playlistmaker.presentation.utils
 
-//import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ui.audio.SearchFragment
-import com.example.playlistmaker.ui.audioPosters.ExtraOption
-import com.example.playlistmaker.ui.main.MainFragment
+import com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment
 import com.example.playlistmaker.ui.movie.SearchMovie
 import com.example.playlistmaker.ui.settings.SettingsFragment
 
@@ -32,7 +30,7 @@ class SegmentManager(
     {
         val randomColor = ColorHelper.getNextColor(context)
         val currentFragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
-        val isMainFragment = currentFragment is MainFragment
+        val isMainFragment = currentFragment?.toScreenType() == ScreenType.MAIN_FRAGMENT
 
         if (isChangedState) {
 
@@ -56,7 +54,7 @@ class SegmentManager(
                 1 -> {
                     val fragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
                     when {
-                        currentActivity is ExtraOption -> shareSingleTrack()
+                        fragment is ExtraOptionFragment -> shareSingleTrack()
                         currentActivity is SearchMovie -> {
                             AlertDialog.Builder(currentActivity)
                                 .setTitle(currentActivity.getString(R.string.share_movie_question))

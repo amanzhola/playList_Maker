@@ -31,7 +31,14 @@ class MoviesRepositoryImplPoster(
             200 -> {
                 with(response as MoviesSearchResponse) {
                     ResourceMovieDetials.Success(results.map {
-                        Movie(it.id, it.resultType, it.image, it.title, it.description, year = null)
+                        Movie(
+                            it.id, it.resultType, it.image, it.title, it.description, year = null,
+                            runtimeStr = null,
+                            genres = null,
+                            plot = null,
+                            imDbRating = null,
+                            inFavorite = false
+                        )
                     })
                 }
             }

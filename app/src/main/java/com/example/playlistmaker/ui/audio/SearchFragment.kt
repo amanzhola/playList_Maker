@@ -9,8 +9,10 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
@@ -95,6 +97,10 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         viewModel.uiState.observe(viewLifecycleOwner) { state ->
             binding.progressBar.isVisible = state.isLoading
 
+            // 👇 используем метод для синхронизации ⬇️ 🚗 💖
+            val shouldShowBottomNav = state.query.isEmpty()
+            updateBottomNavVisibility(shouldShowBottomNav)
+
             when (state.error) {
                 ErrorState.ERROR -> errorManager.showError()
                 ErrorState.FAILURE -> {
@@ -120,9 +126,8 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
             adapter.updateTracks(state.displayedTracks.toMutableList())
 
             binding.history.isVisible = state.showHistory
-            binding.searchBox.hint = if (state.isInputFocused) null else getString(R.string.search_hint)
+            binding.searchBox.hint = if (state.query.isNotEmpty() || state.isInputFocused) null else getString(R.string.search_hint)
             binding.clearIcon.isVisible = state.isClearIconVisible
-
         }
     }
 
@@ -165,12 +170,18 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
     }
 
     override fun onSegment4ClickedInternal() {
-        if (isBottomNavVisible) {
-            getBaseActivity()?.hideBottomNavigation()
-        } else {
-            getBaseActivity()?.showBottomNavigation()
+        updateBottomNavVisibility(!isBottomNavVisible)
+    }
+
+    private fun updateBottomNavVisibility(show: Boolean) {
+        if (isBottomNavVisible != show) {
+            if (show) {
+                getBaseActivity()?.showBottomNavigation()
+            } else {
+                getBaseActivity()?.hideBottomNavigation()
+            }
+            isBottomNavVisible = show
         }
-        isBottomNavVisible = !isBottomNavVisible
     }
 
     fun shareTrackHistoryFromViewModel() {
@@ -189,4 +200,30 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
                 bottomNavigationHelper.setBottomNavigationVisibility()
             }
         }
+
+    override fun onResume() {
+        super.onResume()
+        requireActivity()
+            .findViewById<TextView>(R.id.title)
+            ?.visibility = View.VISIBLE // Явно показываем заголовок
+
+        val backStackEntry = findNavController().currentBackStackEntry
+        val fromExtra = backStackEntry?.savedStateHandle?.get<Boolean>("from_extra") == true
+
+        if (fromExtra) {
+            backStackEntry?.savedStateHandle?.remove<Boolean>("from_extra")
+
+            val query = viewModel.uiState.value?.query.orEmpty()
+
+            if (query.isNotEmpty()) {
+                // 👇 Логика осталась: если был запрос — скрываем навигатор
+                getBaseActivity()?.hideBottomNavigation()
+            } else {
+                // 👇 Если запроса нет — показываем историю
+                viewModel.setInputFocused(true)
+            }
+        }
+
+        (activity as? BaseActivity)?.updateSegmentTexts()
+    }
 }

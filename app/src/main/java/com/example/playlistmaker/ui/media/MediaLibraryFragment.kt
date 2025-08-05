@@ -86,4 +86,9 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
                 bottomNavigationHelper.setBottomNavigationVisibility()
             }
         }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? BaseActivity)?.updateSegmentTexts()
+    }
 }

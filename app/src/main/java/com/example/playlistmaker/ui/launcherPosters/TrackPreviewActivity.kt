@@ -49,6 +49,9 @@ class TrackPreviewActivity : AppCompatActivity() {
             override fun onPlayButtonClicked(track: Track) {
                 viewModel.audioPlay(track)
             }
+
+            override fun onFavoriteClicked(track: Track){} // ❤️
+
         }, layoutId = R.layout.track_item2)
 
         recyclerView.adapter = adapter

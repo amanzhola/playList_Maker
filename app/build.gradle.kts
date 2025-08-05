@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.parcelize")
     id("androidx.navigation.safeargs.kotlin") version "2.9.1"
+    id("kotlin-kapt")
 }
 
 // id("androidx.navigation.safeargs") version "2.9.1"
@@ -44,7 +45,7 @@ android {
 
     buildFeatures {
         viewBinding = true
-        this.dataBinding = true
+//        this.dataBinding = true
     }
 }
 
@@ -55,6 +56,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -62,7 +64,8 @@ dependencies {
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
     implementation (libs.glide)
-    annotationProcessor (libs.compiler)
+//    annotationProcessor (libs.compiler)
+    kapt(libs.compiler)
     implementation(libs.gson)
     implementation(libs.androidx.recyclerview)
 
@@ -153,10 +156,27 @@ dependencies {
 //    implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
 //    implementation ("androidx.fragment:fragment-ktx:1.5.6")
 
-//    implementation(libs.koin.androidx.fragment) -> лишний создает конфликт
+//    implementation(libs.koin.androidx.fragment) -> создает лишний  конфликт
 //    Но! 💡 Даже если implementation(libs.koin.android) подключен, тебе нужно убедиться,
 //    что модуль для fragment тоже включён — потому что by viewModel() в фрагменте требует
 //    отдельного артефакта, а koin-android по умолчанию не содержит расширения для фрагментов.
 //    implementation("io.insert-koin:koin-androidx-fragment:3.5.3") // или актуальная версия
+
+    //    val roomVersion = "2.5.1"
+//
+//    implementation("androidx.room:room-runtime:$roomVersion")
+//    kapt("androidx.room:room-compiler:$roomVersion")
+//
+//    // Опционально: ktx для корутин
+//    implementation("androidx.room:room-ktx:$roomVersion")
+
+//        val roomVersion = "2.5.1"
+
+    implementation(libs.androidx.room.runtime)
+    //noinspection KaptUsageInsteadOfKsp
+    kapt(libs.androidx.room.compiler)
+
+    // Опционально: ktx для корутин
+    implementation(libs.androidx.room.ktx)
 
 }

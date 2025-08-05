@@ -136,4 +136,7 @@
     <!-- <adding Movies Names Search> -->
     <string name="moviesStars"> ✍️ Name of the actor or actress ✨📽️💃 👈</string>
 
+    <!-- <adding DataBase> -->
+    <string name="nothing_searched_yet">😌🌼U haven not searched anything yet.🔍</string>
+
 </resources>

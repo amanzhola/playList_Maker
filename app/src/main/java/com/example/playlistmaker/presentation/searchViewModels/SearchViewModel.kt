@@ -1,5 +1,6 @@
 package com.example.playlistmaker.presentation.searchViewModels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,28 +34,27 @@ class SearchViewModel( // 🖼️
     private val currentState: SearchUiState
         get() = _uiState.value ?: SearchUiState()
 
-    private var ignoreNextHistoryUpdate = false
-    
     init {
-        searchHistoryInteraction.subscribeToHistoryChanges { updatedHistory ->
-            if (ignoreNextHistoryUpdate) {
-                ignoreNextHistoryUpdate = false
-                return@subscribeToHistoryChanges
-            }
+        // 🔁 Подписка на историю
+        viewModelScope.launch {
+            searchHistoryInteraction.observeHistory().collect { updatedHistory ->
+                val query = currentState.query
+                val isFocused = currentState.isInputFocused
+                val shouldShow = query.isEmpty() && isFocused && updatedHistory.isNotEmpty()
 
-            val shouldShow = currentState.query.isEmpty() &&
-                    currentState.isInputFocused && updatedHistory.isNotEmpty()
+                Log.d("SearchVM", "🎯 History update collected: size=${updatedHistory.size}, show=$shouldShow")
 
-            _uiState.postValue(
-                currentState.copy(
-                    historyTracks = updatedHistory,
-                    showHistory = shouldShow,
-                    error = ErrorState.NONE
+                _uiState.postValue(
+                    currentState.copy(
+                        historyTracks = updatedHistory,
+                        showHistory = shouldShow,
+                        error = ErrorState.NONE
+                    )
                 )
-            )
+            }
         }
 
-        // Новый debounce для поиска
+        // ⌛ Debounce поиска
         queryFlow // ✨
             .collectDebouncedIn(viewModelScope, SEARCH_DEBOUNCE_DELAY) { query ->
                 if (query.isNotBlank()) {
@@ -62,23 +62,26 @@ class SearchViewModel( // 🖼️
                 }
             }
 
-        _uiState.value = currentState.copy(
-            historyTracks = searchHistoryInteraction.getHistory()
-        )
-    }
+        // 🕘 Первичная инициализация истории
+        viewModelScope.launch {
+            val history = searchHistoryInteraction.getHistory()
+            val shouldShow = history.isNotEmpty() &&
+                    currentState.query.isEmpty() &&
+                    currentState.isInputFocused
 
-    override fun onCleared() {
-        super.onCleared()
-        searchHistoryInteraction.unsubscribeFromHistoryChanges()
-//        debounce.cancel() // 🧼 Очистка таймера // 🧼➖🧹
-    }
+            Log.d("SearchVM", "🕘 Initial history loaded: size=${history.size}, show=$shouldShow")
 
+            _uiState.value = currentState.copy(
+                historyTracks = history,
+                showHistory = shouldShow
+            )
+        }
+    }
 
     fun onQueryChanged(query: String) {
         setSearchQuery(query) // 🎯
         queryFlow.value = query
     }
-
 
     private fun setSearchQuery(query: String) {
         val showClear = query.isNotEmpty()
@@ -90,8 +93,7 @@ class SearchViewModel( // 🖼️
             query = query,
             isClearIconVisible = showClear,
             showHistory = showHistory,
-            error = ErrorState.NONE,
-            // не меняем searchTracks, они сохраняются между переходами
+            error = ErrorState.NONE
         )
     }
 
@@ -130,6 +132,7 @@ class SearchViewModel( // 🖼️
                             error = if (tracks.isEmpty()) ErrorState.ERROR else ErrorState.NONE
                         ))
                     }
+
                     is Resource.Error -> { // ⚠️
                         _uiState.postValue(currentState.copy(
                             isLoading = false,
@@ -154,7 +157,10 @@ class SearchViewModel( // 🖼️
     }
 
     fun onTrackClicked(track: Track) { // 🎵
-        searchHistoryInteraction.addTrackToHistory(track)
+        Log.d("SearchViewModel", "Adding to history: $track")
+        viewModelScope.launch {
+            searchHistoryInteraction.addTrackToHistory(track)
+        }
     }
 
     fun removeTrack(track: Track) {
@@ -162,7 +168,9 @@ class SearchViewModel( // 🖼️
             val updated = currentState.historyTracks.toMutableList().apply {
                 removeIf { it.trackId == track.trackId }
             }
-            searchHistoryInteraction.saveHistory(updated)
+            viewModelScope.launch {
+                searchHistoryInteraction.saveHistory(updated)
+            }
             _uiState.value = currentState.copy(historyTracks = updated)
         } else {
             val updated = currentState.searchTracks.toMutableList().apply {
@@ -173,8 +181,9 @@ class SearchViewModel( // 🖼️
     }
 
     fun clearHistory() {
-        ignoreNextHistoryUpdate = true
-        searchHistoryInteraction.clearHistory()
+        viewModelScope.launch {
+            searchHistoryInteraction.clearHistory()
+        }
 
         _uiState.value = currentState.copy(
             showHistory = false,
@@ -183,4 +192,15 @@ class SearchViewModel( // 🖼️
     }
 
     fun getTrackHistoryList(): List<Track> = currentState.historyTracks
+
+    fun updateHistoryStateFromFragment(history: List<Track>, show: Boolean) {
+        _uiState.value = currentState.copy(
+            historyTracks = history,
+            showHistory = show
+        )
+    }
+
+    suspend fun getHistoryTracksFromRepo(): List<Track> {
+        return searchHistoryInteraction.getHistory()
+    }
 }

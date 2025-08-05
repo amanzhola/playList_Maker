@@ -1,11 +1,10 @@
 package com.example.playlistmaker.presentation.utils
 
+//import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import android.content.Context
 import com.example.playlistmaker.NavigationData
 import com.example.playlistmaker.R
-//import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.roots.main.MainActivity
-import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import com.example.playlistmaker.ui.movie.SearchMovie
 import com.example.playlistmaker.ui.weather.SearchWeather
 
@@ -55,10 +54,10 @@ object NavigationConfigProvider {
                 buttonIndex = 4
             ),
             NavigationData.ActivityData(
-                activityClass = ExtraOption::class.java,
+                activityClass = MainActivity::class.java,
                 enterAnim = 0,
                 exitAnim = 0,
-                buttonIndex = 5
+                buttonIndex = 5 // 🔹 ExtraOption
             ),
         )
     }

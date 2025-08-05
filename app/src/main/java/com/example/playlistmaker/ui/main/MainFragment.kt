@@ -157,4 +157,10 @@ class MainFragment : BaseFragment(), BottomNavConfig {
             view.findViewById<MaterialButton>(id).visibility = visibility
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? BaseActivity)?.updateSegmentTexts()
+    }
+
 }

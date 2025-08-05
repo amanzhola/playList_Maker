@@ -1,10 +1,11 @@
 package com.example.playlistmaker.di.movie
 
-import com.example.playlistmaker.presentation.movieCast.MoviesCastViewModel
-import com.example.playlistmaker.presentation.movieDetails.AboutViewModel
-import com.example.playlistmaker.presentation.movieDetails.MovieDetailsViewModel
-import com.example.playlistmaker.presentation.movieDetails.PosterViewModel
-import com.example.playlistmaker.presentation.movieNames.NamesViewModel
+import com.example.playlistmaker.presentation.movieViewModels.movieCast.MoviesCastViewModel
+import com.example.playlistmaker.presentation.movieViewModels.movieDetails.AboutViewModel
+import com.example.playlistmaker.presentation.movieViewModels.movieDetails.MovieDetailsViewModel
+import com.example.playlistmaker.presentation.movieViewModels.movieDetails.PosterViewModel
+import com.example.playlistmaker.presentation.movieViewModels.movieHistory.HistoryViewModel
+import com.example.playlistmaker.presentation.movieViewModels.movieNames.NamesViewModel
 import com.example.playlistmaker.presentation.movieViewModels.MoviesViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -38,5 +39,10 @@ val movieViewModelModule = module { // 🎥 💃 🎬 // 🎥  from 🏠 🔍 �
     // add for Persons
     viewModel {
         NamesViewModel(androidContext(), get())
+    }
+
+    // Movies Data Base
+    viewModel {
+        HistoryViewModel(androidContext(), get())
     }
 }
