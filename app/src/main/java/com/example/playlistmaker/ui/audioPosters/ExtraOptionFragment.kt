@@ -9,6 +9,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -24,6 +28,7 @@ import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptio
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -58,108 +63,106 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 🎨 Тулбар
         val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
         val backgroundColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-
         getBaseActivity()?.toolbarHelper?.apply {
             setTitleTextColor(whiteColor)
             setToolbarBackgroundColor(backgroundColor)
         }
 
-        // Инициализация адаптера
+        // 🎧 Адаптер
         adapter = TrackAdapterAudio(emptyList(), object : OnTrackAudioClickListener {
             override fun onTrackClicked(track: Track, position: Int) {
                 viewModel.setCurrentTrackIndex(position)
                 viewModel.toggleIsHorizontal()
                 viewModel.setScrollPosition(position)
             }
-
             override fun onPlayButtonClicked(track: Track) {
                 viewModel.audioPlay(track)
             }
-
             override fun onBackArrowClicked() {
                 viewModel.stopAudioPlay()
                 requireActivity().onBackPressedDispatcher.onBackPressed()
             }
-
-            // 🆕 Обработка клика по "Избранному"
+            // ❤️ Избранное
             override fun onFavoriteClicked(track: Track) {
                 viewModel.onFavoriteClicked()
             }
         })
 
+        // ♻️ RecyclerView
         binding.tracksRecyclerView.adapter = adapter
         snapHelper = PagerSnapHelper().also { it.attachToRecyclerView(binding.tracksRecyclerView) }
         setLayoutManager(currentLayoutOrientation)
 
-        // Подписка на состояние ViewModel
-        viewModel.state.observe(viewLifecycleOwner) { state ->
+        // 👀 Подписка на состояние ViewModel (StateFlow)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // запускаем наблюдение за плеером, когда экран на виду
+                viewModel.startObservingAudioPlayer()
 
-            // Обновляем список треков
-            if (adapter.getItems() != state.trackList) {
-                adapter.update(state.trackList.map { it.copy() })
-                binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
-            }
+                viewModel.state.collect { state ->
+                    // 🔄 Обновление списка треков
+                    if (adapter.getItems() != state.trackList) {
+                        adapter.update(state.trackList.map { it.copy() })
+                        binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
+                    }
 
-            // Переключаем ориентацию списка (горизонтальная/вертикальная)
-            val desiredOrientation = if (state.isHorizontal) LinearLayoutManager.HORIZONTAL
-            else LinearLayoutManager.VERTICAL
+                    // ↔️ Переключение ориентации (гориз/верт)
+                    val desiredOrientation = if (state.isHorizontal)
+                        LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL
+                    if (desiredOrientation != currentLayoutOrientation) {
+                        currentLayoutOrientation = desiredOrientation
+                        setLayoutManager(desiredOrientation)
+                        binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
+                    }
 
-            if (desiredOrientation != currentLayoutOrientation) {
-                currentLayoutOrientation = desiredOrientation
-                setLayoutManager(desiredOrientation)
-                binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
-            }
+                    // 👁️ Видимость
+                    binding.tracksRecyclerView.isVisible = !state.isBottomNavVisible
+                    requireActivity().findViewById<TextView>(R.id.title)?.isVisible = state.isBottomNavVisible
 
-            // Управление видимостью элементов
-            binding.tracksRecyclerView.visibility =
-                if (state.isBottomNavVisible) View.GONE else View.VISIBLE
-
-            requireActivity().findViewById<TextView>(R.id.title)?.visibility =
-                if (state.isBottomNavVisible) View.VISIBLE else View.INVISIBLE
-
-            requireActivity().findViewById<Toolbar>(R.id.toolbar)?.apply {
-                val fixedHeightInPx = 45.convertDpToPx(requireContext())
-                layoutParams.height = fixedHeightInPx
-                requestLayout()
+                    // 🪜 Фикс высоты тулбара
+                    requireActivity().findViewById<Toolbar>(R.id.toolbar)?.apply {
+                        val fixedHeightInPx = 45.convertDpToPx(requireContext())
+                        layoutParams.height = fixedHeightInPx
+                        requestLayout()
+                    }
+                }
             }
         }
 
-        // Следим за скроллом и обновляем индекс трека
+        // 🧲 Следим за скроллом — обновляем индекс текущего трека
         binding.tracksRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val pos =
-                        (recyclerView.layoutManager as? LinearLayoutManager)?.findFirstVisibleItemPosition()
-                            ?: 0
+                    val pos = (recyclerView.layoutManager as? LinearLayoutManager)
+                        ?.findFirstVisibleItemPosition() ?: 0
                     viewModel.setCurrentTrackIndex(pos)
                     viewModel.setScrollPosition(pos)
                 }
             }
         })
 
-        // 🧠 Передача аргументов при первом запуске
+        // 🧠 Аргументы при первом запуске
         if (savedInstanceState == null) {
             arguments?.let {
                 val json = it.getString("TRACK_LIST_JSON") ?: return@let
                 val index = it.getInt("TRACK_INDEX")
-
                 trackListIntentParser.parse(json, index)?.let { inputData ->
                     viewModel.initializeWith(inputData)
                 }
             }
         }
 
-        // Выделяем иконку нижнего меню
+        // ⭐ Подсветка иконки нижнего меню
         binding.root.findViewById<View>(R.id.bottom6)?.isSelected = true
     }
 
     override fun onPause() {
         super.onPause()
-        val pos =
-            (binding.tracksRecyclerView.layoutManager as? LinearLayoutManager)?.findFirstVisibleItemPosition()
-                ?: 0
+        val pos = (binding.tracksRecyclerView.layoutManager as? LinearLayoutManager)
+            ?.findFirstVisibleItemPosition() ?: 0
         viewModel.setScrollPosition(pos)
     }
 
@@ -180,40 +183,39 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             context.resources.displayMetrics
         ).toInt()
 
-    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(View.VISIBLE, R.string.option) {
-        if (viewModel.state.value?.isBottomNavVisible == true) {
-            (requireActivity() as? MainActivity)?.apply {
-                buttonIndex = -1
-                switchFragment(buttonIndex)
-                bottomNavigationHelper.selectButton(buttonIndex)
-                bottomNavigationHelper.setBottomNavigationVisibility()
-            }
-        } else {
-            viewModel.stopAudioPlay()
-            val navController = findNavController()
-//            val backStackEntry = navController.getBackStackEntry(R.id.searchFragment)
-            // Проверяем, есть ли в бэкстеке searchFragment
-            val backStackEntry = try {
-                navController.getBackStackEntry(R.id.searchFragment)
-            } catch (e: IllegalArgumentException) {
-                null
-            }
+    override fun getToolbarConfig(): ToolbarConfig =
+        ToolbarConfig(View.VISIBLE, R.string.option) {
+            if (viewModel.state.value.isBottomNavVisible) {
+                (requireActivity() as? MainActivity)?.apply {
+                    buttonIndex = -1
+                    switchFragment(buttonIndex)
+                    bottomNavigationHelper.selectButton(buttonIndex)
+                    bottomNavigationHelper.setBottomNavigationVisibility()
+                }
+            } else {
+                viewModel.stopAudioPlay()
+                val navController = findNavController()
 
-            backStackEntry?.savedStateHandle?.set("from_extra", true)
+                // Проверяем, есть ли в back stack searchFragment
+                val backStackEntry = try {
+                    navController.getBackStackEntry(R.id.searchFragment)
+                } catch (_: IllegalArgumentException) {
+                    null
+                }
+                backStackEntry?.savedStateHandle?.set("from_extra", true)
 
-            // Возврат в любой предыдущий экран
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+            }
         }
-    }
 
     override fun getBottomNavButtonIndex(): Int = 5
     override fun shouldShowBottomNav(): Boolean = !isFromSearch
     override fun shouldShowFullBottomNav(): Boolean = isFromSearch
 
     override fun onSegment4ClickedInternal() {
-        val visible = viewModel.state.value?.isBottomNavVisible == true
-        viewModel.updateState { it.copy(isBottomNavVisible = !visible) }
+        viewModel.updateState { s -> s.copy(isBottomNavVisible = !s.isBottomNavVisible) }
     }
+
 
     override fun onResume() {
         super.onResume()

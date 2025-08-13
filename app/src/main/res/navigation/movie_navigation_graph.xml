@@ -5,6 +5,7 @@
     app:startDestination="@id/detailsFragment">
 
     <!-- Главное меню -->
+    <!-- Главный экран деталей -->
     <fragment
         android:id="@+id/detailsFragment"
         android:name="com.example.playlistmaker.ui.movie.movieDetails.DetailsFragment"
@@ -17,17 +18,18 @@
             app:argType="string" />
     </fragment>
 
+    <!-- Имена (исправили пакет на ui.*) -->
     <fragment
         android:id="@+id/namesFragment"
         android:name="com.example.playlistmaker.ui.movie.movieNames.NamesFragment"
         android:label="Names" />
-
     <fragment
         android:id="@+id/infoFragment"
         android:name="com.example.playlistmaker.ui.movie.movieNames.InfoFragment"
         android:label="Info" />
 
     <!-- Второстепенный экран -->
+    <!-- Каст -->
     <fragment
         android:id="@+id/moviesCastFragment"
         android:name="com.example.playlistmaker.ui.movie.movieCast.MoviesCastFragment"
@@ -38,6 +40,7 @@
     </fragment>
 
     <!-- Наш новый фрагмент Movies Data Base-->
+    <!-- История -->
     <fragment
         android:id="@+id/historyFragment"
         android:name="com.example.playlistmaker.ui.movie.movieHistory.HistoryFragment"

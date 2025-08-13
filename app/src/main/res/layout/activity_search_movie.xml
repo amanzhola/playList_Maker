@@ -20,18 +20,32 @@
         <EditText
             android:id="@+id/queryInput"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:textColor="@color/black1"
             android:hint="@string/enter_movie_name"
             android:paddingHorizontal="8dp"
             android:inputType="text"
-            android:autofillHints="text"
             android:textColorHint="@color/hintSearchIcon"
             android:minHeight="48dp"
             android:maxWidth="488dp"
-            android:background="@color/hintField_white"/>
+            android:background="@color/hintField_white"
+            android:importantForAutofill="no"
+            android:saveEnabled="false"/>
+<!--        android:layout_width="match_parent"-->
 
+        <ImageButton
+            android:id="@+id/clearButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/clear_search"
+            android:visibility="gone"
+            android:padding="8dp" />
+
+        <!--        <Option for button entry -->
 <!--        <EditText-->
 <!--            android:id="@+id/queryInput"-->
 <!--            android:layout_width="0dp"-->

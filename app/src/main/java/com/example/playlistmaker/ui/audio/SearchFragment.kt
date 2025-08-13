@@ -12,6 +12,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.BaseActivity
@@ -28,6 +31,7 @@ import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -94,40 +98,48 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
     }
 
     private fun setupObservers() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            binding.progressBar.isVisible = state.isLoading
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    binding.progressBar.isVisible = state.isLoading
 
-            // 👇 используем метод для синхронизации ⬇️ 🚗 💖
-            val shouldShowBottomNav = state.query.isEmpty()
-            updateBottomNavVisibility(shouldShowBottomNav)
+                    // 👇 используем метод для синхронизации ⬇️ 🚗 💖
+                    val shouldShowBottomNav = state.query.isEmpty()
+                    updateBottomNavVisibility(shouldShowBottomNav)
 
-            when (state.error) {
-                ErrorState.ERROR -> errorManager.showError()
-                ErrorState.FAILURE -> {
-                    errorManager.showFailure()
-                    binding.btnUpdate.setOnClickListener {
-                        viewModel.onSearchActionDone()
-                        errorManager.hideError()
+                    when (state.error) {
+                        ErrorState.ERROR -> errorManager.showError()
+                        ErrorState.FAILURE -> {
+                            errorManager.showFailure()
+                            binding.btnUpdate.setOnClickListener {
+                                viewModel.onSearchActionDone()
+                                errorManager.hideError()
+                            }
+                        }
+                        ErrorState.NONE -> {
+                            errorManager.hideError()
+                            binding.btnUpdate.isVisible = state.showHistory
+                            binding.btnUpdate.setOnClickListener {
+                                if (state.showHistory) viewModel.clearHistory()
+                            }
+                        }
                     }
-                }
-                ErrorState.NONE -> {
-                    errorManager.hideError()
-                    binding.btnUpdate.isVisible = state.showHistory
-                    binding.btnUpdate.setOnClickListener {
-                        if (state.showHistory) viewModel.clearHistory()
-                    }
+
+                    binding.btnUpdate.text = getString(
+                        if (state.error == ErrorState.NONE) R.string.clean else R.string.update
+                    )
+
+                    // 🎯 рисуем ровно то, что посчитал VM
+                    adapter.updateTracks(state.displayedTracks.toMutableList())
+
+                    binding.history.isVisible = state.showHistory
+                    binding.searchBox.hint =
+                        if (state.query.isNotEmpty() || state.isInputFocused) null
+                        else getString(R.string.search_hint)
+
+                    binding.clearIcon.isVisible = state.isClearIconVisible
                 }
             }
-
-            binding.btnUpdate.text = getString(
-                if (state.error == ErrorState.NONE) R.string.clean else R.string.update
-            )
-
-            adapter.updateTracks(state.displayedTracks.toMutableList())
-
-            binding.history.isVisible = state.showHistory
-            binding.searchBox.hint = if (state.query.isNotEmpty() || state.isInputFocused) null else getString(R.string.search_hint)
-            binding.clearIcon.isVisible = state.isClearIconVisible
         }
     }
 

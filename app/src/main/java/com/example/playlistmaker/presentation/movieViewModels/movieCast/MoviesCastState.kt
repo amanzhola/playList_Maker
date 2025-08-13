@@ -6,20 +6,11 @@ sealed interface MoviesCastState {
 
     object Loading : MoviesCastState
 
-//    data class Content(
-//        val movie: MovieCast,
-//    ) : MoviesCastState
-
     data class Error(
         val message: String,
     ) : MoviesCastState
 
-//    // Вместо объекта MovieCast появились два поля
-//    data class Content(
-//        val fullTitle: String,
-//        val items: List<MoviesCastRVItem>,
-//    ) : MoviesCastState
-
+// Вместо объекта MovieCast появились два поля
     data class Content(
         val fullTitle: String,
         // Поменяли тип ячеек на более общий

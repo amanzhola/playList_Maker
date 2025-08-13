@@ -1,6 +1,5 @@
 package com.example.playlistmaker.data.repository.movie
 
-import android.util.Log
 import com.example.playlistmaker.data.dto.movie.MovieAdvancedSearchDto
 import com.example.playlistmaker.data.dto.movie.MovieSearchDto
 import com.example.playlistmaker.data.movie_db.MovieDbConvertor
@@ -23,9 +22,11 @@ class MoviesRepositoryImpl(
     private val movieDbConvertor: MovieDbConvertor  // 👈 добавили конвертер
 ) : MoviesRepository {
 
-    init {
-        Log.d("MoviesRepo", "MoviesRepositoryImpl created")
-    }
+    companion object { private const val TAG = "HistoryRepo" }
+
+//    init {
+//        Log.d("MoviesRepo", "MoviesRepositoryImpl created")
+//    }
 
     override fun searchMovies(expression: String): Flow<Resource<List<Movie>>> = flow {
         try {
@@ -98,7 +99,8 @@ class MoviesRepositoryImpl(
             if (combinedMovies.isEmpty()) {
                 emit(Resource.Error("Ничего не найдено"))
             } else {
-                saveMovies(combinedMovies) // Сохраняем список фильмов в историю поиска (БД)
+                // Сохраняем список фильмов в историю поиска (БД)
+                saveMovies(expression, combinedMovies) // 👈 сюда просто прокидываем параметр
                 emit(Resource.Success(combinedMovies))
             }
 
@@ -108,8 +110,10 @@ class MoviesRepositoryImpl(
     }.flowOn(Dispatchers.IO)
 
     // Сохраняем в базу данных
-    private suspend fun saveMovies(movies: List<Movie>) {
-        val entities = movies.map { movie -> movieDbConvertor.map(movie) }
-        appDatabase.movieDao().insertMovies(entities)
+      private suspend fun saveMovies(expression: String, movies: List<Movie>) {
+        val entities = movies.map(movieDbConvertor::map)
+//        Log.d(TAG, "saveMovies(): expr='$expression', size=${entities.size}")
+        appDatabase.movieDao().replaceAll(entities)
     }
+
 }
