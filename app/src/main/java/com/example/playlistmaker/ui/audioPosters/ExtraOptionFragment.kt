@@ -157,6 +157,9 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
 
         // ⭐ Подсветка иконки нижнего меню
         binding.root.findViewById<View>(R.id.bottom6)?.isSelected = true
+
+        // ❤️ один раз включаем «живую» синхронизацию флагов из БД
+        viewModel.startFavoritesSyncIfNeeded()
     }
 
     override fun onPause() {
@@ -216,9 +219,9 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         viewModel.updateState { s -> s.copy(isBottomNavVisible = !s.isBottomNavVisible) }
     }
 
-
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
     }
+
 }

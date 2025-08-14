@@ -44,6 +44,9 @@ class SearchViewModel(
     // 🙋 ручной "поиск по Done" (если понадобится)
     private val manualSearchRequests = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
+    // 💾 последний подтверждённый запрос (после дебаунса ИЛИ ручного запуска)
+    private val lastSubmittedQuery = MutableStateFlow("")
+
     // ⛔ локально скрытые треки из текущей выдачи
     private val removedFromSearch = MutableStateFlow<Set<Int>>(emptySet())
 
@@ -58,17 +61,28 @@ class SearchViewModel(
 
     // ⌛ триггеры поиска: дебаунс ввода + явный Done
     @OptIn(FlowPreview::class)
+    private val debouncedQueries: Flow<String> =
+        queryFlow
+            .debounce(SEARCH_DEBOUNCE_DELAY)
+            .map { it.trimForEmoji() }
+            .filter { it.isNotBlank() }
+            .distinctUntilChanged()
+            .onEach {
+                removedFromSearch.value = emptySet()
+                lastSubmittedQuery.value = it
+            }
+
+    /// 🔀 итоговый поток запросов: дебаунс + ручные повторы (без distinct!)
     private val searchQueries: Flow<String> =
         merge(
-            queryFlow
-                .debounce(SEARCH_DEBOUNCE_DELAY)
-                .map { it.trimForEmoji() }
-                .filter { it.isNotBlank() }
-                .onEach { removedFromSearch.value = emptySet() },
-            manualSearchRequests.onEach { removedFromSearch.value = emptySet() }
-        ).distinctUntilChanged()
+            debouncedQueries,
+            manualSearchRequests.onEach { q ->
+                removedFromSearch.value = emptySet()
+                lastSubmittedQuery.value = q
+            }
+        )
 
-    // 📝 реально выполненный запрос (после дебаунса)
+    // 📝 реально выполненный запрос
     private val executedQuery: StateFlow<String> =
         searchQueries.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
@@ -138,54 +152,65 @@ class SearchViewModel(
     val uiState: StateFlow<SearchUiState> =
         inputs
             .map { inp ->
-                val showHistory = inp.isFocused && inp.query.isEmpty() && inp.history.isNotEmpty()
+                val queryBlank = inp.query.isBlank()
+                val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
+                // 🧠 queryBlank — пустой ввод?
+                // 🗂️ showHistory — показывать историю только когда есть фокус, ввода нет и история не пуста
 
-                // получаем сырую выдачу
-                val (tracksRaw, error) = when (inp.resource) {
+                // 1) 📦 Собираем «сырую» выдачу и базовую ошибку
+                val (tracksRaw0, error0) = when (inp.resource) {
                     is Resource.Success -> {
                         val list = inp.resource.data.orEmpty()
-                        // «ничего не найдено» показываем ТОЛЬКО когда запрос реально выполнен
-                        // (query == executedQuery), загрузка завершилась и итог пуст
+                        // ❗ «Ничего не найдено» показываем ТОЛЬКО для реально выполненного запроса
                         if (
                             inp.query.isNotEmpty() &&
                             inp.query == inp.executedQuery &&
                             !inp.isLoading &&
                             list.isEmpty()
                         ) {
-                            emptyList<Track>() to ErrorState.ERROR
+                            emptyList<Track>() to ErrorState.ERROR // 🫙
                         } else {
-                            list to ErrorState.NONE
+                            list to ErrorState.NONE // ✅ есть данные или поиск ещё идёт
                         }
                     }
-                    is Resource.Error -> emptyList<Track>() to ErrorState.FAILURE
+                    is Resource.Error -> emptyList<Track>() to ErrorState.FAILURE // ⚠️ сеть/сервер
                 }
 
-                // локальная фильтрация (мягкое удаление)
-                val filtered = tracksRaw.filter { it.trackId !in inp.removedIds }
+                // 2) 🧼 Мягкое удаление — прячем локально исключённые треки (без запроса к бэку)
+                val filtered0 = tracksRaw0.filter { it.trackId !in inp.removedIds }
 
-                // какие треки реально показываем:
-                // 1) если история активна — история
-                // 2) если ввод идёт или debounce ещё не кончился (query != executedQuery) — пусто
-                // 3) иначе — актуальная отфильтрованная выдача
+                // 3) 🚫 Жёсткая засечка: при пустом вводе — всегда пустой список и без ошибок
+                val (tracksRaw, error) = if (queryBlank) {
+                    emptyList<Track>() to ErrorState.NONE // 🔕 ни лоадера, ни ошибок, ни хвостов
+                } else {
+                    filtered0 to error0
+                }
+
+                // 4) 🎯 Что реально показываем пользователю
                 val displayed = when {
-                    showHistory -> inp.history
-                    inp.query.isNotEmpty() && inp.query != inp.executedQuery -> emptyList()
-                    else -> filtered
+                    showHistory -> inp.history                        // 🗂️ история
+                    !queryBlank && inp.query != inp.executedQuery -> emptyList() // ⏳ печатает (debounce ещё не сработал)
+                    else -> tracksRaw                                  // 🔍 свежая выдача поиска
                 }
 
+                // 5) 🧊 При пустом запросе не крутим лоадер
+                val isLoadingSafe = if (queryBlank) false else inp.isLoading
+
+                // 6) 🧱 Финальный UI-стейт (адаптер рисует displayedTracks)
                 SearchUiState(
                     query = inp.query,
                     isInputFocused = inp.isFocused,
-                    isClearIconVisible = inp.query.isNotEmpty(),
-                    isLoading = inp.isLoading,
-                    error = error,
-                    searchTracks = filtered,         // можно оставить для совместимости
-                    historyTracks = inp.history,
-                    showHistory = !inp.isLoading && showHistory,
-                    displayedTracks = displayed      // 👈 важно: именно это рисует адаптер
+                    isClearIconVisible = inp.query.isNotEmpty(), // ❎ крестик только при непустом вводе
+                    isLoading = isLoadingSafe,                   // ⏳ лоадер не мигает на пустом запросе
+                    error = error,                               // 🚦 NONE / ERROR / FAILURE
+                    searchTracks = tracksRaw,                    // 📄 сырая (отфильтрованная) выдача
+                    historyTracks = inp.history,                 // 🗂️ история
+                    showHistory = !isLoadingSafe && showHistory, // 👁️ история не перекрывается лоадером
+                    displayedTracks = displayed                  // 🖼️ именно это отображаем в списке
                 )
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchUiState())
+
 
     // ─── public API ───
 
@@ -197,8 +222,10 @@ class SearchViewModel(
         focusFlow.value = focused
     }
 
+    // 🔘 «Готово / Повторить»
     fun onSearchActionDone() {
-        val q = queryFlow.value.trimForEmoji()
+        val qUi = queryFlow.value.trimForEmoji()
+        val q = if (qUi.isNotEmpty()) qUi else lastSubmittedQuery.value
         if (q.isNotEmpty()) manualSearchRequests.tryEmit(q)
     }
 
