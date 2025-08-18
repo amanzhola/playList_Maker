@@ -369,5 +369,4 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         }
         return false
     }
-
 }
