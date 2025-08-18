@@ -31,6 +31,7 @@ import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptio
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.example.playlistmaker.utils.NavKeys
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -118,12 +119,9 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
                         overlay.alpha = 1f        // максимум при полном развороте
                     }
 
-                    BottomSheetBehavior.STATE_DRAGGING -> {
-                        TODO()
-                    }
-
+                    BottomSheetBehavior.STATE_DRAGGING,
                     BottomSheetBehavior.STATE_SETTLING -> {
-                        TODO()
+                        // no-op: эти стейты кратковременные, альфой рулит onSlide()
                     }
                 }
             }
@@ -133,13 +131,13 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
                 val t = slideOffset.coerceIn(0f, 1f)
                 // если хочешь максимум 0.6 даже при expanded, умножай на 0.6f
                 overlay.alpha = t.coerceAtMost(1f)
-                overlay.isVisible = t > 1f
+                overlay.isVisible = t > 0f
             }
         })
 
         // Поймаем одноразовое событие от CreatePlaylistFragment
         val handle = findNavController().currentBackStackEntry?.savedStateHandle
-        handle?.getLiveData<String>("playlist_created_name")
+        handle?.getLiveData<String>(NavKeys.PLAYLIST_CREATED_NAME)
             ?.observe(viewLifecycleOwner) { name ->
                 // На всякий случай — если шторка открыта, спрячем
                 if (::bottomBehavior.isInitialized) {
@@ -147,9 +145,8 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
                     overlay.visibility = View.GONE
                     overlay.alpha = 0f
                 }
-
-                showSnack(getString(R.string.playlist_created, name), durationMs = 4000)    // ↓ функция ниже
-                handle.remove<String>("playlist_created_name") // очистить ключ, чтобы не повторялось
+                showSnack(getString(R.string.playlist_created, name), durationMs = 4000)
+                handle.remove<String>(NavKeys.PLAYLIST_CREATED_NAME) // очистить, чтобы не повторялось
             }
 
         // 🎧 Адаптер

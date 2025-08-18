@@ -154,6 +154,13 @@
     <string name="added_to_playlist">Добавлено в плейлист %1$s </string>
     <string name="track_already_in_playlist">Трек уже добавлен в плейлист %1$s</string>
 
+    <plurals name="tracks_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d трека</item>
+    </plurals>
+
 
     <!--    for Ok people -->
     <!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
@@ -302,5 +309,12 @@
 <!--    <string name="finish">✅ Завершить 🏁</string>-->
     <!--    <string name="playlist_created">🎵➕ Плейлист %1$s создан 💃</string>-->
 <!--    <string name="add_to_playlist">➕🆕🎼 Добавить в плейлист📀</string>-->
+
+<!--    <plurals name="tracks_count">-->
+<!--        <item quantity="one">%d трек 🎵</item>-->
+<!--        <item quantity="few">%d трека 🎶</item>-->
+<!--        <item quantity="many">%d треков 🎶</item>-->
+<!--        <item quantity="other">%d трека 🎶</item>-->
+<!--    </plurals>-->
 
 </resources>

@@ -4,7 +4,6 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputFilter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +24,7 @@ import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.createPlaylist.CreatePlaylistViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.example.playlistmaker.utils.NavKeys
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -78,7 +78,6 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             out.toString()
         })
 
-
         // выбор обложки
         binding.ivCover.setOnClickListener {
             pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -95,7 +94,6 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
         // кнопка «Создать» — реал логику добавим позже
         binding.btnCreate.setOnClickListener {
-            Log.i("CreatePlaylistUI", "btnCreate clicked")
             vm.save(requireContext())
         }
 
@@ -118,13 +116,12 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                 launch {
                     vm.events.collect { e ->
 
-                        Log.i("CreatePlaylistUI", "event: $e")
-
                         when (e) {
                             is CreatePlaylistViewModel.Event.Saved -> {
                                 findNavController().previousBackStackEntry
                                     ?.savedStateHandle
-                                    ?.set("playlist_created_name", e.name)
+                                    ?.set(NavKeys.PLAYLIST_CREATED_NAME, e.name)
+
                                 findNavController().popBackStack()
                             }
                             is CreatePlaylistViewModel.Event.Error -> {
@@ -140,9 +137,7 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
     override fun onResume() {
         super.onResume()
-        Log.i("CreatePlaylistUI", "onResume; vm=${vm.hashCode()}")
     }
-
 
     override fun onDestroyView() {
         _binding = null
@@ -158,7 +153,6 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         ToolbarConfig(View.VISIBLE, R.string.create_playlist_title) {
             handleBack()
         }
-
 
     private fun TextInputLayout.applyFilledFlatAppearance(hasContent: Boolean) {
         val filledColor = ContextCompat.getColor(context, R.color.switch_thumb_on_color)

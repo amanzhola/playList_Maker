@@ -2,7 +2,6 @@ package com.example.playlistmaker.presentation.createPlaylist
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.usecases.createPlaylist.CreatePlaylistUseCase
@@ -19,8 +18,6 @@ import kotlinx.coroutines.withContext
 class CreatePlaylistViewModel(
     private val createPlaylist: CreatePlaylistUseCase
 ) : ViewModel() {
-
-    private val TAG = "CreatePlaylistVM"
 
     data class UiState(
         val name: String = "",
@@ -71,12 +68,7 @@ class CreatePlaylistViewModel(
     fun save(appContext: Context) {
         val snapshot = _state.value
 
-        Log.d(TAG, "save(): name='${snapshot.name}', descLen=${snapshot.desc.length}, hasCover=${snapshot.coverUri != null}")
-
         if (snapshot.name.isBlank()) {
-
-            Log.w(TAG, "save(): empty name → cancel")
-
             // На всякий случай — защита на уровне VM (кнопка-то и так disabled)
             viewModelScope.launch { _events.send(Event.Error("Введите название плейлиста")) }
             return
@@ -90,8 +82,6 @@ class CreatePlaylistViewModel(
                         FileCopier.copyToAppStorage(appContext, snapshot.coverUri)
                     }.also { copied ->
 
-                        Log.d(TAG, "cover copy result: $copied")
-
                         // Требование 9: если не скопировалось — не сохраняем, чтобы не потерять обложку
                         if (copied == null) {
                             _events.send(Event.Error("Не удалось сохранить обложку"))
@@ -102,8 +92,6 @@ class CreatePlaylistViewModel(
 
                 // 2) Пишем в БД
                 val id = withContext(Dispatchers.IO) {
-
-                    Log.d(TAG, "insert to Room…")
 
                     createPlaylist(
                         snapshot.name.trim(),
@@ -119,9 +107,6 @@ class CreatePlaylistViewModel(
                 _state.value = _state.value.copy(dirty = false)
 
             } catch (e: Exception) {
-
-                Log.e(TAG, "save error", e)
-
                 _events.send(Event.Error(e.message ?: "Ошибка сохранения плейлиста"))
             }
         }

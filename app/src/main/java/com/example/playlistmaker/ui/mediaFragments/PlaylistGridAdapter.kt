@@ -43,10 +43,8 @@ class PlaylistGridAdapter(
         holder.itemView.setOnClickListener { onClick(item) } // переход на экран плейлиста не требуется по ТЗ
     }
 
-    private fun pluralizeTracks(ctx: Context, count: Int): String {
-        // может быть plurals. Простой вариант:
-        return if (count == 1) "1 трек" else "$count треков"
-    }
+    private fun pluralizeTracks(ctx: Context, count: Int): String =
+        ctx.resources.getQuantityString(R.plurals.tracks_count, count, count)
 
     class Diff : DiffUtil.ItemCallback<Playlist>() {
         override fun areItemsTheSame(o: Playlist, n: Playlist) = o.id == n.id

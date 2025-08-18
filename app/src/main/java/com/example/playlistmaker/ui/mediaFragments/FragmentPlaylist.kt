@@ -18,6 +18,7 @@ import com.example.playlistmaker.databinding.FragmentPlaylistBinding
 import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.SpacesItemDecoration
 import com.example.playlistmaker.presentation.media.PlaylistViewModel
+import com.example.playlistmaker.utils.NavKeys
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -68,10 +69,10 @@ class FragmentPlaylist : Fragment() {
         }
 
         val handle = findNavController().currentBackStackEntry?.savedStateHandle
-        handle?.getLiveData<String>("playlist_created_name")
+        handle?.getLiveData<String>(NavKeys.PLAYLIST_CREATED_NAME)
             ?.observe(viewLifecycleOwner) { name ->
                 showCreationSnackbar(name)
-                handle.remove<String>("playlist_created_name") // очистить, чтобы не повторялось
+                handle.remove<String>(NavKeys.PLAYLIST_CREATED_NAME) // очистить, чтобы не повторялось
             }
 
         // RecyclerView: 2 колонки
@@ -97,8 +98,6 @@ class FragmentPlaylist : Fragment() {
                 }
             }
         }
-
-
     }
 
     private fun showCreationSnackbar(name: String, durationMs: Int = 5000) {
@@ -110,7 +109,7 @@ class FragmentPlaylist : Fragment() {
 
         (sb.view.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(0, 0, 0, 0)
 
-        sb.duration = durationMs      // ← вот здесь ставим > 5 секунд, например 7000 или 10000
+        sb.duration = durationMs      // ← вот здесь ставим > 4 секунд, например 7000 или 10000
         sb.show()
     }
 

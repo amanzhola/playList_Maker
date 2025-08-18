@@ -1,6 +1,5 @@
 package com.example.playlistmaker.data.repository.playlist
 
-import android.util.Log
 import com.example.playlistmaker.data.createPlaylist.PlaylistDao
 import com.example.playlistmaker.data.createPlaylist.PlaylistEntity
 import com.example.playlistmaker.data.mappers.toDomain
@@ -20,8 +19,6 @@ class PlaylistRepositoryImpl(
 ) : PlaylistRepository {
 
     override suspend fun create(name: String, description: String?, coverPath: String?): Long {
-
-        Log.i("PlaylistRepo", "create(name='$name', coverPath=$coverPath)")
 
         return playlistDao.insert(
             PlaylistEntity(

@@ -1,4 +1,4 @@
-<resources>
+<resources >
 
     <string name="app_name">✨Playlist maker</string>
     <string name="search">🧐Search</string>
@@ -151,5 +151,11 @@
     <string name="add_to_playlist">➕🆕🎼 Add to PlayList📀</string>
     <string name="added_to_playlist">Added to PlayList %1$s 🎵➕✅ </string>
     <string name="track_already_in_playlist">🤔The track has already in the playlist %1$s 🎶📀</string>
+
+    <plurals name="tracks_count">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
+
 
 </resources>
