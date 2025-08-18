@@ -97,7 +97,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:maxHeight">@dimen/searchLineHeight_52</item>
         <item name="boxBackgroundMode">outline</item>
-        <item name="hintEnabled">true</item>
+        <item name="hintEnabled">false</item>
         <item name="android:hint">@string/search_hint</item>
         <item name="android:textColorHint">@color/hintColor_textColor</item>
         <item name="boxStrokeWidth">@dimen/searchNoStroke</item>
@@ -111,6 +111,8 @@
         <item name="boxBackgroundColor">@color/hintField_white</item>
         <item name="cursorColor">@color/cursorColor</item>
     </style>
+<!--            app:hintEnabled="false"                 &lt;!&ndash; ⬅️ убираем плавающий лейбл &ndash;&gt;-->
+<!--    <item name="hintEnabled">true</item>-->
 
     <style name="SearchInput" parent="Text16">
         <item name="android:layout_width">match_parent</item>
@@ -125,7 +127,9 @@
         <item name="android:drawableTint">@color/hintColor_textColor</item>
         <item name="android:paddingVertical">@dimen/searchIconAndHintVerticalPadding_8.5</item>
         <item name="android:maxLength">30</item>
+        <item name="android:hint">@string/search</item>
     </style>
+<!--    android:hint="@string/name_new_playlist"   &lt;!&ndash; 👈 обычный hint внутри &ndash;&gt;-->
 
     <style name="ClearIcon">
         <item name="android:layout_width">wrap_content</item>
@@ -192,7 +196,6 @@
         <item name="android:visibility">gone</item>
 
     </style>
-
 
     <style name="Theme.PlaylistMaker" parent="Base.Theme.PlaylistMaker" />
     <color name="blue_textColor">@color/backgroundDay</color>

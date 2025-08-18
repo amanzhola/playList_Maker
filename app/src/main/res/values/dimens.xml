@@ -62,4 +62,13 @@
     <dimen name="label_text_size">18sp</dimen>
     <dimen name="value_text_size">18sp</dimen>
 
+    <dimen name="one_dp">1dp</dimen>
+
+    <!-- <create playlist> -->
+    <dimen name="vertical_margin_create_playlist">16dp</dimen>
+    <dimen name="bottom_margin_create_playlist">32dp</dimen>
+
+    <style name="CoverConstraints">
+    </style>
+
 </resources>

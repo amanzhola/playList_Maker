@@ -6,9 +6,11 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -24,10 +26,12 @@ import com.example.playlistmaker.databinding.FragmentExtraOptionBinding
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.AudioSingleTrackShare
 import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
+import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -45,6 +49,11 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
 
     private var currentLayoutOrientation = LinearLayoutManager.HORIZONTAL
     private var isFromSearch: Boolean = false
+
+    private lateinit var bottomBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var overlay: View
+    private val imageLoader: ImageLoader by inject()
+    private val bottomAdapter by lazy { PlaylistBottomAdapter(imageLoader) { viewModel.onPlaylistClicked(it) } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +80,78 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             setToolbarBackgroundColor(backgroundColor)
         }
 
+        val bottom = view.findViewById<LinearLayout>(R.id.playlists_bottom_sheet)
+        overlay = view.findViewById(R.id.overlay)
+
+        // список в шторке
+        val rv = view.findViewById<RecyclerView>(R.id.rvBottomPlaylists)
+        rv.layoutManager = LinearLayoutManager(requireContext())
+        rv.adapter = bottomAdapter // ← твой адаптер PlaylistBottomAdapter
+
+        // «Новый плейлист»
+        view.findViewById<View>(R.id.btnUpdate).setOnClickListener {
+            bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            findNavController().navigate(R.id.action_global_to_createPlaylistFragment)
+        }
+
+        bottomBehavior = BottomSheetBehavior.from(bottom).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        bottomBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(sheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        overlay.isGone = true
+                        overlay.alpha = 0f
+                    }
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        overlay.isVisible = false
+                        overlay.alpha = 0f
+                    }
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                        overlay.isVisible = true
+                        overlay.alpha = 0.6f      // ✨ полупрозрачное затемнение на пол-экрана
+                    }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        overlay.isVisible = true
+                        overlay.alpha = 1f        // максимум при полном развороте
+                    }
+
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+                        TODO()
+                    }
+
+                    BottomSheetBehavior.STATE_SETTLING -> {
+                        TODO()
+                    }
+                }
+            }
+
+            override fun onSlide(sheet: View, slideOffset: Float) {
+                // плавная анимация: 0..1 → 0..0.6 (для half), 0..1 (для expanded)
+                val t = slideOffset.coerceIn(0f, 1f)
+                // если хочешь максимум 0.6 даже при expanded, умножай на 0.6f
+                overlay.alpha = t.coerceAtMost(1f)
+                overlay.isVisible = t > 1f
+            }
+        })
+
+        // Поймаем одноразовое событие от CreatePlaylistFragment
+        val handle = findNavController().currentBackStackEntry?.savedStateHandle
+        handle?.getLiveData<String>("playlist_created_name")
+            ?.observe(viewLifecycleOwner) { name ->
+                // На всякий случай — если шторка открыта, спрячем
+                if (::bottomBehavior.isInitialized) {
+                    bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    overlay.visibility = View.GONE
+                    overlay.alpha = 0f
+                }
+
+                showSnack(getString(R.string.playlist_created, name), durationMs = 4000)    // ↓ функция ниже
+                handle.remove<String>("playlist_created_name") // очистить ключ, чтобы не повторялось
+            }
+
         // 🎧 Адаптер
         adapter = TrackAdapterAudio(emptyList(), object : OnTrackAudioClickListener {
             override fun onTrackClicked(track: Track, position: Int) {
@@ -89,6 +170,17 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             override fun onFavoriteClicked(track: Track) {
                 viewModel.onFavoriteClicked()
             }
+
+            // 🎵➕ Add Track 👉💿
+            override fun onAddTrackClicked(track: Track) {
+//                viewModel.onOpenBottomSheet()                   // попросим актуальные данные (если надо)
+                bottom.post {                      // чтобы не спорить с лайаутом
+                    bottomBehavior.isFitToContents = false          // разрешаем половинчатое состояние
+                    bottomBehavior.halfExpandedRatio = 0.6f         // половина экрана (0f..1f)
+                    bottomBehavior.skipCollapsed = false            // при свайпе вниз можно вернуться в collapsed/скрыть
+                    bottomBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                }
+            }
         })
 
         // ♻️ RecyclerView
@@ -100,33 +192,65 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // запускаем наблюдение за плеером, когда экран на виду
+                // в VM есть защита от повторного старта
                 viewModel.startObservingAudioPlayer()
 
-                viewModel.state.collect { state ->
-                    // 🔄 Обновление списка треков
-                    if (adapter.getItems() != state.trackList) {
-                        adapter.update(state.trackList.map { it.copy() })
-                        binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
+                // 1) Состояние аудиоплеера/экрана
+                launch {
+                    viewModel.state.collect { state ->
+                        // 🔄 Обновление списка треков
+                        if (adapter.getItems() != state.trackList) {
+                            adapter.update(state.trackList.map { it.copy() })
+                            binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
+                        }
+
+                        // ↔️ Переключение ориентации (гориз/верт)
+                        val desired = if (state.isHorizontal)
+                            LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL
+                        if (desired != currentLayoutOrientation) {
+                            currentLayoutOrientation = desired
+                            setLayoutManager(desired)
+                            binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
+                        }
+
+                        // 👁️ Видимость и фиксы тулбара
+                        binding.tracksRecyclerView.isVisible = !state.isBottomNavVisible
+                        requireActivity().findViewById<TextView>(R.id.title)?.isVisible = state.isBottomNavVisible
+
+                        // 🪜 Фикс высоты тулбара
+                        requireActivity().findViewById<Toolbar>(R.id.toolbar)?.apply {
+                            val fixedHeightInPx = 45.convertDpToPx(requireContext())
+                            layoutParams.height = fixedHeightInPx
+                            requestLayout()
+                        }
                     }
+                }
 
-                    // ↔️ Переключение ориентации (гориз/верт)
-                    val desiredOrientation = if (state.isHorizontal)
-                        LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL
-                    if (desiredOrientation != currentLayoutOrientation) {
-                        currentLayoutOrientation = desiredOrientation
-                        setLayoutManager(desiredOrientation)
-                        binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
+                // 2) Список плейлистов для BottomSheet
+                launch {
+                    viewModel.playlists.collect { list ->
+                        bottomAdapter.submitList(list)
+                        // (опц.) показать заглушку, если нужно:
+                        // binding.emptyBottomView.isVisible = list.isEmpty()
                     }
+                }
 
-                    // 👁️ Видимость
-                    binding.tracksRecyclerView.isVisible = !state.isBottomNavVisible
-                    requireActivity().findViewById<TextView>(R.id.title)?.isVisible = state.isBottomNavVisible
-
-                    // 🪜 Фикс высоты тулбара
-                    requireActivity().findViewById<Toolbar>(R.id.toolbar)?.apply {
-                        val fixedHeightInPx = 45.convertDpToPx(requireContext())
-                        layoutParams.height = fixedHeightInPx
-                        requestLayout()
+                // (опц.) 3) События добавления трека в плейлист (Toast и т.п.)
+                launch {
+                    viewModel.playlistEvents.collect { e ->
+                        when (e) {
+                            is ExtraOptionViewModel.PlaylistEvent.Added -> {
+                                bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                                showSnack(getString(R.string.added_to_playlist, e.playlistName))
+                            }
+                            is ExtraOptionViewModel.PlaylistEvent.AlreadyExists -> {
+                                // шторку НЕ прячем — пусть юзер выберет другой плейлист
+                                showSnack(getString(R.string.track_already_in_playlist, e.playlistName))
+                            }
+                            is ExtraOptionViewModel.PlaylistEvent.Error -> {
+                                showSnack(e.message)
+                            }
+                        }
                     }
                 }
             }
@@ -222,6 +346,31 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
+        if (hideBottomSheetIfOpen()) {
+            overlay.visibility = View.GONE
+            overlay.alpha = 0f
+        }
+    }
+
+    private fun showSnack(text: String, durationMs: Int = 4000) {
+        val root = requireActivity().findViewById<View>(android.R.id.content)
+        val sb = com.google.android.material.snackbar.Snackbar
+            .make(root, text, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+
+        // на всю ширину, без якоря
+        (sb.view.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(0, 0, 0, 0)
+
+        sb.duration = durationMs
+        sb.show()
+    }
+
+    private fun hideBottomSheetIfOpen(): Boolean {
+        if (::bottomBehavior.isInitialized &&
+            bottomBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
+            bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            return true
+        }
+        return false
     }
 
 }

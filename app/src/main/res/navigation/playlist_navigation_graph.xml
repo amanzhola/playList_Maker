@@ -11,7 +11,7 @@
         android:label="fragment_search"
         tools:layout="@layout/fragment_search">
 
-    <!-- Добавь action здесь -->
+    <!-- action -->
     <action
         android:id="@+id/action_searchFragment_to_extraOptionFragment"
         app:destination="@id/extraOptionFragment" />
@@ -42,7 +42,14 @@
         android:id="@+id/fragmentPlaylist"
         android:name="com.example.playlistmaker.ui.mediaFragments.FragmentPlaylist"
         android:label="fragment_playlist"
-        tools:layout="@layout/fragment_playlist" />
+        tools:layout="@layout/fragment_playlist"/>
+
+    <fragment
+        android:id="@+id/createPlaylistFragment"
+        android:name="com.example.playlistmaker.ui.createPlaylist.CreatePlaylistFragment"
+        android:label="@string/create_playlist_title"
+        tools:layout="@layout/fragment_create_playlist" />
+
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.playlistmaker.ui.main.MainFragment"
@@ -60,5 +67,10 @@
             android:name="TRACK_INDEX"
             app:argType="integer" />
     </fragment>
+
+    <!-- Глобальный переход на CreatePlaylist -->
+    <action
+        android:id="@+id/action_global_to_createPlaylistFragment"
+        app:destination="@id/createPlaylistFragment" />
 
 </navigation>

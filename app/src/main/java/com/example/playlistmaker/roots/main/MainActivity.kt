@@ -1,7 +1,7 @@
 package com.example.playlistmaker.roots.main
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -15,6 +15,7 @@ import com.example.playlistmaker.ui.audio.ReversableList
 import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.media.MediaLibraryFragment
 import com.example.playlistmaker.ui.settings.SettingsFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : BaseActivity() {
 
@@ -78,6 +79,11 @@ class MainActivity : BaseActivity() {
         bottomNavigationHelper.setupBottomNavigation()
         bottomNavigationHelper.selectButton(buttonIndex)
         bottomNavigationHelper.setBottomNavigationVisibility()
+
+        // for dialog on exit
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = handleBack()
+        })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -126,24 +132,29 @@ class MainActivity : BaseActivity() {
 
     override fun shouldEnableEdgeToEdge(): Boolean = false
 
-    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        // Проверка: если отображается один из корневых фрагментов — выходим из приложения
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_container)
-        val currentFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull()
+    private fun handleBack() {
+        val current = getCurrentVisibleFragment()
+        val isTopLevel =
+            current is SearchFragment ||
+                    current is MediaLibraryFragment ||
+                    current is SettingsFragment
 
-        if (currentFragment is SearchFragment ||
-            currentFragment is MediaLibraryFragment ||
-            currentFragment is SettingsFragment
-        ) {
-            // Закрываем приложение
-            finishAffinity() // ← завершает всё приложение
-        }
-        else {
-            // Обычное поведение (вернуться назад)
-//            super.onBackPressed()
-            onBackPressedDispatcher.onBackPressed()
+        if (isTopLevel) {
+            // Диалог подтверждения выхода
+            MaterialAlertDialogBuilder(this)
+                .setMessage("Вы действительно хотите выйти из приложения?")
+                .setPositiveButton("Да") { d, _ ->
+                    d.dismiss()
+                    finishAffinity() // закрываем всю задачу приложения
+                }
+                .setNegativeButton("Нет") { d, _ -> d.dismiss() }
+                .show()
+        } else {
+            // Обычный шаг назад по навграфу
+            if (!navController.navigateUp()) {
+                // Если уже некуда «назад» внутри графа — закрываем текущую Activity
+                finish()
+            }
         }
     }
 }

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white_textColor"
+    android:id="@+id/createPlaylist"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/leftBorder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="@dimen/Padding_16" />
+    <!--        🧱-->
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/rightBorder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="@dimen/Padding_16" />
+    <!--        🧱-->
+
+    <!-- Обложка (кликабельная) -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivCover"
+        style="@style/CoverConstraints"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/Button_margin_16"
+        android:contentDescription="@string/cover"
+        android:src="@drawable/cover_create_playlist"
+        tools:src="@drawable/placeholder2"
+        android:clickable="true"
+        android:focusable="true"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@id/rightBorder"
+        app:layout_constraintStart_toEndOf="@id/leftBorder"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tilName"
+        android:layout_marginVertical="@dimen/vertical_margin_create_playlist"/>
+
+    <!-- Название (обязательное) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:id="@+id/tilName"
+        app:boxBackgroundMode="outline"
+        android:hint="@string/name_new_playlist"
+        app:boxStrokeColor="@color/edit_box_outline_selector"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/hint_color_selector"
+        app:layout_constraintTop_toBottomOf="@id/ivCover"
+        app:layout_constraintEnd_toStartOf="@id/rightBorder"
+        app:layout_constraintStart_toEndOf="@id/leftBorder"
+        android:layout_marginVertical="@dimen/vertical_margin_create_playlist">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Text16"
+            android:id="@+id/etName"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:inputType="text"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:ellipsize="end"
+            android:scrollHorizontally="false"
+            tools:text="Yesterday (Remastered 2009)" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Описание (опционально) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:id="@+id/tilDesc"
+        app:boxBackgroundMode="outline"
+        android:hint="@string/description"
+        app:boxStrokeColor="@color/edit_box_outline_selector"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/hint_color_selector"
+        app:layout_constraintTop_toBottomOf="@id/tilName"
+        app:layout_constraintEnd_toStartOf="@id/rightBorder"
+        app:layout_constraintStart_toEndOf="@id/leftBorder">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            style="@style/Text16"
+            android:id="@+id/etDesc"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:inputType="textMultiLine"
+            android:minLines="1"
+            android:maxLines="4"
+            tools:text="The Beatlesasdfasdfasdfasdfasdfasdfasdfsdsadfasdfsdafsdsdafsdafsdafasdfsdfaasdfasdfasdfsdfsdafasfdsffsdfsdafsdafasdfsdafasdfasdfdasfsddas"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Создать (disabled по умолчанию) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreate"
+        style="@style/Widget.MaterialComponents.Button"
+        android:text="@string/create"
+        android:enabled="false"
+        android:textAllCaps="false"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/btn_create_bg"
+        android:textColor="@color/white1"
+        app:elevation="0dp"
+        android:stateListAnimator="@null"
+        android:textSize="16sp"
+        android:fontFamily="@font/ys_display_regular"
+        android:textFontWeight="500"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/rightBorder"
+        app:layout_constraintStart_toEndOf="@id/leftBorder"
+        android:layout_marginBottom="@dimen/bottom_margin_create_playlist"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

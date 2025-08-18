@@ -3,9 +3,7 @@ package com.example.playlistmaker.ui.movie
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.View
+import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -13,12 +11,12 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.api.movie.MovieStorageHelper
@@ -30,271 +28,209 @@ import com.example.playlistmaker.ui.movie.moviePosters.MoviePager
 import com.example.playlistmaker.ui.movie.moviePosters.MoviePagerList
 import com.example.playlistmaker.utils.CLICK_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.ClickDebouncer
-import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import com.example.playlistmaker.utils.UIUpdater
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-private const val TAG_HISTORY_VM = "HistoryVM"
+class SearchMovie : BaseActivity() { // 🔁 👉 🎬 экран поиска • 🧼 чистки • 🏗️ сборка UI • ✅ готово
 
-class SearchMovie : BaseActivity() { // 🔁 👉 🎬🧼🏗️✅
+    private lateinit var clickDebouncer: ClickDebouncer      // 🛑🕒 анти-даблклик (защита от быстрых тапов)
+    private var isDialogShown = false                        // 🚪 флаг «диалог уже открыт»
 
-    companion object {
-        private const val KEY_QUERY_TEXT = "search_query_text" // 💾 сохраняем текст поля
-    }
+    private lateinit var uiUpdater: UIUpdater                // 🎛️ переключатель: лоадер / плейсхолдер / список
 
-    // 🧯 глушим TextWatcher при программной очистке/восстановлении
-    private var suppressWatcher = false
+    // ── View refs ───────────────────────────────────────────────────────────────
+    private lateinit var searchButton: Button                // 🔍 кнопка поиска (сейчас не используется — авто-поиск)
+    private lateinit var queryInput: EditText                // ⌨️ поле ввода запроса
+    private lateinit var placeholderMessage: TextView        // 📨 плейсхолдер сообщений
+    private lateinit var moviesList: RecyclerView            // 🎞️ список фильмов
+    private lateinit var clearButton: ImageButton            // ❌ очистить запрос
 
-    // ⏳ ручной debounce (ровно 2 секунды тишины перед запросом)
-    private var typingJob: Job? = null
+    // ── DI / VM ─────────────────────────────────────────────────────────────────
+    private val viewModel: MoviesViewModel by viewModel()    // 🧠 VM на Flow/StateFlow
+    private val movieStorageHelper: MovieStorageHelper by inject() // 📦 крошечное хранилище между экранами
 
-    private lateinit var clickDebouncer: ClickDebouncer
-    private var isDialogShown = false
-
-    private lateinit var uiUpdater: UIUpdater
-
-    private lateinit var searchButton: Button
-    private lateinit var queryInput: EditText
-    private lateinit var clearButton: ImageButton
-    private lateinit var placeholderMessage: TextView
-    private lateinit var moviesList: RecyclerView
-
-    private val viewModel: MoviesViewModel by viewModel()
-    private val movieStorageHelper: MovieStorageHelper by inject() // 👉 📦
-
+    // ── Adapter ─────────────────────────────────────────────────────────────────
     private val adapter by lazy {
         MoviesAdapter(
-            { event -> handleMovieEvent(event) },
-            { movie -> onFavoriteClicked(movie) } // (❤️)
+            { event -> handleMovieEvent(event) },            // 🎯 тап по карточке → события
+            { movie -> onFavoriteClicked(movie) }            // ❤️ тап по избранному
         )
     }
 
+    // Обработка событий из адаптера
     private fun handleMovieEvent(event: MoviesEvent) {
-        val selectedEvent = event as? MoviesEvent.SingleMovie ?: return
-        val selectedMovie = selectedEvent.movie
-        val position = selectedEvent.position
+        val selectedEvent = event as? MoviesEvent.SingleMovie // 🧲 безопасный даункаст
+        selectedEvent?.let {
+            val selectedMovie = it.movie                      // 🎬 выбранный фильм
+            val position = it.position                        // #️⃣ позиция в списке
 
-        clickDebouncer.tryClick { // ⛔ 🕒 1 секунда защита
-            showChoiceDialog(selectedMovie, position)
+            clickDebouncer.tryClick {                         // 🛡️ 1с защита от повторных кликов
+                showChoiceDialog(selectedMovie, position)     // 🪟 диалог выбора действия
+            }
         }
     }
 
-    private lateinit var moviePagerLauncher: ActivityResultLauncher<Intent>
+    private lateinit var moviePagerLauncher: ActivityResultLauncher<Intent> // 🎬 Activity Result API
 
+    // Диалог с 3 опциями навигации
     private fun showChoiceDialog(selectedMovie: Movie, position: Int) {
-        if (isDialogShown) return
-        isDialogShown = true
 
-        val options = arrayOf(getString(R.string.first), getString(R.string.second), getString(R.string.third))
+        if (isDialogShown) return                              // 🚫 уже показывается
+        isDialogShown = true                                   // ✅ ставим флажок
+
+        val options = arrayOf(getString(R.string.first), getString(R.string.second), getString(R.string.third)) // 🧾 три варианта
 
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Выберите опцию")
-            .setItems(options) { dialog, which ->
+            .setTitle("Выберите опцию")                        // 🏷️ заголовок
+            .setItems(options) { dialog, which ->              // 🧩 обработка выбора
                 when (which) {
-                    0 -> {
-                        movieStorageHelper.saveMovie(selectedMovie)
-                        moviePagerLauncher.launch(Intent(this, MoviePager::class.java))
+                    0 -> {                                     // 1) Открыть одиночный пейджер
+                        movieStorageHelper.saveMovie(selectedMovie)           // 💾 сохранить выбранный
+                        val intent = Intent(this, MoviePager::class.java)    // 🎯 экран пейджера
+                        moviePagerLauncher.launch(intent)                     // 🚀 старт
                     }
-                    1 -> {
-                        val movieList = adapter.getMovies()
-                        movieStorageHelper.saveMovieList(movieList)
-                        movieStorageHelper.setCurrentIndex(position)
-                        moviePagerLauncher.launch(Intent(this, MoviePagerList::class.java))
+                    1 -> {                                     // 2) Открыть пейджер списка
+                        val movieList: List<Movie> = adapter.getMovies()     // 🧺 текущий список
+                        movieStorageHelper.saveMovieList(movieList)          // 💾 сохранить список
+                        movieStorageHelper.setCurrentIndex(position)         // 🎯 стартовый индекс
+
+                        val intent = Intent(this, MoviePagerList::class.java) // 📚 экран лист-пейджера
+                        moviePagerLauncher.launch(intent)                     // 🚀
                     }
-                    2 -> {
-                        val intent = Intent(this, MovieRootActivity::class.java)
-                            .putExtra("poster", selectedMovie.image)
-                            .putExtra("id", selectedMovie.id)
-                        startActivity(intent)
+                    2 -> {                                     // 3) Перейти в детали
+                        val intent = Intent(this, MovieRootActivity::class.java) // 🧭 экран деталей
+                        intent.putExtra("poster", selectedMovie.image)            // 🖼️ постер
+                        intent.putExtra("id", selectedMovie.id)                   // 🆔 id фильма
+                        startActivity(intent)                                     // 🚀
                     }
                 }
             }
-            .setNegativeButton("Отмена") { d, _ -> d.dismiss() }
-            .setOnDismissListener { isDialogShown = false } // ✅ не даём открыть второй раз подряд
+            .setNegativeButton("Отмена") { d, _ -> d.dismiss() }               // 🙅 отмена
+            .setOnDismissListener { isDialogShown = false }                     // 🧹 сброс флага, когда окно закрылось
             .show()
     }
 
-    private var isBottomNavVisible = true
+    private var isBottomNavVisible = true                 // 👇/👆 состояние нижней навигации
 
     @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, lifecycleScope)
-        uiUpdater = UIUpdater(
+        // ── Инициализация вспомогательных компонентов ───────────────────────────
+        clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, lifecycleScope)   // 🛑🕒 анти-даблклик
+        uiUpdater = UIUpdater(                                                   // 🎛️ control center
             progressBar = findViewById(R.id.progressBar),
             placeholderMessage = findViewById(R.id.placeholderMessage),
             recyclerView = findViewById(R.id.movies)
         )
 
-        // ——— init views ———
-        placeholderMessage = findViewById(R.id.placeholderMessage)
-        searchButton = findViewById(R.id.searchButton)
-        queryInput = findViewById(R.id.queryInput)
-        clearButton = findViewById(R.id.clearButton)
-        moviesList = findViewById(R.id.movies)
+        // ── Поиск View ──────────────────────────────────────────────────────────
+        placeholderMessage = findViewById(R.id.placeholderMessage)  // 🔎
+        searchButton = findViewById(R.id.searchButton)              // 🔎 (не используется с авто-поиском)
+        queryInput = findViewById(R.id.queryInput)                  // ⌨️
+        moviesList = findViewById(R.id.movies)                      // 🎞️
+        clearButton = findViewById(R.id.clearButton)                // ❌
 
-        moviesList.layoutManager = LinearLayoutManager(this)
-        moviesList.adapter = adapter
+        // ── Начальное состояние поля ввода ─────────────────────────────────────
+        val vmText = viewModel.query.value                          // 🔁 восстановим ввод из VM (переживает повороты)
+        if (queryInput.text?.toString() != vmText) {
+            queryInput.setText(vmText)                              // ↩️ проставим текст
+            queryInput.setSelection(vmText.length)                  // 📍 курсор в конце
+        }
+        clearButton.isVisible = vmText.isNotEmpty()                 // 👁️ показать/скрыть крестик
 
-        // 🔕 убираем анимации — чтобы старые элементы не «вспыхивали»
-        (moviesList.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
-        moviesList.itemAnimator = null
+        // ── Кнопка «крестик» ───────────────────────────────────────────────────
+        clearButton.setOnClickListener {
+            queryInput.setText("")                                  // 🧹 очистить поле
+            viewModel.setDefaultState()                             // 🧽 сбросить состояние VM
+        }
 
-        moviePagerLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    viewModel.refreshFavorites()
-                }
-            }
+        // ── RecyclerView ───────────────────────────────────────────────────────
+        moviesList.layoutManager = LinearLayoutManager(this)        // 🧱 линейный список
+        moviesList.adapter = adapter                                // 🔌 подключаем адаптер
 
-        // ——— restore текста при ротации/теме ———
-        savedInstanceState?.getString(KEY_QUERY_TEXT)?.let { restored ->
-            if (restored.isNotEmpty()) {
-                suppressWatcher = true
-                queryInput.setText(restored)
-                queryInput.setSelection(restored.length)
-                suppressWatcher = false
-                clearButton.isVisible = true
-                // держим дефолтный экран; реальный поиск — только после 2с тишины
-                adapter.updateMovies(emptyList())
-                uiUpdater.showDefault()
+        // ── Activity Result (пейджеры) ─────────────────────────────────────────
+        moviePagerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                viewModel.refreshFavorites()                        // 🔄❤️ обновим «избранное» после возврата
             }
         }
 
-        // ——— Подписка на VM ———
+        // ── Подписки на StateFlow из ViewModel ─────────────────────────────────
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when (state) {
-                        is MoviesViewModel.UiState.Loading -> {
-                            // 🧹 убираем старые результаты пока ждём ответ
-                            adapter.updateMovies(emptyList())
-                            uiUpdater.showLoading()
-                        }
-                        is MoviesViewModel.UiState.Success -> {
-                            adapter.updateMovies(state.movies)
-                            uiUpdater.showData()
-                        }
-                        is MoviesViewModel.UiState.Empty -> {
-                            adapter.updateMovies(emptyList())
-                            uiUpdater.showMessage(getString(R.string.nothing_found))
-                        }
-                        is MoviesViewModel.UiState.Error -> {
-                            adapter.updateMovies(emptyList())
-                            val userFacing =
-                                getString(R.string.something_went_wrong) + "\n" + state.message
-                            uiUpdater.showMessage(userFacing)
-                        }
-                        is MoviesViewModel.UiState.Default -> {
-                            adapter.updateMovies(emptyList())
-                            uiUpdater.showDefault()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {            // 🔁 подписки активны, когда экран видим
+                // 🎞️ список фильмов
+                launch {
+                    viewModel.movies.collect { newMovies ->
+                        adapter.updateMovies(newMovies)             // 🔄 отрисовываем новые данные
+                    }
+                }
+                // 🎛️ ui-state (лоадер/ошибки/пусто/данные)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        when (state) {
+                            is MoviesViewModel.UiState.Loading -> uiUpdater.showLoading() // ⏳
+                            is MoviesViewModel.UiState.Success -> uiUpdater.showData()    // ✅
+                            is MoviesViewModel.UiState.Error -> {                         // ❌
+                                val userFacingMessage = getString(R.string.something_went_wrong) +
+                                        "\n" + state.message
+                                uiUpdater.showMessage(userFacingMessage)
+                            }
+                            is MoviesViewModel.UiState.Empty -> uiUpdater.showMessage(getString(R.string.nothing_found)) // 🫙
+                            is MoviesViewModel.UiState.Default -> { /* 💤 ничего не делаем */ }
                         }
                     }
                 }
             }
         }
 
-        // ——— ОДИН TextWatcher с ручным debounce ровно 2s ———
-        queryInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        // ── Автопоиск: реакция на ввод ─────────────────────────────────────────
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (suppressWatcher) return
+        // 1) sprint 20 replaced by Полный автоматический поиск EditText + Flow.debounce
+//        searchButton.setOnClickListener {
+//            val query = queryInput.text.toString()
+//            viewModel.onSearchQueryEntered(query)
+//        }
 
-                val text = s?.toString().orEmpty()
-
-                // 🎛️ крестик
-                clearButton.isVisible = text.isNotEmpty()
-
-                // перезапускаем «таймер тишины»
-                typingJob?.cancel()
-
-                if (text.isEmpty()) {
-                    // 🧹 пустой ввод → сразу дефолт
-                    adapter.updateMovies(emptyList())
-                    uiUpdater.showDefault()
-                    viewModel.setDefaultState()
-                    return
-                }
-
-                // ⏳ ждём SEARCH_DEBOUNCE_DELAY «без набора»
-                typingJob = lifecycleScope.launch {
-                    delay(SEARCH_DEBOUNCE_DELAY)
-                    // 💬 emoji-safe: передаём сырую строку, VM сама триммит корректно
-                    viewModel.onSearchQueryEntered(text)
-                }
+        // add by sprint 20 -> Полный автоматический поиск EditText + Flow.debounce
+        // 2) UI -> VM
+        queryInput.doAfterTextChanged { s ->
+            val txt = s?.toString().orEmpty()                       // ✍️ текущий ввод
+            if (txt != viewModel.query.value) {                     // 🧯 защита от лишних триггеров
+                viewModel.onSearchQueryEntered(txt)                 // 📩 отправили в VM
             }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
-
-        // ——— крестик очистки ———
-        clearButton.setOnClickListener {
-            // 🚫 останавливаем отложенный запуск
-            typingJob?.cancel()
-
-            // 🤫 не триггерим TextWatcher повторно
-            suppressWatcher = true
-            queryInput.setText("")
-            suppressWatcher = false
-
-            // 🧼 UI моментально чистим
-            adapter.updateMovies(emptyList())
-            uiUpdater.showDefault()
-
-            // 🔁 сбрасываем VM (query="" и локальные правки)
-            viewModel.setDefaultState()
+            clearButton.isVisible = txt.isNotEmpty()                // 👁️ показать крестик, если есть текст
         }
 
-        // косметика: при фокусе на пустом поле — чистый экран
-        queryInput.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus && queryInput.text.isNullOrEmpty()) {
-                adapter.updateMovies(emptyList())
-                uiUpdater.showDefault()
-            }
-        }
-
-        findViewById<TextView>(R.id.bottom4).isSelected = true
+        findViewById<TextView>(R.id.bottom4).isSelected = true      // ⭐ подсветим пункт навигации
     }
 
-    // 💾 сохраняем текст вручную (без системного автосейва)
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(KEY_QUERY_TEXT, queryInput.text?.toString().orEmpty())
-        super.onSaveInstanceState(outState)
-    }
-
+    // ❤️ клик по избранному на карточке
     private fun onFavoriteClicked(movie: Movie) {
-        viewModel.toggleFavorite(movie.id) // (❤️)
+        viewModel.toggleFavorite(movie.id)                          // 🔁 flip избранного
     }
 
+    // 🔃 реверс списка (пример доп. фичи)
     override fun reverseList() {
         val currentMovies = adapter.getMovies()
-        adapter.updateMovies(currentMovies.reversed())
-        moviesList.scrollToPosition(0)
+        val reversed = currentMovies.reversed()                     // 🔁 переворачиваем порядок
+        adapter.updateMovies(reversed)
+        moviesList.scrollToPosition(0)                              // ⬆️ прокрутка к началу
     }
 
+    // 👇/👆 показать/скрыть нижнюю навигацию
     override fun onSegment4Clicked() {
         if (isBottomNavVisible) hideBottomNavigation() else showBottomNavigation()
-        isBottomNavVisible = !isBottomNavVisible
+        isBottomNavVisible = !isBottomNavVisible                    // 🔄 переключили флаг
     }
 
-    override fun getLayoutId() = R.layout.activity_search_movie
-    override fun getMainLayoutId() = R.id.main
-    override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.movie) { navigateToMainScreen(this@SearchMovie, -1) }
-
-    override fun shouldEnableEdgeToEdge(): Boolean = false
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (isFinishing) {
-            // 🧹 подчистим VM на всякий
-            viewModel.setDefaultState()
-        }
+    // ── BaseActivity hooks ─────────────────────────────────────────────────────
+    override fun getLayoutId() = R.layout.activity_search_movie     // 🧱 layout ресурc
+    override fun getMainLayoutId() = R.id.main                      // 🎯 корневой контейнер
+    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.movie) {
+        navigateToMainScreen(this@SearchMovie, -1)                  // 🧭 обработчик навбара «назад»
     }
+    override fun shouldEnableEdgeToEdge(): Boolean = false          // ⛔ без edge-to-edge для экрана
 }

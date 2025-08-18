@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.playlistmaker.data.repository.base.ThemeRepositoryImpl
 import com.example.playlistmaker.di.appModule
+import com.example.playlistmaker.di.db.databaseModule
 import com.example.playlistmaker.di.extraOption.extraOptionDataModule
 import com.example.playlistmaker.di.extraOption.extraOptionInteractionModule
 import com.example.playlistmaker.di.extraOption.extraOptionViewModelModule
+import com.example.playlistmaker.di.imageLoaderModule
 import com.example.playlistmaker.di.mainActivity.mainActivityModule
 import com.example.playlistmaker.di.media.mediaViewModelModule
 import com.example.playlistmaker.di.movie.movieDataModule
@@ -18,6 +20,7 @@ import com.example.playlistmaker.di.movie.movieViewModelModule
 import com.example.playlistmaker.di.movie.namesInteractorModule
 import com.example.playlistmaker.di.movie.namesRepositoryModule
 import com.example.playlistmaker.di.navigation.navigationModule
+import com.example.playlistmaker.di.playlist.playlistsModule
 import com.example.playlistmaker.di.search.searchDataModule
 import com.example.playlistmaker.di.search.searchInteractionModule
 import com.example.playlistmaker.di.search.searchRepositoryModule
@@ -71,7 +74,10 @@ class App : Application() { // ☀️ 🔁 🌙
                     mediaViewModelModule,
                     navigationModule,
                     namesRepositoryModule,      // 👈 добавили
-                    namesInteractorModule       // 👈 добавили
+                    namesInteractorModule,      // 👈 добавили
+                    imageLoaderModule,          // 👈 для Glide
+                    databaseModule,
+                    playlistsModule
                 )
             )
         }
@@ -98,7 +104,7 @@ class App : Application() { // ☀️ 🔁 🌙
 
     fun isDarkThemeEnabled() = themeManager.repository.isDarkTheme()
 
-    fun View.traverse(action: (View) -> Unit) {
+    private fun View.traverse(action: (View) -> Unit) {
         action(this)
         if (this is ViewGroup) {
             for (i in 0 until childCount) {

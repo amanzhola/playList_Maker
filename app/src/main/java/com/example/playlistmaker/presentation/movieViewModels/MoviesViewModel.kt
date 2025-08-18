@@ -6,215 +6,125 @@ import com.example.playlistmaker.domain.api.movie.MoviesInteraction
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.usecases.movie.ToggleFavoriteUseCase
 import com.example.playlistmaker.domain.util.Resource
+import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
-private const val TAG_HISTORY_VM = "HistoryVM"
-
 class MoviesViewModel(
-    private val moviesInteraction: MoviesInteraction,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val moviesInteraction: MoviesInteraction,     // 🌐🔎 доменный поиск фильмов
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase // 🧠❤️ юзкейс переключения избранного
 ) : ViewModel() {
 
-    // 🎛️ UI стейты
+    // 🎛️ UI стейты — единый источник правды для экрана
     sealed class UiState {
-        data object Default : UiState()          // 💤 пустой ввод / стартовый экран
-        data object Loading : UiState()          // ⏳ загрузка
-        data class Success(val movies: List<Movie>) : UiState() // ✅ данные
-        data class Error(val message: String) : UiState()       // ❌ ошибка
-        data object Empty : UiState()            // 🫙 ничего не найдено
+        data object Default : UiState()                         // 💤 пустой ввод / стартовый экран
+        data object Loading : UiState()                         // ⏳ загрузка
+        data class Success(val movies: List<Movie>) : UiState() // ✅ данные получены
+        data class Error(val message: String) : UiState()       // ❌ ошибка запроса/сети
+        data object Empty : UiState()                           // 🫙 ничего не найдено
     }
 
-    // 🧩 ввод из UI
-    private val queryFlow = MutableStateFlow("")
+    // ── Query ───────────────────────────────────────────────────────────────────
+    // 🧩 ввод из UI (горячий поток, всегда хранит последнее значение)
+    private val queryFlow = MutableStateFlow("")               // 🔥 StateFlow внутри
+    val query: StateFlow<String> = queryFlow.asStateFlow()     // 🧊 наружу только чтение (инкапсуляция)
 
-    // ✋ локальная «ручная» подмена списка (после клика по ❤️), очищается при новом запросе
-    private val manualMovies = MutableStateFlow<List<Movie>?>(null)
+    // 🗂️ текущий отображаемый список; нужен для мгновенных локальных обновлений
+    // ✋ локальная подмена после клика по ❤️; при новом поиске очищается
+    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
+    val movies: StateFlow<List<Movie>> = _movies.asStateFlow()
 
-    // 🔤 безопасный trim для эмодзи: убираем только обычные пробелы/переводы строк
-    private fun String.trimForEmoji(): String = trim(' ', '\t', '\n', '\r')
-
-    // ⌛ дебаунс + фильтр пустых, без поломки emoji
-    @OptIn(FlowPreview::class)
-    private val searchQueries: Flow<String> =
-        queryFlow
-//            .debounce(SEARCH_DEBOUNCE_DELAY)
-            .map { it.trimForEmoji() }                 // 👈 эмодзи остаются целыми
-            .filter { it.isNotEmpty() }
-            .distinctUntilChanged()
-            .onEach { manualMovies.value = null }      // ♻️ новый запрос → сбрасываем локальные правки
-
-    // 📝 фактически ВЫПОЛНЕННЫЙ запрос (после дебаунса)
-    private val executedQuery: StateFlow<String> =
-        searchQueries.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
-//    // 🔎 поиск фильмов (ресурс)
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val searchResource: Flow<Resource<List<Movie>>> =
-        searchQueries
-            .flatMapLatest { q ->
-                moviesInteraction.searchMovies(q)
-                    .onStart { emit(Resource.Success(emptyList())) } // ⏳ лоадер только после дебаунса
-                    .catch { e -> emit(Resource.Error(e.message ?: "Unknown error")) }
-            }
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
-
-
-    // ⏳ лоадер: стартуем на новом запросе, гасим на ПЕРВОМ реальном ответе (после onStart)
-    private val loadingFlow: Flow<Boolean> =
-        merge(
-            searchQueries.map { true },
-            searchResource.drop(1).map { false } // 👈 пропускаем onStart
-        )
-
-    // ❤️ накатываем «избранное» на выдачу поиска
-    private val moviesFromSearch: Flow<List<Movie>> =
-        searchResource.map { res ->
-            val base = when (res) {
-                is Resource.Success -> res.data.orEmpty()
-                is Resource.Error   -> emptyList()
-            }
-            val favoriteIds = toggleFavoriteUseCase.getFavorites()
-            base.map { m -> m.copy(inFavorite = favoriteIds.contains(m.id)) }
-                .sortedByDescending { it.inFavorite } // ❤️🔝 сначала избранные
-        }
-
-    // 🕐 «pending» — печатаем, но дебаунс ещё не отдал запрос (query != executedQuery)
-    private val pendingSearch: Flow<Boolean> =
-        combine(queryFlow, executedQuery) { q, execQ ->
-            val t = q.trimForEmoji()
-            t.isNotBlank() && t != execQ
-        }.distinctUntilChanged()
-
-    // 👀 «видимый» список для UI: если query пустой ИЛИ запрос ещё не стартовал → пусто
-    private val visibleMovies: Flow<List<Movie>> =
-        combine(queryFlow, executedQuery, manualMovies, moviesFromSearch) { q, execQ, manual, fromSearch ->
-            val t = q.trimForEmoji()
-            if (t.isBlank() || t != execQ) emptyList() else manual ?: fromSearch
-        }
-
-    // 🧮 сборка входов
-    private data class Inputs(
-        val query: String,
-        val isLoading: Boolean,
-        val isPending: Boolean,
-        val resource: Resource<List<Movie>>,
-        val visibleMovies: List<Movie>,
-        val executedQuery: String
-    )
-
-    // небольшие «контейнеры», чтобы не городить Pair<Pair<...>>
-    private data class QLP( // Query + Loading + Pending
-        val query: String,
-        val isLoading: Boolean,
-        val isPending: Boolean
-    )
-    private data class QLPRes(
-        val base: QLP,
-        val resource: Resource<List<Movie>>
-    )
-    private data class QLPResMovies(
-        val base: QLP,
-        val resource: Resource<List<Movie>>,
-        val movies: List<Movie>
-    )
-
-    // 1) комбинируем первые три
-    private val qlp: Flow<QLP> = combine(
-        queryFlow,
-        loadingFlow.onStart { emit(false) },
-        pendingSearch.onStart { emit(false) }
-    ) { q, isLoading, isPending ->
-        QLP(q, isLoading, isPending)
-    }
-
-    // 2) добавляем resource
-    private val qlpRes: Flow<QLPRes> = qlp.combine(searchResource) { base, res ->
-        QLPRes(base, res)
-    }
-
-    // 3) добавляем видимые фильмы
-    private val qlpResMovies: Flow<QLPResMovies> = qlpRes.combine(visibleMovies) { br, movies ->
-        QLPResMovies(br.base, br.resource, movies)
-    }
-
-    // 4) финально приклеиваем executedQuery и строим Inputs
-    private val baseInputs: Flow<Inputs> = qlpResMovies.combine(executedQuery) { brm, execQ ->
-        Inputs(
-            query = brm.base.query,
-            isLoading = brm.base.isLoading,
-            isPending = brm.base.isPending,
-            resource = brm.resource,
-            visibleMovies = brm.movies,
-            executedQuery = execQ
-        )
-    }
-
-    // 🖼️ конечный UI-стейт
+    // UiState строится без init: вся логика дебаунса/поиска — в декларативном пайплайне
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<UiState> =
-        baseInputs
-            .map { inp ->
-                val q = inp.query.trimForEmoji()
-                when {
-                    q.isBlank()       -> UiState.Default                      // 💤 пустой запрос
-//                    inp.isPending     -> UiState.Loading                      // ⏳ печатаем, но поиск ещё не ушёл
-                    // БЫЛО: inp.isPending -> UiState.Loading
-                    // СТАЛО: пока печатает, ничего не показываем (держим Default)
-                    inp.isPending     -> UiState.Default // ⏳ печатаем, но поиск ещё не ушёл
-                    inp.isLoading     -> UiState.Loading                      // ⏳ ждём ответа
-                    inp.resource is Resource.Error ->
-                        UiState.Error(inp.resource.message ?: "Unknown error")// ❌ ошибка
-                    // 🫙 «ничего не найдено» — только для актуального и завершённого запроса
-                    inp.executedQuery.isNotEmpty() &&
-                            q == inp.executedQuery &&
-                            !inp.isLoading &&
-                            inp.visibleMovies.isEmpty() -> UiState.Empty
-                    else -> UiState.Success(inp.visibleMovies)                // ✅ данные
+        queryFlow
+            .map { it.trim() }                                  // ✂️ убираем лишние пробелы
+            .debounce(SEARCH_DEBOUNCE_DELAY)                    // ⏱️ ждём, пока пользователь «допечатает»
+            .distinctUntilChanged()                             // 🔁🚫 не дёргаем поиск на одинаковый ввод
+            .flatMapLatest { q ->                               // 🏎️💨 отменяем старый поиск при новом вводе
+                if (q.isEmpty()) {
+                    _movies.value = emptyList()                 // 🧹 чистим локальный список
+                    flowOf(UiState.Default)                     // 📭 показываем дефолтный экран
+                } else {
+                    moviesInteraction.searchMovies(q)           // 🌐🔎 доменный Flow<Resource<List<Movie>>>
+                        .map { result ->                        // 🧰 трансформируем ресурс в UiState
+                            when (result) {
+                                is Resource.Success -> {        // 📬 успех
+                                    val list = result.data.orEmpty()
+                                    if (list.isEmpty()) {
+                                        _movies.value = emptyList()
+                                        UiState.Empty           // 🫙 пустая выдача
+                                    } else {
+                                        val favoriteIds = toggleFavoriteUseCase.getFavorites() // 📥❤️ получаем избранные id
+                                        val updated = list
+                                            .map { m -> m.copy(inFavorite = favoriteIds.contains(m.id)) } // 🖍️ помечаем ❤️
+                                            .sortedByDescending { it.inFavorite }                         // ❤️🔝 избранные вверх
+                                        _movies.value = updated
+                                        UiState.Success(updated) // ✅ отдаём на экран
+                                    }
+                                }
+                                is Resource.Error -> {           // 🆘 ошибка доменного слоя/сети
+                                    _movies.value = emptyList()
+                                    UiState.Error(result.message ?: "Неизвестная ошибка") // 🛟 сообщение о проблеме
+                                }
+                            }
+                        }
+                        .onStart { emit(UiState.Loading) }       // 🎬⏳ перед реальным ответом покажем загрузку
                 }
             }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Default)
+            .stateIn(
+                scope = viewModelScope,                          // 🧵 жизненный цикл корутин = ViewModel
+                started = SharingStarted.WhileSubscribed(5_000), // 👂 активен, пока есть подписчики (ещё +5с)
+                initialValue = UiState.Default                   // 🍼 начальное состояние
+            )
 
-    // ── 📣 public API ──
+    // ── 📣 Public API ───────────────────────────────────────────────────────────
 
-    fun onSearchQueryEntered(rawQuery: String) { // ⌨️ ввод из UI
-        queryFlow.value = rawQuery
+    fun onSearchQueryEntered(rawQuery: String) {  // ⌨️📨 ввод из UI
+        queryFlow.value = rawQuery                // 🧲 триггерим пайплайн сверху
     }
 
-    fun toggleFavorite(movieId: String) { // ❤️ клик по избранному
-        toggleFavoriteUseCase(movieId)
-        val current = (uiState.value as? UiState.Success)?.movies ?: return
-        val updated = current.map { m ->
-            if (m.id == movieId) m.copy(inFavorite = !m.inFavorite) else m
-        }.sortedByDescending { it.inFavorite }
-        manualMovies.value = updated
+    fun toggleFavorite(movieId: String) {         // ❤️ клик по избранному
+        val current = _movies.value
+        if (current.isEmpty()) return             // 🚪 нечего обновлять
+
+        val updated = current.map { movie ->
+            if (movie.id == movieId) {
+                toggleFavoriteUseCase(movie.id)   // 💾 side-effect: сохранить новое состояние
+                movie.copy(inFavorite = !movie.inFavorite) // 🔁 flip ❤️
+            } else movie
+        }.sortedByDescending { it.inFavorite }    // ❤️🔝 держим избранные сверху
+
+        _movies.value = updated                   // 🚀 моментально обновляем список на экране
+        // 📝 UiState остаётся Success — переэмичивать не нужно
     }
 
-    fun refreshFavorites() { // 🔁 актуализировать избранное (после детального экрана и т.п.)
-        val current = (uiState.value as? UiState.Success)?.movies ?: return
-        val updated = current.map { m ->
-            m.copy(inFavorite = toggleFavoriteUseCase.isFavorite(m.id))
-        }.sortedByDescending { it.inFavorite }
-        manualMovies.value = updated
+    fun refreshFavorites() {                      // 🔄❤️ синхронизировать с хранилищем (после деталей и т.п.)
+        val updated = _movies.value
+            .map { it.copy(inFavorite = toggleFavoriteUseCase.isFavorite(it.id)) } // 🧾 сверка
+            .sortedByDescending { it.inFavorite }                                   // ❤️🔝
+        _movies.value = updated
     }
 
-    fun setDefaultState() { // 🧹 полный сброс (крестик/уход со страницы)
-        queryFlow.value = ""
-        manualMovies.value = null
+    fun setDefaultState() {                       // 🧼 полный сброс (крестик/уход со страницы)
+        queryFlow.value = ""                      // 🧼❎ очистить строку поиска
+        _movies.value = emptyList()               // 🧼🗂️ очистить список
     }
 }
+/*
+легенда (на всякий):
+⏱️ debounce • 🏎️💨 flatMapLatest • 🔁🚫 distinctUntilChanged
+🔥/🧊 StateFlow внутрь/наружу • 🧹 сброс • 📬 успех • 🆘/🛟 ошибка
+❤️ избранное • 💾 запись/side-effect • 🔝 сортировка вверх
+*/

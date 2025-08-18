@@ -19,6 +19,7 @@ interface OnTrackAudioClickListener {
     fun onBackArrowClicked()
     // 🆕 Новый метод для клика по кнопке "Избранное"
     fun onFavoriteClicked(track: Track) // ❤️
+    fun onAddTrackClicked(track: Track) // 🎵➕👉💿
 }
 
 class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
@@ -48,6 +49,7 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         private val playTime: TextView = itemView.findViewById(R.id.play_time)
         private val backArrow: ImageView? = itemView.findViewById(R.id.arrow_back)
         private val favorite: ImageView? = itemView.findViewById(R.id.favorite)
+        private val addTrack: ImageView? = itemView.findViewById(R.id.add_track)
 
         init {
             // ▶️ Кнопка воспроизведения
@@ -78,6 +80,14 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onFavoriteClicked(tracks[position])
+                }
+            }
+
+            // 🎵➕ Add Track 👉💿
+            addTrack?.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onAddTrackClicked(tracks[position])
                 }
             }
         }
