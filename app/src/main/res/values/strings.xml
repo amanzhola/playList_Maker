@@ -161,7 +161,8 @@
         <item quantity="other">%d трека</item>
     </plurals>
 
-
+<!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒-->
+<!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕-->
     <!--    for Ok people -->
     <!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
     <!--    <string name="search">🧐Поиск</string>-->
@@ -287,7 +288,7 @@
     <!--    <string name="emptyMedia">📭Ваша медиатека пуста❌🎶</string>-->
     <!--    <string name="newPlaylist">➕🆕Meдия📀🎼</string>-->
     <!--    <string name="noPlayList">😌Вы не создали\nни одного плейлиста😕</string>-->
-    <!--    <string name="favourites">❤️Избранные⭐</string>-->
+    <!--    <string name="favourites">💖Избранные⭐</string>-->
     <!--    <string name="playlists">🎶Плейлисты🎼</string>-->
 
     <!--    &lt;!&ndash; <adding Movies Cast Description> &ndash;&gt;-->

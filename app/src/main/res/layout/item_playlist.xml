@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="8dp"
@@ -25,7 +26,10 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:contentDescription="@string/cover"/>
+            android:contentDescription="@string/cover"
+            android:background="@drawable/rounded_8dp"
+            android:clipToOutline="true"
+            tools:targetApi="31" />
 <!--        android:contentDescription="@string/bottom_sheet_behavior"-->
 
         <TextView

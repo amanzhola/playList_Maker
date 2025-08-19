@@ -100,7 +100,7 @@ class FragmentPlaylist : Fragment() {
         }
     }
 
-    private fun showCreationSnackbar(name: String, durationMs: Int = 5000) {
+    private fun showCreationSnackbar(name: String, durationMs: Int = 4000) {
         val root = requireActivity().findViewById<View>(android.R.id.content)
         val msg = getString(R.string.playlist_created, name)
 
