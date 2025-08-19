@@ -7,23 +7,53 @@ import com.example.playlistmaker.ui.main.BottomNavConfig
 
 open class BaseFragment : Fragment() {
 
+    private var wasBottomNavSynced = false // ✅ Однократная защита от сбоя навигации
+
     protected fun getBaseActivity(): BaseActivity? = activity as? BaseActivity
 
     open fun getToolbarConfig(): ToolbarConfig? = null
 
     override fun onResume() {
         super.onResume()
+
+        val activity = getBaseActivity() ?: return
         val main = activity as? MainActivity ?: return
 
         if (this is BottomNavConfig) {
-            if (shouldShowBottomNav()) main.showBottomNavigation() else main.hideBottomNavigation()
-            getBottomNavButtonIndex()?.let { index ->
-                main.buttonIndex = index
-                main.bottomNavigationHelper.selectButton(index) // ← сам переведёт в нужную тройку и подсветит
+            // ✅ Показываем или скрываем навигацию
+            if (shouldShowBottomNav()) {
+                activity.showBottomNavigation()
+            } else {
+                activity.hideBottomNavigation()
+            }
+
+
+            // ✅ Однократная синхронизация на старте — для Search/Settings
+            if (!wasBottomNavSynced) {
+                getBottomNavButtonIndex()?.let { index ->
+                    main.buttonIndex = index
+                    main.bottomNavigationHelper.selectButton(index)
+                    main.bottomNavigationHelper.setBottomNavigationVisibility() // ← вызывать и при равенстве
+                }
+                wasBottomNavSynced = true
+            } else {
+                // ✅ Обычная логика при возвратах и пересозданиях
+                getBottomNavButtonIndex()?.let { index ->
+                    if (main.buttonIndex != index) {
+                        // поднимаем индекс в MainActivity
+                        main.buttonIndex = index
+                        // подсветить нужную кнопку
+                        main.bottomNavigationHelper.selectButton(index)
+                    }
+                    main.bottomNavigationHelper.setBottomNavigationVisibility() // ← вызывать и при равенстве
+                }
             }
         }
 
-        getToolbarConfig()?.let { (activity as? BaseActivity)?.updateToolbar(it) }
+        // ✅ Обновляем тулбар
+        getToolbarConfig()?.let { config ->
+            activity.updateToolbar(config)
+        }
     }
 
     open fun onSegment4ClickedInternal() {

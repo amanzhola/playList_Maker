@@ -54,6 +54,15 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         super.onViewCreated(view, savedInstanceState)
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
+        // Фон тулбара
+        val blueColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
+        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
+
+        // Цвет заголовка
+        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
+        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
+
+
         // первичное восстановление
         vm.state.value.let { s ->
             if (binding.etName.text?.toString() != s.name) binding.etName.setText(s.name)
