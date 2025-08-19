@@ -92,12 +92,12 @@
         <item name="trackTint">@color/switch_track_off_color</item>
     </style>
 
-    <style name="SearchBox">
+        <style name="SearchBox">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:maxHeight">@dimen/searchLineHeight_52</item>
         <item name="boxBackgroundMode">outline</item>
-        <item name="hintEnabled">false</item>
+        <item name="hintEnabled">true</item>
         <item name="android:hint">@string/search_hint</item>
         <item name="android:textColorHint">@color/hintColor_textColor</item>
         <item name="boxStrokeWidth">@dimen/searchNoStroke</item>
@@ -114,7 +114,7 @@
 <!--            app:hintEnabled="false"                 &lt;!&ndash; ⬅️ убираем плавающий лейбл &ndash;&gt;-->
 <!--    <item name="hintEnabled">true</item>-->
 
-    <style name="SearchInput" parent="Text16">
+        <style name="SearchInput" parent="Text16">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:maxHeight">@dimen/searchBoxHeight_36</item>
@@ -125,11 +125,11 @@
         <item name="android:drawablePadding">8dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:drawableTint">@color/hintColor_textColor</item>
-        <item name="android:paddingVertical">@dimen/searchIconAndHintVerticalPadding_8.5</item>
         <item name="android:maxLength">30</item>
-        <item name="android:hint">@string/search</item>
     </style>
+
 <!--    android:hint="@string/name_new_playlist"   &lt;!&ndash; 👈 обычный hint внутри &ndash;&gt;-->
+<!--    <item name="android:paddingVertical">@dimen/searchIconAndHintVerticalPadding_8.5</item>-->
 
     <style name="ClearIcon">
         <item name="android:layout_width">wrap_content</item>

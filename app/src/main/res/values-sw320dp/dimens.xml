@@ -21,7 +21,7 @@
 
     <style name="CoverConstraints">
         <item name="layout_constraintWidth_default">percent</item>
-        <item name="layout_constraintWidth_percent">0.85</item>
+        <item name="layout_constraintWidth_percent">0.75</item>
     </style>
 
 </resources>

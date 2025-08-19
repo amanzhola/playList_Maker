@@ -85,7 +85,6 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         // Цвет заголовка
         val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
         getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
-
     }
 
     override fun getBottomNavButtonIndex(): Int = 0
@@ -225,7 +224,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         if (fromExtra) {
             backStackEntry?.savedStateHandle?.remove<Boolean>("from_extra")
 
-            val query = viewModel.uiState.value?.query.orEmpty()
+            val query = viewModel.uiState.value.query
 
             if (query.isNotEmpty()) {
                 // 👇 Логика осталась: если был запрос — скрываем навигатор
