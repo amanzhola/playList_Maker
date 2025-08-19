@@ -17,11 +17,11 @@
 
     <!-- <create playlist> -->
     <dimen name="vertical_margin_create_playlist">8dp</dimen>
-    <dimen name="bottom_margin_create_playlist">16dp</dimen>
+    <dimen name="bottom_margin_create_playlist">8dp</dimen>
 
     <style name="CoverConstraints">
         <item name="layout_constraintWidth_default">percent</item>
-        <item name="layout_constraintWidth_percent">0.7</item>
+        <item name="layout_constraintWidth_percent">0.85</item>
     </style>
 
 </resources>

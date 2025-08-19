@@ -30,7 +30,6 @@
         style="@style/CoverConstraints"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="@dimen/Button_margin_16"
         android:contentDescription="@string/cover"
         android:src="@drawable/cover_create_playlist"
         tools:src="@drawable/placeholder2"
@@ -38,10 +37,9 @@
         android:focusable="true"
         android:scaleType="centerCrop"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toStartOf="@id/rightBorder"
         app:layout_constraintStart_toEndOf="@id/leftBorder"
+        app:layout_constraintEnd_toStartOf="@id/rightBorder"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/tilName"
         android:layout_marginVertical="@dimen/vertical_margin_create_playlist"/>
 
     <!-- Название (обязательное) -->
@@ -123,6 +121,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/rightBorder"
         app:layout_constraintStart_toEndOf="@id/leftBorder"
-        android:layout_marginBottom="@dimen/bottom_margin_create_playlist"/>
+        android:layout_marginBottom="@dimen/bottom_margin_create_playlist" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
