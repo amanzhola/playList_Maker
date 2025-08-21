@@ -10,7 +10,9 @@ val extraOptionViewModelModule = module { // + from 🏠 🔍 🛠️ 🎧 ☁�
     viewModel {
         ExtraOptionViewModel(
             audioPlayer = get(),                // AudioPlayerInteraction
-            favoriteTracksInteractor = get()    // FavoriteTracksInteractor
+            favoriteTracksInteractor = get(),   // FavoriteTracksInteractor
+            observePlaylists = get(), // ObservePlaylistsUseCase
+            addTrackToPlaylist = get() // AddTrackToPlaylistUseCase
         )
     }
 

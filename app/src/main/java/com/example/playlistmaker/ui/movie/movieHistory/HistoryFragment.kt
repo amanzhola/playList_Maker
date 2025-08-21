@@ -8,12 +8,16 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.databinding.FragmentHistoryBinding
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.presentation.movieViewModels.movieHistory.HistoryState
 import com.example.playlistmaker.presentation.movieViewModels.movieHistory.HistoryViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HistoryFragment : Fragment() {
@@ -44,25 +48,24 @@ class HistoryFragment : Fragment() {
         historyList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         historyList.adapter = adapter
 
-        viewModel.fillData()
-
-        viewModel.observeState().observe(viewLifecycleOwner) {
-            render(it)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { st ->
+                    when (st) {
+                        is HistoryState.Loading -> showLoading()
+                        is HistoryState.Empty   -> showEmpty(st.message)
+                        is HistoryState.Content -> showContent(st.movies)
+                    }
+                }
+            }
         }
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         adapter = null
         historyList.adapter = null
-    }
-
-    private fun render(state: HistoryState) {
-        when (state) {
-            is HistoryState.Content -> showContent(state.movies)
-            is HistoryState.Empty -> showEmpty(state.message)
-            is HistoryState.Loading -> showLoading()
-        }
     }
 
     private fun showLoading() {
@@ -84,6 +87,9 @@ class HistoryFragment : Fragment() {
         historyList.visibility = View.VISIBLE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.GONE
+
+        val head = movies.take(3).joinToString { it.title }
+        android.util.Log.d("HistoryUI", "showContent size=${movies.size}; head=[$head]")
 
         adapter?.movies?.clear()
         adapter?.movies?.addAll(movies)

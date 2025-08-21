@@ -13,7 +13,6 @@ open class BaseFragment : Fragment() {
 
     open fun getToolbarConfig(): ToolbarConfig? = null
 
-
     override fun onResume() {
         super.onResume()
 
@@ -34,15 +33,19 @@ open class BaseFragment : Fragment() {
                 getBottomNavButtonIndex()?.let { index ->
                     main.buttonIndex = index
                     main.bottomNavigationHelper.selectButton(index)
+                    main.bottomNavigationHelper.setBottomNavigationVisibility() // ← вызывать и при равенстве
                 }
                 wasBottomNavSynced = true
             } else {
                 // ✅ Обычная логика при возвратах и пересозданиях
                 getBottomNavButtonIndex()?.let { index ->
                     if (main.buttonIndex != index) {
+                        // поднимаем индекс в MainActivity
                         main.buttonIndex = index
+                        // подсветить нужную кнопку
                         main.bottomNavigationHelper.selectButton(index)
                     }
+                    main.bottomNavigationHelper.setBottomNavigationVisibility() // ← вызывать и при равенстве
                 }
             }
         }

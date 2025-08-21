@@ -141,7 +141,28 @@
     <!-- <adding DataBase> -->
     <string name="nothing_searched_yet">😌🌼Вы еще ничего не искали🔍</string>
 
+    <!-- <adding CreatePlayList> -->
+    <string name="name_new_playlist">Название*</string>
+    <string name="create">Создать</string>
+    <string name="create_playlist_title">Новый плейлист</string>
+    <string name="exit_dialog_title">Завершить создание плейлиста?</string>
+    <string name="exit_dialog_message">Все несохраненные данные будут потеряны</string>
+    <string name="cancel">Отмена</string>
+    <string name="finish">Завершить</string>
+    <string name="playlist_created">Плейлист %1$s создан</string>
+    <string name="add_to_playlist">Добавить в плейлист</string>
+    <string name="added_to_playlist">Добавлено в плейлист %1$s </string>
+    <string name="track_already_in_playlist">Трек уже добавлен в плейлист %1$s</string>
 
+    <plurals name="tracks_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d трека</item>
+    </plurals>
+
+<!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒-->
+<!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕-->
     <!--    for Ok people -->
     <!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
     <!--    <string name="search">🧐Поиск</string>-->
@@ -267,7 +288,7 @@
     <!--    <string name="emptyMedia">📭Ваша медиатека пуста❌🎶</string>-->
     <!--    <string name="newPlaylist">➕🆕Meдия📀🎼</string>-->
     <!--    <string name="noPlayList">😌Вы не создали\nни одного плейлиста😕</string>-->
-    <!--    <string name="favourites">❤️Избранные⭐</string>-->
+    <!--    <string name="favourites">💖Избранные⭐</string>-->
     <!--    <string name="playlists">🎶Плейлисты🎼</string>-->
 
     <!--    &lt;!&ndash; <adding Movies Cast Description> &ndash;&gt;-->
@@ -278,5 +299,23 @@
 
     <!-- <adding DataBase> -->
 <!--    <string name="nothing_searched_yet">😌🌼Вы еще ничего не искали🔍</string>-->
+
+<!--    &lt;!&ndash; <adding CreatePlayList> &ndash;&gt;-->
+<!--    <string name="name_new_playlist">✍️Название*🌼</string>-->
+<!--    <string name="create"> 🎵➕ Создать ➕🖼️ </string>-->
+<!--    <string name="create_playlist_title">🎵➕ Новый плейлист ➕🖼️</string>-->
+<!--    <string name="exit_dialog_title">⚠️ Завершить создание плейлиста? 🏁 </string>-->
+<!--    <string name="exit_dialog_message">⚠️ Все несохраненные данные будут потеряны ℹ️,</string>-->
+<!--    <string name="cancel">❌ Отмена ↩️</string>-->
+<!--    <string name="finish">✅ Завершить 🏁</string>-->
+    <!--    <string name="playlist_created">🎵➕ Плейлист %1$s создан 💃</string>-->
+<!--    <string name="add_to_playlist">➕🆕🎼 Добавить в плейлист📀</string>-->
+
+<!--    <plurals name="tracks_count">-->
+<!--        <item quantity="one">%d трек 🎵</item>-->
+<!--        <item quantity="few">%d трека 🎶</item>-->
+<!--        <item quantity="many">%d треков 🎶</item>-->
+<!--        <item quantity="other">%d трека 🎶</item>-->
+<!--    </plurals>-->
 
 </resources>

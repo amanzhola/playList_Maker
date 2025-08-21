@@ -6,12 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentAboutBinding
 import com.example.playlistmaker.domain.models.movieDetails.MovieDetails
 import com.example.playlistmaker.presentation.movieViewModels.movieDetails.AboutState
 import com.example.playlistmaker.presentation.movieViewModels.movieDetails.AboutViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -21,34 +25,38 @@ class AboutFragment : Fragment() {
         private const val MOVIE_ID = "movie_id"
 
         fun newInstance(movieId: String) = AboutFragment().apply {
-            arguments = Bundle().apply {
-                putString(MOVIE_ID, movieId)
-            }
+            arguments = Bundle().apply { putString(MOVIE_ID, movieId) }
         }
     }
 
     private val aboutViewModel: AboutViewModel by viewModel {
-        parametersOf(requireArguments().getString(MOVIE_ID))
+        parametersOf(requireArguments().getString(MOVIE_ID).orEmpty())
     }
 
-    private lateinit var binding: FragmentAboutBinding
+    private var _binding: FragmentAboutBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentAboutBinding.inflate(inflater, container, false)
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentAboutBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        aboutViewModel.observeState().observe(viewLifecycleOwner) {
-            when(it) {
-                is AboutState.Content -> showDetails(it.movie)
-                is AboutState.Error -> showErrorMessage(it.message)
+        // 🔄 подписка на стейт
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                aboutViewModel.state.collect { st ->
+                    when (st) {
+                        is AboutState.Idle    -> showLoading() // или пусто — на твой вкус
+                        is AboutState.Loading -> showLoading()
+                        is AboutState.Content -> showDetails(st.data)
+                        is AboutState.Error   -> showErrorMessage(st.message)
+                    }
+                }
             }
         }
 
@@ -59,30 +67,40 @@ class AboutFragment : Fragment() {
                 bundleOf("movie_id" to movieId)
             )
         }
-
     }
 
-    private fun showErrorMessage(message: String) {
-        binding.apply {
-            details.visibility = View.GONE
-            errorMessage.visibility = View.VISIBLE
-            errorMessage.text = message
-        }
+    private fun showLoading() = binding.apply {
+        details.visibility = View.GONE
+        errorMessage.visibility = View.GONE
+        // если есть ProgressBar — покажи его здесь
+        // progressBar.visibility = View.VISIBLE
     }
 
-    private fun showDetails(movieDetails: MovieDetails) {
-        binding.apply {
-            details.visibility = View.VISIBLE
-            errorMessage.visibility = View.GONE
-            title.text = movieDetails.title
-            ratingValue.text = movieDetails.imDbRating
-            yearValue.text = movieDetails.year
-            countryValue.text = movieDetails.countries
-            genreValue.text = movieDetails.genres
-            directorValue.text = movieDetails.directors
-            writerValue.text = movieDetails.writers
-            castValue.text = movieDetails.stars
-            plot.text = movieDetails.plot
-        }
+    private fun showErrorMessage(message: String) = binding.apply {
+        // progressBar.visibility = View.GONE
+        details.visibility = View.GONE
+        errorMessage.visibility = View.VISIBLE
+        errorMessage.text = message
+    }
+
+    private fun showDetails(movieDetails: MovieDetails) = binding.apply {
+        // progressBar.visibility = View.GONE
+        details.visibility = View.VISIBLE
+        errorMessage.visibility = View.GONE
+
+        title.text = movieDetails.title
+        ratingValue.text = movieDetails.imDbRating
+        yearValue.text = movieDetails.year
+        countryValue.text = movieDetails.countries
+        genreValue.text = movieDetails.genres
+        directorValue.text = movieDetails.directors
+        writerValue.text = movieDetails.writers
+        castValue.text = movieDetails.stars
+        plot.text = movieDetails.plot
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
     }
 }

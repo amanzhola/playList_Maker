@@ -14,4 +14,13 @@
     <dimen name="icon_size">28dp</dimen>
 
     <dimen name="marginBottom_4">4dp</dimen>
+
+    <!-- <create playlist> -->
+    <dimen name="vertical_margin_create_playlist">16dp</dimen>
+    <dimen name="bottom_margin_create_playlist">32dp</dimen>
+    <style name="CoverConstraints">
+        <item name="layout_constraintWidth_default">percent</item>
+        <item name="layout_constraintWidth_percent">0.9</item>
+    </style>
+
 </resources>

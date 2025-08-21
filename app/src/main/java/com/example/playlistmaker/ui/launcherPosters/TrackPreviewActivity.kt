@@ -52,6 +52,13 @@ class TrackPreviewActivity : AppCompatActivity() {
 
             override fun onFavoriteClicked(track: Track){} // ❤️
 
+            // 🎵➕ Add Track 👉💿
+            override fun onAddTrackClicked(track: Track) {
+                //TODO("Not yet implemented")
+//                viewModel.onOpenBottomSheet()                   // попросим актуальные данные (если надо)
+//                bottomBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+
         }, layoutId = R.layout.track_item2)
 
         recyclerView.adapter = adapter

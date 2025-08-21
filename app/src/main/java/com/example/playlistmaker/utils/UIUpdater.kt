@@ -28,4 +28,11 @@ class UIUpdater(
         placeholderMessage.visibility = View.VISIBLE
         placeholderMessage.text = message
     }
+
+    fun showDefault() {
+        progressBar.visibility = View.GONE
+        placeholderMessage.text = ""
+        placeholderMessage.visibility = View.GONE
+        recyclerView.visibility = View.GONE   // или VISIBLE, если хочешь пустой список
+    }
 }

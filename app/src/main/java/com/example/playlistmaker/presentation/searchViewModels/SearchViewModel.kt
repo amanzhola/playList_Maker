@@ -1,8 +1,5 @@
 package com.example.playlistmaker.presentation.searchViewModels
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.api.base.SearchHistoryInteraction
@@ -11,196 +8,253 @@ import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.util.Resource
 import com.example.playlistmaker.presentation.searchViewModels.models.SearchUiState
 import com.example.playlistmaker.utils.SEARCH_DEBOUNCE_DELAY
-import com.example.playlistmaker.utils.collectDebouncedIn
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class ErrorState {
-    ERROR,
-    FAILURE,
-    NONE
-}
+enum class ErrorState { ERROR, FAILURE, NONE }
 
-class SearchViewModel( // 🖼️
+class SearchViewModel(
     private val audioInteraction: AudioInteraction,
     private val searchHistoryInteraction: SearchHistoryInteraction
 ) : ViewModel() {
 
+    // 🧩 ввод и фокус
     private val queryFlow = MutableStateFlow("")
+    private val focusFlow = MutableStateFlow(false)
 
-    private val _uiState = MutableLiveData(SearchUiState())
-    val uiState: LiveData<SearchUiState> = _uiState
+    // 🙋 ручной "поиск по Done" (если понадобится)
+    private val manualSearchRequests = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
-    private val currentState: SearchUiState
-        get() = _uiState.value ?: SearchUiState()
+    // 💾 последний подтверждённый запрос (после дебаунса ИЛИ ручного запуска)
+    private val lastSubmittedQuery = MutableStateFlow("")
 
-    init {
-        // 🔁 Подписка на историю
-        viewModelScope.launch {
-            searchHistoryInteraction.observeHistory().collect { updatedHistory ->
-                val query = currentState.query
-                val isFocused = currentState.isInputFocused
-                val shouldShow = query.isEmpty() && isFocused && updatedHistory.isNotEmpty()
+    // ⛔ локально скрытые треки из текущей выдачи
+    private val removedFromSearch = MutableStateFlow<Set<Int>>(emptySet())
 
-                Log.d("SearchVM", "🎯 History update collected: size=${updatedHistory.size}, show=$shouldShow")
+    // 🕘 История: сначала снимок, затем “живая” подписка
+    private val historyFlow: Flow<List<Track>> =
+        searchHistoryInteraction
+            .observeHistory()
+            .onStart { emit(searchHistoryInteraction.getHistory()) }
 
-                _uiState.postValue(
-                    currentState.copy(
-                        historyTracks = updatedHistory,
-                        showHistory = shouldShow,
-                        error = ErrorState.NONE
-                    )
+    // 🔤 без поломки emoji — режем только обычные пробелы/переносы
+    private fun String.trimForEmoji(): String = trim(' ', '\t', '\n', '\r')
+
+    // ⌛ триггеры поиска: дебаунс ввода + явный Done
+    @OptIn(FlowPreview::class)
+    private val debouncedQueries: Flow<String> =
+        queryFlow
+            .debounce(SEARCH_DEBOUNCE_DELAY)
+            .map { it.trimForEmoji() }
+            .filter { it.isNotBlank() }
+            .distinctUntilChanged()
+            .onEach {
+                removedFromSearch.value = emptySet()
+                lastSubmittedQuery.value = it
+            }
+
+    /// 🔀 итоговый поток запросов: дебаунс + ручные повторы (без distinct!)
+    private val searchQueries: Flow<String> =
+        merge(
+            debouncedQueries,
+            manualSearchRequests.onEach { q ->
+                removedFromSearch.value = emptySet()
+                lastSubmittedQuery.value = q
+            }
+        )
+
+    // 📝 реально выполненный запрос
+    private val executedQuery: StateFlow<String> =
+        searchQueries.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    // 🔎 ресурс поиска
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val searchResource: Flow<Resource<List<Track>>> =
+        searchQueries
+            .flatMapLatest { q ->
+                audioInteraction.searchTracks(q)
+                    .onStart { emit(Resource.Success(emptyList())) } // ⏳ старт "реального" поиска
+                    .catch { e -> emit(Resource.Error(e.message ?: "Unknown error")) }
+            }
+            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    // ⏳ индикатор загрузки: включаем на новый запрос, выключаем на первом реальном ответе
+    private val loadingFlow: Flow<Boolean> =
+        merge(
+            searchQueries.map { true },
+            searchResource.drop(1).map { false } // пропускаем onStart
+        )
+
+    // 👁️‍🗨️ вычисляем всё разом
+    private data class Inputs(
+        val query: String,
+        val isFocused: Boolean,
+        val history: List<Track>,
+        val resource: Resource<List<Track>>,
+        val isLoading: Boolean,
+        val executedQuery: String,
+        val removedIds: Set<Int>
+    )
+
+    private data class P1(
+        val query: String,
+        val isFocused: Boolean,
+        val history: List<Track>,
+        val resource: Resource<List<Track>>,
+        val isLoading: Boolean
+    )
+
+    private val inputs: Flow<Inputs> =
+        combine(
+            queryFlow,
+            focusFlow,
+            historyFlow,
+            searchResource.onStart { emit(Resource.Success(emptyList())) },
+            loadingFlow.onStart { emit(false) }
+        ) { query, isFocused, history, resource, isLoading ->
+            P1(query, isFocused, history, resource, isLoading)
+        }
+            .combine(executedQuery) { p, execQ ->
+                p to execQ
+            }
+            .combine(removedFromSearch) { (p, execQ), removedIds ->
+                Inputs(
+                    query = p.query,
+                    isFocused = p.isFocused,
+                    history = p.history,
+                    resource = p.resource,
+                    isLoading = p.isLoading,
+                    executedQuery = execQ,
+                    removedIds = removedIds
                 )
             }
-        }
 
-        // ⌛ Debounce поиска
-        queryFlow // ✨
-            .collectDebouncedIn(viewModelScope, SEARCH_DEBOUNCE_DELAY) { query ->
-                if (query.isNotBlank()) {
-                    onSearchActionDoneInternal(query)
+    // 🎛️ финальный UI-стейт
+    val uiState: StateFlow<SearchUiState> =
+        inputs
+            .map { inp ->
+                val queryBlank = inp.query.isBlank()
+                val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
+                // 🧠 queryBlank — пустой ввод?
+                // 🗂️ showHistory — показывать историю только когда есть фокус, ввода нет и история не пуста
+
+                // 1) 📦 Собираем «сырую» выдачу и базовую ошибку
+                val (tracksRaw0, error0) = when (inp.resource) {
+                    is Resource.Success -> {
+                        val list = inp.resource.data.orEmpty()
+                        // ❗ «Ничего не найдено» показываем ТОЛЬКО для реально выполненного запроса
+                        if (
+                            inp.query.isNotEmpty() &&
+                            inp.query == inp.executedQuery &&
+                            !inp.isLoading &&
+                            list.isEmpty()
+                        ) {
+                            emptyList<Track>() to ErrorState.ERROR // 🫙
+                        } else {
+                            list to ErrorState.NONE // ✅ есть данные или поиск ещё идёт
+                        }
+                    }
+                    is Resource.Error -> emptyList<Track>() to ErrorState.FAILURE // ⚠️ сеть/сервер
                 }
+
+                // 2) 🧼 Мягкое удаление — прячем локально исключённые треки (без запроса к бэку)
+                val filtered0 = tracksRaw0.filter { it.trackId !in inp.removedIds }
+
+                // 3) 🚫 Жёсткая засечка: при пустом вводе — всегда пустой список и без ошибок
+                val (tracksRaw, error) = if (queryBlank) {
+                    emptyList<Track>() to ErrorState.NONE // 🔕 ни лоадера, ни ошибок, ни хвостов
+                } else {
+                    filtered0 to error0
+                }
+
+                // 4) 🎯 Что реально показываем пользователю
+                val displayed = when {
+                    showHistory -> inp.history                        // 🗂️ история
+                    !queryBlank && inp.query != inp.executedQuery -> emptyList() // ⏳ печатает (debounce ещё не сработал)
+                    else -> tracksRaw                                  // 🔍 свежая выдача поиска
+                }
+
+                // 5) 🧊 При пустом запросе не крутим лоадер
+                val isLoadingSafe = if (queryBlank) false else inp.isLoading
+
+                // 6) 🧱 Финальный UI-стейт (адаптер рисует displayedTracks)
+                SearchUiState(
+                    query = inp.query,
+                    isInputFocused = inp.isFocused,
+                    isClearIconVisible = inp.query.isNotEmpty(), // ❎ крестик только при непустом вводе
+                    isLoading = isLoadingSafe,                   // ⏳ лоадер не мигает на пустом запросе
+                    error = error,                               // 🚦 NONE / ERROR / FAILURE
+                    searchTracks = tracksRaw,                    // 📄 сырая (отфильтрованная) выдача
+                    historyTracks = inp.history,                 // 🗂️ история
+                    showHistory = !isLoadingSafe && showHistory, // 👁️ история не перекрывается лоадером
+                    displayedTracks = displayed                  // 🖼️ именно это отображаем в списке
+                )
             }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, SearchUiState())
 
-        // 🕘 Первичная инициализация истории
-        viewModelScope.launch {
-            val history = searchHistoryInteraction.getHistory()
-            val shouldShow = history.isNotEmpty() &&
-                    currentState.query.isEmpty() &&
-                    currentState.isInputFocused
 
-            Log.d("SearchVM", "🕘 Initial history loaded: size=${history.size}, show=$shouldShow")
-
-            _uiState.value = currentState.copy(
-                historyTracks = history,
-                showHistory = shouldShow
-            )
-        }
-    }
+    // ─── public API ───
 
     fun onQueryChanged(query: String) {
-        setSearchQuery(query) // 🎯
         queryFlow.value = query
     }
 
-    private fun setSearchQuery(query: String) {
-        val showClear = query.isNotEmpty()
-        val isFocused = currentState.isInputFocused
-        val history = currentState.historyTracks
-        val showHistory = isFocused && query.isEmpty() && history.isNotEmpty()
-
-        _uiState.value = currentState.copy(
-            query = query,
-            isClearIconVisible = showClear,
-            showHistory = showHistory,
-            error = ErrorState.NONE
-        )
-    }
-
     fun setInputFocused(focused: Boolean) {
-        val showHistory = focused &&
-                currentState.query.isEmpty() &&
-                currentState.historyTracks.isNotEmpty()
-
-        _uiState.value = currentState.copy(
-            isInputFocused = focused,
-            showHistory = showHistory
-        )
+        focusFlow.value = focused
     }
 
+    // 🔘 «Готово / Повторить»
     fun onSearchActionDone() {
-        val query = currentState.query.trim()
-        if (query.isEmpty()) return
-
-        onSearchActionDoneInternal(query)
-    }
-
-    private fun onSearchActionDoneInternal(query: String) { // 🔍
-        _uiState.postValue(currentState.copy(
-            isLoading = true,
-            showHistory = false
-        ))
-
-        viewModelScope.launch {
-            audioInteraction.searchTracks(query).collect { result ->
-                when (result) { // 🎯
-                    is Resource.Success -> { // ✅
-                        val tracks = result.data ?: emptyList()
-                        _uiState.postValue(currentState.copy(
-                            isLoading = false,
-                            searchTracks = tracks,
-                            error = if (tracks.isEmpty()) ErrorState.ERROR else ErrorState.NONE
-                        ))
-                    }
-
-                    is Resource.Error -> { // ⚠️
-                        _uiState.postValue(currentState.copy(
-                            isLoading = false,
-                            searchTracks = emptyList(),
-                            error = ErrorState.FAILURE
-                        ))
-                    }
-                }
-            }
-        }
+        val qUi = queryFlow.value.trimForEmoji()
+        val q = if (qUi.isNotEmpty()) qUi else lastSubmittedQuery.value
+        if (q.isNotEmpty()) manualSearchRequests.tryEmit(q)
     }
 
     fun clearSearchInput() {
-        _uiState.value = currentState.copy(
-            query = "",
-            isClearIconVisible = false,
-            searchTracks = emptyList(),
-            error = ErrorState.NONE,
-            showHistory = currentState.isInputFocused &&
-                    currentState.historyTracks.isNotEmpty()
-        )
+        // только сброс — всё пересчитается в combine
+        queryFlow.value = ""
     }
 
-    fun onTrackClicked(track: Track) { // 🎵
-        Log.d("SearchViewModel", "Adding to history: $track")
-        viewModelScope.launch {
-            searchHistoryInteraction.addTrackToHistory(track)
-        }
+    fun onTrackClicked(track: Track) {
+        viewModelScope.launch { searchHistoryInteraction.addTrackToHistory(track) }
     }
 
     fun removeTrack(track: Track) {
-        if (currentState.showHistory) {
-            val updated = currentState.historyTracks.toMutableList().apply {
-                removeIf { it.trackId == track.trackId }
-            }
+        val state = uiState.value
+        if (state.showHistory) {
+            // 🗂️ удаляем из истории репозитория
             viewModelScope.launch {
+                val updated = state.historyTracks.filter { it.trackId != track.trackId }
                 searchHistoryInteraction.saveHistory(updated)
             }
-            _uiState.value = currentState.copy(historyTracks = updated)
         } else {
-            val updated = currentState.searchTracks.toMutableList().apply {
-                removeIf { it.trackId == track.trackId }
-            }
-            _uiState.value = currentState.copy(searchTracks = updated)
+            // 🔎 мягко скрываем элемент из текущей выдачи
+            removedFromSearch.value = removedFromSearch.value + track.trackId
         }
     }
 
     fun clearHistory() {
-        viewModelScope.launch {
-            searchHistoryInteraction.clearHistory()
-        }
-
-        _uiState.value = currentState.copy(
-            showHistory = false,
-            historyTracks = emptyList()
-        )
+        viewModelScope.launch { searchHistoryInteraction.clearHistory() }
     }
 
-    fun getTrackHistoryList(): List<Track> = currentState.historyTracks
-
-    fun updateHistoryStateFromFragment(history: List<Track>, show: Boolean) {
-        _uiState.value = currentState.copy(
-            historyTracks = history,
-            showHistory = show
-        )
-    }
-
-    suspend fun getHistoryTracksFromRepo(): List<Track> {
-        return searchHistoryInteraction.getHistory()
-    }
+    fun getTrackHistoryList(): List<Track> = uiState.value.historyTracks
 }
