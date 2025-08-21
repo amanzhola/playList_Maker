@@ -11,11 +11,13 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
@@ -127,11 +129,22 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
                         when (e) {
                             is CreatePlaylistViewModel.Event.Saved -> {
-                                findNavController().previousBackStackEntry
-                                    ?.savedStateHandle
-                                    ?.set(NavKeys.PLAYLIST_CREATED_NAME, e.name)
 
-                                findNavController().popBackStack()
+                                val args = bundleOf(
+                                    NavKeys.PLAYLIST_CREATED_NAME to e.name,
+                                    NavKeys.SCROLL_TOP to true,   // одноразовый скролл вверх
+                                    NavKeys.SELECT_TAB to 1       // ← индекс вкладки "Playlist" во ViewPager2 (0 или 1 у тебя)
+                                )
+                                val opts = navOptions {
+                                    popUpTo(R.id.mediaLibraryFragment) {
+                                        inclusive = true   // удалить старый MediaLibrary из back stack
+                                        saveState = false
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = false
+                                }
+                                findNavController().navigate(R.id.mediaLibraryFragment, args, opts)
+
                             }
                             is CreatePlaylistViewModel.Event.Error -> {
                                 // при желании — локальный Snackbar / Toast
@@ -142,10 +155,6 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onDestroyView() {
@@ -190,11 +199,18 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
     // единая точка обработки «назад»
     private fun handleBack() {
+        if (!isAdded) return
         if (vm.hasUnsavedChanges()) {
             showExitDialog()
         } else {
-            findNavController().popBackStack()
+//            findNavController().popBackStack()
+            safePopBack()
         }
+    }
+
+    private fun safePopBack() {
+        if (!isAdded) return                           // ← на всякий случай
+        runCatching { findNavController().popBackStack() }
     }
 
     private fun showExitDialog() {
@@ -207,7 +223,8 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }
             .setPositiveButton(R.string.finish) { d, _ ->
                 d.dismiss()
-                findNavController().popBackStack()
+//                findNavController().popBackStack()
+                safePopBack()
             }
             .setOnDismissListener { exitDialogShown = false }
             .show()

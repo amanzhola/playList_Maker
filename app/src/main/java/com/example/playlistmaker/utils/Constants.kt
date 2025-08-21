@@ -6,4 +6,6 @@ const val CLICK_DEBOUNCE_DELAY = 300L // ⛔ 🕒 1 секунда задерж�
 
 object NavKeys {
     const val PLAYLIST_CREATED_NAME = "playlist_created_name"
+    const val SCROLL_TOP = "scroll_top"
+    const val SELECT_TAB = "select_tab"
 }
