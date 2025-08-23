@@ -161,6 +161,9 @@
         <item quantity="other">%d трека</item>
     </plurals>
 
+    <!-- <adding TrackPreview from share> -->
+    <string name="track_preview">📀🎵 Track Preview 👀</string>
+
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒-->
 <!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
     <!--    for Ok people -->
@@ -317,5 +320,8 @@
 <!--        <item quantity="many">%d треков 🎶</item>-->
 <!--        <item quantity="other">%d трека 🎶</item>-->
 <!--    </plurals>-->
+
+<!--    &lt;!&ndash; <adding TrackPreview from share> &ndash;&gt;-->
+<!--    <string name="track_preview">📀🎵 Track Preview 👀</string>-->
 
 </resources>

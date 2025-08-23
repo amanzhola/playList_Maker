@@ -1,11 +1,15 @@
 package com.example.playlistmaker.ui.media
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
@@ -35,6 +39,18 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val nav = runCatching { findNavController() }.getOrNull()
+        nav?.currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<Boolean>("restore_toolbar")
+            ?.observe(viewLifecycleOwner) { need ->
+                if (need == true) {
+                    applyToolbarTheme()   // см. ниже
+                    // одноразово — удаляем ключ, чтобы не триггерилось снова
+                    nav.currentBackStackEntry?.savedStateHandle?.remove<Boolean>("restore_toolbar")
+                }
+            }
 
         setupViewPager()
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
@@ -112,7 +128,31 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
         }
 
     override fun onResume() {
+        Log.d("Media/onResume", "apply toolbar + theme; tab=${binding.viewPager.currentItem}")
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
+        applyToolbarTheme()
+    }
+
+    private fun applyToolbarTheme() {
+        // 1) вернуть конфиг (стрелка GONE, заголовок “Медиа”)
+        (activity as? BaseActivity)?.updateToolbar(
+            ToolbarConfig(GONE, R.string.media)
+        )
+
+        // 2) вернуть цвета:
+        val bg = ContextCompat.getColor(requireContext(), R.color.white_textColor)          // твой белый фон
+        val titleColor = ContextCompat.getColor(requireContext(), R.color.textColor_white) // ⚠️ чёрный
+        (activity as? BaseActivity)?.toolbarHelper?.apply {
+            setToolbarBackgroundColor(bg)
+            setTitleTextColor(titleColor)
+        }
+
+        // 3) safety-net: убедиться, что текст видим и непрозрачный
+        val tb = requireActivity().findViewById<Toolbar>(R.id.toolbar)
+        tb?.findViewById<TextView>(R.id.title)?.apply {
+            visibility = View.VISIBLE
+            alpha = 1f
+        }
     }
 }

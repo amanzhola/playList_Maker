@@ -77,7 +77,8 @@
             android:exported="false" />
         <activity
             android:name=".ui.launcherPosters.TrackPreviewActivity"
-            android:exported="false" /> <!-- FileProvider для доступа к файлам -->
+            android:exported="false" />
+        <!-- FileProvider для доступа к файлам -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

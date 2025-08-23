@@ -159,13 +159,8 @@ class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудио
 
     private var _favoritesSyncStarted = false
 
-    // ❤️ клик по сердечку (без параметров) — на текущем треке
-    fun onFavoriteClicked() { // ❤️ Логика для кнопки "лайк"
-        getCurrentTrack()?.let { onFavoriteClicked(it.trackId) }
-    }
-
-    // ❤️ клик по сердечку (по id трека — если приходят события из списка)
-    private fun onFavoriteClicked(trackId: Int) = viewModelScope.launch {
+    // ❤️ клик по сердечку (по id трека — если приходят события из списка) // ❤️ Логика для кнопки "лайк"
+    fun onFavoriteClicked(trackId: Int) = viewModelScope.launch {
         val list = _state.value.trackList
         val idx = list.indexOfFirst { it.trackId == trackId }
         if (idx == -1) return@launch

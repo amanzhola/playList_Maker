@@ -19,6 +19,7 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
     private val tracks: MutableList<Track> = mutableListOf()
     private var trackIndex: Int = 0
     private val trackStorageHelper: TrackStorageHelper by inject()
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,15 +33,14 @@ class TrackDetailActivity : AppCompatActivity(), OnTrackClickListener {
 
         toolbar.setNavigationOnClickListener { finish() }
 
-        val recyclerView = findViewById<RecyclerView>(R.id.track_detail_recycler)
+        recyclerView = findViewById(R.id.track_detail_recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val savedTracks = trackStorageHelper.getTrackList()
-        trackIndex = trackStorageHelper.getCurrentIndex()
-
         tracks.addAll(savedTracks)
-
+        trackIndex = trackStorageHelper.getCurrentIndex()
         adapter = TrackAdapterTD(tracks, this)
+
         recyclerView.adapter = adapter
         recyclerView.scrollToPosition(trackIndex)
 

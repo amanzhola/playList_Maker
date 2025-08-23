@@ -88,7 +88,7 @@ class TrackAdapter(
                     val bundle = bundleOf(
                         "TRACK_LIST_JSON" to trackListJson,
                         "TRACK_INDEX" to bindingAdapterPosition,
-                        "IS_FROM_SEARCH" to true // 🟢 Новый флаг!
+                        "IS_FROM_SEARCH" to true, // 🟢 Новый флаг!
                     )
                     binding.root.findNavController().navigate(actionId, bundle)
                 }

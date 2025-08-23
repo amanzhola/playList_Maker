@@ -1,5 +1,6 @@
 package com.example.playlistmaker.roots.main
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -84,6 +85,9 @@ class MainActivity : BaseActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() = handleBack()
         })
+
+        // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
+        handleExternalIntent(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -157,4 +161,35 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
+    // ✅ 2 для перехода с TrackPreviewFragment на CreatePlaylistFragment :
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleExternalIntent(intent)
+    }
+
+    // ✅ 3 для перехода с TrackPreviewFragment на CreatePlaylistFragment : (приватный хелпер):
+    private fun handleExternalIntent(intent: Intent) {
+        if (intent.getBooleanExtra("open_create_playlist", false)) {
+            val fromPreview   = intent.getBooleanExtra("return_result", false)  // ← вот это ключ
+            val focusTrackId  = intent.getLongExtra("preview_track_id", -1L).takeIf { it > 0 }
+
+            val args = Bundle().apply {
+                putBoolean("from_preview", fromPreview)          // ← пробрасываем в Fragment
+                focusTrackId?.let { putLong("preview_track_id", it) }
+            }
+
+            if (navController.graph.findNode(R.id.createPlaylistFragment) != null) {
+                navController.navigate(R.id.createPlaylistFragment, args)
+            }
+
+            // чтобы не навигироваться повторно при конфиг-изменениях:
+            intent.removeExtra("open_create_playlist")
+            intent.removeExtra("return_result")
+            intent.removeExtra("preview_track_id")
+        }
+    }
+
+
 }

@@ -165,7 +165,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             }
             // ❤️ Избранное
             override fun onFavoriteClicked(track: Track) {
-                viewModel.onFavoriteClicked()
+                viewModel.onFavoriteClicked(track.id)
             }
 
             // 🎵➕ Add Track 👉💿

@@ -157,5 +157,8 @@
         <item quantity="other">%d tracks</item>
     </plurals>
 
+    <!-- <adding TrackPreview from share> -->
+    <string name="track_preview">📀🎵 Track Preview 👀</string>
+
 
 </resources>

@@ -92,6 +92,7 @@ val appModule = module {
 
     // TrackPreviewActivity **************************************************
 
-    viewModel { TrackPreviewViewModel(get()) }
+    // updated sprint22 + 📜 👉 📝 oberver and bottom sheet + favourite ❤️
+    viewModel { TrackPreviewViewModel(get(), get(), get(), get()) }
 
 }

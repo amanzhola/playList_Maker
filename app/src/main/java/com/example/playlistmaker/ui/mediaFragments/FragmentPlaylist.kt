@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -73,11 +74,8 @@ class FragmentPlaylist : Fragment() {
         binding.btnUpdate.visibility = View.VISIBLE
         binding.btnUpdate.setOnClickListener {
 
-            findNavController().currentBackStackEntry
-                ?.savedStateHandle
-                ?.set(NavKeys.SCROLL_TOP, true)
-
-            findNavController().navigate(R.id.action_global_to_createPlaylistFragment)
+            findNavController().navigate(R.id.action_global_to_createPlaylistFragment,
+                bundleOf("from_playlist" to true))
         }
 
         // RecyclerView
