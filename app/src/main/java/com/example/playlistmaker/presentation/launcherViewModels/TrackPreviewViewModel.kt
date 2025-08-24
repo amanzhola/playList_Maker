@@ -127,7 +127,7 @@ class TrackPreviewViewModel(
         }
     }
 
-    // ───── Остальная логика плеера — как у тебя было ───── // ❤️ Логика для кнопки "лайк"
+    // ───── Остальная логика плеера — как было ───── // ❤️ Логика для кнопки "лайк"
 
 
     private val _state = MutableLiveData(TrackPreviewViewState())
@@ -180,9 +180,7 @@ class TrackPreviewViewModel(
     }
 
     fun initialize(tracks: List<Track>, index: Int) {
-//        updateState {
-//            it.copy(trackList = tracks, currentTrackIndex = index)
-//        }
+
         updateState {
             // при инициализации можно сразу расставить флаги из lastFavoriteIds
             it.copy(
@@ -226,7 +224,7 @@ class TrackPreviewViewModel(
         if (st.trackList.isEmpty()) return null
 
         // 1) пробуем по id из плеера (если setTrack уже вызывался)
-        val playingId = audioPlayer.getValidTrackId() // у тебя уже используется выше
+        val playingId = audioPlayer.getValidTrackId() // уже используется выше
         st.trackList.firstOrNull { it.trackId == playingId }?.let { return it }
 
         // 2) fallback — по индексу из состояния

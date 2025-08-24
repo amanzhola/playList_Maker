@@ -20,4 +20,7 @@
         app:showAsAction="ifRoom"
         app:iconTint = "@color/menu_state_selector"/>
 
+<!--        option to replace dropdown icon by emoji -> note: selector be invalid-->
+<!--    android:title="@string/dropdown_emoji"-->
+
 </menu>

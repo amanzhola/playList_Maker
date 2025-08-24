@@ -162,7 +162,12 @@
     </plurals>
 
     <!-- <adding TrackPreview from share> -->
-    <string name="track_preview">📀🎵 Track Preview 👀</string>
+    <string name="track_preview">📀🎵 Просмотр треков 👀</string>
+
+    <!-- <Toolbar dropdown> -->
+    <string name="dropdown_emoji">🌼</string>
+
+
 
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒-->
 <!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
@@ -322,6 +327,9 @@
 <!--    </plurals>-->
 
 <!--    &lt;!&ndash; <adding TrackPreview from share> &ndash;&gt;-->
-<!--    <string name="track_preview">📀🎵 Track Preview 👀</string>-->
+<!--    <string name="track_preview">📀🎵 Просмотр треков 👀</string>-->
+
+<!--    &lt;!&ndash; <Toolbar dropdown> &ndash;&gt;-->
+<!--    <string name="dropdown_emoji">🌼</string>-->
 
 </resources>

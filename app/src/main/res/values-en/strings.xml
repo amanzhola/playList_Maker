@@ -160,5 +160,8 @@
     <!-- <adding TrackPreview from share> -->
     <string name="track_preview">📀🎵 Track Preview 👀</string>
 
+    <!-- <Toolbar dropdown> -->
+    <string name="dropdown_emoji">🌼</string>
+
 
 </resources>

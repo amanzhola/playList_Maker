@@ -137,11 +137,18 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
     private fun applyToolbarTheme() {
         // 1) вернуть конфиг (стрелка GONE, заголовок “Медиа”)
         (activity as? BaseActivity)?.updateToolbar(
-            ToolbarConfig(GONE, R.string.media)
+            ToolbarConfig(GONE, R.string.media){ // 👇 возврат на сетку выбора
+                (requireActivity() as? MainActivity)?.apply {
+                    buttonIndex = -1 // 🔹 явно переключаем индекс
+                    switchFragment(buttonIndex)
+                    bottomNavigationHelper.selectButton(buttonIndex)
+                    bottomNavigationHelper.setBottomNavigationVisibility()
+                }
+            }
         )
 
         // 2) вернуть цвета:
-        val bg = ContextCompat.getColor(requireContext(), R.color.white_textColor)          // твой белый фон
+        val bg = ContextCompat.getColor(requireContext(), R.color.white_textColor)          // белый фон
         val titleColor = ContextCompat.getColor(requireContext(), R.color.textColor_white) // ⚠️ чёрный
         (activity as? BaseActivity)?.toolbarHelper?.apply {
             setToolbarBackgroundColor(bg)
@@ -152,7 +159,7 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
         val tb = requireActivity().findViewById<Toolbar>(R.id.toolbar)
         tb?.findViewById<TextView>(R.id.title)?.apply {
             visibility = View.VISIBLE
-            alpha = 1f
+            alpha = 1f // // ⚠️ почему-то терялся (!?)
         }
     }
 }
