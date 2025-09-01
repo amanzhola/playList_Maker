@@ -89,6 +89,17 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         rv.layoutManager = LinearLayoutManager(requireContext())
         rv.adapter = bottomAdapter // ← твой адаптер PlaylistBottomAdapter
 
+        // ⬇️ Автоскролл к началу при вставке нового плейлиста в позицию 0
+        // наблюдатель адаптера:Автоскролл к началу, когда в список прилетел новый элемент сверху
+        bottomAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                // если вставка в начало — пролистываем к началу
+                if (positionStart == 0) {
+                    rv.post { rv.scrollToPosition(0) }
+                }
+            }
+        })
+
         // «Новый плейлист»
         view.findViewById<View>(R.id.btnUpdate).setOnClickListener {
             bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
@@ -129,7 +140,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             override fun onSlide(sheet: View, slideOffset: Float) {
                 // плавная анимация: 0..1 → 0..0.6 (для half), 0..1 (для expanded)
                 val t = slideOffset.coerceIn(0f, 1f)
-                // если хочешь максимум 0.6 даже при expanded, умножай на 0.6f
+                // по желанию максимум 0.6 даже при expanded, умножай на 0.6f
                 overlay.alpha = t.coerceAtMost(1f)
                 overlay.isVisible = t > 0f
             }

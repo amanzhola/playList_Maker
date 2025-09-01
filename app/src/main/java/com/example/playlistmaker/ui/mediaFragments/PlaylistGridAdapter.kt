@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -36,11 +37,21 @@ class PlaylistGridAdapter(
         holder.name.text = item.name
         holder.count.text = pluralizeTracks(holder.itemView.context, item.tracksCount)
 
-        // загрузка обложки с плейсхолдером (если coverPath == null)
-        val uri = item.coverPath?.let { Uri.fromFile(File(it)) }
+        // Загружаем обложку: coverPath может быть content:// (MediaStore) или файловым путём.
+        // Если строки нет/непонятный формат — показываем placeholder.
+        val uri = item.coverPath?.let { ref ->
+            when {
+                ref.startsWith("content://") || ref.startsWith("file://") -> ref.toUri()
+                ref.startsWith("/") -> Uri.fromFile(File(ref))       // поддержка старых приватных путей
+                else -> null
+            }
+        }
         imageLoader.load(holder.iv, uri, R.drawable.placeholder)
 
-        holder.itemView.setOnClickListener { onClick(item) } // переход на экран плейлиста не требуется по ТЗ
+        // переход на экран плейлиста не требуется по ТЗ - 22
+        // как раз нужен ТЗ - 23
+        holder.itemView.setOnClickListener { onClick(item) }
+
     }
 
     private fun pluralizeTracks(ctx: Context, count: Int): String =

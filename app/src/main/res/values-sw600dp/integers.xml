@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- <for FragmentPlaylist via PlaylistGridAdapter> -->
+<resources>
+    <integer name="playlist_grid_span_count">3</integer>
+
+    <!-- <for FragmentPlaylist description edit line> -->
+    <integer name="qty_lines_create_playlist">2</integer>
+
+</resources>

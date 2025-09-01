@@ -33,9 +33,17 @@ class FragmentPlaylist : Fragment() {
     private val viewModel: PlaylistViewModel by viewModel()
     private val imageLoader: ImageLoader by inject()
 
-    private val adapter by lazy {
-        PlaylistGridAdapter(imageLoader) { /* no-op */ }
-            .apply {
+    // Адаптер создаём один раз; не восстанавливаем состояние,
+    // пока список пустой (иначе RecyclerView может «залипнуть» на старой позиции).
+    private val adapter by lazy(LazyThreadSafetyMode.NONE) {
+        PlaylistGridAdapter(imageLoader) {playlist ->
+        /* onClick: no-op (или добавь нужный переход) sprint 22*/
+
+            // playlist.id должен быть Long
+            val b = bundleOf("playlistId" to playlist.id)
+            findNavController().navigate(R.id.action_global_to_playlistInfoFragment, b)
+
+        }.apply {
                 stateRestorationPolicy =
                     RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             }
@@ -43,6 +51,7 @@ class FragmentPlaylist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // ловим запрос на скролл вверх и имя созданного плейлиста
         parentFragmentManager.setFragmentResultListener("playlist_scroll_top", this) { _, b ->
             scrollTopOnce = b.getBoolean("scrollTop", false)
             pendingSnackbarName = b.getString("name")
@@ -78,15 +87,16 @@ class FragmentPlaylist : Fragment() {
                 bundleOf("from_playlist" to true))
         }
 
-        // RecyclerView
-        val lm = GridLayoutManager(requireContext(), 2)
+        // RecyclerView: span из ресурсов (2 — телефоны, 3 — sw600dp)
+        val span = resources.getInteger(R.integer.playlist_grid_span_count)
+        val lm = GridLayoutManager(requireContext(), span)
         binding.rvPlaylists.layoutManager = lm
         binding.rvPlaylists.adapter = adapter
-
 
         val space = resources.getDimensionPixelSize(R.dimen.line_margin)
         binding.rvPlaylists.addItemDecoration(SpacesItemDecoration(space))
 
+        // Snackbar после создания (через savedStateHandle)
         // Snackbar после создания плейлиста (без скролла)
         findNavController().currentBackStackEntry
             ?.savedStateHandle
@@ -102,7 +112,7 @@ class FragmentPlaylist : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.playlists.collect { list ->
-
+                    // Даём новый snapshot, чтобы DiffUtil точно увидел изменения
                     adapter.submitList(list.toList()) {
 
                         if (scrollTopOnce) {

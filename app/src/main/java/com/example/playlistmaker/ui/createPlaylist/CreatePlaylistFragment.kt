@@ -28,6 +28,10 @@ import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.createPlaylist.CreatePlaylistViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.example.playlistmaker.utils.ARG_EDIT_COVER
+import com.example.playlistmaker.utils.ARG_EDIT_DESC
+import com.example.playlistmaker.utils.ARG_EDIT_ID
+import com.example.playlistmaker.utils.ARG_EDIT_NAME
 import com.example.playlistmaker.utils.NavKeys
 import com.example.playlistmaker.utils.NavKeys.SCROLL_TOP
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -37,6 +41,10 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
+
+    // ★ Признак режима редактирования (bundle-based, без SafeArgs)
+    private val isEditMode: Boolean
+        get() = arguments?.containsKey(ARG_EDIT_ID) == true
 
     private var _binding: FragmentCreatePlaylistBinding? = null
     private val binding get() = _binding!!
@@ -67,6 +75,18 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
         getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
 
+        // ★ Если открылись в режиме редактирования — один раз передадим VM исходные данные
+        if (isEditMode) {
+            val id    = requireArguments().getLong(ARG_EDIT_ID)
+            val name  = requireArguments().getString(ARG_EDIT_NAME).orEmpty()
+            val desc  = requireArguments().getString(ARG_EDIT_DESC)
+            val cover = requireArguments().getString(ARG_EDIT_COVER) // может быть null
+            vm.enterEditModeIfNeeded(id, name, desc, cover) // ← см. патч VM ниже
+        }
+
+        // ★ Текст заголовка/кнопки в зависимости от режима
+        val titleRes = if (isEditMode) R.string.edit_playlist_title else R.string.create_playlist_title
+        binding.btnCreate.text = getString(if (isEditMode) R.string.save else R.string.create)
 
         // первичное восстановление
         vm.state.value.let { s ->
@@ -136,6 +156,13 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                                 val fromPlaylist = arguments?.getBoolean("from_playlist") == true
                                 val fromPreview  = arguments?.getBoolean("from_preview")  == true   // 👈 вместо cameFromPreview
 
+                                // ★ В режиме редактирования — просто назад на экран плейлиста,
+                                // он получает обновления из БД сам
+                                if (isEditMode) {
+                                    nav.popBackStack()
+                                    return@collect
+                                }
+
                                 when {
                                     // 1) из FragmentPlaylist → в MediaLibrary
                                     fromPlaylist -> {
@@ -198,7 +225,8 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
     override fun shouldShowBottomNav(): Boolean = false
 
     override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.create_playlist_title) {
+        // ★ Динамический заголовок
+        ToolbarConfig(View.VISIBLE, if (isEditMode) R.string.edit_playlist_title else R.string.create_playlist_title) {
             handleBack()
         }
 
@@ -236,7 +264,9 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
         val doExit = {
             when {
-                fromPlaylist -> safePopBack()              // тут как и раньше — вернёшься по графу
+                // ★ В РЕЖИМЕ РЕДАКТИРОВАНИЯ — ВСЕГДА закрываем без диалога/сохранения
+                isEditMode   -> safePopBack()
+                fromPlaylist -> safePopBack()              // тут как и раньше — вернёмся по графу
                 fromPreview  -> {
                     // Возвращаемся в TrackPreviewActivity БЕЗ результата (отмена)
                     requireActivity().setResult(Activity.RESULT_CANCELED)
@@ -246,7 +276,8 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
-        if (vm.hasUnsavedChanges()) {
+        // ★ Диалог подтверждения — только в режиме СОЗДАНИЯ
+        if (!isEditMode && vm.hasUnsavedChanges()) {
             showExitDialog(onConfirm = doExit) // диалог: подтвердил → выполняем doExit
         } else {
             doExit()                           // нет изменений → выходим сразу

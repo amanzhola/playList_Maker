@@ -125,6 +125,22 @@ class TrackPreviewActivity : AppCompatActivity() {
             viewModel.onPlaylistClicked(playlist)
         }
 
+        // для ⬇️ Автоскролл к началу при вставке нового плейлиста в позицию 0
+        val rvBottom = findViewById<RecyclerView>(R.id.rvBottomPlaylists).apply {
+            layoutManager = LinearLayoutManager(this@TrackPreviewActivity)
+            adapter = bottomAdapter
+        }
+
+        // ⬇️ Автоскролл к началу при вставке нового плейлиста в позицию 0
+        // наблюдатель адаптера:Автоскролл к началу, когда в список прилетел новый элемент сверху
+        bottomAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    rvBottom.post { rvBottom.scrollToPosition(0) }
+                }
+            }
+        })
+
         findViewById<RecyclerView>(R.id.rvBottomPlaylists).apply {
             layoutManager = LinearLayoutManager(this@TrackPreviewActivity)
             adapter = bottomAdapter

@@ -33,6 +33,8 @@ class TrackAdapter(
     private val actionId: Int = R.id.action_searchFragment_to_extraOptionFragment // ✅ по умолчанию
 ) : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
 
+    var onItemLongClick: ((Track) -> Unit)? = null
+
     private val defaultTextColor: Int = resourceProvider.getColor(R.color.hintColor_white, null)
     private val defaultTextNameColor: Int = resourceProvider.getColor(R.color.black_white, null)
     private var textNameColor: Int = defaultTextNameColor
@@ -102,7 +104,13 @@ class TrackAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(tracks[position])
+        val item = tracks[position]
+        holder.bind(item)
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick?.invoke(item)
+            true // возвращаем true, чтобы событие не ушло дальше как обычный клик
+        }
     }
 
     override fun getItemCount(): Int = tracks.size

@@ -2,7 +2,9 @@ package com.example.playlistmaker.roots.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -88,6 +90,19 @@ class MainActivity : BaseActivity() {
 
         // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
         handleExternalIntent(intent)
+
+        // for playlistInfoFragment on sprint 23
+        navController.addOnDestinationChangedListener { _, dest, _ ->
+            val hideOn = setOf(
+                R.id.playlistInfoFragment // сюда можно добавить и другие экраны без нижней навигации
+            )
+            val shouldHide = dest.id in hideOn
+
+            // прячем кастомный низ
+            findViewById<View>(R.id.bottomNavigation).isVisible = !shouldHide
+            // если нужно — прячем и кастомный тулбар
+            findViewById<View>(R.id.toolbar)?.isVisible = !shouldHide
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

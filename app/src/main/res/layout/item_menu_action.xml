@@ -1,0 +1,18 @@
+<!-- res/layout/item_menu_action.xml for 2nd bottom sheet line playlistInfoFragment-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tvTitle"
+    android:layout_width="match_parent"
+    android:layout_height="61dp"
+    android:paddingStart="13dp"
+    android:paddingEnd="13dp"
+    android:gravity="center_vertical"
+    android:textSize="16sp"
+    android:textColor="@color/textColor_white"
+    android:fontFamily="@font/ys_display_regular"
+    android:textFontWeight="400"
+    android:background="@color/white_textColor"
+    android:clickable="true"
+    android:focusable="true"
+    android:contentDescription="@string/track_detail_title"
+    tools:text="Редактировать информацию" />

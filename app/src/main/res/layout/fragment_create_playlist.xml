@@ -32,7 +32,7 @@
         android:layout_height="0dp"
         android:contentDescription="@string/cover"
         android:src="@drawable/cover_create_playlist"
-        tools:src="@drawable/placeholder2"
+        tools:src="@drawable/barsik"
         android:clickable="true"
         android:focusable="true"
         android:scaleType="centerCrop"
@@ -98,7 +98,7 @@
             android:includeFontPadding="false"
             android:inputType="textMultiLine"
             android:minLines="1"
-            android:maxLines="4"
+            android:maxLines="@integer/qty_lines_create_playlist"
             tools:text="The Beatlesasdfasdfasdfasdfasdfasdfasdfsdsadfasdfsdafsdsdafsdafsdafasdfsdfaasdfasdfasdfsdfsdafasfdsffsdfsdafsdafasdfsdafasdfasdfdasfsddas"/>
     </com.google.android.material.textfield.TextInputLayout>
 
