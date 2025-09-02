@@ -1,16 +1,10 @@
 package com.example.playlistmaker.ui.playlistInfo
 
-import android.content.Context
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -39,6 +33,13 @@ import com.example.playlistmaker.utils.ARG_EDIT_ID
 import com.example.playlistmaker.utils.ARG_EDIT_NAME
 import com.example.playlistmaker.utils.BASE_DIM
 import com.example.playlistmaker.utils.MENU_DIM
+import com.example.playlistmaker.utils.coverModelFrom
+import com.example.playlistmaker.utils.formatDuration
+import com.example.playlistmaker.utils.makeSingleLineEllipsizeEnd
+import com.example.playlistmaker.utils.setStartDrawable
+import com.example.playlistmaker.utils.setTopPaddingDp
+import com.example.playlistmaker.utils.showLongSnack
+import com.example.playlistmaker.utils.showWithSquareWhiteStyle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -46,13 +47,11 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-
 class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackClickListener {
 
+    private var isMenuOpened = false
     private val args: PlaylistInfoFragmentArgs by navArgs()
     private val viewModel: PlaylistInfoViewModel by viewModel()
-
-    private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t.coerceIn(0f, 1f)
 
     // ⚠️ адаптер пере-использован
     private lateinit var adapter: TrackAdapter
@@ -64,41 +63,11 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
     private var overlayDefaultFocusable = false
 
     private lateinit var menuAdapter: MenuAdapter
-
-    private fun coverModelFrom(path: String?): Any? =
-        path?.takeIf { it.isNotBlank() }?.let { ref ->
-            when {
-                ref.startsWith("content://") || ref.startsWith("file://") -> ref.toUri()
-                ref.startsWith("/") -> java.io.File(ref)
-                ref.startsWith("http") -> ref
-                else -> null
-            }
-        }
     private var lastUi: PlaylistInfoViewModel.Ui? = null
-
-    // формат mm:ss
-    private fun formatDuration(ms: Long): String {
-        val totalSec = (ms / 1000).toInt()
-        val m = totalSec / 60
-        val s = totalSec % 60
-        return "%d:%02d".format(m, s)
-    }
-
-    // единый сниackbar «нечем делиться»
-    private fun showNothingToShareSnackbar(durationMs: Int = 4000) {
-        val root = requireActivity().findViewById<View>(android.R.id.content)
-        val msg = getString(R.string.nothing_to_share)
-        val sb = com.google.android.material.snackbar.Snackbar
-            .make(root, msg, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
-        (sb.view.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(0, 0, 0, 0)
-        sb.duration = durationMs
-        sb.show()
-    }
 
     // Текст по ТЗ
     private fun buildShareText(ui: PlaylistInfoViewModel.Ui): String {
         val sb = StringBuilder()
-
         sb.appendLine(ui.name)                                  // название
         if (!ui.description.isNullOrBlank()) sb.appendLine(ui.description) // описание (если есть)
         sb.appendLine(                                          // "[xx] треков"
@@ -120,6 +89,15 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        val failTextView: TextView = view.findViewById(R.id.fail)
+        failTextView.text = getString(R.string.no_tracks_in_playlist)
+        failTextView.setStartDrawable(
+            drawableRes = R.drawable.fail_icon,
+            paddingPx = resources.getDimensionPixelSize(R.dimen.Padding_16)
+        )
+        val topPx = resources.getDimensionPixelSize(R.dimen.radius_2dp)
+        failTextView.setTopPaddingDp(topPx)
+
         // ИНИЦИАЛИЗИРУЕМ overlay РАНЬШЕ, чтобы им пользоваться в collect{}
         overlay = view.findViewById(R.id.overlay)
         overlayDefaultClickable = overlay.isClickable
@@ -132,30 +110,11 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
 
         // Название: ровно 1 строка + троеточие (для Info-экрана)
-        tvTitle.apply {
-            isSingleLine = true
-            maxLines = 1
-            setHorizontallyScrolling(true)     // помогает, чтобы ellipsize работал предсказуемо
-            ellipsize = TextUtils.TruncateAt.END
-        }
+        tvTitle.makeSingleLineEllipsizeEnd()
+        tvDesc.makeSingleLineEllipsizeEnd()
+        // или, если нужно N строк по ресурсу:
+        // tvDesc.makeEllipsizeEnd(resources.getInteger(R.integer.qty_lines_create_playlist))
 
-        // Описание: ровно 1 строка + троеточие (для Info-экрана)
-        tvDesc.apply {
-            isSingleLine = true
-            maxLines = 1
-            setHorizontallyScrolling(true)
-            ellipsize = TextUtils.TruncateAt.END
-        }
-/*
-        // Опция -> Описание: ровно N(qty_lines_create_playlist) строк + троеточие (для Info-экрана)
-        val maxDescLines = resources.getInteger(R.integer.qty_lines_create_playlist)
-        tvDesc.apply {
-            isSingleLine = false
-            setHorizontallyScrolling(false)
-            maxLines = maxDescLines
-            ellipsize = TextUtils.TruncateAt.END
-        }
-*/
         btnBack.setOnClickListener { findNavController().navigateUp() }
 
         // --- BottomSheet: важно сохранить в поле behavior
@@ -217,6 +176,10 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
 
                     // ⚠️ загрузка адаптера
                     adapter.updateTracks(ui.tracks.toMutableList())
+                    val showEmpty = ui.tracks.toMutableList().isEmpty()
+                    failTextView.isVisible = showEmpty
+                    failTextView.isEnabled = showEmpty
+
                 }
             }
         }
@@ -236,11 +199,13 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
 
     private fun shareCurrentPlaylistOrToast() {
         val ui = lastUi ?: run {
-            showNothingToShareSnackbar()
+            // единый сниackbar «нечем делиться»
+            showLongSnack(getString(R.string.nothing_to_share))
             return
         }
         if (ui.tracks.isEmpty()) {
-            showNothingToShareSnackbar()
+            // единый сниackbar «нечем делиться»
+            showLongSnack(getString(R.string.nothing_to_share))
             return
         }
 
@@ -319,32 +284,73 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
             peekHeight = resources.getDimensionPixelSize(R.dimen.playlist_sheet_peek2)
             expandedOffset = resources.getDimensionPixelSize(R.dimen.playlist_sheet_expanded_offset)
 
+            // 🔐 гарантируем чёрный фон (важно!)
+            overlay.setBackgroundColor(0xFF000000.toInt())
+
             addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+
                 private fun applyOverlayForMenu(opened: Boolean) {
                     overlay.isClickable = if (opened) true else overlayDefaultClickable
                     overlay.isFocusable = if (opened) true else overlayDefaultFocusable
-
-                    // плавно меняем альфу: к большему затемнению при открытом меню
-                    overlay.animate()
-                        .alpha(if (opened) MENU_DIM else BASE_DIM)
-                        .setDuration(180L)
-                        .start()
+                    // ⛔️ НИКАКИХ .animate().alpha() здесь!
                 }
+
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     val opened = newState != BottomSheetBehavior.STATE_HIDDEN
+                    isMenuOpened = opened
                     applyOverlayForMenu(opened)
-                    if (!opened) { // вернуть дефолтные флаги
+
+                    overlay.animate().cancel()
+
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            overlay.alpha = 1f       // максимум
+                        }
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            overlay.alpha = MENU_DIM // старт при показе меню
+                        }
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            overlay.alpha = BASE_DIM // базовое затемнение
+                        }
+                        else -> Unit
+                    }
+
+                    if (!opened) {
                         overlay.isClickable = overlayDefaultClickable
                         overlay.isFocusable = overlayDefaultFocusable
                     }
                 }
+
+                // убиица времени -> эмулятор(наконец-то удалось!)
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    /* no-op */
-                    // интерактивная анимация затемнения во время перетягивания
-                    overlay.alpha = lerp(BASE_DIM, MENU_DIM, slideOffset)
+                    val raw = if (slideOffset.isNaN()) 0f else slideOffset
+                    val t = raw.coerceIn(0f, 1f) // 0..1
+
+                    overlay.animate().cancel()
+
+                    if (isMenuOpened) {
+                        // Меню уже показано (COLLAPSED→EXPANDED)
+                        // целевая альфа: от MENU_DIM до 1f
+                        val target = MENU_DIM + (1f - MENU_DIM) * t
+
+                        // ⚙️ ВВЕРХ — только темнее (монотонность),
+                        // если вдруг target < текущее (например, после глитча) — не светлим
+                        if (target >= overlay.alpha) {
+                            overlay.alpha = target
+                        } else {
+                            // ДВИЖЕНИЕ ВНИЗ → сразу к BASE_DIM
+                            overlay.alpha = BASE_DIM
+                        }
+                    } else {
+                        // Переход из HIDDEN к COLLAPSED (если перетягивание жестом)
+                        // от BASE_DIM до MENU_DIM
+                        val target = BASE_DIM + (MENU_DIM - BASE_DIM) * t
+                        overlay.alpha = target
+                    }
                 }
             })
         }
+
     }
 
     /** Открыть меню: заполняем и раскрываем. Безопасно, т.к. ensureMenuInit() уже был вызван. */
@@ -364,32 +370,6 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
         menuAdapter.submit(listOf(header) + items)
         // ⬇️ вместо EXPANDED
         menuBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-    }
-
-    private fun AlertDialog.showWithSquareWhiteStyle(ctx: Context) {
-        setOnShowListener {
-            // фон прямоугольником
-            window?.setBackgroundDrawable(
-                ContextCompat.getDrawable(ctx, R.drawable.bg_dialog_square)
-            )
-            // кнопки
-            val accent = ContextCompat.getColor(ctx, R.color.backgroundDay)
-            getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(accent)
-            getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(accent)
-            // тело сообщения
-            findViewById<TextView>(android.R.id.message)
-                ?.setTextColor(ContextCompat.getColor(ctx, R.color.textColor))
-            // заголовок, если есть
-            findTitleView()
-                ?.setTextColor(ContextCompat.getColor(ctx, R.color.textColor))
-        }
-        show()
-    }
-
-    private fun AlertDialog.findTitleView(): TextView? {
-        return findViewById(androidx.appcompat.R.id.alertTitle)
-            ?: findViewById(com.google.android.material.R.id.alertTitle)
-            ?: findViewById(android.R.id.title)
     }
 
     private fun confirmDelete(track: Track) {

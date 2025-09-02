@@ -47,10 +47,16 @@ class PlaylistRepositoryImpl(
 
         if (current.contains(track.trackId)) return false // уже есть
 
-        // 3) Обновляем список и счётчик
-        current.add(0, track.trackId)
+        // 3) ДОБАВЛЯЕМ В КОНЕЦ (а не в начало)
+        current.add(track.trackId) // ✅ новые треки будут внизу
+
+        // сериализуем и обновляем count по факту
         val newJson = gson.toJson(current)
-        playlistDao.updateTracks(pl.id, newJson, pl.tracksCount + 1)
+        playlistDao.updateTracks(
+            id = pl.id,
+            trackIdsJson = newJson,
+            count = current.size // ✅ надёжнее, чем pl.tracksCount + 1
+        )
 
         // 4) Кладём сам трек в «пул» треков плейлистов (IGNORE — защитит от дублей)
         playlistTrackDao.insertIgnore(
@@ -97,9 +103,20 @@ class PlaylistRepositoryImpl(
     override fun observePlaylist(id: Long): Flow<Playlist> =
         playlistDao.observeById(id).map { e -> e.toDomain(gson) } // .toDomain уже собирает trackIds: List<Int>
 
-    override fun observeTracksByIds(ids: List<Int>): Flow<List<Track>> =
-        if (ids.isEmpty()) flowOf(emptyList())
-        else playlistTrackDao.observeByIds(ids).map { it.map(PlaylistTrackEntity::toDomain) }
+    override fun observeTracksByIds(ids: List<Int>): Flow<List<Track>> {
+        if (ids.isEmpty()) return flowOf(emptyList())
+
+        // карта «id → позиция» из исходного порядка
+        val order = ids.withIndex().associate { (index, id) -> id to index }
+
+        return playlistTrackDao.observeByIds(ids)
+            .map { entities ->
+                entities
+                    .map(PlaylistTrackEntity::toDomain)
+                    // ❌ новые сверху
+                    .sortedByDescending { order[it.trackId] ?: Int.MAX_VALUE }
+            }
+    }
 
     override suspend fun deletePlaylist(playlistId: Long) {
         // 1) найдём плейлист
@@ -129,6 +146,7 @@ class PlaylistRepositoryImpl(
         }
     }
 
+    // CreatePlaylistFragment edit (updating)
     override suspend fun updatePlaylistMetadata(
         id: Long,
         name: String,

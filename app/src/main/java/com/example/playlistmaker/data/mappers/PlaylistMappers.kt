@@ -13,7 +13,7 @@ fun PlaylistEntity.toDomain(gson: Gson): Playlist =
         name = name,
         description = description,
         coverPath = coverPath,
-        tracksCount = tracksCount,
+//        tracksCount = tracksCount,
         trackIds = gson.fromJson(trackIdsJson, object : TypeToken<List<Int>>(){}.type) ?: emptyList()
     )
 fun List<PlaylistEntity>.toDomain(gson: Gson) = map { it.toDomain(gson) }

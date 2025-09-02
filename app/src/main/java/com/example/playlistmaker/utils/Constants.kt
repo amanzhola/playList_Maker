@@ -15,7 +15,7 @@ const val ACTION_EDIT  = 2
 const val ACTION_DELETE= 3
 
 const val BASE_DIM = 0.35f   // затемнение, когда меню закрыто
-const val MENU_DIM = 0.90f   // затемнение, когда меню открыто
+const val MENU_DIM = 0.70f   // затемнение, когда меню открыто
 
 // для CreatePlaylist - редактирование
 const val ARG_EDIT_ID    = "edit_id"

@@ -194,6 +194,7 @@
     <string name="save">Сохранить</string>
     <string name="edit">Редактировать</string>
     <string name="playlist_edited">Плейлист отредактирован</string>
+    <string name="no_tracks_in_playlist">В плейлисте нет треков</string>
 
 
 
@@ -387,5 +388,6 @@
 <!--    <string name="save">💾 Сохранить</string>-->
 <!--    <string name="edit">✏️ Редактировать</string>-->
 <!--    <string name="playlist_edited">✅ Плейлист отредактирован</string>-->
+<!--    <string name="no_tracks_in_playlist">😌В плейлисте нет треков</string>-->
 
 </resources>

@@ -47,5 +47,4 @@ interface PlaylistDao {
         description: String?,
         coverPath: String?
     )
-
 }

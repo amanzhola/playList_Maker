@@ -188,6 +188,7 @@
     <string name="save">💾 Save</string>
     <string name="edit">✏️ Edit</string>
     <string name="playlist_edited">✅ Playlist edited</string>
+    <string name="no_tracks_in_playlist">😌Playlist is empty</string>
 
 
 </resources>
