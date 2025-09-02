@@ -350,7 +350,6 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
                 }
             })
         }
-
     }
 
     /** Открыть меню: заполняем и раскрываем. Безопасно, т.к. ensureMenuInit() уже был вызван. */
