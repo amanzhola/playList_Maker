@@ -143,6 +143,11 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/rounder_bsh"/>
 
+        <!--     Заглушка -->
+        <include
+            layout="@layout/fail"
+            tools:visibility="visible"/>
+
         <!-- Пока по ТЗ список не реализуем ш2— просто область для ш3-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTracks"
