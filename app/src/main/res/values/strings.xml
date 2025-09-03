@@ -161,8 +161,46 @@
         <item quantity="other">%d трека</item>
     </plurals>
 
-<!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒-->
-<!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕-->
+    <!-- <adding TrackPreview from share> -->
+    <string name="track_preview">📀🎵 Просмотр треков 👀</string>
+
+    <!-- <Toolbar dropdown> -->
+    <string name="dropdown_emoji">🌼</string>
+
+    <!-- <fragment_playlist_info.xml> -->
+    <plurals name="minutes_count">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минуты</item>
+    </plurals>
+
+    <!-- склейка "A · B" -->
+    <string name="two_parts_with_dot">%1$s · %2$s</string>
+
+    <string name="blackout">Затемнение экрана</string>
+    <string name="menu">меню</string>
+
+    <string name="delete_track_question">Хотите удалить трек?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+
+    <string name="edit_playlist_title">Редактировать</string>
+    <string name="delete_playlist">Удалить плейлист</string>
+
+    <string name="nothing_to_share">В этом плейлисте нет списка треков, которым можно поделиться</string>
+    <string name="delete_playlist_question">Удалить плейлист?</string>
+
+    <string name="save">Сохранить</string>
+    <string name="edit">Редактировать</string>
+    <string name="playlist_edited">Плейлист отредактирован</string>
+    <string name="no_tracks_in_playlist">В плейлисте нет треков</string>
+    <string name="exit_dialog_edit">Завершить редактирование плейлиста?</string>
+
+
+
+<!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
+<!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
     <!--    for Ok people -->
     <!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
     <!--    <string name="search">🧐Поиск</string>-->
@@ -317,5 +355,41 @@
 <!--        <item quantity="many">%d треков 🎶</item>-->
 <!--        <item quantity="other">%d трека 🎶</item>-->
 <!--    </plurals>-->
+
+<!--    &lt;!&ndash; <adding TrackPreview from share> &ndash;&gt;-->
+<!--    <string name="track_preview">📀🎵 Просмотр треков 👀</string>-->
+
+<!--    &lt;!&ndash; <Toolbar dropdown> &ndash;&gt;-->
+<!--    <string name="dropdown_emoji">🌼</string>-->
+
+<!--    &lt;!&ndash; <fragment_playlist_info.xml> &ndash;&gt;-->
+<!--    <plurals name="minutes_count">-->
+<!--        <item quantity="one">%d минута</item>-->
+<!--        <item quantity="few">%d минуты</item>-->
+<!--        <item quantity="many">%d минут</item>-->
+<!--        <item quantity="other">%d минуты</item>-->
+<!--    </plurals>-->
+
+<!--    &lt;!&ndash; склейка "A · B" &ndash;&gt;-->
+<!--    <string name="two_parts_with_dot">%1$s · %2$s</string>-->
+
+<!--    <string name="blackout">Затемнение экрана</string>-->
+<!--    <string name="menu">меню</string>-->
+
+<!--    <string name="delete_track_question">❓🗑️ Удалить трек?</string>-->
+<!--    <string name="yes">✅ Да</string>-->
+<!--    <string name="no">❌ Нет</string>-->
+
+<!--    <string name="edit_info">✏️ Редактировать информацию</string>-->
+<!--    <string name="delete_playlist">🗑️🎶 Удалить плейлист</string>-->
+
+<!--    <string name="nothing_to_share">📭 В этом плейлисте нет списка треков, которым можно поделиться</string>-->
+<!--    <string name="delete_playlist_question">❓🗑️🎶 Удалить плейлист?</string>-->
+
+<!--    <string name="save">💾 Сохранить</string>-->
+<!--    <string name="edit">✏️🖼️ Редактировать</string>-->
+<!--    <string name="playlist_edited">✅ Плейлист отредактирован</string>-->
+<!--    <string name="no_tracks_in_playlist">😌В плейлисте нет треков</string>-->
+<!--    <string name="exit_dialog_edit">✏️🖼️⚠️Завершить редактирование плейлиста?</string>-->
 
 </resources>

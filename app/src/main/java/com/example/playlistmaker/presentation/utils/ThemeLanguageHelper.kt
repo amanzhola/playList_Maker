@@ -17,10 +17,12 @@ object ThemeLanguageHelper {
         languageInteraction = language
     }
 
+    // вызывать из SegmentManager
     fun toggleTheme() {
-        themeInteraction.toggleTheme()
+        val newValue = !themeInteraction.isDarkTheme()
+        themeInteraction.setDarkTheme(newValue)
         themeInteraction.applyTheme()
-    } // SegmentManager -> ThemeLanguageHelper.toggleTheme()
+    }
 
     fun toggleLanguage(context: Context): String {
         return languageInteraction.toggleLanguage()
@@ -32,10 +34,6 @@ object ThemeLanguageHelper {
         Locale.setDefault(locale)
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale))
     } // // App and BaseActivity -> ThemeLanguageHelper.applySavedLanguage(this)
-
-    fun getCurrentLanguage(): String {
-        return languageInteraction.getLanguage()
-    }
 
     fun isDarkTheme(): Boolean {
         return themeInteraction.isDarkTheme()

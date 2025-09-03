@@ -1,5 +1,7 @@
 package com.example.playlistmaker.ui.createPlaylist
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
@@ -10,12 +12,15 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
@@ -24,7 +29,13 @@ import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.createPlaylist.CreatePlaylistViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.example.playlistmaker.utils.ARG_EDIT_COVER
+import com.example.playlistmaker.utils.ARG_EDIT_DESC
+import com.example.playlistmaker.utils.ARG_EDIT_ID
+import com.example.playlistmaker.utils.ARG_EDIT_NAME
 import com.example.playlistmaker.utils.NavKeys
+import com.example.playlistmaker.utils.NavKeys.SCROLL_TOP
+import com.example.playlistmaker.utils.showWithSquareWhiteStyle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -32,6 +43,10 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
+
+    // ★ Признак режима редактирования (bundle-based, без SafeArgs)
+    private val isEditMode: Boolean
+        get() = arguments?.containsKey(ARG_EDIT_ID) == true
 
     private var _binding: FragmentCreatePlaylistBinding? = null
     private val binding get() = _binding!!
@@ -54,14 +69,17 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         super.onViewCreated(view, savedInstanceState)
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
-        // Фон тулбара
-        val blueColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
+        // ★ Если открылись в режиме редактирования — один раз передадим VM исходные данные
+        if (isEditMode) {
+            val id    = requireArguments().getLong(ARG_EDIT_ID)
+            val name  = requireArguments().getString(ARG_EDIT_NAME).orEmpty()
+            val desc  = requireArguments().getString(ARG_EDIT_DESC)
+            val cover = requireArguments().getString(ARG_EDIT_COVER) // может быть null
+            vm.enterEditModeIfNeeded(id, name, desc, cover) // ← см. патч VM ниже
+        }
 
-        // Цвет заголовка
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
-
+        // ★ Текст кнопки в зависимости от режима
+        binding.btnCreate.text = getString(if (isEditMode) R.string.save else R.string.create)
 
         // первичное восстановление
         vm.state.value.let { s ->
@@ -127,12 +145,55 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
                         when (e) {
                             is CreatePlaylistViewModel.Event.Saved -> {
-                                findNavController().previousBackStackEntry
-                                    ?.savedStateHandle
-                                    ?.set(NavKeys.PLAYLIST_CREATED_NAME, e.name)
+                                val nav = findNavController()
+                                val fromPlaylist = arguments?.getBoolean("from_playlist") == true
+                                val fromPreview  = arguments?.getBoolean("from_preview")  == true   // 👈 вместо cameFromPreview
 
-                                findNavController().popBackStack()
+                                // ★ В режиме редактирования — просто назад на экран плейлиста,
+                                // он получает обновления из БД сам
+                                if (isEditMode) {
+                                    nav.popBackStack()
+                                    return@collect
+                                }
+
+                                when {
+                                    // 1) из FragmentPlaylist → в MediaLibrary
+                                    fromPlaylist -> {
+                                        val args = bundleOf(
+                                            NavKeys.PLAYLIST_CREATED_NAME to e.name,
+                                            SCROLL_TOP to true,
+                                            NavKeys.SELECT_TAB to 1
+                                        )
+                                        val opts = navOptions {
+                                            popUpTo(R.id.mediaLibraryFragment) {
+                                                inclusive = true
+                                                saveState = false
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = false
+                                        }
+                                        nav.navigate(R.id.mediaLibraryFragment, args, opts)
+                                    }
+
+                                    // 3) НОВОЕ: пришли из TrackPreviewFragment (другая Activity)
+                                    fromPreview -> {
+                                        // Внутри CreatePlaylistFragment после успешного сохранения:
+                                        requireActivity().setResult(
+                                            Activity.RESULT_OK,
+                                            Intent().putExtra("playlist_created_name", e.name)
+                                        )
+                                        requireActivity().finish() // закрываем MainActivity и возвращаемся назад
+                                    }
+
+                                    // ExtraOption (тот же граф)
+                                    else -> {
+                                        // твой текущий кейс: savedStateHandle + popBackStack()
+                                        findNavController().previousBackStackEntry?.savedStateHandle?.set(NavKeys.PLAYLIST_CREATED_NAME, e.name)
+                                        findNavController().popBackStack()
+                                    }
+                                }
                             }
+
                             is CreatePlaylistViewModel.Event.Error -> {
                                 // при желании — локальный Snackbar / Toast
                                 // Snackbar.make(binding.root, e.message, Snackbar.LENGTH_LONG).show()
@@ -146,6 +207,8 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
     override fun onResume() {
         super.onResume()
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
     override fun onDestroyView() {
@@ -159,7 +222,8 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
     override fun shouldShowBottomNav(): Boolean = false
 
     override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.create_playlist_title) {
+        // ★ Динамический заголовок
+        ToolbarConfig(View.VISIBLE, if (isEditMode) R.string.edit_playlist_title else R.string.create_playlist_title) {
             handleBack()
         }
 
@@ -190,26 +254,91 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
     // единая точка обработки «назад»
     private fun handleBack() {
-        if (vm.hasUnsavedChanges()) {
-            showExitDialog()
+        if (!isAdded) return
+
+        val fromPlaylist = arguments?.getBoolean("from_playlist") == true
+        val fromPreview  = arguments?.getBoolean("from_preview")  == true
+
+        val doExit = {
+            when {
+                // ★ В РЕЖИМЕ РЕДАКТИРОВАНИЯ — ВСЕГДА закрываем без диалога/сохранения
+                isEditMode   -> safePopBack()
+                fromPlaylist -> safePopBack()              // вернёмся по графу
+                fromPreview  -> {
+                    // Возвращаемся в TrackPreviewActivity БЕЗ результата (отмена)
+                    requireActivity().setResult(Activity.RESULT_CANCELED)
+                    requireActivity().finish()
+                } // вернуться в TrackDetailActivity
+                else         -> safePopBack()              // обычный случай (ExtraOption и др.)
+            }
+        }
+
+        val hasChanges = vm.hasUnsavedChanges()
+
+        if (isEditMode) { // ★ Диалог подтверждения — только в режиме СОЗДАНИЯ + РЕДАКТИРОВАНИЕ
+            // 🔔 Режим редактирования: если есть несохранённые изменения — спросим подтверждение
+            if (hasChanges) {
+                showExitDialog(
+                    titleRes = R.string.exit_dialog_edit,             // 👈 другой заголовок
+                    onConfirm = doExit
+                )
+            } else {
+                doExit()
+            }
         } else {
-            findNavController().popBackStack()
+            // 🔔 Режим создания: как и было — диалог только если есть изменения
+            if (hasChanges) {
+                showExitDialog(onConfirm = doExit)
+            } else {
+                doExit()
+            }
         }
     }
 
-    private fun showExitDialog() {
+    private fun safePopBack() {
+        if (!isAdded) return // фрагмент уже не присоединён — выходим
+
+        // Пытаемся получить NavController (без краша)
+        val nav = runCatching { findNavController() }.getOrNull()
+
+        // Сначала пробуем navigateUp (корректнее для графа),
+        // если не получилось — пробуем popBackStack вручную.
+        val handled = when {
+            nav == null -> false
+            nav.navigateUp() -> true
+            nav.popBackStack() -> true
+            else -> false
+        }
+
+        // Если внутри графа «назад» не обработался — закрываем Activity
+        if (!handled) {
+            requireActivity().finish()
+        }
+    }
+
+    private fun showExitDialog(
+        @StringRes titleRes: Int = R.string.exit_dialog_title,
+        @StringRes messageRes: Int = R.string.exit_dialog_message,
+        onConfirm: () -> Unit = { safePopBack() },
+        onCancel: (() -> Unit)? = null
+    ) {
         if (exitDialogShown) return
         exitDialogShown = true
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.exit_dialog_title))
-            .setMessage(getString(R.string.exit_dialog_message))
-            .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(titleRes))
+            .setMessage(getString(messageRes))
+            .setNegativeButton(R.string.cancel) { d, _ ->
+                d.dismiss()
+                onCancel?.invoke()
+            }
             .setPositiveButton(R.string.finish) { d, _ ->
                 d.dismiss()
-                findNavController().popBackStack()
+                onConfirm()
             }
-            .setOnDismissListener { exitDialogShown = false }
-            .show()
+            .create()
+
+        dialog.setOnDismissListener { exitDialogShown = false }
+        dialog.showWithSquareWhiteStyle(requireContext())
     }
 }

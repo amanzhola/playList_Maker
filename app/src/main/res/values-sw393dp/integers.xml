@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- <for FragmentPlaylist description edit line> -->
+<resources>
+    <integer name="qty_lines_create_playlist">4</integer>
+</resources>

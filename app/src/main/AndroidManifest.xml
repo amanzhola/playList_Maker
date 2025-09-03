@@ -5,12 +5,19 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!--
+         =========================
+         option 0: icon [icon_launcher] and roundIcon [icon_launcher_round]
+         option 1: icon [heart_launcher] and roundIcon [heart_launcher_round]
+         option 2: icon [heart] and roundIcon [heart_round]
+             =========================
+        -->
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/icon_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
@@ -77,7 +84,8 @@
             android:exported="false" />
         <activity
             android:name=".ui.launcherPosters.TrackPreviewActivity"
-            android:exported="false" /> <!-- FileProvider для доступа к файлам -->
+            android:exported="false" />
+        <!-- FileProvider для доступа к файлам -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

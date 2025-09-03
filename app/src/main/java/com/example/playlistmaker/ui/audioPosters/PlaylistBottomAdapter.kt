@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -31,8 +32,19 @@ class PlaylistBottomAdapter(
     override fun onBindViewHolder(h: VH, pos: Int) {
         val item = getItem(pos)
         h.name.text = item.name
-        h.count.text = if (item.tracksCount == 1) "1 трек" else "${item.tracksCount} треков"
-        val uri = item.coverPath?.let { Uri.fromFile(File(it)) }
+
+        // (опционально) корректные варианты множественного числа:
+         h.count.text = h.itemView.context.resources.getQuantityString(R.plurals.tracks_count, item.tracksCount, item.tracksCount)
+
+        // Загружаем обложку: coverPath может быть content:// (MediaStore) или абсолютным файловым путём.
+        // Если строка пустая/непонятного формата — показываем placeholder.
+        val uri = item.coverPath?.let { ref ->
+            when {
+                ref.startsWith("content://") || ref.startsWith("file://") -> ref.toUri()
+                ref.startsWith("/") -> Uri.fromFile(File(ref)) // legacy: приватное хранилище (filesDir/externalFilesDir)
+                else -> null
+            }
+        }
         imageLoader.load(h.iv, uri, R.drawable.placeholder)
         h.itemView.setOnClickListener { onClick(item) }
     }

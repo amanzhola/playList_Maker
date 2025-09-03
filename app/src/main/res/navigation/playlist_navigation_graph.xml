@@ -22,21 +22,18 @@
         android:name="com.example.playlistmaker.ui.settings.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+
     <fragment
         android:id="@+id/mediaLibraryFragment"
         android:name="com.example.playlistmaker.ui.media.MediaLibraryFragment"
         android:label="fragment_media_library"
         tools:layout="@layout/fragment_media_library" />
+
     <fragment
         android:id="@+id/fragmentFavouriteTracks2"
         android:name="com.example.playlistmaker.ui.mediaFragments.FragmentFavouriteTracks"
         android:label="fragment_favourite_tracks"
         tools:layout="@layout/fragment_favourite_tracks"/>
-
-    <!-- Новый action для перехода на extraOptionFragment -->
-    <action
-        android:id="@+id/action_global_to_extraOptionFragment"
-        app:destination="@id/extraOptionFragment" />
 
     <fragment
         android:id="@+id/fragmentPlaylist"
@@ -54,6 +51,7 @@
         android:id="@+id/mainFragment"
         android:name="com.example.playlistmaker.ui.main.MainFragment"
         android:label="MainFragment" />
+
     <fragment
         android:id="@+id/extraOptionFragment"
         android:name="com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment"
@@ -68,9 +66,28 @@
             app:argType="integer" />
     </fragment>
 
+    <fragment
+        android:id="@+id/playlistInfoFragment"
+        android:name="com.example.playlistmaker.ui.playlistInfo.PlaylistInfoFragment">
+        <argument
+            android:name="playlistId"
+            app:argType="long" />
+    </fragment>
+
+    <!-- Новый action для перехода на extraOptionFragment -->
+    <action
+        android:id="@+id/action_global_to_extraOptionFragment"
+        app:destination="@id/extraOptionFragment" />
+
     <!-- Глобальный переход на CreatePlaylist -->
     <action
         android:id="@+id/action_global_to_createPlaylistFragment"
         app:destination="@id/createPlaylistFragment" />
+
+    <!-- Глобальный переход на playlistInfoFragment -->
+    <action
+        android:id="@+id/action_global_to_playlistInfoFragment"
+        app:destination="@id/playlistInfoFragment" />
+
 
 </navigation>

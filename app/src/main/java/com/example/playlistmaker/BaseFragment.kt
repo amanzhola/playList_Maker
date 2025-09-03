@@ -59,5 +59,4 @@ open class BaseFragment : Fragment() {
     open fun onSegment4ClickedInternal() {
         // по умолчанию ничего
     }
-
 }

@@ -59,4 +59,40 @@ class ToolbarHelper(private val activity: Activity) {
     fun setToolbarBackgroundColor(color: Int) {
         toolbar?.setBackgroundColor(color)
     }
+
+    // fixing theme on emulator and real mobile difference
+    /** Применить цвета из ТЕКУЩЕЙ темы (Day/Night) */
+    fun applyThemeColors() {
+        val tb = toolbar ?: return
+        // Берём не «жёсткие» R.color.*, а атрибуты темы
+        val bg = com.google.android.material.color.MaterialColors.getColor(
+            tb, R.attr.toolbarColor
+        )
+        val on = com.google.android.material.color.MaterialColors.getColor(
+            tb, R.attr.toolbarContentColor
+        )
+
+        tb.setBackgroundColor(bg)
+        title?.setTextColor(on)
+        // стрелка назад и overflow-меню
+        backArrow?.imageTintList = android.content.res.ColorStateList.valueOf(on)
+        (activity as? AppCompatActivity)?.let {
+            tb.navigationIcon?.setTint(on)
+            tb.overflowIcon?.setTint(on)
+        }
+    }
+
+    fun applyMainBlueColors() {
+        val tb = toolbar ?: return
+        // Синий фон + белые иконки/текст (цвета из ресурсов — можно сделать day/night-aware при желании)
+        val bg = tb.context.getColor(R.color.blue_textColor)      // твой «синий»
+        val on = tb.context.getColor(R.color.white_white)    // белый
+        tb.setBackgroundColor(bg)
+        title?.setTextColor(on)
+        backArrow?.imageTintList = android.content.res.ColorStateList.valueOf(on)
+        (activity as? AppCompatActivity)?.let {
+            tb.navigationIcon?.setTint(on)
+            tb.overflowIcon?.setTint(on)
+        }
+    }
 }

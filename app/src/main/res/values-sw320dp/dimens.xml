@@ -16,12 +16,19 @@
     <dimen name="marginBottom_4">2dp</dimen>
 
     <!-- <create playlist> -->
-    <dimen name="vertical_margin_create_playlist">8dp</dimen>
-    <dimen name="bottom_margin_create_playlist">8dp</dimen>
+    <dimen name="vertical_margin_create_playlist">4dp</dimen>
+    <dimen name="bottom_margin_create_playlist">6dp</dimen>
 
     <style name="CoverConstraints">
         <item name="layout_constraintWidth_default">percent</item>
-        <item name="layout_constraintWidth_percent">0.75</item>
+        <item name="layout_constraintWidth_percent">0.80</item>
     </style>
+<!--    <item name="layout_constraintWidth_percent">0.75</item>-->
+
+    <!-- <create playlistInfo> -->
+    <dimen name="Title_text_24">18sp</dimen>
+    <dimen name="Search_Text_18">14sp</dimen>
+    <dimen name="playlist_sheet_peek">80dp</dimen>
+    <dimen name="playlist_sheet_peek2">120dp</dimen>
 
 </resources>

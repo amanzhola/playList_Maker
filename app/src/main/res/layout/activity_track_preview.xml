@@ -1,24 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.launcherPosters.TrackPreviewActivity"
-    android:background="@color/white_textColor">
+    android:background="@color/white_textColor"
+    tools:context=".ui.launcherPosters.TrackDetailActivity">
 
+    <!-- Контент (твой RecyclerView с карточками треков) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/track_detail_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:nestedScrollingEnabled="false"
-        android:contentDescription="@string/recycle_full_screen_track"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:contentDescription="@string/recycle_full_screen_track"/>
 
-<!--    android:layout_height="wrap_content"-->
+    <!-- Полупрозрачная подложка под шторкой -->
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:visibility="gone"
+        android:alpha="0"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- BottomSheet со списком плейлистов (как в ExtraOption) -->
+    <LinearLayout
+        android:id="@+id/playlists_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_bg"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="240dp"
+        app:behavior_fitToContents="true"
+        app:behavior_skipCollapsed="false"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <View
+            android:layout_width="@dimen/searchLineHeight_52"
+            android:layout_height="@dimen/marginBottom_4"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
+            android:background="@drawable/rounder_bsh" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_to_playlist"
+            android:layout_marginTop="@dimen/arrow_back_padding_12"
+            android:padding="@dimen/Padding_16"
+            android:gravity="center"
+            android:textFontWeight="500"
+            android:textColor="@color/textColor_white"
+            style="@style/Text19"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpdate"
+            style="@style/SearchUpdate"
+            android:text="@string/newPlaylist"
+            android:visibility="visible"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvBottomPlaylists"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:listitem="@layout/item_playlist_bottom"
+            android:contentDescription="@string/bottom_sheet_behavior"/>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

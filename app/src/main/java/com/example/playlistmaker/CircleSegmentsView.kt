@@ -197,7 +197,6 @@ class CircleSegmentsView(context: Context?, attrs: AttributeSet?) : View(context
         return false
     }
 
-
     override fun performClick(): Boolean {
         super.performClick()
         return true

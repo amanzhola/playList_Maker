@@ -47,6 +47,11 @@ class SegmentManager(
             when (segmentIndex) {
                 0 -> { // Toggle theme
                     ThemeLanguageHelper.toggleTheme()
+
+                    // применяем тему мгновенно // for activity and fragment via BaseActivity
+                    (currentActivity as? AppCompatActivity)?.delegate?.applyDayNight() // ⚡ применить Day/Night к Activity
+                    (currentActivity as? BaseActivity)?.applyToolbarThemeColors()  // ⚡ перекрасить тулбар под логику
+
                     if (currentFragment is SettingsFragment) {
                         currentFragment.syncThemeSwitchState()
                     }

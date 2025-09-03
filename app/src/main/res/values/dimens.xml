@@ -70,7 +70,17 @@
 
     <style name="CoverConstraints">
         <item name="layout_constraintWidth_default">percent</item>
-        <item name="layout_constraintWidth_percent">0.95</item>
+        <item name="layout_constraintWidth_percent">0.97</item>
     </style>
+
+    <!-- <create playlistInfo> -->
+    <dimen name="Title_text_24">24sp</dimen>
+    <dimen name="Search_Text_18">18sp</dimen>
+    <dimen name="playlist_sheet_peek">200dp</dimen>
+    <dimen name="playlist_sheet_peek2">320dp</dimen>
+    <dimen name="playlist_sheet_expanded_offset">56dp</dimen>
+
+    <!-- <create playlistInfo for tabs> -->
+    <dimen name="playlist_cover_tablet_height">420dp</dimen>
 
 </resources>

@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -73,14 +72,6 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🎨 Тулбар
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        val backgroundColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.apply {
-            setTitleTextColor(whiteColor)
-            setToolbarBackgroundColor(backgroundColor)
-        }
-
         val bottom = view.findViewById<LinearLayout>(R.id.playlists_bottom_sheet)
         overlay = view.findViewById(R.id.overlay)
 
@@ -88,6 +79,17 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         val rv = view.findViewById<RecyclerView>(R.id.rvBottomPlaylists)
         rv.layoutManager = LinearLayoutManager(requireContext())
         rv.adapter = bottomAdapter // ← твой адаптер PlaylistBottomAdapter
+
+        // ⬇️ Автоскролл к началу при вставке нового плейлиста в позицию 0
+        // наблюдатель адаптера:Автоскролл к началу, когда в список прилетел новый элемент сверху
+        bottomAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                // если вставка в начало — пролистываем к началу
+                if (positionStart == 0) {
+                    rv.post { rv.scrollToPosition(0) }
+                }
+            }
+        })
 
         // «Новый плейлист»
         view.findViewById<View>(R.id.btnUpdate).setOnClickListener {
@@ -129,7 +131,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             override fun onSlide(sheet: View, slideOffset: Float) {
                 // плавная анимация: 0..1 → 0..0.6 (для half), 0..1 (для expanded)
                 val t = slideOffset.coerceIn(0f, 1f)
-                // если хочешь максимум 0.6 даже при expanded, умножай на 0.6f
+                // по желанию максимум 0.6 даже при expanded, умножай на 0.6f
                 overlay.alpha = t.coerceAtMost(1f)
                 overlay.isVisible = t > 0f
             }
@@ -165,7 +167,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             }
             // ❤️ Избранное
             override fun onFavoriteClicked(track: Track) {
-                viewModel.onFavoriteClicked()
+                viewModel.onFavoriteClicked(track.id)
             }
 
             // 🎵➕ Add Track 👉💿
@@ -347,6 +349,9 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             overlay.visibility = View.GONE
             overlay.alpha = 0f
         }
+
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
     private fun showSnack(text: String, durationMs: Int = 4000) {

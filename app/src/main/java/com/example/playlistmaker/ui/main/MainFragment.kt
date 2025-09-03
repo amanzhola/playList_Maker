@@ -7,7 +7,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.example.playlistmaker.BaseActivity
@@ -36,14 +35,6 @@ class MainFragment : BaseFragment(), BottomNavConfig {
         super.onViewCreated(view, savedInstanceState)
 
         setupButtons(view)
-
-        // Цвет заголовка
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.white_white)
-        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
-
-        // Фон тулбара
-        val blueColor = ContextCompat.getColor(requireContext(), R.color.blue_textColor)
-        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
 
         // Цвет main
         val mainLayout = activity?.findViewById<View>(R.id.main)
@@ -161,6 +152,18 @@ class MainFragment : BaseFragment(), BottomNavConfig {
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
+        // Синий тулбар только для MainFragment
+        (activity as? BaseActivity)
+            ?.toolbarHelper
+            ?.applyMainBlueColors()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Вернуть дефолтные цвета темы для остальных фрагментов
+        (activity as? BaseActivity)
+            ?.toolbarHelper
+            ?.applyThemeColors() // без аргумента = по текущей теме Day/Night
     }
 
 }

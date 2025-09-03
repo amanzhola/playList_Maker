@@ -5,11 +5,28 @@
 <!--        <item name="actionBarSize">@dimen/searchBoxHeight_36</item>-->
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        !-- базовые цвета тулбара для всех экранов, кроме Main -->
+        <item name="toolbarColor">@color/white</item>
+        <item name="toolbarContentColor">@color/textColor</item>
     </style>
 
-    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="menuTintColor">@color/transparent</item>
-        <!--❌ ревьюер(иначе убрать изопа en\themes + values\attr + AppTheme + Manifest)-->
+    <!-- Глобальная тема приложения = просто наследник базы -->
+    <style name="AppTheme" parent="Base.Theme.PlaylistMaker">
+    <item name="menuTintColor">@color/transparent</item>
+<!--        &lt;!&ndash;❌ ревьюер(иначе убрать изопа en\themes + values\attr + AppTheme + Manifest)&ndash;&gt;-->
+    </style>
+
+    <!-- Оверлей для MainActivity со синим тулбаром -->
+    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="Base.Theme.PlaylistMaker">
+        <item name="toolbarColor">@color/backgroundDay</item>          <!-- синий -->
+        <item name="toolbarContentColor">@color/textColor</item> <!-- белые иконки/текст -->
+    </style>
+
+    <style name="Text24">
+        <item name="android:textSize">@dimen/Title_text_24</item>
+        <item name="android:fontFamily">@font/ys_display_bold</item>
+        <item name="android:textFontWeight">700</item>
     </style>
 
     <style name="Text22">
@@ -27,6 +44,12 @@
 
     <style name="Text19">
         <item name="android:textSize">@dimen/Search_Text_19</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="Text18">
+        <item name="android:textSize">@dimen/Search_Text_18</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textFontWeight">400</item>
     </style>
@@ -211,6 +234,7 @@
     <color name="yellow_yellow">@color/bunColor</color>
     <color name="white_white">@color/white</color>
     <color name="textColor_textColor">@color/textColor</color>
+    <color name="blue_white">@color/backgroundDay</color>
 
     movie
     <color name="eeeee_black">@color/eeeee</color>

@@ -1,7 +1,10 @@
 package com.example.playlistmaker.roots.main
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -84,6 +87,30 @@ class MainActivity : BaseActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() = handleBack()
         })
+
+        // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
+        handleExternalIntent(intent)
+
+        // for playlistInfoFragment on sprint 23
+        navController.addOnDestinationChangedListener { _, dest, _ ->
+            val hideOn = setOf(
+                R.id.playlistInfoFragment // сюда можно добавить и другие экраны без нижней навигации
+            )
+            val shouldHide = dest.id in hideOn
+
+            val isMainDestination = dest.id == R.id.mainFragment // подставь ID твоего главного фрагмента
+
+            if (isMainDestination) {
+                toolbarHelper.applyMainBlueColors()
+            } else {
+                toolbarHelper.applyThemeColors()
+            }
+
+            // прячем кастомный низ
+            findViewById<View>(R.id.bottomNavigation).isVisible = !shouldHide
+            // если нужно — прячем и кастомный тулбар
+            findViewById<View>(R.id.toolbar)?.isVisible = !shouldHide
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -155,6 +182,35 @@ class MainActivity : BaseActivity() {
                 // Если уже некуда «назад» внутри графа — закрываем текущую Activity
                 finish()
             }
+        }
+    }
+
+    // ✅ 2 для перехода с TrackPreviewFragment на CreatePlaylistFragment :
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleExternalIntent(intent)
+    }
+
+    // ✅ 3 для перехода с TrackPreviewFragment на CreatePlaylistFragment : (приватный хелпер):
+    private fun handleExternalIntent(intent: Intent) {
+        if (intent.getBooleanExtra("open_create_playlist", false)) {
+            val fromPreview   = intent.getBooleanExtra("return_result", false)  // ← вот это ключ
+            val focusTrackId  = intent.getLongExtra("preview_track_id", -1L).takeIf { it > 0 }
+
+            val args = Bundle().apply {
+                putBoolean("from_preview", fromPreview)          // ← пробрасываем в Fragment
+                focusTrackId?.let { putLong("preview_track_id", it) }
+            }
+
+            if (navController.graph.findNode(R.id.createPlaylistFragment) != null) {
+                navController.navigate(R.id.createPlaylistFragment, args)
+            }
+
+            // чтобы не навигироваться повторно при конфиг-изменениях:
+            intent.removeExtra("open_create_playlist")
+            intent.removeExtra("return_result")
+            intent.removeExtra("preview_track_id")
         }
     }
 }

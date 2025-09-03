@@ -1,6 +1,6 @@
-<LinearLayout
-    android:layout_width="match_parent"
+<LinearLayout android:layout_width="match_parent"
     android:layout_height="@dimen/Settings_Height_61"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="@dimen/track_13"
     android:orientation="horizontal"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,9 +11,10 @@
     android:layout_width="@dimen/track_45"
     android:layout_height="@dimen/track_45"
     android:scaleType="centerCrop"
-    android:src="@drawable/placeholder"
+    android:src="@drawable/barsik"
     android:layout_gravity="center_vertical"
     android:contentDescription="@string/cover"/>
+<!--    android:src="@drawable/placeholder"-->
 
     <LinearLayout
     android:layout_width="0dp"
@@ -31,7 +32,8 @@
         android:textSize="16sp"
         android:fontFamily="@font/ys_display_regular"
         android:textFontWeight="400"
-        android:textColor="@color/textColor_white"/>
+        android:textColor="@color/textColor_white"
+        tools:text="Best songs 2021"/>
 
     <TextView
         android:id="@+id/tvCount"
@@ -41,7 +43,8 @@
         android:textSize="11sp"
         android:fontFamily="@font/ys_display_regular"
         android:textFontWeight="400"
-        android:textColor="@color/hintColor_white"/>
+        android:textColor="@color/hintColor_white"
+        tools:text="98 треков"/>
     </LinearLayout>
 
 </LinearLayout>

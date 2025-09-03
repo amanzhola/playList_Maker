@@ -1,0 +1,56 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <group
+        android:scaleX="0.55"
+        android:scaleY="0.55"
+        android:translateX="27"
+        android:translateY="27">
+
+        <group android:translateX="-7">
+            <!-- левый «хвост» -->
+            <path
+                android:pathData="M34,29.5L111,3V31.5L40,42.1V76.5V79H39.89C38.95,89.14 32.42,97 24.5,97C15.94,97 9,87.82 9,76.5C9,65.18 15.94,56 24.5,56C28.08,56 31.38,57.6 34,60.3V43V35V29.5Z"
+                android:fillColor="#000000"
+                android:fillType="evenOdd"/>
+
+            <!-- сердце со звёздочками (одноцветно) -->
+            <group
+                android:translateX="71.5"
+                android:translateY="62.5"
+                android:scaleX="1.32"
+                android:scaleY="1.32">
+
+                <path
+                    android:fillColor="#CAC7C7"
+                    android:pathData="
+                        M 0,-12
+                        C -7,-24 -30,-22 -30,-5
+                        C -30,7 -18,16 0,28
+                        C 18,16 30,7 30,-5
+                        C 30,-22 7,-24 0,-12 Z"/>
+
+                <group android:translateX="-10" android:translateY="-8">
+                    <path
+                        android:fillColor="#FCFCFC"
+                        android:pathData="M0,-5 L1.6,-1.6 L5,0 L1.6,1.6 L0,5 L-1.6,1.6 L-5,0 L-1.6,-1.6 Z"/>
+                </group>
+
+                <group android:translateX="12" android:translateY="-12" android:scaleX="0.8" android:scaleY="0.8">
+                    <path
+                        android:fillColor="#FCFCFC"
+                        android:pathData="M0,-5 L1.6,-1.6 L5,0 L1.6,1.6 L0,5 L-1.6,1.6 L-5,0 L-1.6,-1.6 Z"/>
+                </group>
+            </group>
+
+            <!-- правый «хвост» -->
+            <path
+                android:pathData="M111,6L105,18.21V79.3C102.38,76.61 99.08,75 95.5,75C86.94,75 80,84.18 80,95.5C80,106.82 86.94,116 95.5,116C103.68,116 110.38,107.62 110.96,97H111V95.5V6Z"
+                android:fillColor="#000000"
+                android:fillType="evenOdd"/>
+        </group>
+    </group>
+</vector>

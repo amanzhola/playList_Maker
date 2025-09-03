@@ -45,6 +45,9 @@ class MoviesViewModel(
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     val movies: StateFlow<List<Movie>> = _movies.asStateFlow()
 
+    // 👇 добавим «последний реально отработанный запрос»
+    private var lastSearchedQuery: String = ""
+
     // UiState строится без init: вся логика дебаунса/поиска — в декларативном пайплайне
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<UiState> =
@@ -55,32 +58,52 @@ class MoviesViewModel(
             .flatMapLatest { q ->                               // 🏎️💨 отменяем старый поиск при новом вводе
                 if (q.isEmpty()) {
                     _movies.value = emptyList()                 // 🧹 чистим локальный список
+                    lastSearchedQuery = ""                // сброс маркера
                     flowOf(UiState.Default)                     // 📭 показываем дефолтный экран
                 } else {
-                    moviesInteraction.searchMovies(q)           // 🌐🔎 доменный Flow<Resource<List<Movie>>>
-                        .map { result ->                        // 🧰 трансформируем ресурс в UiState
-                            when (result) {
-                                is Resource.Success -> {        // 📬 успех
-                                    val list = result.data.orEmpty()
-                                    if (list.isEmpty()) {
+
+                    // ✅ ГЛАВНОЕ: если возвращаемся на экран с тем же запросом и у нас уже есть данные —
+                    // не делаем повторный поиск и не показываем Loading.
+                    if (q == lastSearchedQuery && _movies.value.isNotEmpty()) {
+                        flowOf(UiState.Success(_movies.value))
+                    } else {
+
+                        moviesInteraction.searchMovies(q)           // 🌐🔎 доменный Flow<Resource<List<Movie>>>
+                            .map { result ->                        // 🧰 трансформируем ресурс в UiState
+                                when (result) {
+                                    is Resource.Success -> {        // 📬 успех
+                                        val list = result.data.orEmpty()
+                                        if (list.isEmpty()) {
+                                            _movies.value = emptyList()
+                                            UiState.Empty           // 🫙 пустая выдача
+                                        } else {
+                                            val favoriteIds =
+                                                toggleFavoriteUseCase.getFavorites() // 📥❤️ получаем избранные id
+                                            val updated = list
+                                                .map { m ->
+                                                    m.copy(
+                                                        inFavorite = favoriteIds.contains(
+                                                            m.id
+                                                        )
+                                                    )
+                                                } // 🖍️ помечаем ❤️
+                                                .sortedByDescending { it.inFavorite }                         // ❤️🔝 избранные вверх
+                                            _movies.value = updated
+                                            lastSearchedQuery = q       // 👈 запоминаем, под какой q получили данные
+                                            UiState.Success(updated) // ✅ отдаём на экран
+                                        }
+                                    }
+
+                                    is Resource.Error -> {           // 🆘 ошибка доменного слоя/сети
                                         _movies.value = emptyList()
-                                        UiState.Empty           // 🫙 пустая выдача
-                                    } else {
-                                        val favoriteIds = toggleFavoriteUseCase.getFavorites() // 📥❤️ получаем избранные id
-                                        val updated = list
-                                            .map { m -> m.copy(inFavorite = favoriteIds.contains(m.id)) } // 🖍️ помечаем ❤️
-                                            .sortedByDescending { it.inFavorite }                         // ❤️🔝 избранные вверх
-                                        _movies.value = updated
-                                        UiState.Success(updated) // ✅ отдаём на экран
+                                        UiState.Error(
+                                            result.message ?: "Неизвестная ошибка"
+                                        ) // 🛟 сообщение о проблеме
                                     }
                                 }
-                                is Resource.Error -> {           // 🆘 ошибка доменного слоя/сети
-                                    _movies.value = emptyList()
-                                    UiState.Error(result.message ?: "Неизвестная ошибка") // 🛟 сообщение о проблеме
-                                }
                             }
-                        }
-                        .onStart { emit(UiState.Loading) }       // 🎬⏳ перед реальным ответом покажем загрузку
+                            .onStart { emit(UiState.Loading) }       // 🎬⏳ перед реальным ответом покажем загрузку
+                    }
                 }
             }
             .stateIn(

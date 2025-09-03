@@ -5,7 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.domain.usecases.createPlaylist.CreatePlaylistUseCase
-import com.example.playlistmaker.presentation.FileCopier
+import com.example.playlistmaker.domain.usecases.createPlaylist.UpdatePlaylistUseCase
+import com.example.playlistmaker.presentation.FileCopier_private
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CreatePlaylistViewModel(
-    private val createPlaylist: CreatePlaylistUseCase
+    private val createPlaylist: CreatePlaylistUseCase,
+    private val updatePlaylist: UpdatePlaylistUseCase
 ) : ViewModel() {
+
+    private var originalName: String = ""
+    private var originalDesc: String = ""
+
+    private enum class Mode { CREATE, EDIT }
+    private var mode: Mode = Mode.CREATE
+    private var editId: Long? = null
+    private var originalCoverString: String? = null
+    private var editInitialized = false
 
     data class UiState(
         val name: String = "",
@@ -30,7 +41,6 @@ class CreatePlaylistViewModel(
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
-    // Одноразовые события: успех / ошибка
     sealed interface Event {
         data class Saved(val id: Long, val name: String) : Event
         data class Error(val message: String) : Event
@@ -38,77 +48,147 @@ class CreatePlaylistViewModel(
     private val _events = Channel<Event>(capacity = Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    // ── Intent’ы ввода ─────────────────────────────────────────────────────────
+    fun enterEditModeIfNeeded(id: Long, name: String, desc: String?, coverPathOrUri: String?) {
+        if (editInitialized) return
+        editInitialized = true
 
-    // Единая точка изменения стейта: после мутации ВСЕГДА пересчитываем createEnabled
+        mode = Mode.EDIT
+        editId = id
+        originalName = name
+        originalDesc = desc.orEmpty()
+        originalCoverString = coverPathOrUri
+
+        _state.value = UiState(
+            name = name,
+            desc = originalDesc,
+            coverUri = toUriOrNull(coverPathOrUri),
+            createEnabled = name.isNotBlank(),
+            dirty = false
+        )
+    }
+
+    // --- helpers ---
+    private fun computeDirty(nextName: String, nextDesc: String, nextCover: Uri?): Boolean {
+        val coverChanged = (nextCover?.toString() ?: "") != (originalCoverString ?: "")
+        return nextName != originalName || nextDesc != originalDesc || coverChanged
+    }
+
     private fun reduce(mutator: (UiState) -> UiState) {
-        val next = mutator(_state.value)
+        val prev = _state.value
+        val next = mutator(prev)
         _state.value = next.copy(createEnabled = next.name.isNotBlank())
     }
 
     fun onNameChanged(raw: String) = reduce { st ->
         val oneLine = raw.replace("\r", " ").replace("\n", " ").trim()
-        st.copy(
-            name = oneLine,
-            dirty = st.dirty || oneLine.isNotBlank()
-        )
+        val dirty = if (mode == Mode.EDIT)
+            computeDirty(oneLine, st.desc, st.coverUri)
+        else
+            (st.dirty || oneLine.isNotBlank())
+
+        st.copy(name = oneLine, dirty = dirty)
     }
 
     fun onDescChanged(s: String) = reduce { st ->
-        st.copy(desc = s, dirty = st.dirty || s.isNotBlank())
+        val dirty = if (mode == Mode.EDIT)
+            computeDirty(st.name, s, st.coverUri)
+        else
+            (st.dirty || s.isNotBlank())
+        st.copy(desc = s, dirty = dirty)
     }
 
     fun onCoverPicked(uri: Uri?) = reduce { st ->
-        st.copy(coverUri = uri, dirty = st.dirty || (uri != null))
+        val dirty = if (mode == Mode.EDIT)
+            computeDirty(st.name, st.desc, uri)
+        else
+            (st.dirty || (uri != null))
+        st.copy(coverUri = uri, dirty = dirty)
     }
 
     fun hasUnsavedChanges(): Boolean = _state.value.dirty
 
-    // ── Сохранение (шаг 7) ─────────────────────────────────────────────────────
     fun save(appContext: Context) {
         val snapshot = _state.value
 
         if (snapshot.name.isBlank()) {
-            // На всякий случай — защита на уровне VM (кнопка-то и так disabled)
             viewModelScope.launch { _events.send(Event.Error("Введите название плейлиста")) }
             return
         }
 
         viewModelScope.launch {
             try {
-                // 1) Копируем обложку в приватное хранилище (если выбрана)
-                val coverPath: String? = if (snapshot.coverUri != null) {
-                    withContext(Dispatchers.IO) {
-                        FileCopier.copyToAppStorage(appContext, snapshot.coverUri)
-                    }.also { copied ->
 
-                        // Требование 9: если не скопировалось — не сохраняем, чтобы не потерять обложку
-                        if (copied == null) {
-                            _events.send(Event.Error("Не удалось сохранить обложку"))
-                            return@launch
+                when(mode) {
+
+                    Mode.CREATE -> {
+
+                        val coverPath: String ? = if (snapshot.coverUri != null) {
+
+                        withContext(Dispatchers.IO) {
+                            FileCopier_private.copyToAppStorage(appContext, snapshot.coverUri)
+
+                        }.also { copied ->
+                            if (copied == null) {
+                                _events.send(Event.Error("Не удалось сохранить обложку"))
+                                return@launch
+                            }
                         }
+                    } else null
+                        val id = withContext(Dispatchers.IO) {
+
+                        createPlaylist(
+                            snapshot.name.trim(),
+                            snapshot.desc.ifBlank { null },
+                            coverPath
+                        )
                     }
-                } else null
+                    _state.value = _state.value.copy(dirty = false)
+                     _events . send (Event.Saved(id = id, name = snapshot.name.trim()))
+                    }
 
-                // 2) Пишем в БД
-                val id = withContext(Dispatchers.IO) {
+                    Mode.EDIT -> {
+                        val currentCover = snapshot.coverUri?.toString()
+                        val coverChanged = currentCover != originalCoverString
 
-                    createPlaylist(
-                        snapshot.name.trim(),
-                        snapshot.desc.ifBlank { null },
-                        coverPath
-                    )
+                        val newCoverPath: String? = if (coverChanged) {
+                            if (snapshot.coverUri == null) {
+                                null
+                            } else {
+                                withContext(Dispatchers.IO) {
+                                    FileCopier_private.copyToAppStorage(appContext, snapshot.coverUri)
+                                }.also { copied ->
+                                    if (copied == null) {
+                                        _events.send(Event.Error("Не удалось сохранить обложку"))
+                                        return@launch
+                                    }
+                                }
+                            }
+                        } else {
+                            originalCoverString
+                        }
+
+                        withContext(Dispatchers.IO) {
+                            updatePlaylist(
+                                id = requireNotNull(editId) { "editId is null in EDIT mode" },
+                                name = snapshot.name.trim(),
+                                desc = snapshot.desc.ifBlank { null },
+                                coverPath = newCoverPath
+                            )
+                        }
+                        _state.value = _state.value.copy(dirty = false)
+                        _events.send(Event.Saved(id = requireNotNull(editId), name = snapshot.name.trim()))
+                    }
                 }
-
-                // 3) Сообщаем об успехе (фрагмент закроет экран и отправит имя назад для Snackbar)
-                _events.send(Event.Saved(id = id, name = snapshot.name.trim()))
-
-                // (Опционально) Сбросим dirty, если останемся на экране
-                _state.value = _state.value.copy(dirty = false)
-
             } catch (e: Exception) {
                 _events.send(Event.Error(e.message ?: "Ошибка сохранения плейлиста"))
             }
         }
+    }
+
+    private fun toUriOrNull(s: String?): Uri? = when {
+        s.isNullOrBlank() -> null
+        s.startsWith("content://") || s.startsWith("file://") || s.startsWith("http") -> Uri.parse(s)
+        s.startsWith("/") -> Uri.fromFile(java.io.File(s)) // обычный file path → Uri.fromFile
+        else -> null
     }
 }

@@ -59,158 +59,166 @@ sealed class NavigationData {
 }
 
 // 🏆 ➡️ 🔄 📦 🤖 📈
-    open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClickListener {
+open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClickListener {
 
-//        private lateinit var mainLayout: LinearLayout // -> 🏆 🤔
-        // 👉 вот почему мне приходилось оборачивать constrain в linearlayout
-        private lateinit var mainLayout: ViewGroup // 🔄 LinearLayout etc
+    //        private lateinit var mainLayout: LinearLayout // -> 🏆 🤔
+    // 👉 вот почему мне приходилось оборачивать constrain в linearlayout
+    private lateinit var mainLayout: ViewGroup // 🔄 LinearLayout etc
 
-        private var isDialogVisible = false
-        private val baseSegmentColors = intArrayOf(
-            R.color.hintFieldColor,
-            R.color.blue
-        )
-        private val segmentColors = IntArray(6) { baseSegmentColors[it % 2] }
-        private lateinit var segmentTexts: Array<String>
-        private val segmentIcons by lazy { SegmentTextHelper.getSegmentIcons(this) }
-        private val newSegmentColors = IntArray(6) { baseSegmentColors[it % 2] }
-        private lateinit var newSegmentTexts: Array<String>
-        private val newSegmentIcons by lazy { SegmentTextHelper.getNewSegmentIcons(this) }
-        private val totalSegments = segmentColors.size
-        private val newTotalSegments = newSegmentColors.size
+    private var isDialogVisible = false
+    private val baseSegmentColors = intArrayOf(
+        R.color.hintFieldColor,
+        R.color.blue
+    )
+    private val segmentColors = IntArray(6) { baseSegmentColors[it % 2] }
+    private lateinit var segmentTexts: Array<String>
+    private val segmentIcons by lazy { SegmentTextHelper.getSegmentIcons(this) }
+    private val newSegmentColors = IntArray(6) { baseSegmentColors[it % 2] }
+    private lateinit var newSegmentTexts: Array<String>
+    private val newSegmentIcons by lazy { SegmentTextHelper.getNewSegmentIcons(this) }
+    private val totalSegments = segmentColors.size
+    private val newTotalSegments = newSegmentColors.size
 
-        private val bottomViewIds = listOf( // 👉 📊
-            R.id.bottom1,
-            R.id.bottom2,
-            R.id.bottom3,
-            R.id.bottom4,
-            R.id.bottom5,
-            R.id.bottom6
-        )
-        var buttonIndex: Int = -1
+    private val bottomViewIds = listOf( // 👉 📊
+        R.id.bottom1,
+        R.id.bottom2,
+        R.id.bottom3,
+        R.id.bottom4,
+        R.id.bottom5,
+        R.id.bottom6
+    )
+    var buttonIndex: Int = -1
 
-        private val failTextView: TextView by lazy { findViewById(R.id.fail) }
-        private val themeInteraction: ThemeInteraction by inject() // 😎
-        lateinit var toolbarHelper: ToolbarHelper
-        lateinit var bottomNavigationHelper: BottomNavigationHelper
-        private lateinit var segmentHelper: SegmentHelper
-        private lateinit var colorApplierHelper: ColorApplierHelper
-        private lateinit var colorPersistenceHelper: ColorPersistenceHelper
-        private lateinit var segmentManager: SegmentManager
-        private lateinit var colorManager: ColorManager
-        private val share: Share by inject { parametersOf(this) }
-        private val support by lazy {
-            getKoin().get<Support> { parametersOf(this, mainLayout, failTextView) }
-        }
-        private val agreement by lazy {
-            getKoin().get<Agreement> { parametersOf(this, mainLayout, failTextView) }
-        }
+    private val failTextView: TextView by lazy { findViewById(R.id.fail) }
+    private val themeInteraction: ThemeInteraction by inject() // 😎
+    lateinit var toolbarHelper: ToolbarHelper
+    lateinit var bottomNavigationHelper: BottomNavigationHelper
+    private lateinit var segmentHelper: SegmentHelper
+    private lateinit var colorApplierHelper: ColorApplierHelper
+    private lateinit var colorPersistenceHelper: ColorPersistenceHelper
+    private lateinit var segmentManager: SegmentManager
+    private lateinit var colorManager: ColorManager
+    private val share: Share by inject { parametersOf(this) }
+    private val support by lazy {
+        getKoin().get<Support> { parametersOf(this, mainLayout, failTextView) }
+    }
+    private val agreement by lazy {
+        getKoin().get<Agreement> { parametersOf(this, mainLayout, failTextView) }
+    }
 
-        override fun onCreate(savedInstanceState: Bundle?) {
-            ThemeLanguageHelper.applySavedLanguage(this) // 🌓 ↔️ 🌗
-            super.onCreate(savedInstanceState) // 🔜 🔝 🔚 ⬇️ ⬅️ 🔙
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeLanguageHelper.applySavedLanguage(this) // 🌓 ↔️ 🌗
+        super.onCreate(savedInstanceState) // 🔜 🔝 🔚 ⬇️ ⬅️ 🔙
 
-            setContentView(getLayoutId())
+        setContentView(getLayoutId())
 
-            mainLayout = findViewById(getMainLayoutId())
+        mainLayout = findViewById(getMainLayoutId())
 
-            buttonIndex = intent.getIntExtra("buttonIndex", -1)
-            val activityName = this::class.simpleName ?: "UnknownActivity"
-            colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(activityName, isDarkThemeEnabled()) }
+        buttonIndex = intent.getIntExtra("buttonIndex", -1)
+        val activityName = this::class.simpleName ?: "UnknownActivity"
+        colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(activityName, isDarkThemeEnabled()) }
 
-            initializeToolbar()
-            colorApplierHelper = ColorApplierHelper(this, mainLayout, toolbarHelper)
-            bottomNavigationHelper = BottomNavigationProvider.createHelper(this, bottomViewIds, buttonIndex)
-            bottomNavigationHelper.setupBottomNavigation()
-            bottomNavigationHelper.setBottomNavigationVisibility()
+        initializeToolbar()
+        // fixing theme on emulator and real mobile difference
+        // ⬇️ сразу применяем цвета темы
+        toolbarHelper.applyThemeColors()
 
-            if (shouldEnableEdgeToEdge()) { enableEdgeToEdge() }
-            setupWindowInsets()
+        colorApplierHelper = ColorApplierHelper(this, mainLayout, toolbarHelper)
+        bottomNavigationHelper = BottomNavigationProvider.createHelper(this, bottomViewIds, buttonIndex)
+        bottomNavigationHelper.setupBottomNavigation()
+        bottomNavigationHelper.setBottomNavigationVisibility()
 
-            val isMainFragment = (getCurrentFragment() is MainFragment)
-            segmentTexts = SegmentTextHelper.getSegmentTexts(this, isMainFragment)
-            newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
+        if (shouldEnableEdgeToEdge()) { enableEdgeToEdge() }
+        setupWindowInsets()
 
-            // 👌 for 2 more 😉 parameters by default to have 1 out of 3
-            segmentHelper = SegmentHelper(this, this)
-            colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
-            segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
-                colorPersistenceHelper, colorManager)
-            segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
-                colorPersistenceHelper, colorManager)
-            colorManager.applySavedColors()
-        }
+        val isMainFragment = (getCurrentFragment() is MainFragment)
+        segmentTexts = SegmentTextHelper.getSegmentTexts(this, isMainFragment)
+        newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
+
+        // 👌 for 2 more 😉 parameters by default to have 1 out of 3
+        segmentHelper = SegmentHelper(this, this)
+        colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
+        segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
+            colorPersistenceHelper, colorManager)
+        segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
+            colorPersistenceHelper, colorManager)
+        colorManager.applySavedColors()
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-            return when (item.itemId) {
-                R.id.dropdown -> {
-                    segmentHelper.showSegmentDialog( // 📈 🎨
-                        segmentColors,
-                        segmentTexts,
-                        segmentIcons,
-                        newSegmentColors,
-                        newSegmentTexts,
-                        newSegmentIcons,
-                        totalSegments,
-                        newTotalSegments
-                    ) {
-                        isDialogVisible = false
-                    }
-                    isDialogVisible = true
-                    true
+        return when (item.itemId) {
+            R.id.dropdown -> {
+                segmentHelper.showSegmentDialog( // 📈 🎨
+                    segmentColors,
+                    segmentTexts,
+                    segmentIcons,
+                    newSegmentColors,
+                    newSegmentTexts,
+                    newSegmentIcons,
+                    totalSegments,
+                    newTotalSegments
+                ) {
+                    isDialogVisible = false
                 }
-                R.id.filter_list -> {
-                    reverseList()
-                    true
-                }
-                else -> super.onOptionsItemSelected(item)
+                isDialogVisible = true
+                true
             }
-        }
-
-        open fun reverseList() {
-            // To be done by subclass or derived class 🔧✨
-        }
-
-        override fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean) {
-            segmentManager.onSegmentClicked(segmentIndex, isChangedState, this)
-        }
-
-        open fun onSegment4Clicked() {} // by btm navig 🔥
-        override fun onResume() {
-            super.onResume()
-            segmentManager.applySavedColors()
-        }
-
-        // ⬇️ 🚗 💖
-        fun showBottomNavigation() = bottomNavigationHelper.showBottomNavigation()
-        fun hideBottomNavigation() = bottomNavigationHelper.hideBottomNavigation()
-        fun isDarkThemeEnabled() = themeInteraction.isDarkTheme() // 🌓 ↔️ 🌗
-
-        protected open fun shouldEnableEdgeToEdge(): Boolean = true
-        protected open fun getLayoutId(): Int = R.layout.base_main
-        protected open fun getMainLayoutId(): Int = R.id.nav_host_container
-
-        override fun onCreateOptionsMenu(menu: Menu): Boolean {
-            menuInflater.inflate(R.menu.menu, menu)
-            return true
-        }
-
-        private fun setupWindowInsets() {
-            ViewCompat.setOnApplyWindowInsetsListener(mainLayout) { v, insets ->
-                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-                insets
+            R.id.filter_list -> {
+                reverseList()
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
+    }
 
-        private fun initializeToolbar() {
-            toolbarHelper = ToolbarHelper(this)
-            toolbarHelper.initialize(getToolbarConfig(), this is MainActivity)
-        }
+    open fun reverseList() {
+        // To be done by subclass or derived class 🔧✨
+    }
 
-        protected open fun getToolbarConfig(): ToolbarConfig {
-            return ToolbarConfig(VISIBLE, R.string.app_name)
+    override fun onSegmentClicked(segmentIndex: Int, isChangedState: Boolean) {
+        segmentManager.onSegmentClicked(segmentIndex, isChangedState, this)
+    }
+
+    open fun onSegment4Clicked() {} // by btm navig 🔥
+    override fun onResume() {
+        super.onResume()
+        segmentManager.applySavedColors()
+
+        // fixing theme on emulator and real mobile difference
+        // ⬇️ на всякий случай — если тема сменена в другой Activity
+        toolbarHelper.applyThemeColors()
+    }
+
+    // ⬇️ 🚗 💖
+    fun showBottomNavigation() = bottomNavigationHelper.showBottomNavigation()
+    fun hideBottomNavigation() = bottomNavigationHelper.hideBottomNavigation()
+    fun isDarkThemeEnabled() = themeInteraction.isDarkTheme() // 🌓 ↔️ 🌗
+
+    protected open fun shouldEnableEdgeToEdge(): Boolean = true
+    protected open fun getLayoutId(): Int = R.layout.base_main
+    protected open fun getMainLayoutId(): Int = R.id.nav_host_container
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
         }
+    }
+
+    private fun initializeToolbar() {
+        toolbarHelper = ToolbarHelper(this)
+        toolbarHelper.initialize(getToolbarConfig(), this is MainActivity)
+    }
+
+    protected open fun getToolbarConfig(): ToolbarConfig {
+        return ToolbarConfig(VISIBLE, R.string.app_name)
+    }
 
     // 🔧 BaseActivity
     fun navigateToMainScreen(host: Any, buttonIndex: Int = -1) {
@@ -241,17 +249,17 @@ sealed class NavigationData {
     }
 
     fun changeLanguage() {
-                ThemeLanguageHelper.toggleLanguage(this)
-                recreate() // 👈 ⚠️ (перезапуск) 🔄
-            }
+        ThemeLanguageHelper.toggleLanguage(this)
+        recreate() // 👈 ⚠️ (перезапуск) 🔄
+    }
 
-        fun shareApp() = share.shareApp()
-        fun writeToSupport() = support.writeToSupport()
-        fun openAgreement() = agreement.openAgreement()
+    fun shareApp() = share.shareApp()
+    fun writeToSupport() = support.writeToSupport()
+    fun openAgreement() = agreement.openAgreement()
 
 
 //********************************************************************************
-        // tranfer main to fragment
+    // tranfer main to fragment
 
     // no-op: handled by navController.navigate()
     protected open fun setupInitialFragment(fragment: Fragment) {
@@ -282,5 +290,15 @@ sealed class NavigationData {
         newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
     }
 
+    // fixing theme on emulator and real mobile difference
+    // Если где-то перехватишь uiMode вручную — вызови здесь:
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        delegate.applyDayNight()
+        toolbarHelper.applyThemeColors()
+    }
 
+    // fixing theme on emulator and real mobile difference
+    // Удобный фасад, чтобы дёргать из фрагментов при точечной смене темы
+    fun applyToolbarThemeColors() = toolbarHelper.applyThemeColors()
 }
