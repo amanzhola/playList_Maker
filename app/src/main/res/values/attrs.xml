@@ -2,4 +2,8 @@
 <resources>
     <attr name="menuTintColor" format="color" />
     <!--❌ ревьюер(иначе убрать изопа en\themes + values\attr + AppTheme + Manifest)-->
+
+    <attr name="toolbarColor" format="color" />
+    <attr name="toolbarContentColor" format="color" />
+
 </resources>

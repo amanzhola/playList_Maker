@@ -55,14 +55,6 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
         setupViewPager()
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
-        // Фон тулбара
-        val blueColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
-
-        // Цвет заголовка
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
-
         // выбрать вкладку один раз при новом входе
         if (savedInstanceState == null) {
             val index = arguments?.getInt(NavKeys.SELECT_TAB, -1) ?: -1
@@ -132,6 +124,9 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
         applyToolbarTheme()
+
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
     private fun applyToolbarTheme() {

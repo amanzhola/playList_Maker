@@ -195,10 +195,11 @@
     <string name="edit">Редактировать</string>
     <string name="playlist_edited">Плейлист отредактирован</string>
     <string name="no_tracks_in_playlist">В плейлисте нет треков</string>
+    <string name="exit_dialog_edit">Завершить редактирование плейлиста?</string>
 
 
 
-<!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒-->
+<!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
 <!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
     <!--    for Ok people -->
     <!--    <string name="app_name" translatable="false">✨Playlist maker</string>-->
@@ -386,8 +387,9 @@
 <!--    <string name="delete_playlist_question">❓🗑️🎶 Удалить плейлист?</string>-->
 
 <!--    <string name="save">💾 Сохранить</string>-->
-<!--    <string name="edit">✏️ Редактировать</string>-->
+<!--    <string name="edit">✏️🖼️ Редактировать</string>-->
 <!--    <string name="playlist_edited">✅ Плейлист отредактирован</string>-->
 <!--    <string name="no_tracks_in_playlist">😌В плейлисте нет треков</string>-->
+<!--    <string name="exit_dialog_edit">✏️🖼️⚠️Завершить редактирование плейлиста?</string>-->
 
 </resources>

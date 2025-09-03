@@ -119,6 +119,10 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(activityName, isDarkThemeEnabled()) }
 
         initializeToolbar()
+        // fixing theme on emulator and real mobile difference
+        // ⬇️ сразу применяем цвета темы
+        toolbarHelper.applyThemeColors()
+
         colorApplierHelper = ColorApplierHelper(this, mainLayout, toolbarHelper)
         bottomNavigationHelper = BottomNavigationProvider.createHelper(this, bottomViewIds, buttonIndex)
         bottomNavigationHelper.setupBottomNavigation()
@@ -179,6 +183,10 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     override fun onResume() {
         super.onResume()
         segmentManager.applySavedColors()
+
+        // fixing theme on emulator and real mobile difference
+        // ⬇️ на всякий случай — если тема сменена в другой Activity
+        toolbarHelper.applyThemeColors()
     }
 
     // ⬇️ 🚗 💖
@@ -281,4 +289,16 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         segmentTexts = SegmentTextHelper.getSegmentTexts(this, isMainFragment)
         newSegmentTexts = SegmentTextHelper.getNewSegmentTexts(this, isMainFragment)
     }
+
+    // fixing theme on emulator and real mobile difference
+    // Если где-то перехватишь uiMode вручную — вызови здесь:
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        delegate.applyDayNight()
+        toolbarHelper.applyThemeColors()
+    }
+
+    // fixing theme on emulator and real mobile difference
+    // Удобный фасад, чтобы дёргать из фрагментов при точечной смене темы
+    fun applyToolbarThemeColors() = toolbarHelper.applyThemeColors()
 }

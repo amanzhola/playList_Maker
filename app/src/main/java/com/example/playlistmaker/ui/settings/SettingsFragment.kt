@@ -6,7 +6,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
@@ -39,19 +39,17 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
 
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
-        // Фон тулбара
-        val blueColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
-
-        // Цвет заголовка
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
-
         // Инициализация переключателя
         binding.switchControl.apply {
             isChecked = viewModel.isDarkTheme()
             setOnCheckedChangeListener { _, isChecked ->
                 viewModel.toggleTheme(isChecked)
+
+                // применяем тему мгновенно // for activity and fragment via BaseActivity
+                // 1) мгновенно применить тему к текущей Activity
+                (requireActivity() as? AppCompatActivity)?.delegate?.applyDayNight() // ⚡ применить Day/Night к Activity
+                // 2) мгновенно перекрасить тулбар по атрибутам темы
+                (activity as? BaseActivity)?.applyToolbarThemeColors() // ⚡ перекрасить тулбар под логику
             }
         }
 
@@ -110,6 +108,8 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
-    }
 
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
+    }
 }

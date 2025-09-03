@@ -10,7 +10,6 @@ import android.view.View.GONE
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -77,14 +76,6 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         setupListeners()
 
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
-
-        // Фон тулбара
-        val blueColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
-
-        // Цвет заголовка
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
     }
 
     override fun getBottomNavButtonIndex(): Int = 0
@@ -236,5 +227,8 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         }
 
         (activity as? BaseActivity)?.updateSegmentTexts()
+
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 }

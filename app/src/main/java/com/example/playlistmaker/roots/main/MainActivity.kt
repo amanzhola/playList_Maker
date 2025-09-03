@@ -98,6 +98,14 @@ class MainActivity : BaseActivity() {
             )
             val shouldHide = dest.id in hideOn
 
+            val isMainDestination = dest.id == R.id.mainFragment // подставь ID твоего главного фрагмента
+
+            if (isMainDestination) {
+                toolbarHelper.applyMainBlueColors()
+            } else {
+                toolbarHelper.applyThemeColors()
+            }
+
             // прячем кастомный низ
             findViewById<View>(R.id.bottomNavigation).isVisible = !shouldHide
             // если нужно — прячем и кастомный тулбар
@@ -205,6 +213,4 @@ class MainActivity : BaseActivity() {
             intent.removeExtra("preview_track_id")
         }
     }
-
-
 }

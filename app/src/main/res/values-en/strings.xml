@@ -142,7 +142,7 @@
     <!-- <adding CreatePlayList> -->
     <string name="name_new_playlist">✍️ Name*🌼</string>
     <string name="create"> 🎵➕ Create ➕🖼️ </string>
-    <string name="create_playlist_title">🎵➕ Новый плейлист ➕🖼️</string>
+    <string name="create_playlist_title">🎵➕ New PlayList ➕🖼️</string>
     <string name="exit_dialog_title">⚠️ Finish creating playlist? 🏁 </string>
     <string name="exit_dialog_message">⚠️ All unsaved data will be lost ℹ️,</string>
     <string name="cancel">❌ Cancel ↩️</string>
@@ -186,9 +186,10 @@
     <string name="delete_playlist_question">❓🗑️🎶 Want to delete a playlist?</string>
 
     <string name="save">💾 Save</string>
-    <string name="edit">✏️ Edit</string>
+    <string name="edit">✏️🖼️ Edit</string>
     <string name="playlist_edited">✅ Playlist edited</string>
     <string name="no_tracks_in_playlist">😌Playlist is empty</string>
+    <string name="exit_dialog_edit">✏️🖼️⚠️Finish editing playlist? 🏁 </string>
 
 
 </resources>

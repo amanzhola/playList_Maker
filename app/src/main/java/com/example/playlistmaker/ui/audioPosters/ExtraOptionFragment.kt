@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -72,14 +71,6 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // 🎨 Тулбар
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        val backgroundColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.apply {
-            setTitleTextColor(whiteColor)
-            setToolbarBackgroundColor(backgroundColor)
-        }
 
         val bottom = view.findViewById<LinearLayout>(R.id.playlists_bottom_sheet)
         overlay = view.findViewById(R.id.overlay)
@@ -358,6 +349,9 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             overlay.visibility = View.GONE
             overlay.alpha = 0f
         }
+
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
     private fun showSnack(text: String, durationMs: Int = 4000) {

@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import com.example.playlistmaker.data.repository.base.ThemeRepositoryImpl
 import com.example.playlistmaker.di.appModule
 import com.example.playlistmaker.di.db.databaseModule
 import com.example.playlistmaker.di.extraOption.extraOptionDataModule
@@ -31,7 +30,7 @@ import com.example.playlistmaker.di.settingsActivity.settingsActivityViewModelMo
 import com.example.playlistmaker.di.weather.weatherDataModule
 import com.example.playlistmaker.di.weather.weatherInteractionModule
 import com.example.playlistmaker.di.weather.weatherRepositoryModule
-import com.example.playlistmaker.domain.usecases.base.ThemeManager
+import com.example.playlistmaker.domain.api.base.ThemeInteraction
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -39,7 +38,6 @@ import org.koin.core.context.GlobalContext.startKoin
 
 // ☀️ 🔁 🌙 👉 🧼🏗️✅
 class App : Application() { // ☀️ 🔁 🌙
-    private lateinit var themeManager: ThemeManager // 😎
 
     companion object {
         var wasInitialLaunchDone: Boolean = false
@@ -91,18 +89,14 @@ class App : Application() { // ☀️ 🔁 🌙
         // 🌍 Установка языка на основе сохранённого
         ThemeLanguageHelper.applySavedLanguage(this)
 
-        // 🎨 Инициализация ThemeManager через Repository
-        val repository = ThemeRepositoryImpl(this)
-        themeManager = ThemeManager(repository)
-        themeManager.applyTheme()
+        // 3) применяем сохранённую тему (до показа первой Activity)
+        get<ThemeInteraction>().applyTheme()
 
         // 🧼 Ловим крэш-ошибки
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             Log.e("UncaughtException", "Uncaught exception in thread ${thread.name}", throwable)
         }
     }
-
-    fun isDarkThemeEnabled() = themeManager.repository.isDarkTheme()
 
     private fun View.traverse(action: (View) -> Unit) {
         action(this)

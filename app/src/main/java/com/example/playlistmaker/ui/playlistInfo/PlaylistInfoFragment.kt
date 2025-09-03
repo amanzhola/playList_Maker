@@ -50,6 +50,8 @@ import org.koin.core.parameter.parametersOf
 class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackClickListener {
 
     private var isMenuOpened = false
+    private var menuInitDone = false
+
     private val args: PlaylistInfoFragmentArgs by navArgs()
     private val viewModel: PlaylistInfoViewModel by viewModel()
 
@@ -224,8 +226,7 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
     private fun ensureMenuInit(root: View = requireView()) {
 
         overlay.alpha = BASE_DIM // ⬅️ базовое (лёгкое) затемнение
-
-        if (::menuBehavior.isInitialized && ::menuAdapter.isInitialized) return
+        if (menuInitDone) return
 
         val menuSheet = root.findViewById<View>(R.id.menu_sheet)
             ?: error("layout must contain @id/menu_sheet")
@@ -247,24 +248,30 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
             menuAdapter = MenuAdapter { actionId ->
                 when (actionId) {
                     ACTION_SHARE  -> { shareCurrentPlaylistOrToast(); menuBehavior.state = BottomSheetBehavior.STATE_HIDDEN }
-                    ACTION_EDIT   -> {
-                    /* по ТЗ шаг 5 */
+                    ACTION_EDIT -> {
                         val ui = lastUi
-                        if (ui == null) {
-                            // нет актуального UI — просто закрываем меню и выходим из ветки
+                        // 1) Спрятать меню и оверлей ПЕРЕД навигацией
+                        if (::menuBehavior.isInitialized) {
                             menuBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                        } else {
-                            findNavController().navigate(
-                                R.id.createPlaylistFragment,
-                                bundleOf(
-                                    ARG_EDIT_ID    to args.playlistId, // <-- id из SafeArgs
-                                    ARG_EDIT_NAME  to ui.name,
-                                    ARG_EDIT_DESC  to ui.description,
-                                    ARG_EDIT_COVER to ui.coverPath     // <-- строка пути/URI
-                                )
+                        }
+                        overlay.animate().cancel()
+                        overlay.alpha = BASE_DIM
+                        overlay.isClickable = false
+                        overlay.isFocusable = false
+                        overlay.visibility = View.GONE
+
+                        lastUi?.let {
+
+                            val argsBundle = bundleOf(
+                                ARG_EDIT_ID    to args.playlistId,
+                                ARG_EDIT_NAME  to ui?.name,
+                                ARG_EDIT_DESC  to ui?.description,
+                                ARG_EDIT_COVER to ui?.coverPath
                             )
-                            // опционально сразу прячем меню
-                            menuBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+                            view?.post {
+                                findNavController().navigate(R.id.createPlaylistFragment, argsBundle)
+                            }
                         }
                     }
                     ACTION_DELETE -> {
@@ -349,10 +356,12 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
                     }
                 }
             })
+
+            // ВАЖНО: помечаем, что меню привязано к ТЕКУЩЕМУ view
+            menuInitDone = true
         }
     }
 
-    /** Открыть меню: заполняем и раскрываем. Безопасно, т.к. ensureMenuInit() уже был вызван. */
     private fun openMenuSheet() {
 
         val ui = lastUi ?: return
@@ -397,5 +406,10 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
             }
             .create()
             .showWithSquareWhiteStyle(requireContext())
+    }
+
+    override fun onDestroyView() {
+        menuInitDone = false
+        super.onDestroyView()
     }
 }

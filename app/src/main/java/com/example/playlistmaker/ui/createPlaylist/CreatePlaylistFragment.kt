@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
@@ -34,6 +35,7 @@ import com.example.playlistmaker.utils.ARG_EDIT_ID
 import com.example.playlistmaker.utils.ARG_EDIT_NAME
 import com.example.playlistmaker.utils.NavKeys
 import com.example.playlistmaker.utils.NavKeys.SCROLL_TOP
+import com.example.playlistmaker.utils.showWithSquareWhiteStyle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -67,14 +69,6 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         super.onViewCreated(view, savedInstanceState)
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
-        // Фон тулбара
-        val blueColor = ContextCompat.getColor(requireContext(), R.color.white_textColor)
-        getBaseActivity()?.toolbarHelper?.setToolbarBackgroundColor(blueColor)
-
-        // Цвет заголовка
-        val whiteColor = ContextCompat.getColor(requireContext(), R.color.textColor_white)
-        getBaseActivity()?.toolbarHelper?.setTitleTextColor(whiteColor)
-
         // ★ Если открылись в режиме редактирования — один раз передадим VM исходные данные
         if (isEditMode) {
             val id    = requireArguments().getLong(ARG_EDIT_ID)
@@ -84,8 +78,7 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             vm.enterEditModeIfNeeded(id, name, desc, cover) // ← см. патч VM ниже
         }
 
-        // ★ Текст заголовка/кнопки в зависимости от режима
-        val titleRes = if (isEditMode) R.string.edit_playlist_title else R.string.create_playlist_title
+        // ★ Текст кнопки в зависимости от режима
         binding.btnCreate.text = getString(if (isEditMode) R.string.save else R.string.create)
 
         // первичное восстановление
@@ -190,8 +183,6 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                                             Intent().putExtra("playlist_created_name", e.name)
                                         )
                                         requireActivity().finish() // закрываем MainActivity и возвращаемся назад
-
-
                                     }
 
                                     // ExtraOption (тот же граф)
@@ -212,6 +203,12 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
     override fun onDestroyView() {
@@ -266,7 +263,7 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             when {
                 // ★ В РЕЖИМЕ РЕДАКТИРОВАНИЯ — ВСЕГДА закрываем без диалога/сохранения
                 isEditMode   -> safePopBack()
-                fromPlaylist -> safePopBack()              // тут как и раньше — вернёмся по графу
+                fromPlaylist -> safePopBack()              // вернёмся по графу
                 fromPreview  -> {
                     // Возвращаемся в TrackPreviewActivity БЕЗ результата (отмена)
                     requireActivity().setResult(Activity.RESULT_CANCELED)
@@ -276,11 +273,25 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
-        // ★ Диалог подтверждения — только в режиме СОЗДАНИЯ
-        if (!isEditMode && vm.hasUnsavedChanges()) {
-            showExitDialog(onConfirm = doExit) // диалог: подтвердил → выполняем doExit
+        val hasChanges = vm.hasUnsavedChanges()
+
+        if (isEditMode) { // ★ Диалог подтверждения — только в режиме СОЗДАНИЯ + РЕДАКТИРОВАНИЕ
+            // 🔔 Режим редактирования: если есть несохранённые изменения — спросим подтверждение
+            if (hasChanges) {
+                showExitDialog(
+                    titleRes = R.string.exit_dialog_edit,             // 👈 другой заголовок
+                    onConfirm = doExit
+                )
+            } else {
+                doExit()
+            }
         } else {
-            doExit()                           // нет изменений → выходим сразу
+            // 🔔 Режим создания: как и было — диалог только если есть изменения
+            if (hasChanges) {
+                showExitDialog(onConfirm = doExit)
+            } else {
+                doExit()
+            }
         }
     }
 
@@ -306,15 +317,17 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
     }
 
     private fun showExitDialog(
-        onConfirm: () -> Unit = { safePopBack() },   // ← по умолчанию делает как раньше
+        @StringRes titleRes: Int = R.string.exit_dialog_title,
+        @StringRes messageRes: Int = R.string.exit_dialog_message,
+        onConfirm: () -> Unit = { safePopBack() },
         onCancel: (() -> Unit)? = null
     ) {
         if (exitDialogShown) return
         exitDialogShown = true
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.exit_dialog_title))
-            .setMessage(getString(R.string.exit_dialog_message))
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(titleRes))
+            .setMessage(getString(messageRes))
             .setNegativeButton(R.string.cancel) { d, _ ->
                 d.dismiss()
                 onCancel?.invoke()
@@ -323,7 +336,9 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                 d.dismiss()
                 onConfirm()
             }
-            .setOnDismissListener { exitDialogShown = false }
-            .show()
+            .create()
+
+        dialog.setOnDismissListener { exitDialogShown = false }
+        dialog.showWithSquareWhiteStyle(requireContext())
     }
 }

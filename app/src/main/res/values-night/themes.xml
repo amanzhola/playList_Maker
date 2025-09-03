@@ -4,6 +4,19 @@
     <style name="Base.Theme.PlaylistMaker" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="toolbarColor">@color/textColor</item>
+        <item name="toolbarContentColor">@color/white</item>
+    </style>
+
+    <!-- Глобальная тема приложения = просто наследник базы -->
+    <style name="AppTheme" parent="Base.Theme.PlaylistMaker">
+        <item name="menuTintColor">@color/transparent</item>
+    </style>
+
+    <!-- Оверлей для MainActivity со синим тулбаром -->
+    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="Base.Theme.PlaylistMaker">
+        <item name="toolbarColor">@color/textColor</item>          <!-- синий -->
+        <item name="toolbarContentColor">@color/white</item> <!-- белые иконки/текст -->
     </style>
 
     <style name="SwitchView" parent="SettingsTextView">
