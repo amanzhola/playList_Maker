@@ -197,6 +197,13 @@
     <string name="no_tracks_in_playlist">В плейлисте нет треков</string>
     <string name="exit_dialog_edit">Завершить редактирование плейлиста?</string>
 
+    <string name="export_failed">"🖼️🎶📀Экспорт плейлиста не удался 😌</string>
+    <string name="import_preview_title">"➕🆕🖼️Импорт Плейлиста 🎶📀</string>
+
+    <!-- share albums for ImportPreviewFragment -->
+    <string name="playlist_saved">🖼️📀Плейлист «%1$s» сохранён 🎶</string>
+    <string name="playlist_saved_with_count">🖼️📀Плейлист «%1$s» сохранён — %2$s 🎶</string>
+
 
 
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
@@ -392,4 +399,10 @@
 <!--    <string name="no_tracks_in_playlist">😌В плейлисте нет треков</string>-->
 <!--    <string name="exit_dialog_edit">✏️🖼️⚠️Завершить редактирование плейлиста?</string>-->
 
+<!--    <string name="export_failed">"🖼️🎶📀Экспорт альбома не удался 😌</string>-->
+<!--    <string name="import_preview_title">"➕🆕🖼️Импорт Плейлиста 🎶📀</string>-->
+
+    <!-- share albums for ImportPreviewFragment -->
+<!--    <string name="playlist_saved">🖼️📀Плейлист «%1$s» сохранён 🎶</string>-->
+<!--    <string name="playlist_saved_with_count">🖼️📀Плейлист «%1$s» сохранён — %2$s 🎶</string>-->
 </resources>

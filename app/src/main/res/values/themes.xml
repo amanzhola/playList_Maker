@@ -6,7 +6,7 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
 
-        !-- базовые цвета тулбара для всех экранов, кроме Main -->
+        <!-- базовые цвета тулбара для всех экранов, кроме Main -->
         <item name="toolbarColor">@color/white</item>
         <item name="toolbarContentColor">@color/textColor</item>
     </style>
@@ -18,7 +18,7 @@
     </style>
 
     <!-- Оверлей для MainActivity со синим тулбаром -->
-    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="Base.Theme.PlaylistMaker">
+    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="ThemeOverlay.Material3">
         <item name="toolbarColor">@color/backgroundDay</item>          <!-- синий -->
         <item name="toolbarContentColor">@color/textColor</item> <!-- белые иконки/текст -->
     </style>

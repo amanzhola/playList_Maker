@@ -1,4 +1,4 @@
 <!-- <for FragmentPlaylist description edit line> -->
 <resources>
-    <integer name="qty_lines_create_playlist">2</integer>
+    <integer name="qty_lines_create_playlist">1</integer>
 </resources>

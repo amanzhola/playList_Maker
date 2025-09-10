@@ -21,10 +21,10 @@ val playlistsModule = module {
     factory {
         CreatePlaylistUseCase(get()) }
 
-    // Экран Create Playlist 🎵➕ Новый плейлист ➕🖼️
+    // Экран Create Playlist 🎵➕ Новый плейлист ➕🖼️  ➕for share albums with tracks
     // update + get() for Create Playlist -> edit(updating + use case)
     viewModel {
-        CreatePlaylistViewModel(get(), get()) }
+        CreatePlaylistViewModel(get(), get(), get()) }
 
     // Экран Медиатеки -> Вкладка "Плейлисты" 🎼
     viewModel {

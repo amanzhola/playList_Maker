@@ -43,9 +43,9 @@
     <dimen name="author_margin_button">20dp</dimen>
     <dimen name="guideline">0.6</dimen>
 
-    <dimen name="dialog_circle">260dp</dimen>
+    <dimen name="dialog_circle">280dp</dimen>
 
-    <dimen name="small_circle_radius">38dp</dimen>
+    <dimen name="small_circle_radius">40dp</dimen>
     <dimen name="text_size_small">12sp</dimen>
     <dimen name="text_size_large">14sp</dimen>
     <dimen name="icon_size">28dp</dimen>
@@ -76,11 +76,14 @@
     <!-- <create playlistInfo> -->
     <dimen name="Title_text_24">24sp</dimen>
     <dimen name="Search_Text_18">18sp</dimen>
-    <dimen name="playlist_sheet_peek">200dp</dimen>
-    <dimen name="playlist_sheet_peek2">320dp</dimen>
+    <dimen name="playlist_sheet_peek">325dp</dimen>
+    <dimen name="playlist_sheet_peek2">340dp</dimen>
     <dimen name="playlist_sheet_expanded_offset">56dp</dimen>
 
     <!-- <create playlistInfo for tabs> -->
     <dimen name="playlist_cover_tablet_height">420dp</dimen>
+
+    <!-- <create playlistInfo for BS having down from Share and Menu buttons> -->
+    <dimen name="peek_below_share_extra">15dp</dimen>
 
 </resources>

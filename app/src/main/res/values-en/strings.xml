@@ -180,16 +180,23 @@
     <string name="no">❌ No</string>
 
     <string name="edit_playlist_title">✏️ Edit PlayList</string>
-    <string name="delete_playlist">🗑️🎶 Delete playlist</string>
+    <string name="delete_playlist">🗑️🎶 Delete playList</string>
 
     <string name="nothing_to_share">📭 This playlist does not have a list of tracks that can be shared</string>
     <string name="delete_playlist_question">❓🗑️🎶 Want to delete a playlist?</string>
 
     <string name="save">💾 Save</string>
     <string name="edit">✏️🖼️ Edit</string>
-    <string name="playlist_edited">✅ Playlist edited</string>
-    <string name="no_tracks_in_playlist">😌Playlist is empty</string>
+    <string name="playlist_edited">✅ PlayList edited</string>
+    <string name="no_tracks_in_playlist">😌PlayList is empty</string>
     <string name="exit_dialog_edit">✏️🖼️⚠️Finish editing playlist? 🏁 </string>
+
+    <string name="export_failed">"🖼️🎶📀PlayList export is failed 😌</string>
+    <string name="import_preview_title">"➕🆕🖼️Import of PlayList 🎶📀</string>
+
+    <!-- share albums for ImportPreviewFragment -->
+    <string name="playlist_saved">🖼️📀PlayList «%1$s» saved 🎶</string>
+    <string name="playlist_saved_with_count">🖼️📀PlayList «%1$s» saved — %2$s 🎶</string>
 
 
 </resources>

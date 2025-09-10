@@ -2,10 +2,13 @@ package com.example.playlistmaker.presentation.createPlaylist
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.usecases.createPlaylist.CreatePlaylistUseCase
 import com.example.playlistmaker.domain.usecases.createPlaylist.UpdatePlaylistUseCase
+import com.example.playlistmaker.domain.usecases.playlist.AddTrackToPlaylistUseCase
 import com.example.playlistmaker.presentation.FileCopier_private
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -18,8 +21,12 @@ import kotlinx.coroutines.withContext
 
 class CreatePlaylistViewModel(
     private val createPlaylist: CreatePlaylistUseCase,
-    private val updatePlaylist: UpdatePlaylistUseCase
+    private val updatePlaylist: UpdatePlaylistUseCase,
+    private val addTrackToPlaylist: AddTrackToPlaylistUseCase,
 ) : ViewModel() {
+
+    // то, что пришло из ImportPreview (или пусто)
+    private var pendingImportTracks: List<Track> = emptyList()
 
     private var originalName: String = ""
     private var originalDesc: String = ""
@@ -134,16 +141,29 @@ class CreatePlaylistViewModel(
                             }
                         }
                     } else null
+
+                        // 1) создаём плейлист
                         val id = withContext(Dispatchers.IO) {
 
-                        createPlaylist(
-                            snapshot.name.trim(),
-                            snapshot.desc.ifBlank { null },
-                            coverPath
-                        )
-                    }
-                    _state.value = _state.value.copy(dirty = false)
-                     _events . send (Event.Saved(id = id, name = snapshot.name.trim()))
+                            createPlaylist(
+                                snapshot.name.trim(),
+                                snapshot.desc.ifBlank { null },
+                                coverPath
+                            )
+                        }
+
+                        // 2) добавляем треки, если они пришли из импорта
+                        // после получения newId
+                        if (pendingImportTracks.isNotEmpty()) {
+                            withContext(Dispatchers.IO) {
+                                for (t in pendingImportTracks) {
+                                    runCatching { addTrackToPlaylist(id, t) }
+                                }
+                            }
+                        }
+
+                        _state.value = _state.value.copy(dirty = false)
+                        _events . send (Event.Saved(id = id, name = snapshot.name.trim()))
                     }
 
                     Mode.EDIT -> {
@@ -185,10 +205,35 @@ class CreatePlaylistViewModel(
         }
     }
 
-    private fun toUriOrNull(s: String?): Uri? = when {
-        s.isNullOrBlank() -> null
-        s.startsWith("content://") || s.startsWith("file://") || s.startsWith("http") -> Uri.parse(s)
-        s.startsWith("/") -> Uri.fromFile(java.io.File(s)) // обычный file path → Uri.fromFile
-        else -> null
+    private fun toUriOrNull(s: String?): Uri? {
+        val str = s?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+
+        return when {
+            str.startsWith("content://") ||
+                    str.startsWith("file://")    ||
+                    str.startsWith("http://")    ||
+                    str.startsWith("https://")   -> str.toUri()
+
+            str.startsWith("/") -> Uri.fromFile(java.io.File(str)) // file path
+            else -> null
+        }
+    }
+
+    // import
+    fun prefillForCreate(
+        name: String,
+        desc: String?,
+        cover: String?,
+        tracks: List<Track> = emptyList()   // ← опционально
+    ) {
+        // режим CREATE: просто кладём значения в state; dirty = false (пользователь ещё не трогал)
+        _state.value = _state.value.copy(
+            name = name,
+            desc = desc.orEmpty(),
+            coverUri = toUriOrNull(cover),
+            dirty = false,
+            createEnabled = name.isNotBlank()
+        )
+        pendingImportTracks = tracks // добавлен для кол-во треков для инфо при сохранении альбома
     }
 }

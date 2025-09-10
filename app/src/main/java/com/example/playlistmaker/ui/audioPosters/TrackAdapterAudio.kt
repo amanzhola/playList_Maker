@@ -112,11 +112,10 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
                 album.visibility = View.VISIBLE
             }
 
-            trackYear.text = track.releaseDate.replaceRange(
-                track.releaseDate.indexOf("-"),
-                track.releaseDate.length,
-                ""
-            )
+            val date = track.releaseDate
+            val cutFrom = date.indexOf('-').takeIf { it >= 0 } ?: date.length
+            trackYear.text = date.replaceRange(cutFrom, date.length, "")
+
             trackGenre.text = track.primaryGenreName
             trackCountry.text = track.country
 

@@ -1,12 +1,15 @@
 package com.example.playlistmaker.presentation.utils
 
 import android.app.Activity
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.AttrRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.example.playlistmaker.R
+import com.google.android.material.color.MaterialColors
 
 data class ToolbarConfig( // 📍 👏
     val backArrowVisibility: Int,
@@ -19,6 +22,11 @@ class ToolbarHelper(private val activity: Activity) {
     private var toolbar: Toolbar? = null
     private var title: TextView? = null
     private var backArrow: ImageView? = null
+
+    private fun resolveColorOrNull(view: View, @AttrRes attr: Int): Int? {
+        val tv = TypedValue()
+        return if (view.context.theme.resolveAttribute(attr, tv, true)) tv.data else null
+    }
 
     fun initialize(config: ToolbarConfig, isMainActivity: Boolean) {
         toolbar = activity.findViewById(R.id.toolbar) ?: return
@@ -64,17 +72,17 @@ class ToolbarHelper(private val activity: Activity) {
     /** Применить цвета из ТЕКУЩЕЙ темы (Day/Night) */
     fun applyThemeColors() {
         val tb = toolbar ?: return
+
         // Берём не «жёсткие» R.color.*, а атрибуты темы
-        val bg = com.google.android.material.color.MaterialColors.getColor(
-            tb, R.attr.toolbarColor
-        )
-        val on = com.google.android.material.color.MaterialColors.getColor(
-            tb, R.attr.toolbarContentColor
-        )
+        // + На Android 15 (API 36) Material Components стали строже и кидают IllegalArgumentException,
+        // если атрибут не найден.
+        val bg = resolveColorOrNull(tb, R.attr.toolbarColor)
+            ?: MaterialColors.getColor(tb, com.google.android.material.R.attr.colorSurface)
+        val on = resolveColorOrNull(tb, R.attr.toolbarContentColor)
+            ?: MaterialColors.getColor(tb, com.google.android.material.R.attr.colorOnSurface)
 
         tb.setBackgroundColor(bg)
         title?.setTextColor(on)
-        // стрелка назад и overflow-меню
         backArrow?.imageTintList = android.content.res.ColorStateList.valueOf(on)
         (activity as? AppCompatActivity)?.let {
             tb.navigationIcon?.setTint(on)

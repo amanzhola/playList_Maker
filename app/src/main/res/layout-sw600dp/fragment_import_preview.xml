@@ -11,7 +11,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-<!--        android:layout_height="match_parent"-->
+        <!--        android:layout_height="match_parent"-->
 
         <!-- Обложка -->
         <ImageView
@@ -24,7 +24,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:src="@drawable/barsik"
             android:contentDescription="@string/cover"/>
-<!--        tools:src="@drawable/placeholder2"-->
+        <!--        tools:src="@drawable/placeholder2"-->
 
         <!-- Назад (поверх обложки) -->
         <ImageButton
@@ -86,24 +86,14 @@
                 android:layout_marginVertical="@dimen/album_margin_top">
 
                 <ImageButton
-                    android:id="@+id/btnShare"
+                    android:id="@+id/btnSave"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/share"
-                    app:srcCompat="@drawable/share"
-                    app:tint="@color/black1"
+                    android:contentDescription="@string/save"
+                    app:srcCompat="@drawable/baseline_data_saver_on_24"
                     tools:ignore="TouchTargetSizeCheck" />
 
-                <ImageButton
-                    android:id="@+id/btnMenu"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="16dp"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/menu"
-                    app:srcCompat="@drawable/dot_3"
-                    tools:ignore="TouchTargetSizeCheck" />
             </LinearLayout>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -144,11 +134,6 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/rounder_bsh"/>
 
-        <!--     Заглушка -->
-        <include
-            layout="@layout/fail"
-            tools:visibility="visible"/>
-
         <!-- Пока по ТЗ список не реализуем ш2— просто область для ш3-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTracks"
@@ -157,38 +142,6 @@
             android:layout_weight="1"
             tools:listitem="@layout/track_item"
             android:contentDescription="@string/playlists"/>
-    </LinearLayout>
-
-    <!-- ВТОРАЯ шторка: меню (hideable=true) -->
-    <LinearLayout
-        android:id="@+id/menu_sheet"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/bottom_sheet_bg"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        app:behavior_hideable="true"
-        app:behavior_draggable="true"
-        app:behavior_fitToContents="true"
-        app:behavior_peekHeight="0dp"
-        app:behavior_skipCollapsed="false">
-
-        <!-- «усик» сверху -->
-        <View
-            android:layout_width="@dimen/searchLineHeight_52"
-            android:layout_height="@dimen/marginBottom_4"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/searchPaddingTopBottom_8"
-            android:background="@drawable/rounder_bsh" />
-
-        <!-- Контент меню — просто RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:listitem="@layout/item_menu_action"/>
-        <!--        android:layout_height="0dp"-->
-        <!--        android:layout_weight="1"-->
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

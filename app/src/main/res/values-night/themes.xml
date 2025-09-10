@@ -14,7 +14,7 @@
     </style>
 
     <!-- Оверлей для MainActivity со синим тулбаром -->
-    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="Base.Theme.PlaylistMaker">
+    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="ThemeOverlay.Material3">
         <item name="toolbarColor">@color/textColor</item>          <!-- синий -->
         <item name="toolbarContentColor">@color/white</item> <!-- белые иконки/текст -->
     </style>

@@ -5,6 +5,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+<!--    &lt;!&ndash; Android 13+ (полный доступ к библиотеке) &ndash;&gt;-->
+<!--    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />-->
+<!--    &lt;!&ndash; Android 14+ (частичный доступ — только выбранные пользователем фото/видео) &ndash;&gt;-->
+<!--    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />-->
+
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+
     <!--
          =========================
          option 0: icon [icon_launcher] and roundIcon [icon_launcher_round]
@@ -15,9 +23,9 @@
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:icon="@mipmap/icon_launcher"
+        android:icon="@mipmap/heart"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/icon_launcher_round"
+        android:roundIcon="@mipmap/heart_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
@@ -37,7 +45,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -49,8 +56,8 @@
             <!-- SHARE INTENT (текст) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
@@ -58,13 +65,38 @@
             <!-- OPEN FILE (json) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:mimeType="application/json" />
             </intent-filter>
+
+            <!-- ========== НОВОЕ: ПОЛУЧИТЬ ЧЕРЕЗ "ПОДЕЛИТЬСЯ" ZIP/PLZ ========== -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <!-- покрываем разные MIME, которые встречаются у отправителей -->
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <!-- (если введёшь свой кастомный MIME — добавь сюда ещё одну строку) -->
+                <!-- <data android:mimeType="application/vnd.playlistmaker.playlist" /> -->
+            </intent-filter>
+
+            <!-- ========== НОВОЕ: ОТКРЫТЬ ZIP/PLZ ИЗ ФАЙЛ-МЕНЕДЖЕРА/ЗАГРУЗОК ========== -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/x-zip-compressed" />
+            </intent-filter>
+
         </activity> <!-- Другие активности без LAUNCHER -->
         <activity
             android:name=".ui.launcherPosters.TrackDetailActivity"

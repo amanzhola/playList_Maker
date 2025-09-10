@@ -31,3 +31,18 @@ const val UPDATE_METADATA_SQL = """
         coverPath = :coverPath
     WHERE id = :id
 """
+
+// для ImportPreviewFragment - импорт и просмотр и далее сохранение если будет выбор
+const val ARG_IMPORT_URI     = "import_uri"        // входящий .plz/.zip Uri
+const val ARG_PREFILL_NAME   = "prefill_name"
+const val ARG_PREFILL_DESC   = "prefill_desc"
+const val ARG_PREFILL_COVER  = "prefill_cover"     // String (content:// или file://)
+const val ARG_PREFILL_TRACKS = "arg_prefill_tracks"
+
+const val ACTION_SHOW_IMPORT_PREVIEW = "com.example.playlistmaker.SHOW_IMPORT_PREVIEW"
+const val EXTRA_IMPORT_ENTRY = "extra_is_import_entry"
+const val EXTRA_IMPORT_URI = "import_uri"
+
+const val HEAD_READ_LIMIT = 128 * 1024 // 131072
+
+
