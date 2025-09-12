@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.JsonReader
+import android.util.JsonToken
 import androidx.appcompat.app.AppCompatActivity
 import com.example.playlistmaker.domain.api.base.TrackSerializer
 import com.example.playlistmaker.domain.api.base.TrackStorageHelper
@@ -17,10 +19,10 @@ import com.example.playlistmaker.ui.movie.moviePosters.MoviePager
 import com.example.playlistmaker.utils.ACTION_SHOW_IMPORT_PREVIEW
 import com.example.playlistmaker.utils.EXTRA_IMPORT_ENTRY
 import com.example.playlistmaker.utils.EXTRA_IMPORT_URI
-import com.example.playlistmaker.utils.HEAD_READ_LIMIT
 import org.koin.android.ext.android.inject
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStreamReader
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -261,26 +263,66 @@ class LauncherActivity : AppCompatActivity() {
     /** Это плейлист-JSON (объект с "tracks"), а не массив треков? */
     private fun isPlaylistJson(uri: Uri): Boolean {
         return try {
-            val head = readHead(uri, 128 * 1024) // до 128KB
-            // Быстрая эвристика: объект с полем tracks (и НЕ массив верхнего уровня)
-            val trimmed = head.trimStart()
-            val looksObject = trimmed.startsWith("{")
-            val hasTracks = "\"tracks\"" in head
-            looksObject && hasTracks
-        } catch (_: Exception) { false }
-    }
+            contentResolver.openInputStream(uri)?.use { ins ->
+                JsonReader(InputStreamReader(ins, Charsets.UTF_8)).use { r ->
+                    r.isLenient = true
+                    if (r.peek() != JsonToken.BEGIN_OBJECT) return false
 
-    /** Обёртка с дефолтным лимитом */
-    private fun readHead(uri: Uri) = readHead(uri, HEAD_READ_LIMIT)
+                    var hasName = false
+                    var hasTracksArray = false
+                    var firstTrackLooksValid = false
 
-    /** Читаем ограниченный кусок текста без OOM */
-    private fun readHead(uri: Uri, limit: Int): String {
-        contentResolver.openInputStream(uri)?.use { ins ->
-            val buf = ByteArray(limit)
-            val n = ins.read(buf)
-            if (n <= 0) return ""
-            return String(buf, 0, n, Charsets.UTF_8)
+                    r.beginObject()
+                    while (r.hasNext()) {
+                        when (r.nextName()) {
+                            "name" -> {
+                                hasName = (r.peek() == JsonToken.STRING)
+                                r.skipValue()
+                            }
+                            "tracks" -> {
+                                if (r.peek() == JsonToken.BEGIN_ARRAY) {
+                                    hasTracksArray = true
+                                    r.beginArray()
+                                    // Заглянем в первый элемент массива и проверим «похожесть» на наш SharedTrackDto
+                                    if (r.hasNext() && r.peek() == JsonToken.BEGIN_OBJECT) {
+                                        r.beginObject()
+                                        var hasTrackName = false
+                                        var hasArtistName = false
+                                        var hasTrackId = false
+                                        // посмотрим пару первых полей
+                                        repeat(10) {
+                                            if (!r.hasNext() || r.peek() == JsonToken.END_OBJECT) return@repeat
+                                            val n = r.nextName()
+                                            when (n) {
+                                                "trackName"   -> { hasTrackName = (r.peek() == JsonToken.STRING); r.skipValue() }
+                                                "artistName"  -> { hasArtistName = (r.peek() == JsonToken.STRING); r.skipValue() }
+                                                "trackId"     -> { hasTrackId = (r.peek() == JsonToken.NUMBER); r.skipValue() }
+                                                else          -> r.skipValue()
+                                            }
+                                        }
+                                        // для надёжности: либо есть trackId, либо пара trackName+artistName
+                                        firstTrackLooksValid = hasTrackId || (hasTrackName && hasArtistName)
+                                        // дочитаем объект до конца
+                                        while (r.hasNext()) r.skipValue()
+                                        r.endObject()
+                                    }
+                                    // дочитаем остаток массива быстро
+                                    while (r.hasNext()) r.skipValue()
+                                    r.endArray()
+                                } else {
+                                    r.skipValue()
+                                }
+                            }
+                            else -> r.skipValue()
+                        }
+                    }
+                    r.endObject()
+
+                    hasName && hasTracksArray && firstTrackLooksValid
+                }
+            } ?: false
+        } catch (_: Exception) {
+            false
         }
-        return ""
     }
 }

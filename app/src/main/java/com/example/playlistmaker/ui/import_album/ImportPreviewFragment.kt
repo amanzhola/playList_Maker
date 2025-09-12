@@ -8,6 +8,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnLayout
@@ -33,6 +34,7 @@ import com.example.playlistmaker.utils.ARG_PREFILL_COVER
 import com.example.playlistmaker.utils.ARG_PREFILL_DESC
 import com.example.playlistmaker.utils.ARG_PREFILL_NAME
 import com.example.playlistmaker.utils.ARG_PREFILL_TRACKS
+import com.example.playlistmaker.utils.EXTRA_IMPORT_ENTRY
 import com.example.playlistmaker.utils.NavKeys
 import com.example.playlistmaker.utils.makeSingleLineEllipsizeEnd
 import com.example.playlistmaker.utils.setupDesc
@@ -43,6 +45,11 @@ import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 
 class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrackClickListener {
+
+    private val fromExternalImport by lazy {
+        requireActivity().intent.getBooleanExtra(EXTRA_IMPORT_ENTRY, false)
+    }
+
 
     // Если ты используешь Koin – замени на by viewModel(), остальное без изменений.
     private val vm: ImportPreviewViewModel by viewModels()
@@ -82,8 +89,28 @@ class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrac
         val max = resources.getInteger(R.integer.qty_lines_create_playlist)
 
         btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            if (fromExternalImport) {
+                requireActivity().finishAffinity()
+            } else {
+                val popped = findNavController().popBackStack()
+                if (!popped) requireActivity().finish() // на случай если стек пуст
+            }
         }
+
+        // И системный «Назад» в этом фрагменте — тоже так же:
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (fromExternalImport) {
+                        requireActivity().finishAffinity()
+                    } else {
+                        val popped = findNavController().popBackStack()
+                        if (!popped) requireActivity().finish()
+                    }
+                }
+            }
+        )
 
         // bottom sheet с треками
         val sheet = view.findViewById<View>(R.id.tracks_sheet)

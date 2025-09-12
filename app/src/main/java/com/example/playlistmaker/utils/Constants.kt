@@ -43,6 +43,4 @@ const val ACTION_SHOW_IMPORT_PREVIEW = "com.example.playlistmaker.SHOW_IMPORT_PR
 const val EXTRA_IMPORT_ENTRY = "extra_is_import_entry"
 const val EXTRA_IMPORT_URI = "import_uri"
 
-const val HEAD_READ_LIMIT = 128 * 1024 // 131072
-
 

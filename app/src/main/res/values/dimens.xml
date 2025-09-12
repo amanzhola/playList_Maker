@@ -76,8 +76,8 @@
     <!-- <create playlistInfo> -->
     <dimen name="Title_text_24">24sp</dimen>
     <dimen name="Search_Text_18">18sp</dimen>
-    <dimen name="playlist_sheet_peek">325dp</dimen>
-    <dimen name="playlist_sheet_peek2">340dp</dimen>
+    <dimen name="playlist_sheet_peek">290dp</dimen>
+    <dimen name="playlist_sheet_peek2">325dp</dimen>
     <dimen name="playlist_sheet_expanded_offset">56dp</dimen>
 
     <!-- <create playlistInfo for tabs> -->

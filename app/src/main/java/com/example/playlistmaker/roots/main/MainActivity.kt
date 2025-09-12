@@ -28,10 +28,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : BaseActivity() {
 
+    private var enteredFromImport = false
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enteredFromImport = savedInstanceState?.getBoolean("enteredFromImport")
+            ?: intent.getBooleanExtra(EXTRA_IMPORT_ENTRY, false)
 
         navController = (supportFragmentManager
             .findFragmentById(R.id.nav_host_container) as NavHostFragment).navController
@@ -55,7 +59,7 @@ class MainActivity : BaseActivity() {
         // Обновляем Intent, чтобы сохранить index при recreate()
         intent.putExtra("buttonIndex", buttonIndex)
 
-//        // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
+        // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
         // Сначала пробуем обработать входящий интент
         val handled = handleExternalIntentOnce(intent)
 
@@ -68,7 +72,6 @@ class MainActivity : BaseActivity() {
                 5 -> R.id.extraOptionFragment // ✅ добавляем
                 else -> R.id.mainFragment
             }
-//            navController.navigate(destinationId)
 
             if (navController.currentDestination?.id != destinationId) {
                 navController.navigate(destinationId)
@@ -95,7 +98,6 @@ class MainActivity : BaseActivity() {
 
         // ✅ Настраиваем нижнюю навигацию
         bottomNavigationHelper.setupBottomNavigation()
-//        bottomNavigationHelper.selectButton(buttonIndex)
         if (!handled) {
             bottomNavigationHelper.selectButton(buttonIndex)  // как было
         }
@@ -103,7 +105,9 @@ class MainActivity : BaseActivity() {
 
         // for dialog on exit
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = handleBack()
+            override fun handleOnBackPressed() {
+                if (enteredFromImport) finishAffinity() else handleBack()      //  обычная логика
+            }
         })
 
 
@@ -133,6 +137,7 @@ class MainActivity : BaseActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("buttonIndex", buttonIndex)
+        outState.putBoolean("enteredFromImport", enteredFromImport)   // ← добавили
     }
 
     fun switchFragment(index: Int) {
@@ -213,7 +218,6 @@ class MainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-//        handleExternalIntent(intent)
         handleExternalIntentOnce(intent)
     }
 
@@ -262,8 +266,11 @@ class MainActivity : BaseActivity() {
                 val options = androidx.navigation.navOptions {
                     launchSingleTop = true
                     // <-- ключ: делаем importPreview единственным в back stack
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    popUpTo(navController.graph.id) { inclusive = true }
                 }
+
+                // +++ Новое: запоминаем, что зашли «из импорта»
+                enteredFromImport = true
 
                 if (navController.currentDestination?.id != R.id.importPreviewFragment) {
                     navController.navigate(R.id.importPreviewFragment, args, options)
@@ -271,11 +278,15 @@ class MainActivity : BaseActivity() {
 
                 // помечаем, что это было внешнее открытие
                 intent.putExtra(EXTRA_IMPORT_ENTRY, true)
+                intent.putExtra("_consumed", true)
 
                 // очистка, чтобы не повторялось
                 intent.action = null
                 intent.removeExtra(EXTRA_IMPORT_URI)
                 intent.data = null
+                setIntent(intent)
+
+                // _consumed и setIntent оставляем на handleExternalIntentOnce(...)
                 return true
             }
         }
