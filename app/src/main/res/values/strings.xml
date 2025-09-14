@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--    для // ❌ -->
     <string name="app_name" translatable="false">Playlist maker</string>
@@ -204,8 +205,17 @@
     <string name="playlist_saved">🖼️📀Плейлист «%1$s» сохранён 🎶</string>
     <string name="playlist_saved_with_count">🖼️📀Плейлист «%1$s» сохранён — %2$s 🎶</string>
 
+    <!-- weather wttr -->
+    <string name="country_hint">Country</string>
+    <string name="specify_country">Specify country ❓</string>
+    <string name="country_required">Please enter a country 🙏</string>
+    <string name="coords_not_found">Couldn’t resolve coordinates for %1$s, %2$s 😕</string>
+    <string name="fallback_prompt">Type a country to try wttr.in… 🌤️</string>
+    <string name="wttr_failed">Couldn’t get weather, try again later 😔</string>
 
 
+<!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
+используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
 <!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
     <!--    for Ok people -->
@@ -405,4 +415,13 @@
     <!-- share albums for ImportPreviewFragment -->
 <!--    <string name="playlist_saved">🖼️📀Плейлист «%1$s» сохранён 🎶</string>-->
 <!--    <string name="playlist_saved_with_count">🖼️📀Плейлист «%1$s» сохранён — %2$s 🎶</string>-->
+
+    <!-- weather wttr -->
+<!--    <string name="country_hint">Country</string>-->
+<!--    <string name="specify_country">Specify country ❓</string>-->
+<!--    <string name="country_required">Please enter a country 🙏</string>-->
+<!--    <string name="coords_not_found">Couldn’t resolve coordinates for %1$s, %2$s 😕</string>-->
+<!--    <string name="fallback_prompt">Type a country to try wttr.in… 🌤️</string>-->
+<!--    <string name="wttr_failed">Couldn’t get weather, try again later 😔</string>-->
+
 </resources>

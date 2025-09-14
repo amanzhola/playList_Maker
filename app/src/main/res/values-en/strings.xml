@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources >
 
     <string name="app_name">✨Playlist maker</string>
@@ -198,5 +199,12 @@
     <string name="playlist_saved">🖼️📀PlayList «%1$s» saved 🎶</string>
     <string name="playlist_saved_with_count">🖼️📀PlayList «%1$s» saved — %2$s 🎶</string>
 
+    <!-- weather wttr -->
+    <string name="country_hint">Страна</string>
+    <string name="specify_country">Уточните страну ❓</string>
+    <string name="country_required">Введите страну, пожалуйста 🙏</string>
+    <string name="coords_not_found">Не удалось определить координаты для %1$s, %2$s 😕</string>
+    <string name="fallback_prompt">Укажите страну, попробуем через wttr.in… 🌤️</string>
+    <string name="wttr_failed">Не удалось получить погоду, попробуйте позже 😔</string>
 
 </resources>

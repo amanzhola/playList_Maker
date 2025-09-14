@@ -53,6 +53,7 @@
 
         movie
         <color name="eeeee_black">@color/black</color>
+        <color name="eeeee_textColor">@color/textColor</color>
 
         Track
         <color name="play_red">#F56B6C</color>

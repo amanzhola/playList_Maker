@@ -238,6 +238,7 @@
 
     movie
     <color name="eeeee_black">@color/eeeee</color>
+    <color name="eeeee_textColor">@color/eeeee</color>
 
     <color name="red1">@color/red</color>
     <color name="green1">@color/green</color>
