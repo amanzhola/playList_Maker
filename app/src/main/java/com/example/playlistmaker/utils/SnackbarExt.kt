@@ -16,9 +16,9 @@ fun Activity.showLongSnack(text: CharSequence, durationMs: Int = 3000) {
 }
 
 fun Fragment.showLongSnack(text: CharSequence, durationMs: Int = 3000) {
-    val root = requireActivity().findViewById(android.R.id.content) as android.view.View
+    val root: View = requireActivity().findViewById(android.R.id.content)
     val sb = Snackbar.make(root, text, Snackbar.LENGTH_LONG)
-    (sb.view.layoutParams as? android.view.ViewGroup.MarginLayoutParams)?.setMargins(0, 0, 0, 0)
+    (sb.view.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(0, 0, 0, 0)
     sb.duration = durationMs
     sb.show()
 }
