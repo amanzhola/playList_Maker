@@ -109,7 +109,6 @@
     </style>
 
     <style name="SwitchView" parent="SettingsTextView">
-        <item name="android:paddingEnd">@dimen/Switch_padding_6</item>
         <item name="android:layout_marginTop">@dimen/Separator_10</item>
         <item name="thumbTint">@color/switch_thumb_off_color</item>
         <item name="trackTint">@color/switch_track_off_color</item>
