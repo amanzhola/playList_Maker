@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.search.Track
+import com.example.playlistmaker.ui.widgets.PlaybackButtonView
 import com.example.playlistmaker.utils.TracksDiffCallbackAudio
 
 interface OnTrackAudioClickListener {
@@ -45,15 +46,16 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         private val trackYear: TextView = itemView.findViewById(R.id.track_year)
         private val trackGenre: TextView = itemView.findViewById(R.id.track_genre)
         private val trackCountry: TextView = itemView.findViewById(R.id.track_country)
-        private val playButton: ImageView = itemView.findViewById(R.id.play_track)
+        private val playButton: PlaybackButtonView = itemView.findViewById(R.id.play_track)
         private val playTime: TextView = itemView.findViewById(R.id.play_time)
         private val backArrow: ImageView? = itemView.findViewById(R.id.arrow_back)
         private val favorite: ImageView? = itemView.findViewById(R.id.favorite)
         private val addTrack: ImageView? = itemView.findViewById(R.id.add_track)
 
         init {
-            // ▶️ Кнопка воспроизведения
-            playButton.setOnClickListener {
+
+            // ▶️ колбэк кастомной вью
+            playButton.onToggleRequested = { _ ->
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onPlayButtonClicked(tracks[position])
@@ -133,9 +135,7 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         }
 
         fun updatePlayState(track: Track) {
-            playButton.setImageResource(
-                if (track.isPlaying) R.drawable.pause else R.drawable.play
-            )
+            playButton.setPlaying(track.isPlaying)
         }
     }
 

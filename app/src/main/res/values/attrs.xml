@@ -6,4 +6,10 @@
     <attr name="toolbarColor" format="color" />
     <attr name="toolbarContentColor" format="color" />
 
+    <declare-styleable name="PlaybackButtonView">
+        <!-- иконки состояний -->
+        <attr name="iconPlay"  format="reference"/>
+        <attr name="iconPause" format="reference"/>
+    </declare-styleable>
+
 </resources>

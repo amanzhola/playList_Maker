@@ -213,6 +213,10 @@
     <string name="fallback_prompt">Type a country to try wttr.in… 🌤️</string>
     <string name="wttr_failed">Couldn’t get weather, try again later 😔</string>
 
+    <!-- customs play and pause buttons -->
+    <string name="cd_play">Играть</string>
+    <string name="cd_pause">Пауза</string>
+
 
 <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
 используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
@@ -423,5 +427,9 @@
 <!--    <string name="coords_not_found">Couldn’t resolve coordinates for %1$s, %2$s 😕</string>-->
 <!--    <string name="fallback_prompt">Type a country to try wttr.in… 🌤️</string>-->
 <!--    <string name="wttr_failed">Couldn’t get weather, try again later 😔</string>-->
+
+    <!-- customs play and pause buttons -->
+<!--    <string name="cd_play">Играть</string>-->
+<!--    <string name="cd_pause">Пауза</string>-->
 
 </resources>

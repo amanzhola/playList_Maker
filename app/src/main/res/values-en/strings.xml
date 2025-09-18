@@ -207,4 +207,8 @@
     <string name="fallback_prompt">Укажите страну, попробуем через wttr.in… 🌤️</string>
     <string name="wttr_failed">Не удалось получить погоду, попробуйте позже 😔</string>
 
+    <!-- customs play and pause buttons -->
+    <string name="cd_play">Play</string>
+    <string name="cd_pause">Pause</string>
+
 </resources>
