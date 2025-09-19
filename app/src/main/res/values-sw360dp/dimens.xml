@@ -6,9 +6,9 @@
     <dimen name="author_margin_button">6dp</dimen>
     <dimen name="guideline">0.5</dimen>
 
-    <dimen name="dialog_circle">170dp</dimen>
+    <dimen name="dialog_circle">270dp</dimen>
 
-    <dimen name="small_circle_radius">25dp</dimen>
+    <dimen name="small_circle_radius">40dp</dimen>
     <dimen name="text_size_small">9sp</dimen>
     <dimen name="text_size_large">11sp</dimen>
     <dimen name="icon_size">20dp</dimen>

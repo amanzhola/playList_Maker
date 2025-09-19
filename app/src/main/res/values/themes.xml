@@ -6,7 +6,7 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
 
-        !-- базовые цвета тулбара для всех экранов, кроме Main -->
+        <!-- базовые цвета тулбара для всех экранов, кроме Main -->
         <item name="toolbarColor">@color/white</item>
         <item name="toolbarContentColor">@color/textColor</item>
     </style>
@@ -18,7 +18,7 @@
     </style>
 
     <!-- Оверлей для MainActivity со синим тулбаром -->
-    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="Base.Theme.PlaylistMaker">
+    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="ThemeOverlay.Material3">
         <item name="toolbarColor">@color/backgroundDay</item>          <!-- синий -->
         <item name="toolbarContentColor">@color/textColor</item> <!-- белые иконки/текст -->
     </style>
@@ -109,7 +109,6 @@
     </style>
 
     <style name="SwitchView" parent="SettingsTextView">
-        <item name="android:paddingEnd">@dimen/Switch_padding_6</item>
         <item name="android:layout_marginTop">@dimen/Separator_10</item>
         <item name="thumbTint">@color/switch_thumb_off_color</item>
         <item name="trackTint">@color/switch_track_off_color</item>
@@ -238,6 +237,7 @@
 
     movie
     <color name="eeeee_black">@color/eeeee</color>
+    <color name="eeeee_textColor">@color/eeeee</color>
 
     <color name="red1">@color/red</color>
     <color name="green1">@color/green</color>

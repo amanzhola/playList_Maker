@@ -1,9 +1,11 @@
 package com.example.playlistmaker.roots.main
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -18,14 +20,22 @@ import com.example.playlistmaker.ui.audio.ReversableList
 import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.media.MediaLibraryFragment
 import com.example.playlistmaker.ui.settings.SettingsFragment
+import com.example.playlistmaker.utils.ACTION_SHOW_IMPORT_PREVIEW
+import com.example.playlistmaker.utils.ARG_IMPORT_URI
+import com.example.playlistmaker.utils.EXTRA_IMPORT_ENTRY
+import com.example.playlistmaker.utils.EXTRA_IMPORT_URI
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : BaseActivity() {
 
+    private var enteredFromImport = false
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enteredFromImport = savedInstanceState?.getBoolean("enteredFromImport")
+            ?: intent.getBooleanExtra(EXTRA_IMPORT_ENTRY, false)
 
         navController = (supportFragmentManager
             .findFragmentById(R.id.nav_host_container) as NavHostFragment).navController
@@ -49,7 +59,12 @@ class MainActivity : BaseActivity() {
         // Обновляем Intent, чтобы сохранить index при recreate()
         intent.putExtra("buttonIndex", buttonIndex)
 
-        if (savedInstanceState == null) {
+        // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
+        // Сначала пробуем обработать входящий интент
+        val handled = handleExternalIntentOnce(intent)
+
+        // Если интент НЕ был импортом/внешним кейсом — делаем стартовую навигацию
+        if (savedInstanceState == null && !handled) {
             val destinationId = when (buttonIndex) {
                 0 -> R.id.searchFragment
                 1 -> R.id.mediaLibraryFragment
@@ -57,7 +72,10 @@ class MainActivity : BaseActivity() {
                 5 -> R.id.extraOptionFragment // ✅ добавляем
                 else -> R.id.mainFragment
             }
-            navController.navigate(destinationId)
+
+            if (navController.currentDestination?.id != destinationId) {
+                navController.navigate(destinationId)
+            }
         }
 
         // ✅ Создаём списки и выводим лог — для отладки
@@ -80,21 +98,24 @@ class MainActivity : BaseActivity() {
 
         // ✅ Настраиваем нижнюю навигацию
         bottomNavigationHelper.setupBottomNavigation()
-        bottomNavigationHelper.selectButton(buttonIndex)
+        if (!handled) {
+            bottomNavigationHelper.selectButton(buttonIndex)  // как было
+        }
         bottomNavigationHelper.setBottomNavigationVisibility()
 
         // for dialog on exit
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = handleBack()
+            override fun handleOnBackPressed() {
+                if (enteredFromImport) finishAffinity() else handleBack()      //  обычная логика
+            }
         })
 
-        // ✅ 1 onCreate() для перехода с TrackPreviewFragment на CreatePlaylistFragment :
-        handleExternalIntent(intent)
 
-        // for playlistInfoFragment on sprint 23
+        // for playlistInfoFragment on sprint 23 + importPreviewFragment для просмотра альбома
         navController.addOnDestinationChangedListener { _, dest, _ ->
             val hideOn = setOf(
-                R.id.playlistInfoFragment // сюда можно добавить и другие экраны без нижней навигации
+                R.id.playlistInfoFragment, // сюда можно добавить и другие экраны без нижней навигации
+                R.id.importPreviewFragment
             )
             val shouldHide = dest.id in hideOn
 
@@ -116,6 +137,7 @@ class MainActivity : BaseActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("buttonIndex", buttonIndex)
+        outState.putBoolean("enteredFromImport", enteredFromImport)   // ← добавили
     }
 
     fun switchFragment(index: Int) {
@@ -160,6 +182,13 @@ class MainActivity : BaseActivity() {
     override fun shouldEnableEdgeToEdge(): Boolean = false
 
     private fun handleBack() {
+
+        val fromImport = intent.getBooleanExtra(EXTRA_IMPORT_ENTRY, false)
+        if (fromImport) {
+            finish() // закрыть документ → возврат в Gmail
+            return
+        }
+
         val current = getCurrentVisibleFragment()
         val isTopLevel =
             current is SearchFragment ||
@@ -189,17 +218,20 @@ class MainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleExternalIntent(intent)
+        handleExternalIntentOnce(intent)
     }
 
     // ✅ 3 для перехода с TrackPreviewFragment на CreatePlaylistFragment : (приватный хелпер):
-    private fun handleExternalIntent(intent: Intent) {
+    private fun handleExternalIntent(intent: Intent?): Boolean {
+        if (intent == null) return false
+
+        // ----- 1) Открыть CreatePlaylistFragment -----
         if (intent.getBooleanExtra("open_create_playlist", false)) {
-            val fromPreview   = intent.getBooleanExtra("return_result", false)  // ← вот это ключ
-            val focusTrackId  = intent.getLongExtra("preview_track_id", -1L).takeIf { it > 0 }
+            val fromPreview  = intent.getBooleanExtra("return_result", false)
+            val focusTrackId = intent.getLongExtra("preview_track_id", -1L).takeIf { it > 0 }
 
             val args = Bundle().apply {
-                putBoolean("from_preview", fromPreview)          // ← пробрасываем в Fragment
+                putBoolean("from_preview", fromPreview)
                 focusTrackId?.let { putLong("preview_track_id", it) }
             }
 
@@ -207,10 +239,68 @@ class MainActivity : BaseActivity() {
                 navController.navigate(R.id.createPlaylistFragment, args)
             }
 
-            // чтобы не навигироваться повторно при конфиг-изменениях:
+            // очистить, чтобы не навигировалось повторно
             intent.removeExtra("open_create_playlist")
             intent.removeExtra("return_result")
             intent.removeExtra("preview_track_id")
+            return true
         }
+
+        // ----- 2) Показать ImportPreviewFragment -----
+        val isImportAction =
+            intent.action == ACTION_SHOW_IMPORT_PREVIEW ||
+                    (intent.action == Intent.ACTION_VIEW && (
+                            intent.type == "application/zip" ||
+                                    intent.data?.lastPathSegment?.endsWith(".plz", true) == true ||
+                                    intent.data?.lastPathSegment?.endsWith(".zip", true) == true
+                            ))
+
+        if (isImportAction) {
+            val uri: Uri? = intent.extras?.let {
+                androidx.core.os.BundleCompat.getParcelable(it, EXTRA_IMPORT_URI, Uri::class.java)
+            } ?: intent.data ?: intent.clipData?.getItemAt(0)?.uri
+
+            if (uri != null) {
+                val args = bundleOf(ARG_IMPORT_URI to uri)
+
+                val options = androidx.navigation.navOptions {
+                    launchSingleTop = true
+                    // <-- ключ: делаем importPreview единственным в back stack
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
+
+                // +++ Новое: запоминаем, что зашли «из импорта»
+                enteredFromImport = true
+
+                if (navController.currentDestination?.id != R.id.importPreviewFragment) {
+                    navController.navigate(R.id.importPreviewFragment, args, options)
+                }
+
+                // помечаем, что это было внешнее открытие
+                intent.putExtra(EXTRA_IMPORT_ENTRY, true)
+                intent.putExtra("_consumed", true)
+
+                // очистка, чтобы не повторялось
+                intent.action = null
+                intent.removeExtra(EXTRA_IMPORT_URI)
+                intent.data = null
+                setIntent(intent)
+
+                // _consumed и setIntent оставляем на handleExternalIntentOnce(...)
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun handleExternalIntentOnce(intent: Intent?): Boolean {
+        if (intent == null) return false
+        if (intent.getBooleanExtra("_consumed", false)) return false
+        val handled = handleExternalIntent(intent)
+        if (handled) {
+            intent.putExtra("_consumed", true)
+            setIntent(intent) // обновляем текущий intent Activity
+        }
+        return handled
     }
 }

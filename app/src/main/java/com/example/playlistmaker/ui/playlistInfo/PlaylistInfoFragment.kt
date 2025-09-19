@@ -1,11 +1,17 @@
 package com.example.playlistmaker.ui.playlistInfo
 
+import android.content.ClipData
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -33,11 +39,13 @@ import com.example.playlistmaker.utils.ARG_EDIT_ID
 import com.example.playlistmaker.utils.ARG_EDIT_NAME
 import com.example.playlistmaker.utils.BASE_DIM
 import com.example.playlistmaker.utils.MENU_DIM
+import com.example.playlistmaker.utils.PlaylistExport
 import com.example.playlistmaker.utils.coverModelFrom
 import com.example.playlistmaker.utils.formatDuration
 import com.example.playlistmaker.utils.makeSingleLineEllipsizeEnd
 import com.example.playlistmaker.utils.setStartDrawable
 import com.example.playlistmaker.utils.setTopPaddingDp
+import com.example.playlistmaker.utils.setupDesc
 import com.example.playlistmaker.utils.showLongSnack
 import com.example.playlistmaker.utils.showWithSquareWhiteStyle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -113,9 +121,9 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
 
         // Название: ровно 1 строка + троеточие (для Info-экрана)
         tvTitle.makeSingleLineEllipsizeEnd()
-        tvDesc.makeSingleLineEllipsizeEnd()
+//        tvDesc.makeSingleLineEllipsizeEnd()
         // или, если нужно N строк по ресурсу:
-        // tvDesc.makeEllipsizeEnd(resources.getInteger(R.integer.qty_lines_create_playlist))
+        val max = resources.getInteger(R.integer.qty_lines_create_playlist)
 
         btnBack.setOnClickListener { findNavController().navigateUp() }
 
@@ -125,10 +133,18 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
             isHideable = false
             isDraggable = true
             skipCollapsed = false
-            isFitToContents = true
-            peekHeight = resources.getDimensionPixelSize(R.dimen.playlist_sheet_peek)
+            isFitToContents = false
             expandedOffset = resources.getDimensionPixelSize(R.dimen.playlist_sheet_expanded_offset)
             state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        // ---- ДИНАМИЧЕСКИЙ пересчёт peekHeight от shareMenuRow ----
+        val shareRow = view.findViewById<View>(R.id.shareMenuRow)
+        val extraPx = resources.getDimensionPixelSize(R.dimen.peek_below_share_extra) // например 40dp
+
+        // первый расчёт — когда shareRow уже отрисован
+        shareRow.doOnLayout {
+            updatePeekBelowShare(sheet, shareRow, extraPx, behavior)
         }
 
         // --- RecyclerView на адаптером
@@ -156,6 +172,16 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
                     tvTitle.text = ui.name
                     tvDesc.isVisible = !ui.description.isNullOrBlank()
                     tvDesc.text = ui.description ?: "2022"
+                    // выставляем режим под sw-ресурсы
+                    setupDesc(tvDesc, max)
+
+                    // если хочешь гарантировать запуск marquee после раскладки
+                    if (max == 1) tvDesc.post { tvDesc.isSelected = true }
+
+                    // после установки текста — на следующем кадре пересчёт
+                    tvDesc.post {
+                        updatePeekBelowShare(sheet, shareRow, extraPx, behavior)
+                    }
 
                     val minutesText = resources.getQuantityString(
                         R.plurals.minutes_count, ui.minutesTotal.toInt(), ui.minutesTotal
@@ -201,25 +227,31 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
 
     private fun shareCurrentPlaylistOrToast() {
         val ui = lastUi ?: run {
-            // единый сниackbar «нечем делиться»
             showLongSnack(getString(R.string.nothing_to_share))
             return
         }
         if (ui.tracks.isEmpty()) {
-            // единый сниackbar «нечем делиться»
             showLongSnack(getString(R.string.nothing_to_share))
             return
         }
 
-        // Формируем текст по ТЗ (название, описание, "[xx] треков", нумерованный список)
-        val text = buildShareText(ui)
+        // генерим .plz (zip) и шэрим как файл
+        viewLifecycleOwner.lifecycleScope.launch {
+            val uri = PlaylistExport.exportToZip(requireContext(), ui) // suspend, уже делает IO внутри
+            if (uri == null) {
+                showLongSnack(getString(R.string.export_failed))
+                return@launch
+            }
 
-        // стандартный ACTION_SEND
-        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(android.content.Intent.EXTRA_TEXT, text)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/zip" // можно "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_TEXT, buildShareText(ui)) // опционально — подпись
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                clipData = ClipData.newRawUri("playlist", uri) // для некоторых клиентов
+            }
+            startActivity(Intent.createChooser(intent, getString(R.string.share)))
         }
-        startActivity(android.content.Intent.createChooser(intent, getString(R.string.share)))
     }
 
     /** Ленивая инициализация второго bottom sheet (меню). Вызывай перед любым доступом к нему. */
@@ -288,8 +320,10 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
             isHideable = true
             isDraggable = true
             state = BottomSheetBehavior.STATE_HIDDEN
-            peekHeight = resources.getDimensionPixelSize(R.dimen.playlist_sheet_peek2)
             expandedOffset = resources.getDimensionPixelSize(R.dimen.playlist_sheet_expanded_offset)
+
+            // ВАЖНО: чтобы работали expandedOffset и точный peekHeight
+            isFitToContents = false
 
             // 🔐 гарантируем чёрный фон (важно!)
             overlay.setBackgroundColor(0xFF000000.toInt())
@@ -360,6 +394,34 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
             // ВАЖНО: помечаем, что меню привязано к ТЕКУЩЕМУ view
             menuInitDone = true
         }
+
+        // === ДИНАМИЧЕСКИЙ peekHeight: ровно высота shareMenuRow ===
+        val shareRowInMenu = menuSheet.findViewById<View>(R.id.shareMenuRow)
+        if (shareRowInMenu != null) {
+            shareRowInMenu.doOnLayout {
+                val lp = shareRowInMenu.layoutParams as? ViewGroup.MarginLayoutParams
+                val rawPeek = shareRowInMenu.height + (lp?.topMargin ?: 0) + (lp?.bottomMargin ?: 0)
+
+                // Учитываем системные нижние инсеты (жестовая навигация), чтобы не «выползало»
+                val bottomInset = ViewCompat.getRootWindowInsets(menuSheet)
+                    ?.getInsets(WindowInsetsCompat.Type.systemBars())
+                    ?.bottom ?: 0
+
+                val computedPeek = (rawPeek - bottomInset).coerceAtLeast(1)
+
+                menuBehavior.peekHeight = computedPeek
+
+                // Если лист уже показан — приведём к COLLAPSED, чтобы применилось сразу
+                if (menuBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
+                    menuBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                } else {
+                    menuSheet.requestLayout()
+                }
+            }
+        } else {
+            // safety fallback, если shareMenuRow вдруг не найден
+            menuBehavior.peekHeight = resources.getDimensionPixelSize(R.dimen.playlist_sheet_peek2)
+        }
     }
 
     private fun openMenuSheet() {
@@ -411,5 +473,33 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
     override fun onDestroyView() {
         menuInitDone = false
         super.onDestroyView()
+    }
+
+    private fun updatePeekBelowShare(
+        sheet: View,
+        shareRow: View,
+        extraPx: Int,
+        behavior: BottomSheetBehavior<View>
+    ) {
+        val parent = sheet.parent as View
+        parent.post {
+            val parentLoc = IntArray(2)
+            parent.getLocationOnScreen(parentLoc)
+            val parentBottom = parentLoc[1] + parent.height
+
+            val shareLoc = IntArray(2)
+            shareRow.getLocationOnScreen(shareLoc)
+            val shareBottom = shareLoc[1] + shareRow.height
+
+            val desiredTop = shareBottom + extraPx
+            val newPeek = (parentBottom - desiredTop).coerceIn(0, parent.height)
+
+            if (behavior.peekHeight != newPeek) {
+                behavior.peekHeight = newPeek
+                if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    sheet.requestLayout()
+                }
+            }
+        }
     }
 }

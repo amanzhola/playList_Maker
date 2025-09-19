@@ -1,5 +1,6 @@
 package com.example.playlistmaker.data.repository.playlist
 
+//import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.example.playlistmaker.data.createPlaylist.PlaylistDao
 import com.example.playlistmaker.data.createPlaylist.PlaylistEntity
 import com.example.playlistmaker.data.mappers.toDomain
@@ -8,9 +9,10 @@ import com.example.playlistmaker.data.playlist.PlaylistTrackEntity
 import com.example.playlistmaker.domain.models.playlist.Playlist
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.playlist.PlaylistRepository
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -42,7 +44,7 @@ class PlaylistRepositoryImpl(
         val pl = playlistDao.getById(playlistId) ?: return false
 
         // 2) Парсим IDs
-        val type = object : com.google.gson.reflect.TypeToken<List<Int>>() {}.type
+        val type = object : TypeToken<List<Int>>() {}.type
         val current = (gson.fromJson<List<Int>>(pl.trackIdsJson, type) ?: emptyList()).toMutableList()
 
         if (current.contains(track.trackId)) return false // уже есть
@@ -100,8 +102,11 @@ class PlaylistRepositoryImpl(
         }
     }
 
+    // исправление падения при уничтожении альбомов также удаляются треки -> отсекаем null-эмиссии
     override fun observePlaylist(id: Long): Flow<Playlist> =
-        playlistDao.observeById(id).map { e -> e.toDomain(gson) } // .toDomain уже собирает trackIds: List<Int>
+        playlistDao.observeById(id)
+            .filterNotNull()              // ← отсекаем null-эмиссии
+            .map { e -> e.toDomain(gson) } // .toDomain уже собирает trackIds: List<Int>
 
     override fun observeTracksByIds(ids: List<Int>): Flow<List<Track>> {
         if (ids.isEmpty()) return flowOf(emptyList())
@@ -123,7 +128,7 @@ class PlaylistRepositoryImpl(
         val pl = playlistDao.getById(playlistId) ?: return
 
         // 2) сохраним список его треков
-        val type = object : com.google.gson.reflect.TypeToken<List<Int>>() {}.type
+        val type = object : TypeToken<List<Int>>() {}.type
         val myIds = gson.fromJson<List<Int>>(pl.trackIdsJson, type) ?: emptyList()
 
         // 3) удалим сам плейлист

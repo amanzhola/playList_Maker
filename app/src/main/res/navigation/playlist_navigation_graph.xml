@@ -74,6 +74,19 @@
             app:argType="long" />
     </fragment>
 
+    <fragment
+        android:id="@+id/importPreviewFragment"
+        android:name="com.example.playlistmaker.ui.import_album.ImportPreviewFragment"
+        android:label="@string/import_preview_title"
+        tools:layout="@layout/fragment_import_preview">
+<!--        android:label="fragment_import_preview"-->
+
+        <!-- Если используешь Safe Args: -->
+        <argument
+            android:name="arg_import_uri"
+            app:argType="android.net.Uri" />
+    </fragment>
+
     <!-- Новый action для перехода на extraOptionFragment -->
     <action
         android:id="@+id/action_global_to_extraOptionFragment"
@@ -89,5 +102,9 @@
         android:id="@+id/action_global_to_playlistInfoFragment"
         app:destination="@id/playlistInfoFragment" />
 
+    <!-- Глобальный переход на importPreviewFragment -->
+    <action
+        android:id="@+id/action_global_to_importPreviewFragment"
+        app:destination="@id/importPreviewFragment" />
 
 </navigation>

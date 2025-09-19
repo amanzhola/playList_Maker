@@ -34,5 +34,14 @@ data class Track( // 🧱
         get() = artworkUrl100 ?: ""
 
     val artworkUrl512: String // ❓
-        get() = artworkUrl100?.replaceAfterLast("/", "512x512bb.jpg") ?: ""
+        get() = artworkUrl100?.let { url ->
+            // для http(s) iTunes — как раньше
+            if (url.startsWith("http", ignoreCase = true)) {
+                url.replaceAfterLast("/", "512x512bb.jpg")
+            } else {
+                // для content://, file:// и прочего — отдай как есть
+                url
+            }
+        } ?: ""
+
 }

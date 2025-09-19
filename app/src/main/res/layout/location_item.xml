@@ -8,5 +8,7 @@
     android:paddingEnd="16dp"
     android:gravity="center_vertical"
     android:textSize="18sp"
-    android:textColor="@color/black_white"
-    android:background="@color/eeeee_black"/>
+    android:textColor="@color/textColor_white"
+    android:background="@color/eeeee_textColor"/>
+<!--    android:textColor="@color/black_white"-->
+<!--    android:background="@color/eeeee_black"-->

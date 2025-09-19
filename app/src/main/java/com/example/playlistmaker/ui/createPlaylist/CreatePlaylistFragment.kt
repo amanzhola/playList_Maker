@@ -14,6 +14,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,7 @@ import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentCreatePlaylistBinding
+import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.createPlaylist.CreatePlaylistViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
@@ -33,6 +35,10 @@ import com.example.playlistmaker.utils.ARG_EDIT_COVER
 import com.example.playlistmaker.utils.ARG_EDIT_DESC
 import com.example.playlistmaker.utils.ARG_EDIT_ID
 import com.example.playlistmaker.utils.ARG_EDIT_NAME
+import com.example.playlistmaker.utils.ARG_PREFILL_COVER
+import com.example.playlistmaker.utils.ARG_PREFILL_DESC
+import com.example.playlistmaker.utils.ARG_PREFILL_NAME
+import com.example.playlistmaker.utils.ARG_PREFILL_TRACKS
 import com.example.playlistmaker.utils.NavKeys
 import com.example.playlistmaker.utils.NavKeys.SCROLL_TOP
 import com.example.playlistmaker.utils.showWithSquareWhiteStyle
@@ -43,6 +49,8 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
+
+    private var importTracksCount: Int? = null
 
     // ★ Признак режима редактирования (bundle-based, без SafeArgs)
     private val isEditMode: Boolean
@@ -80,6 +88,21 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
         // ★ Текст кнопки в зависимости от режима
         binding.btnCreate.text = getString(if (isEditMode) R.string.save else R.string.create)
+
+        if (!isEditMode) {
+            val preName  = arguments?.getString(ARG_PREFILL_NAME)
+            val preDesc  = arguments?.getString(ARG_PREFILL_DESC)
+            val preCover = arguments?.getString(ARG_PREFILL_COVER)
+            val preTracks: List<Track> =
+                arguments?.let { BundleCompat.getParcelableArrayList(it, ARG_PREFILL_TRACKS, Track::class.java) }
+                    ?: emptyList()
+
+            importTracksCount = preTracks.size.takeIf { it > 0 }  // 👈 сохраняем количество
+
+            if (!preName.isNullOrBlank() || !preDesc.isNullOrBlank() || !preCover.isNullOrBlank() || preTracks.isNotEmpty()) {
+                vm.prefillForCreate(preName.orEmpty(), preDesc, preCover, preTracks)
+            }
+        }
 
         // первичное восстановление
         vm.state.value.let { s ->
@@ -188,7 +211,9 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
                                     // ExtraOption (тот же граф)
                                     else -> {
                                         // твой текущий кейс: savedStateHandle + popBackStack()
-                                        findNavController().previousBackStackEntry?.savedStateHandle?.set(NavKeys.PLAYLIST_CREATED_NAME, e.name)
+                                        val prev = findNavController().previousBackStackEntry?.savedStateHandle
+                                        prev?.set(NavKeys.PLAYLIST_CREATED_NAME, e.name)
+                                        importTracksCount?.let { prev?.set("PLAYLIST_CREATED_COUNT", it) } // 👈 добавили
                                         findNavController().popBackStack()
                                     }
                                 }
@@ -223,9 +248,21 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
     override fun getToolbarConfig(): ToolbarConfig =
         // ★ Динамический заголовок
-        ToolbarConfig(View.VISIBLE, if (isEditMode) R.string.edit_playlist_title else R.string.create_playlist_title) {
+        ToolbarConfig(View.VISIBLE, resolveTitleRes()) {
             handleBack()
         }
+
+    // 3 options for edit, create and import on share
+    private fun resolveTitleRes(): Int {
+        return if (isEditMode) {
+            R.string.edit_playlist_title
+        } else {
+            if ((importTracksCount ?: 0) > 0)
+                R.string.import_preview_title
+            else
+                R.string.create_playlist_title
+        }
+    }
 
     private fun TextInputLayout.applyFilledFlatAppearance(hasContent: Boolean) {
         val filledColor = ContextCompat.getColor(context, R.color.switch_thumb_on_color)

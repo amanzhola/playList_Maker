@@ -14,12 +14,13 @@
     </style>
 
     <!-- Оверлей для MainActivity со синим тулбаром -->
-    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="Base.Theme.PlaylistMaker">
+    <style name="ThemeOverlay.PlaylistMaker.MainToolbar" parent="ThemeOverlay.Material3">
         <item name="toolbarColor">@color/textColor</item>          <!-- синий -->
         <item name="toolbarContentColor">@color/white</item> <!-- белые иконки/текст -->
     </style>
 
     <style name="SwitchView" parent="SettingsTextView">
+        <item name="android:layout_marginTop">@dimen/Separator_10</item>
         <item name="thumbTint">@color/switch_thumb_on_color</item>
         <item name="trackTint">@color/switch_track_on_color</item>
     </style>
@@ -53,6 +54,7 @@
 
         movie
         <color name="eeeee_black">@color/black</color>
+        <color name="eeeee_textColor">@color/textColor</color>
 
         Track
         <color name="play_red">#F56B6C</color>

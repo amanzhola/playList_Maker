@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--    для // ❌ -->
     <string name="app_name" translatable="false">Playlist maker</string>
@@ -197,8 +198,28 @@
     <string name="no_tracks_in_playlist">В плейлисте нет треков</string>
     <string name="exit_dialog_edit">Завершить редактирование плейлиста?</string>
 
+    <string name="export_failed">"🖼️🎶📀Экспорт плейлиста не удался 😌</string>
+    <string name="import_preview_title">"➕🆕🖼️Импорт Плейлиста 🎶📀</string>
+
+    <!-- share albums for ImportPreviewFragment -->
+    <string name="playlist_saved">🖼️📀Плейлист «%1$s» сохранён 🎶</string>
+    <string name="playlist_saved_with_count">🖼️📀Плейлист «%1$s» сохранён — %2$s 🎶</string>
+
+    <!-- weather wttr -->
+    <string name="country_hint">Country</string>
+    <string name="specify_country">Specify country ❓</string>
+    <string name="country_required">Please enter a country 🙏</string>
+    <string name="coords_not_found">Couldn’t resolve coordinates for %1$s, %2$s 😕</string>
+    <string name="fallback_prompt">Type a country to try wttr.in… 🌤️</string>
+    <string name="wttr_failed">Couldn’t get weather, try again later 😔</string>
+
+    <!-- customs play and pause buttons -->
+    <string name="cd_play">Играть</string>
+    <string name="cd_pause">Пауза</string>
 
 
+<!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
+используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
 <!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
     <!--    for Ok people -->
@@ -391,5 +412,24 @@
 <!--    <string name="playlist_edited">✅ Плейлист отредактирован</string>-->
 <!--    <string name="no_tracks_in_playlist">😌В плейлисте нет треков</string>-->
 <!--    <string name="exit_dialog_edit">✏️🖼️⚠️Завершить редактирование плейлиста?</string>-->
+
+<!--    <string name="export_failed">"🖼️🎶📀Экспорт альбома не удался 😌</string>-->
+<!--    <string name="import_preview_title">"➕🆕🖼️Импорт Плейлиста 🎶📀</string>-->
+
+    <!-- share albums for ImportPreviewFragment -->
+<!--    <string name="playlist_saved">🖼️📀Плейлист «%1$s» сохранён 🎶</string>-->
+<!--    <string name="playlist_saved_with_count">🖼️📀Плейлист «%1$s» сохранён — %2$s 🎶</string>-->
+
+    <!-- weather wttr -->
+<!--    <string name="country_hint">Country</string>-->
+<!--    <string name="specify_country">Specify country ❓</string>-->
+<!--    <string name="country_required">Please enter a country 🙏</string>-->
+<!--    <string name="coords_not_found">Couldn’t resolve coordinates for %1$s, %2$s 😕</string>-->
+<!--    <string name="fallback_prompt">Type a country to try wttr.in… 🌤️</string>-->
+<!--    <string name="wttr_failed">Couldn’t get weather, try again later 😔</string>-->
+
+    <!-- customs play and pause buttons -->
+<!--    <string name="cd_play">Играть</string>-->
+<!--    <string name="cd_pause">Пауза</string>-->
 
 </resources>

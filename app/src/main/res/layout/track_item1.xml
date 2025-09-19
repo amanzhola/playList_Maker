@@ -84,19 +84,21 @@
             app:layout_constraintTop_toTopOf="@id/play_track" />
         <!--        👉-->
 
-        <ImageView
+        <com.example.playlistmaker.ui.widgets.PlaybackButtonView
             android:id="@+id/play_track"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:contentDescription="@string/play_track"
-            android:src="@drawable/play"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:iconPlay="@drawable/play"
+            app:iconPause="@drawable/pause"
             app:layout_constraintBottom_toTopOf="@id/play_time"
             app:layout_constraintEnd_toStartOf="@id/favorite"
             app:layout_constraintStart_toEndOf="@id/add_track"
             app:layout_constraintTop_toBottomOf="@id/track_author"
             app:layout_constraintVertical_chainStyle="spread"
             app:layout_constraintVertical_weight="1" />
-        <!--        // 😅-->
+                <!--        // 😅-->
 
         <ImageView
             android:id="@+id/favorite"
