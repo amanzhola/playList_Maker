@@ -4,18 +4,24 @@ import android.content.Context
 
 class ColorPersistenceHelper(
     private val context: Context,
-    private val activityName: String,
     private val isDarkTheme: Boolean
 ) {
-    fun save(segmentIndex: Int, color: Int) {
-        ColorHelper.saveColor(context, activityName, segmentIndex, isDarkTheme, color)
+    /** Новые методы: сохраняем по scope (экран/активити) */
+    fun save(scope: String, segmentIndex: Int, color: Int) {
+        ColorHelper.saveColor(context, scope, segmentIndex, isDarkTheme, color)
     }
 
-    fun load(segmentIndex: Int): Int? {
-        return ColorHelper.loadColor(context, activityName, segmentIndex, isDarkTheme)
+    fun load(scope: String, segmentIndex: Int): Int? {
+        return ColorHelper.loadColor(context, scope, segmentIndex, isDarkTheme)
     }
 
-    fun clear(range: IntRange) {
-        ColorHelper.clearColors(context, activityName, isDarkTheme, range)
+    fun clear(scope: String, range: IntRange) {
+        ColorHelper.clearColors(context, scope, isDarkTheme, range)
     }
+
+    // ⚠️ Адаптер для старого DI (принимал activityName)
+    @Deprecated("DI: pass only isDarkTheme; scope передаётся в save/load/clear")
+    constructor(context: Context, @Suppress("UNUSED_PARAMETER") activityName: String, isDarkTheme: Boolean)
+            : this(context, isDarkTheme)
+
 }

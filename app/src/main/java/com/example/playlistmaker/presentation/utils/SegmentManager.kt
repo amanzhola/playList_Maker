@@ -40,7 +40,11 @@ class SegmentManager(
             }
 
             if (segmentIndex != 5) {
-                colorPersistenceHelper.save(segmentIndex, randomColor)
+                // toolbar save and apply background color
+                val scope = (currentActivity as? BaseActivity)?.getCurrentScreenKey()
+                    ?: (currentActivity as BaseActivity).activityScope()
+
+                colorPersistenceHelper.save(scope, segmentIndex, randomColor)
                 colorApplierHelper.apply(segmentIndex, randomColor)
             }
         } else {

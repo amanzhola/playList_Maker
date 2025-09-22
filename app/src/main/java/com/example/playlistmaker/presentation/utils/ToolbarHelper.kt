@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.example.playlistmaker.R
@@ -103,4 +104,11 @@ class ToolbarHelper(private val activity: Activity) {
             tb.overflowIcon?.setTint(on)
         }
     }
+    //************************************************************
+    // fixing toolbar apply and saving background color
+
+    fun setBackgroundColor(@ColorInt color: Int) {
+        toolbar?.setBackgroundColor(color)
+    }
+
 }

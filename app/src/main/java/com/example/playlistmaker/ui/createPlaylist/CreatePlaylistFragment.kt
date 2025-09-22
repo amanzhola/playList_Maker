@@ -230,10 +230,11 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         }
     }
 
+    // toolbar save and apply background color
     override fun onResume() {
         super.onResume()
         // fixing theme on emulator and real mobile difference
-        (activity as? BaseActivity)?.applyToolbarThemeColors()
+        (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
     }
 
     override fun onDestroyView() {

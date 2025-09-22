@@ -342,6 +342,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         viewModel.updateState { s -> s.copy(isBottomNavVisible = !s.isBottomNavVisible) }
     }
 
+    // toolbar save and apply background color
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
@@ -351,7 +352,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         }
 
         // fixing theme on emulator and real mobile difference
-        (activity as? BaseActivity)?.applyToolbarThemeColors()
+        (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
     }
 
     private fun showSnack(text: String, durationMs: Int = 4000) {

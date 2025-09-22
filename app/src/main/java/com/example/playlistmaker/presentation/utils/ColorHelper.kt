@@ -1,12 +1,11 @@
 package com.example.playlistmaker.presentation.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
 import com.example.playlistmaker.ColorProvider
@@ -22,34 +21,6 @@ object ColorHelper {
         val color = ContextCompat.getColor(context, colorResId)
         currentIndex = (currentIndex + 1) % ColorProvider.colors.size
         return color
-    }
-
-    private fun getPrefs(context: Context): SharedPreferences {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    }
-
-    fun saveColor(context: Context, activityName: String, segmentIndex: Int, isDarkTheme: Boolean, color: Int) {
-        val key = generateKey(activityName, segmentIndex, isDarkTheme)
-        getPrefs(context).edit() { putInt(key, color) }
-    }
-
-    fun loadColor(context: Context, activityName: String, segmentIndex: Int, isDarkTheme: Boolean): Int? {
-        val key = generateKey(activityName, segmentIndex, isDarkTheme)
-        val color = getPrefs(context).getInt(key, -1)
-        return if (color != -1) color else null
-    } //  😉 💡 👉 🔄 👈
-
-    fun clearColors(context: Context, activityName: String, isDarkTheme: Boolean, segmentRange: IntRange) {
-        getPrefs(context).edit() {
-            segmentRange.forEach {
-                remove(generateKey(activityName, it, isDarkTheme)) // 🧠
-            }
-        }
-    }
-
-    private fun generateKey(activityName: String, segmentIndex: Int, isDarkTheme: Boolean): String { // 📤  👍
-        val themeSuffix = if (isDarkTheme) "_dark" else "_light" // 🌓
-        return "${activityName}_segment_$segmentIndex$themeSuffix"
     }
 
     fun ViewGroup.changeTextColor(color: Int, ignoreId: Int? = null) { // 🎨
@@ -93,5 +64,28 @@ object ColorHelper {
                 is ViewGroup -> view.changeCompoundDrawableColor(color, ignoreId) //  🤘
             }
         }
+    }
+    //**********************************************************************
+
+    private fun key(scope: String, slot: Int, dark: Boolean) = // 📤  👍
+        "${scope}_segment_${slot}_${if (dark) "dark" else "light"}" // 🌓
+
+    @SuppressLint("UseKtx")
+    fun saveColor(ctx: Context, scope: String, slot: Int, dark: Boolean, color: Int) {
+        ctx.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .edit().putInt(key(scope, slot, dark), color).apply()
+    }
+
+    fun loadColor(ctx: Context, scope: String, slot: Int, dark: Boolean): Int? {
+        val v = ctx.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getInt(key(scope, slot, dark), -1)
+        return if (v == -1) null else v
+    } //  😉 💡 👉 🔄 👈
+
+    @SuppressLint("UseKtx")
+    fun clearColors(ctx: Context, scope: String, dark: Boolean, range: IntRange) {
+        val e = ctx.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).edit()
+        range.forEach { e.remove(key(scope, it, dark)) } // 🧠
+        e.apply()
     }
 }

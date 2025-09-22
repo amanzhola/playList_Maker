@@ -6,15 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.viewpager2.widget.ViewPager2
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentMediaLibraryBinding
 import com.example.playlistmaker.presentation.media.MediaLibraryViewModel
+import com.example.playlistmaker.presentation.utils.ActiveChildProvider
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
@@ -22,7 +23,7 @@ import com.example.playlistmaker.utils.NavKeys
 import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
+class MediaLibraryFragment : BaseFragment(), BottomNavConfig, ActiveChildProvider {
 
     private var _binding: FragmentMediaLibraryBinding? = null
     private val binding get() = _binding!!
@@ -53,6 +54,28 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
             }
 
         setupViewPager()
+
+        // toolbar save and apply background color
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val act = activity as? BaseActivity ?: return
+
+                // твой дефолт для медиа-тулбара (белый фон)
+                val defaultBg = ContextCompat.getColor(requireContext(), R.color.white_textColor)
+
+                // scope текущего таба
+                val scope = when (position) {
+                    0 -> "MediaTab:Favourite"
+                    1 -> "MediaTab:Playlist"
+                    else -> act.getCurrentScreenKey() // на всякий
+                }
+
+                // 1) сброс тулбара, если нет персонального bg для этого таба
+                // 2) затем применяем сохранённые только для этого таба
+                act.applySavedForScopeOrDefault(scope, defaultBg)
+            }
+        })
+
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
         // выбрать вкладку один раз при новом входе
@@ -78,6 +101,18 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
             arguments?.remove(NavKeys.SCROLL_TOP)
             arguments?.remove(NavKeys.PLAYLIST_CREATED_NAME)
         }
+    }
+
+    override fun getActiveChildFragment(): Fragment? {
+        val vp = _binding?.viewPager ?: return null  // если view ещё не создана — ничего не возвращаем
+        val idx = vp.currentItem
+        // пробуем найти ребёнка по тегу ViewPager2
+        val tag = "f$idx"
+        val child = childFragmentManager.findFragmentByTag(tag)
+        if (child != null && child.isVisible && child.view != null) return child
+
+        // fallback: первый реально видимый
+        return childFragmentManager.fragments.firstOrNull { it.isVisible && it.view != null }
     }
 
     override fun getBottomNavButtonIndex(): Int = 1
@@ -129,10 +164,11 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
         (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
+    // toolbar save and apply background color
     private fun applyToolbarTheme() {
         // 1) вернуть конфиг (стрелка GONE, заголовок “Медиа”)
         (activity as? BaseActivity)?.updateToolbar(
-            ToolbarConfig(GONE, R.string.media){ // 👇 возврат на сетку выбора
+            ToolbarConfig(GONE, R.string.media) { // 👇 возврат на сетку выбора
                 (requireActivity() as? MainActivity)?.apply {
                     buttonIndex = -1 // 🔹 явно переключаем индекс
                     switchFragment(buttonIndex)
@@ -142,19 +178,14 @@ class MediaLibraryFragment : BaseFragment(), BottomNavConfig {
             }
         )
 
-        // 2) вернуть цвета:
-        val bg = ContextCompat.getColor(requireContext(), R.color.white_textColor)          // белый фон
-        val titleColor = ContextCompat.getColor(requireContext(), R.color.textColor_white) // ⚠️ чёрный
-        (activity as? BaseActivity)?.toolbarHelper?.apply {
-            setToolbarBackgroundColor(bg)
-            setTitleTextColor(titleColor)
-        }
+        val act = activity as? BaseActivity
+        val defaultBg = ContextCompat.getColor(requireContext(), R.color.white_textColor)
+        act?.toolbarHelper?.setToolbarBackgroundColor(defaultBg)
 
-        // 3) safety-net: убедиться, что текст видим и непрозрачный
-        val tb = requireActivity().findViewById<Toolbar>(R.id.toolbar)
-        tb?.findViewById<TextView>(R.id.title)?.apply {
-            visibility = View.VISIBLE
-            alpha = 1f // // ⚠️ почему-то терялся (!?)
-        }
+        // применяем строго для активной вкладки, без фолбэка активити
+        act?.applySavedColorsForCurrentScreen(skipActivityFallback = true)
+
+        // текст/иконки по теме
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 }

@@ -66,7 +66,7 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
     }
 
     // 👇 Конфигурация BottomNav
-    override fun getBottomNavButtonIndex(): Int? = 2 // например, третий таб
+    override fun getBottomNavButtonIndex(): Int = 2 // например, третий таб
     override fun shouldShowFullBottomNav(): Boolean = false
     override fun shouldShowBottomNav(): Boolean = true
 
@@ -105,11 +105,12 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
+    // toolbar save and apply background color
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
 
         // fixing theme on emulator and real mobile difference
-        (activity as? BaseActivity)?.applyToolbarThemeColors()
+        (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
     }
 }

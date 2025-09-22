@@ -27,6 +27,7 @@ import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
 import com.example.playlistmaker.presentation.searchViewModels.ErrorState
 import com.example.playlistmaker.presentation.searchViewModels.SearchViewModel
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
+import com.example.playlistmaker.presentation.utils.BackgroundExclusionProvider
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
@@ -36,7 +37,8 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, ReversableList {
+class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, ReversableList,
+    BackgroundExclusionProvider {
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
@@ -228,7 +230,15 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
 
         (activity as? BaseActivity)?.updateSegmentTexts()
 
+        // toolbar save and apply background color
         // fixing theme on emulator and real mobile difference
-        (activity as? BaseActivity)?.applyToolbarThemeColors()
+        (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
     }
+
+    // toolbar save and apply background color
+    override fun backgroundExclusionIds(): Set<Int> = setOf(
+        R.id.inputEditText,    // само поле ввода
+        R.id.clearIcon         // крестик очистки
+        // добавь сюда ещё id, которые нельзя красить (например, TextInputLayout, если есть)
+    )
 }

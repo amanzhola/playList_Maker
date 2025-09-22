@@ -118,6 +118,9 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬 экран поиска �
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // toolbar save and apply background color
+        applySavedColorsForCurrentScreen()
+
         // ── Инициализация вспомогательных компонентов ───────────────────────────
         clickDebouncer = ClickDebouncer(CLICK_DEBOUNCE_DELAY, lifecycleScope)   // 🛑🕒 анти-даблклик
         uiUpdater = UIUpdater(                                                   // 🎛️ control center
@@ -233,4 +236,10 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬 экран поиска �
         navigateToMainScreen(this@SearchMovie, -1)                  // 🧭 обработчик навбара «назад»
     }
     override fun shouldEnableEdgeToEdge(): Boolean = false          // ⛔ без edge-to-edge для экрана
+
+    // toolbar save and apply background color
+    override fun onResume() {
+        super.onResume()
+        applyThemeThenRestoreSaved()
+    }
 }
