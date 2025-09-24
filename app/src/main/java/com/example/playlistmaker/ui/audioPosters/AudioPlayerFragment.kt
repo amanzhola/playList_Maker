@@ -37,7 +37,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
+class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
     private lateinit var binding: FragmentExtraOptionBinding
     private lateinit var adapter: TrackAdapterAudio
@@ -310,7 +310,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         ).toInt()
 
     override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.option) {
+        ToolbarConfig(View.VISIBLE, R.string.chat_btm) {
             if (viewModel.state.value.isBottomNavVisible) {
                 (requireActivity() as? MainActivity)?.apply {
                     buttonIndex = -1

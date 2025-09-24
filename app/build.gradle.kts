@@ -4,6 +4,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.parcelize")
     id("androidx.navigation.safeargs.kotlin") version "2.9.1"
     id("kotlin-kapt")
+
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -77,5 +80,12 @@ dependencies {
     //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+
+    // chat fragment
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
 
 }

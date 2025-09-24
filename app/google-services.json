@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1039486926507",
+    "project_id": "firemessage-67531",
+    "storage_bucket": "firemessage-67531.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039486926507:android:4693f067bb1b12fd3201ee",
+        "android_client_info": {
+          "package_name": "com.example.playlistmaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjoCS3MGot0vlmI2gmb-Fpsd0VSxQDURA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

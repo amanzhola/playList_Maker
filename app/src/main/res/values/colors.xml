@@ -48,5 +48,8 @@
     <!-- <movie fragments> -->
     <color name="light_gray">#D0D0D0</color>
 
+    <!-- <chat fragment> -->
+    <color name="chat_bubble_in">#E0E0E0</color>     <!-- серый для входящих -->
+    <color name="chat_bubble_out">#81D4FA</color>   <!-- голубой для исходящих -->
 
 </resources>

@@ -2,7 +2,7 @@ package com.example.playlistmaker.presentation.utils
 
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.ui.audio.SearchFragment
-import com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment
+import com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment
 
 object SegmentManagerProvider {
 
@@ -34,7 +34,7 @@ object SegmentManagerProvider {
 
                         shareSingleTrack = {
                     val fragment = activity.getCurrentFragment()
-                    if (fragment is ExtraOptionFragment) {
+                    if (fragment is AudioPlayerFragment) {
                         fragment.shareSingleTrack()
                     }
                 },

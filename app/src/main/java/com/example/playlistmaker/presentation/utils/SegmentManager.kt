@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.ui.audio.SearchFragment
-import com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment
+import com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment
 import com.example.playlistmaker.ui.movie.SearchMovie
 import com.example.playlistmaker.ui.settings.SettingsFragment
 
@@ -63,7 +63,7 @@ class SegmentManager(
                 1 -> {
                     val fragment = (currentActivity as? BaseActivity)?.getCurrentFragment()
                     when {
-                        fragment is ExtraOptionFragment -> shareSingleTrack()
+                        fragment is AudioPlayerFragment -> shareSingleTrack()
                         currentActivity is SearchMovie -> {
                             AlertDialog.Builder(currentActivity)
                                 .setTitle(currentActivity.getString(R.string.share_movie_question))

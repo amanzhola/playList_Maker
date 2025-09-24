@@ -234,6 +234,7 @@
     <color name="white_white">@color/white</color>
     <color name="textColor_textColor">@color/textColor</color>
     <color name="blue_white">@color/backgroundDay</color>
+    <color name="switch_track_on_color_textColor">@color/switch_track_on_color</color>
 
     movie
     <color name="eeeee_black">@color/eeeee</color>

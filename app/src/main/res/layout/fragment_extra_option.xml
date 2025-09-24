@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white_textColor"
-    tools:context=".ui.audioPosters.ExtraOptionFragment">
+    tools:context=".ui.audioPosters.AudioPlayerFragment">
 
     <!-- 1) ТЕКУЩИЙ КОНТЕНТ ПЛЕЕРА БЕЗ ИЗМЕНЕНИЙ -->
     <LinearLayout

@@ -211,4 +211,23 @@
     <string name="cd_play">Play</string>
     <string name="cd_pause">Pause</string>
 
+    <!-- <chat fragment> -->
+    <string name="chat">💬 Chat 🗨️, 📨, 📎 </string>
+    <string name="chat_btm">Chat</string>
+    <string name="attach">📎</string>
+    <string name="send">Send💌</string>
+    <string name="type_message">💬Message…</string>
+    <string name="chat_title">💬 Chat 🗨️📨📎</string>
+    <string name="users_title">🧑‍🤝‍🧑Users</string>
+    <string name="users_avatar">🖼️ Users Avatar</string>
+
+    <string name="pick_photo">🖼️ Select a photo</string>
+    <string name="your_name">💎 Your name </string>
+    <string name="your_status">🏁 Status (sample: busy/online)</string>
+    <string name="profile_title">✨ Profile</string>
+
+    <string name="required_field">👨‍🔧 Required field</string>
+    <string name="saved">Saved ▶ 💾</string>
+    <string name="edit_profile">Edit profile ✏️</string>
+
 </resources>

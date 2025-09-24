@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:gravity="end">
+
+    <LinearLayout
+        android:id="@+id/bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:background="@drawable/bg_bubble_out_tail"
+        android:padding="10dp"
+        android:orientation="vertical">
+<!--        option-->
+<!--        android:background="@drawable/bg_bubble_out"-->
+
+        <ImageView
+            android:id="@+id/img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/chat_bubble_max_width"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:src="@android:drawable/ic_menu_gallery"
+            android:contentDescription="@string/cover"/>
+
+        <TextView
+            android:id="@+id/txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/chat_bubble_max_width"
+            android:lineSpacingExtra="2dp"
+            tools:text="Пример исходящего сообщения" />
+    </LinearLayout>
+
+</LinearLayout>

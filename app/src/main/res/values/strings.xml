@@ -217,9 +217,27 @@
     <string name="cd_play">Играть</string>
     <string name="cd_pause">Пауза</string>
 
+    <!-- <chat fragment> -->
+    <string name="chat">💬 Чат 🗨️, 📨, 📎 </string>
+    <string name="chat_btm">Чат</string>
+    <string name="attach">📎</string>
+    <string name="send">Отправить💌</string>
+    <string name="type_message">🗨️Сообщение…</string>
+    <string name="chat_title">💬 Чат 🗨️📨📎</string>
+    <string name="users_title">Контакты🧑‍🤝‍🧑</string>
+    <string name="users_avatar">🖼️ Аватар пользователя</string>
 
-<!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
-используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
+    <string name="pick_photo">🖼️  Выбрать фото</string>
+    <string name="your_name">💎 Ваше имя</string>
+    <string name="your_status">🏁 Статус (например: занят/онлайн)</string>
+    <string name="profile_title">✨ Профиль</string>
+
+    <string name="required_field">👨‍🔧 Поле обязательно</string>
+    <string name="saved">Сохранено ▶ 💾</string>
+    <string name="edit_profile">Редактировать профиль ✏️</string>
+
+    <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
+    используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
 <!--    ▶ 💾 🎯 🔴 ❌🔄 🆙 🧲 ⭐🧠 🧰 🧪🧩-🔒🥰 💖 💕 🍏-->
     <!--    for Ok people -->
@@ -431,5 +449,24 @@
     <!-- customs play and pause buttons -->
 <!--    <string name="cd_play">Играть</string>-->
 <!--    <string name="cd_pause">Пауза</string>-->
+
+    <!-- <chat fragment> -->
+<!--    <string name="chat">💬 Чат 🗨️, 📨, 📎 </string>-->
+<!--    <string name="chat_btm">Чат</string>-->
+<!--    <string name="attach">📎</string>-->
+<!--    <string name="send">Отправить💌</string>-->
+<!--    <string name="type_message">🗨️Сообщение…</string>-->
+<!--    <string name="chat_title">💬 Чат 🗨️📨📎</string>-->
+<!--    <string name="users_title">Контакты🧑‍🤝‍🧑</string>-->
+<!--    <string name="users_avatar">🖼️ Аватар пользователя</string>-->
+
+<!--    <string name="pick_photo">🖼️  Выбрать фото</string>-->
+<!--    <string name="your_name">💎 Ваше имя</string>-->
+<!--    <string name="your_status">🏁 Статус (например: занят/онлайн)</string>-->
+<!--    <string name="profile_title">✨ Профиль</string>-->
+
+<!--    <string name="required_field">👨‍🔧 Поле обязательно</string>-->
+<!--    <string name="saved">Сохранено ▶ 💾</string>-->
+<!--    <string name="edit_profile">Редактировать профиль ✏️</string>-->
 
 </resources>

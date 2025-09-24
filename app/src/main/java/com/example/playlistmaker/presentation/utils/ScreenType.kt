@@ -2,7 +2,7 @@ package com.example.playlistmaker.presentation.utils
 
 import androidx.fragment.app.Fragment
 import com.example.playlistmaker.ui.audio.SearchFragment
-import com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment
+import com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment
 import com.example.playlistmaker.ui.main.MainFragment
 import com.example.playlistmaker.ui.media.MediaLibraryFragment
 import com.example.playlistmaker.ui.settings.SettingsFragment
@@ -22,7 +22,7 @@ fun Fragment?.toScreenType(): ScreenType {
     return when (this) {
         is MainFragment -> ScreenType.MAIN_FRAGMENT
         is SearchFragment -> ScreenType.SEARCH_FRAGMENT
-        is ExtraOptionFragment -> ScreenType.EXTRA_FRAGMENT
+        is AudioPlayerFragment -> ScreenType.EXTRA_FRAGMENT
         is MediaLibraryFragment -> ScreenType.MEDIA_LIBRARY_FRAGMENT
         is SettingsFragment -> ScreenType.SETTINGS_FRAGMENT
         else -> ScreenType.UNKNOWN
