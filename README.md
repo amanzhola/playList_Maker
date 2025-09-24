@@ -168,7 +168,6 @@
 <img width="666" height="1420" alt="AudioPlayer" src="https://github.com/user-attachments/assets/e9c06406-d19b-40a5-8c06-4be7a88d0350" />
 
 ### 💿🎧📀🎵 Экран Создания и хранения Альбома
-<img width="654" height="1428" alt="Albums" src="https://github.com/user-attachments/assets/05fd1054-4b49-4dc5-b67e-99a9fa73b894" /> <img width="658" height="1442" alt="Albums2" src="https://github.com/user-attachments/assets/660b5c26-0e8f-45a1-bafa-b08e4c955e03" />
 
 <img width="654" height="1458" alt="PlayList1" src="https://github.com/user-attachments/assets/3b890e96-41df-4b60-8747-932be9dcbf3a" />
 
