@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1039486926507:android:4693f067bb1b12fd3201ee",
+        "mobilesdk_app_id": "xxxxxxxx",
         "android_client_info": {
           "package_name": "com.example.playlistmaker"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAjoCS3MGot0vlmI2gmb-Fpsd0VSxQDURA"
+          "current_key": "xxxxxx"
         }
       ],
       "services": {
