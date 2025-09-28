@@ -218,7 +218,6 @@
     <string name="send">Send💌</string>
     <string name="type_message">💬Message…</string>
     <string name="chat_title">💬 Chat 🗨️📨📎</string>
-    <string name="users_title">🧑‍🤝‍🧑Users</string>
     <string name="users_avatar">🖼️ Users Avatar</string>
 
     <string name="pick_photo">🖼️ Select a photo</string>
@@ -229,5 +228,16 @@
     <string name="required_field">👨‍🔧 Required field</string>
     <string name="saved">Saved ▶ 💾</string>
     <string name="edit_profile">Edit profile ✏️</string>
+
+    <string name="chats_title">🗨️ Chat 📨📎</string>
+    <string name="new_chat">💬 New Chat</string>
+    <string name="contacts_title">Contacts🧑‍🤝‍🧑</string>
+
+    <string name="enter_uid_hint">enter ID👨‍🔧</string>
+    <string name="new_chat_by_uid_msg">enter user ID👨‍🔧</string>
+    <string name="search_user_hint">search user👨‍🔧</string>
+
+    <!-- <Push Notification> -->
+    <string name="you_have_unread">You have new messages💬</string>
 
 </resources>

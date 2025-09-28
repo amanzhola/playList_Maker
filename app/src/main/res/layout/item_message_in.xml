@@ -39,7 +39,8 @@
             android:layout_height="wrap_content"
             android:maxWidth="@dimen/chat_bubble_max_width"
             android:lineSpacingExtra="2dp"
-            tools:text="Пример входящего сообщения" />
+            tools:text="Пример входящего сообщения"
+            android:textColor="@color/backgroundDay"/>
     </LinearLayout>
 
 </LinearLayout>

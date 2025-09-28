@@ -224,7 +224,6 @@
     <string name="send">Отправить💌</string>
     <string name="type_message">🗨️Сообщение…</string>
     <string name="chat_title">💬 Чат 🗨️📨📎</string>
-    <string name="users_title">Контакты🧑‍🤝‍🧑</string>
     <string name="users_avatar">🖼️ Аватар пользователя</string>
 
     <string name="pick_photo">🖼️  Выбрать фото</string>
@@ -235,6 +234,18 @@
     <string name="required_field">👨‍🔧 Поле обязательно</string>
     <string name="saved">Сохранено ▶ 💾</string>
     <string name="edit_profile">Редактировать профиль ✏️</string>
+
+    <string name="chats_title">🗨️ Чат 📨📎</string>
+    <string name="new_chat">💬 Новый Чат</string>
+    <string name="contacts_title">Контакты🧑‍🤝‍🧑</string>
+
+    <string name="enter_uid_hint">введите ID👨‍🔧</string>
+    <string name="new_chat_by_uid_msg">введите UID пользователя👨‍🔧</string>
+    <string name="search_user_hint">поиск пользователя👨‍🔧</string>
+
+    <!-- <Push Notification> -->
+    <string name="you_have_unread">У вас есть новые сообщения💬</string>
+
 
     <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
     используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
@@ -457,7 +468,6 @@
 <!--    <string name="send">Отправить💌</string>-->
 <!--    <string name="type_message">🗨️Сообщение…</string>-->
 <!--    <string name="chat_title">💬 Чат 🗨️📨📎</string>-->
-<!--    <string name="users_title">Контакты🧑‍🤝‍🧑</string>-->
 <!--    <string name="users_avatar">🖼️ Аватар пользователя</string>-->
 
 <!--    <string name="pick_photo">🖼️  Выбрать фото</string>-->
@@ -468,5 +478,16 @@
 <!--    <string name="required_field">👨‍🔧 Поле обязательно</string>-->
 <!--    <string name="saved">Сохранено ▶ 💾</string>-->
 <!--    <string name="edit_profile">Редактировать профиль ✏️</string>-->
+
+<!--    <string name="chats_title">🗨️ Чат 📨📎</string>-->
+<!--    <string name="new_chat">💬 Новый Чат</string>-->
+<!--    <string name="contacts_title">Контакты🧑‍🤝‍🧑</string>-->
+
+<!--    <string name="enter_uid_hint">введите ID👨‍🔧</string>-->
+<!--    <string name="new_chat_by_uid_msg">введите UID пользователя👨‍🔧</string>-->
+<!--    <string name="search_user_hint">поиск пользователя👨‍🔧</string>-->
+
+    <!-- <Push Notification> -->
+<!--    <string name="you_have_unread">У вас есть новые сообщения💬</string>-->
 
 </resources>

@@ -110,4 +110,9 @@ class ToolbarHelper(private val activity: Activity) {
     fun setBackgroundColor(@ColorInt color: Int) {
         toolbar?.setBackgroundColor(color)
     }
+
+    /** Поставить произвольный текст заголовка (минуя titleResId) */
+    fun setTitle(text: CharSequence) {
+        title?.text = text
+    }
 }

@@ -97,7 +97,7 @@
     <fragment
         android:id="@+id/usersFragment"
         android:name="com.example.playlistmaker.ui.chat.UsersFragment"
-        android:label="@string/users_title"
+        android:label="@string/contacts_title"
         tools:layout="@layout/fragment_users" />
 
     <fragment

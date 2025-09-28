@@ -3,9 +3,11 @@ package com.example.playlistmaker.roots.main
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -33,8 +35,12 @@ import com.google.firebase.firestore.ktx.firestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-
 class MainActivity : BaseActivity() {
+
+    private val requestPostNotifications =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            // можно показать подсказку, если не выдали
+        }
 
     private val prefs by lazy { getSharedPreferences("chat_prefs", MODE_PRIVATE) }
     private fun wasProfileAskedOnce() = prefs.getBoolean("profile_asked_once", false)
@@ -48,6 +54,10 @@ class MainActivity : BaseActivity() {
             // уже вошли — создадим/обновим запись в users и поехали
             lifecycleScope.launch {
                 try { UsersRepo().ensureCurrentUser(current.uid) } catch (_: Exception) {}
+                // >>> добавлен Push Notification Token Issue
+                com.example.playlistmaker.ui.chat.notification.FcmTokenManager
+                    .forceRegisterFcmToken(this@MainActivity)
+                // <<<
                 onReady(current.uid)
             }
             return
@@ -58,6 +68,10 @@ class MainActivity : BaseActivity() {
                 val uid = res.user?.uid ?: return@addOnSuccessListener
                 lifecycleScope.launch {
                     try { UsersRepo().ensureCurrentUser(uid) } catch (_: Exception) {}
+                    // >>> добавлен Push Notification Token Issue
+                    com.example.playlistmaker.ui.chat.notification.FcmTokenManager
+                        .forceRegisterFcmToken(this@MainActivity)
+                    // <<<
                     onReady(uid)
                 }
             }
@@ -71,6 +85,11 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Android 13+: запросить разрешение на уведомления
+        if (Build.VERSION.SDK_INT >= 33) {
+            requestPostNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         // 1) (как было) разбор import-интента и т.д. — ОК
         enteredFromImport = savedInstanceState?.getBoolean("enteredFromImport")
@@ -95,7 +114,7 @@ class MainActivity : BaseActivity() {
                             .get()
                             .await()
 
-                        // не важно, какое там имя — мы всё равно откроем профиль лишь один раз
+                    // не важно, какое там имя — мы всё равно откроем профиль лишь один раз
                     } catch (_: Throwable) { /* игнор */ }
 
                     // открыть профиль и сразу пометить, что уже спрашивали
@@ -137,7 +156,7 @@ class MainActivity : BaseActivity() {
                 0 -> R.id.searchFragment
                 1 -> R.id.mediaLibraryFragment
                 2 -> R.id.settingsFragment
-                5 -> R.id.usersFragment // ✅ добавляем
+                5 -> R.id.usersFragment  // ✅ добавляем
                 else -> R.id.mainFragment
             }
 //            5 -> R.id.extraOptionFragment // ✅ добавляем
@@ -259,28 +278,28 @@ class MainActivity : BaseActivity() {
         }
 
         val current = getCurrentVisibleFragment()
-        val isTopLevel =
-            current is SearchFragment ||
-                    current is MediaLibraryFragment ||
-                    current is SettingsFragment
+            val isTopLevel =
+                current is SearchFragment ||
+                        current is MediaLibraryFragment ||
+                        current is SettingsFragment
 
-        if (isTopLevel) {
-            // Диалог подтверждения выхода
-            MaterialAlertDialogBuilder(this)
-                .setMessage("Вы действительно хотите выйти из приложения?")
-                .setPositiveButton("Да") { d, _ ->
-                    d.dismiss()
-                    finishAffinity() // закрываем всю задачу приложения
+            if (isTopLevel) {
+                // Диалог подтверждения выхода
+                MaterialAlertDialogBuilder(this)
+                    .setMessage("Вы действительно хотите выйти из приложения?")
+                    .setPositiveButton("Да") { d, _ ->
+                        d.dismiss()
+                        finishAffinity() // закрываем всю задачу приложения
+                    }
+                    .setNegativeButton("Нет") { d, _ -> d.dismiss() }
+                    .show()
+            } else {
+                // Обычный шаг назад по навграфу
+                if (!navController.navigateUp()) {
+                    // Если уже некуда «назад» внутри графа — закрываем текущую Activity
+                    finish()
                 }
-                .setNegativeButton("Нет") { d, _ -> d.dismiss() }
-                .show()
-        } else {
-            // Обычный шаг назад по навграфу
-            if (!navController.navigateUp()) {
-                // Если уже некуда «назад» внутри графа — закрываем текущую Activity
-                finish()
             }
-        }
     }
 
     // ✅ 2 для перехода с TrackPreviewFragment на CreatePlaylistFragment :

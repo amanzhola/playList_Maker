@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 
+    <!-- Android 13+ уведомления -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!--
          =========================
          option 0: icon [icon_launcher] and roundIcon [icon_launcher_round]
@@ -49,6 +52,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Сервис для FCM -->
+        <service
+            android:name=".ui.chat.notification.ChatPushService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Иконка по умолчанию для статус-бара -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_chat" />
+
         <activity
             android:name=".ui.launcher.LauncherActivity"
             android:theme="@style/AppTheme"
