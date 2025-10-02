@@ -181,8 +181,9 @@
 ### 💬 🗨️ 📨 📎  Экран Чата
 
 <img width="670" height="1410" alt="Chat(Messages)" src="https://github.com/user-attachments/assets/cc5a359d-ece1-4063-b64c-adb6ec5ba252" /> <img width="670" height="1408" alt="Chat(Profile)" src="https://github.com/user-attachments/assets/11facfb3-cbfc-4927-945b-e840a307cdde" />
-
-<img width="1076" height="1390" alt="Chat(Users)" src="https://github.com/user-attachments/assets/a646520f-a94e-4d0d-aff1-d36ba48e236f" />
+![chat(horizontal)](https://github.com/user-attachments/assets/ec980d97-da1a-4a52-813d-b8613db2b4b3)
+![Chat(unreadCount)](https://github.com/user-attachments/assets/e974a08c-f160-4737-9f48-0c80a067f79d)
+![Chat(vertical)](https://github.com/user-attachments/assets/3624481c-01e7-4360-9243-d0f4410da3fd)
 
 ### 🌧️ ☀️ ⛅ 🌩️ ❄️ Экран Погода 
 
