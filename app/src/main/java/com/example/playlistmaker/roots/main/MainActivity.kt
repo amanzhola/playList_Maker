@@ -31,9 +31,7 @@ import com.example.playlistmaker.utils.EXTRA_IMPORT_ENTRY
 import com.example.playlistmaker.utils.EXTRA_IMPORT_URI
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.ktx.firestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class MainActivity : BaseActivity() {
 
@@ -103,6 +101,8 @@ class MainActivity : BaseActivity() {
         ensureFirebaseAuthThen { uid ->
             android.util.Log.d("AUTH", "signed in as $uid")
 
+            // закрываем авто-запуск profileFragment, регистарция есть и по желанию пользователея обновление профиля
+            /*
             // показываем профиль только ОДИН раз после самого первого входа
             if (!wasProfileAskedOnce()) {
                 // пробуем прочитать имя — если пустое, тоже ок, просто откроем профиль
@@ -123,7 +123,7 @@ class MainActivity : BaseActivity() {
                     }
                     markProfileAskedOnce()
                 }
-            }
+            } */
         }
 
         // 4) Дальше — существующая логика вычисления buttonIndex и стартовой навигации

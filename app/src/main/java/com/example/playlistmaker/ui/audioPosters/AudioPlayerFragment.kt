@@ -1,6 +1,12 @@
 package com.example.playlistmaker.ui.audioPosters
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -22,6 +28,7 @@ import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentExtraOptionBinding
+import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.AudioSingleTrackShare
 import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
@@ -31,6 +38,7 @@ import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
 import com.example.playlistmaker.utils.NavKeys
+import com.example.playlistmaker.utils.showLongSnack
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -38,6 +46,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
+
+    // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+    private val networkChecker: NetworkStatusChecker by inject { parametersOf(requireContext()) }
+    private var cm: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var lastConnected: Boolean? = null
 
     private lateinit var binding: FragmentExtraOptionBinding
     private lateinit var adapter: TrackAdapterAudio
@@ -290,6 +304,13 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         val pos = (binding.tracksRecyclerView.layoutManager as? LinearLayoutManager)
             ?.findFirstVisibleItemPosition() ?: 0
         viewModel.setScrollPosition(pos)
+
+        // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+        networkCallback?.let { cb ->
+            try { cm?.unregisterNetworkCallback(cb) } catch (_: Exception) {}
+        }
+        networkCallback = null
+        cm = null
     }
 
     fun shareSingleTrack() {
@@ -343,6 +364,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     }
 
     // toolbar save and apply background color
+    @SuppressLint("ObsoleteSdkInt")
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
@@ -353,6 +375,52 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
         // fixing theme on emulator and real mobile difference
         (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
+
+        // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+        cm = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        // инициализируем предыдущее состояние (чтобы не спамить первым событием)
+        lastConnected = networkChecker.isNetworkAvailable()
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                // стало доступно — просто запомним
+                lastConnected = true
+            }
+
+            override fun onLost(network: Network) {
+                // сеть потеряна → проверим реальную доступность и покажем snack при переходе true -> false
+                val now = networkChecker.isNetworkAvailable()
+                val was = lastConnected
+                if (was == true && !now) {
+                    // см. пункт 2 — используем ваш showLongSnack()
+                    showLongSnack(getString(R.string.no_internet_connection))
+                }
+                lastConnected = now
+            }
+
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                // на некоторых устройствах потеря валидированного интернета прилетает сюда
+                val now = networkChecker.isNetworkAvailable()
+                val was = lastConnected
+                if (was == true && !now) {
+                    showLongSnack(getString(R.string.no_internet_connection))
+                }
+                lastConnected = now
+            }
+        }
+
+        // РЕГИСТРАЦИЯ
+        // API 24+ — можно коротко:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            cm?.registerDefaultNetworkCallback(networkCallback!!)
+        } else {
+            // API 21–23 — явно строим запрос на интернет
+            val req = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build()
+            cm?.registerNetworkCallback(req, networkCallback!!)
+        }
     }
 
     private fun showSnack(text: String, durationMs: Int = 4000) {

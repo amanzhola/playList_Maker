@@ -1,6 +1,12 @@
 package com.example.playlistmaker.ui.audio
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -31,6 +37,7 @@ import com.example.playlistmaker.presentation.utils.BackgroundExclusionProvider
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.example.playlistmaker.utils.showLongSnack
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
@@ -49,7 +56,14 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
     private lateinit var errorManager: AudioErrorManager
     private val viewModel: SearchViewModel by viewModel()
     private val resourceColorProvider: ResourceColorProvider by inject { parametersOf(requireContext()) }
+
     private val networkChecker: NetworkStatusChecker by inject { parametersOf(requireContext()) }
+
+    // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+    private var cm: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var lastConnected: Boolean? = null
+
     private val trackShareService: AudioTracksShare by inject { parametersOf(requireContext()) }
 
     override fun onCreateView(
@@ -205,6 +219,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
             }
         }
 
+    @SuppressLint("ObsoleteSdkInt")
     override fun onResume() {
         super.onResume()
         requireActivity()
@@ -233,6 +248,62 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
         // toolbar save and apply background color
         // fixing theme on emulator and real mobile difference
         (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
+
+        // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+        cm = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        // инициализируем предыдущее состояние (чтобы не спамить первым событием)
+        lastConnected = networkChecker.isNetworkAvailable()
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                // стало доступно — просто запомним
+                lastConnected = true
+            }
+
+            override fun onLost(network: Network) {
+                // сеть потеряна → проверим реальную доступность и покажем snack при переходе true -> false
+                val now = networkChecker.isNetworkAvailable()
+                val was = lastConnected
+                if (was == true && !now) {
+                    // см. пункт 2 — используем showLongSnack()
+                    showLongSnack(getString(R.string.no_internet_connection), anchor = requireActivity().findViewById(R.id.bottomNavigation))
+                }
+                lastConnected = now
+            }
+
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                // на некоторых устройствах потеря валидированного интернета прилетает сюда
+                val now = networkChecker.isNetworkAvailable()
+                val was = lastConnected
+                if (was == true && !now) {
+                    showLongSnack(getString(R.string.no_internet_connection), anchor = requireActivity().findViewById(R.id.bottomNavigation))
+                }
+                lastConnected = now
+            }
+        }
+
+        // РЕГИСТРАЦИЯ
+        // API 24+ — можно коротко:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            cm?.registerDefaultNetworkCallback(networkCallback!!)
+        } else {
+            // API 21–23 — явно строим запрос на интернет
+            val req = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build()
+            cm?.registerNetworkCallback(req, networkCallback!!)
+        }
+    }
+
+    // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+    override fun onPause() {
+        super.onPause()
+        networkCallback?.let { cb ->
+            try { cm?.unregisterNetworkCallback(cb) } catch (_: Exception) {}
+        }
+        networkCallback = null
+        cm = null
     }
 
     // toolbar save and apply background color

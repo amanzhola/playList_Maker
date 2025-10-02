@@ -247,6 +247,10 @@
     <string name="you_have_unread">У вас есть новые сообщения💬</string>
 
 
+    <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
+    <string name="no_internet_connection">📶❌Отсутствует подключение к интернету ⛔️</string>
+
+
     <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
     используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->
@@ -489,5 +493,8 @@
 
     <!-- <Push Notification> -->
 <!--    <string name="you_have_unread">У вас есть новые сообщения💬</string>-->
+
+    <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
+<!--    <string name="no_internet_connection">📶❌Отсутствует подключение к интернету ⛔️</string>-->
 
 </resources>

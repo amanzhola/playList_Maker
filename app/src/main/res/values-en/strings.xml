@@ -240,4 +240,7 @@
     <!-- <Push Notification> -->
     <string name="you_have_unread">You have new messages💬</string>
 
+    <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
+    <string name="no_internet_connection">📶❌Lost internet connection ⛔️</string>
+
 </resources>
