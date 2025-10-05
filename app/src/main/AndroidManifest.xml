@@ -16,6 +16,10 @@
     <!-- Android 13+ уведомления -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!--Сервис (Bound + Foreground)-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
     <!--
          =========================
          option 0: icon [icon_launcher] and roundIcon [icon_launcher_round]
@@ -147,6 +151,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!--Сервис (Bound + Foreground)-->
+        <service
+            android:name=".services.MusicService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
     </application>
 
 </manifest>

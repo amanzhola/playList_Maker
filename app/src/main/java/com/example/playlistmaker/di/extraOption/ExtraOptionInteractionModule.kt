@@ -15,6 +15,10 @@ val extraOptionInteractionModule = module { // + from 🏠 🔍 🛠️ 🎧 ☁
     // Аудио плеер // for ExtraOption viewModel require  🎶 ↔️ 🎵 + use by TrackPreviewActivity (viewModel)
     single<AudioPlayerInteraction> { AudioPlayerInteractionImpl() }
 
+    // use by TrackPreviewActivity (viewModel) for future possible removing ->
+    // single<AudioPlayerInteraction> { AudioPlayerInteractionImpl() } ViewModel больше не получает AudioPlayerInteraction.
+    // Вместо этого Fragment биндинит MusicService и передаёт его в VM через setAudioPlayerControl(...).
+
     // Сервис шаринга одного трека // for ExtraOption SingleTrackShare require  // 👨‍💻 ⬇️
     factory<AudioSingleTrackShare> { (activity: Activity) ->
         AudioSingleTrackImpl(

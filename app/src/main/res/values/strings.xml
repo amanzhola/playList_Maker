@@ -250,6 +250,31 @@
     <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
     <string name="no_internet_connection">📶❌Отсутствует подключение к интернету ⛔️</string>
 
+    <!-- Foreground notification -->
+    <!-- Запасной текст для уведомления, если нет артиста/названия -->
+    <string name="playback_in_progress">Playback in progress…</string>
+    <!-- "Artist — Title" -->
+    <string name="notification_playing_format">%1$s — %2$s</string>
+
+    <!-- Notification channel -->
+    <string name="notification_channel_name">Playback</string>
+    <string name="notification_channel_desc">Audio playback controls and status</string>
+
+    <!-- Actions (если добавлять кнопки в уведомление) -->
+    <string name="notification_action_play">Play</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_action_stop">Stop</string>
+
+    <!-- Разрешение на уведомления (Android 13+) -->
+    <string name="permission_notifications_rationale">🔔 Разрешите уведомления, чтобы мы показывали статус воспроизведения, когда приложение в фоне.</string>
+    <string name="permission_notifications_denied">🚫 Уведомления отключены. Вы можете включить их позже в настройках.</string>
+    <string name="permission_notifications_denied_permanently">⚠️ Для этого приложения уведомления отключены. Откройте настройки, чтобы включить.</string>
+    <string name="permission_notifications_granted">✅ Уведомления включены. Мы будем показывать статус воспроизведения в шторке.</string>
+
+    <!-- Подписи для Snackbar / кнопки -->
+    <string name="allow">Разрешить</string>
+    <string name="open_settings">Открыть настройки</string>
+
 
     <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
     используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
@@ -496,5 +521,30 @@
 
     <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
 <!--    <string name="no_internet_connection">📶❌Отсутствует подключение к интернету ⛔️</string>-->
+
+<!--    &lt;!&ndash; Foreground notification &ndash;&gt;-->
+<!--    &lt;!&ndash; Запасной текст для уведомления, если нет артиста/названия &ndash;&gt;-->
+<!--    <string name="playback_in_progress">Playback in progress…</string>-->
+<!--    &lt;!&ndash; "Artist — Title" &ndash;&gt;-->
+<!--    <string name="notification_playing_format">%1$s — %2$s</string>-->
+
+<!--    &lt;!&ndash; Notification channel &ndash;&gt;-->
+<!--    <string name="notification_channel_name">Playback</string>-->
+<!--    <string name="notification_channel_desc">Audio playback controls and status</string>-->
+
+<!--    &lt;!&ndash; Actions (если добавлять кнопки в уведомление) &ndash;&gt;-->
+<!--    <string name="notification_action_play">Play</string>-->
+<!--    <string name="notification_action_pause">Pause</string>-->
+<!--    <string name="notification_action_stop">Stop</string>-->
+
+<!--    &lt;!&ndash; Разрешение на уведомления (Android 13+) &ndash;&gt;-->
+<!--    <string name="permission_notifications_rationale">🔔 Разрешите уведомления, чтобы мы показывали статус воспроизведения, когда приложение в фоне.</string>-->
+<!--    <string name="permission_notifications_denied">🚫 Уведомления отключены. Вы можете включить их позже в настройках.</string>-->
+<!--    <string name="permission_notifications_denied_permanently">⚠️ Для этого приложения уведомления отключены. Откройте настройки, чтобы включить.</string>-->
+<!--    <string name="permission_notifications_granted">✅ Уведомления включены. Мы будем показывать статус воспроизведения в шторке.</string>-->
+
+<!--    &lt;!&ndash; Подписи для Snackbar / кнопки &ndash;&gt;-->
+<!--    <string name="allow">Разрешить</string>-->
+<!--    <string name="open_settings">Открыть настройки</string>-->
 
 </resources>

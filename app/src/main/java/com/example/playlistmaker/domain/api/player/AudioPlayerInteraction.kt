@@ -3,8 +3,9 @@ package com.example.playlistmaker.domain.api.player
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
+// add COMPLETED, ERROR for service on Player [Сервис (Bound + Foreground)]
 enum class PlaybackState {
-    IDLE, PREPARING, PREPARED, PLAYING, PAUSED, STOPPED
+    IDLE, PREPARING, PREPARED, PLAYING, PAUSED, STOPPED, COMPLETED, ERROR
 }
 
 interface AudioPlayerInteraction {

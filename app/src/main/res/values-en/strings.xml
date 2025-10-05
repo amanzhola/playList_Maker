@@ -243,4 +243,29 @@
     <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
     <string name="no_internet_connection">📶❌Lost internet connection ⛔️</string>
 
+    <!-- Foreground notification -->
+    <!-- Fallback text for ongoing playback notification (if no artist/title) -->
+    <string name="playback_in_progress">Воспроизведение идёт…</string>
+    <!-- "Исполнитель — Трек" -->
+    <string name="notification_playing_format">%1$s — %2$s</string>
+
+    <!-- Notification channel -->
+    <string name="notification_channel_name">Воспроизведение</string>
+    <string name="notification_channel_desc">Управление и статус аудио-воспроизведения</string>
+
+    <!-- Actions if will require-->
+    <string name="notification_action_play">Играть</string>
+    <string name="notification_action_pause">Пауза</string>
+    <string name="notification_action_stop">Стоп</string>
+
+    <!-- Notifications permission (Android 13+) -->
+    <string name="permission_notifications_rationale">🔔 Allow notifications so we can show playback status while the app is in the background.</string>
+    <string name="permission_notifications_denied">🚫 Notifications are turned off. You can enable them later in Settings.</string>
+    <string name="permission_notifications_denied_permanently">⚠️ Notifications are disabled for this app. Open Settings to enable them.</string>
+    <string name="permission_notifications_granted">✅ Notifications enabled. We’ll show playback status in the notification shade.</string>
+
+    <!-- Snackbar / button captions -->
+    <string name="allow">Allow</string>
+    <string name="open_settings">Open settings</string>
+
 </resources>

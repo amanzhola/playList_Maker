@@ -43,4 +43,13 @@ const val ACTION_SHOW_IMPORT_PREVIEW = "com.example.playlistmaker.SHOW_IMPORT_PR
 const val EXTRA_IMPORT_ENTRY = "extra_is_import_entry"
 const val EXTRA_IMPORT_URI = "import_uri"
 
+// MusicService
+const val EXTRA_URL = "song_url"
+const val EXTRA_ARTIST = "artist"
+const val EXTRA_TITLE = "title"
+const val EXTRA_ID = "track_id"
+
+const val CHANNEL_ID = "player_channel"
+const val CHANNEL_NAME = "Playback"
+const val NOTIF_ID = 1001
 
