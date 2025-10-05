@@ -57,6 +57,9 @@ class SearchWeather : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // toolbar save and apply background color
+        applySavedColorsForCurrentScreen()
+
         placeholderMessage = findViewById(R.id.placeholderMessage)
         searchButton = findViewById(R.id.searchButton)
         queryInput = findViewById(R.id.queryInput)
@@ -321,4 +324,15 @@ class SearchWeather : BaseActivity() {
     override fun shouldEnableEdgeToEdge(): Boolean = false
     override fun getLayoutId(): Int = R.layout.activity_search_weather
     override fun getMainLayoutId(): Int = R.id.main
+
+    override fun onResume() {
+        super.onResume()
+
+        // это Activity, тут не нужно (activity as? ...)
+        updateSegmentTexts()
+
+        // toolbar save and apply background color
+        // раньше было applyToolbarThemeColors(); теперь комбо:
+        applyThemeThenRestoreSaved()
+    }
 }

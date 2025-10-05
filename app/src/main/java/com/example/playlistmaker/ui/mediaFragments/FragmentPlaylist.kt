@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,11 +15,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentPlaylistBinding
 import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.SpacesItemDecoration
 import com.example.playlistmaker.presentation.media.PlaylistViewModel
+import com.example.playlistmaker.presentation.utils.screenKeyOrDefault
 import com.example.playlistmaker.utils.NavKeys
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -151,5 +154,21 @@ class FragmentPlaylist : Fragment() {
             fragment.arguments = args
             return fragment
         }
+    }
+
+    // toolbar save and apply background color
+    override fun onResume() {
+        super.onResume()
+
+        // активна ли эта вкладка?
+        val isActive = (parentFragment as? com.example.playlistmaker.presentation.utils.ActiveChildProvider)
+            ?.getActiveChildFragment() === this
+        if (!isActive) return
+
+        val act = activity as? BaseActivity ?: return
+        val defaultBg = ContextCompat.getColor(requireContext(), R.color.white_textColor)
+
+        val scope = screenKeyOrDefault()   // ← без any is-проверок
+        act.applySavedForScopeOrDefault(scope, defaultBg)
     }
 }

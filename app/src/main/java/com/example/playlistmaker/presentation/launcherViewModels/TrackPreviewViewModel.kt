@@ -164,7 +164,9 @@ class TrackPreviewViewModel(
                     PlaybackState.PREPARED -> it.copy(isPlaying = true, playTime = "🕒0:00")
                     PlaybackState.PLAYING -> it.copy(isPlaying = true, playTime = playTime)
                     PlaybackState.PAUSED -> it.copy(isPlaying = false, playTime = playTime)
-                    PlaybackState.STOPPED, PlaybackState.IDLE -> it.copy(isPlaying = false, playTime = "🕒0:00")
+                    PlaybackState.STOPPED, PlaybackState.IDLE, PlaybackState.COMPLETED,
+                    PlaybackState.ERROR -> it.copy(isPlaying = false, playTime = "🕒0:00")
+                    // НОВОЕ: обнуляемся как при STOPPED/IDLE update AudioPlayerInteraction PlaybackState + for adding service on Player
                 }
             } else {
                 it.copy(isPlaying = false, playTime = "🕒0:00")

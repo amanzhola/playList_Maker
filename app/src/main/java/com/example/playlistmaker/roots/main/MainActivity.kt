@@ -1,13 +1,17 @@
 package com.example.playlistmaker.roots.main
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.playlistmaker.App
@@ -18,6 +22,7 @@ import com.example.playlistmaker.presentation.utils.BottomNavigationHelper
 import com.example.playlistmaker.presentation.utils.NavigationConfigProvider
 import com.example.playlistmaker.ui.audio.ReversableList
 import com.example.playlistmaker.ui.audio.SearchFragment
+import com.example.playlistmaker.ui.chat.UsersRepo
 import com.example.playlistmaker.ui.media.MediaLibraryFragment
 import com.example.playlistmaker.ui.settings.SettingsFragment
 import com.example.playlistmaker.utils.ACTION_SHOW_IMPORT_PREVIEW
@@ -25,8 +30,53 @@ import com.example.playlistmaker.utils.ARG_IMPORT_URI
 import com.example.playlistmaker.utils.EXTRA_IMPORT_ENTRY
 import com.example.playlistmaker.utils.EXTRA_IMPORT_URI
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.auth
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
+
+    private val requestPostNotifications =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            // можно показать подсказку, если не выдали
+        }
+
+    private val prefs by lazy { getSharedPreferences("chat_prefs", MODE_PRIVATE) }
+    private fun wasProfileAskedOnce() = prefs.getBoolean("profile_asked_once", false)
+    @SuppressLint("UseKtx")
+    private fun markProfileAskedOnce() = prefs.edit().putBoolean("profile_asked_once", true).apply()
+
+    private fun ensureFirebaseAuthThen(onReady: (String) -> Unit) {
+        val auth = com.google.firebase.Firebase.auth
+        val current = auth.currentUser
+        if (current != null) {
+            // уже вошли — создадим/обновим запись в users и поехали
+            lifecycleScope.launch {
+                try { UsersRepo().ensureCurrentUser(current.uid) } catch (_: Exception) {}
+                // >>> добавлен Push Notification Token Issue
+                com.example.playlistmaker.ui.chat.notification.FcmTokenManager
+                    .forceRegisterFcmToken(this@MainActivity)
+                // <<<
+                onReady(current.uid)
+            }
+            return
+        }
+
+        auth.signInAnonymously()
+            .addOnSuccessListener { res ->
+                val uid = res.user?.uid ?: return@addOnSuccessListener
+                lifecycleScope.launch {
+                    try { UsersRepo().ensureCurrentUser(uid) } catch (_: Exception) {}
+                    // >>> добавлен Push Notification Token Issue
+                    com.example.playlistmaker.ui.chat.notification.FcmTokenManager
+                        .forceRegisterFcmToken(this@MainActivity)
+                    // <<<
+                    onReady(uid)
+                }
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("AUTH", "Anon sign-in failed", e)
+            }
+    }
 
     private var enteredFromImport = false
     private lateinit var navController: NavController
@@ -34,12 +84,49 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Android 13+: запросить разрешение на уведомления
+        if (Build.VERSION.SDK_INT >= 33) {
+            requestPostNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        // 1) (как было) разбор import-интента и т.д. — ОК
         enteredFromImport = savedInstanceState?.getBoolean("enteredFromImport")
             ?: intent.getBooleanExtra(EXTRA_IMPORT_ENTRY, false)
 
+        // 2) СНАЧАЛА получаем navController
         navController = (supportFragmentManager
             .findFragmentById(R.id.nav_host_container) as NavHostFragment).navController
 
+        // 3) ТЕПЕРЬ вызываем аутентификацию и проверку профиля
+        ensureFirebaseAuthThen { uid ->
+            android.util.Log.d("AUTH", "signed in as $uid")
+
+            // закрываем авто-запуск profileFragment, регистарция есть и по желанию пользователея обновление профиля
+            /*
+            // показываем профиль только ОДИН раз после самого первого входа
+            if (!wasProfileAskedOnce()) {
+                // пробуем прочитать имя — если пустое, тоже ок, просто откроем профиль
+                lifecycleScope.launch {
+                    try {
+                        val doc = com.google.firebase.ktx.Firebase.firestore
+                            .collection("profiles")
+                            .document(uid)
+                            .get()
+                            .await()
+
+                    // не важно, какое там имя — мы всё равно откроем профиль лишь один раз
+                    } catch (_: Throwable) { /* игнор */ }
+
+                    // открыть профиль и сразу пометить, что уже спрашивали
+                    if (navController.currentDestination?.id != R.id.profileFragment) {
+                        navController.navigate(R.id.profileFragment)
+                    }
+                    markProfileAskedOnce()
+                }
+            } */
+        }
+
+        // 4) Дальше — существующая логика вычисления buttonIndex и стартовой навигации
         buttonIndex = when {
             savedInstanceState != null -> {
                 // Восстановление после recreate()
@@ -69,9 +156,10 @@ class MainActivity : BaseActivity() {
                 0 -> R.id.searchFragment
                 1 -> R.id.mediaLibraryFragment
                 2 -> R.id.settingsFragment
-                5 -> R.id.extraOptionFragment // ✅ добавляем
+                5 -> R.id.usersFragment  // ✅ добавляем
                 else -> R.id.mainFragment
             }
+//            5 -> R.id.extraOptionFragment // ✅ добавляем
 
             if (navController.currentDestination?.id != destinationId) {
                 navController.navigate(destinationId)
@@ -110,7 +198,6 @@ class MainActivity : BaseActivity() {
             }
         })
 
-
         // for playlistInfoFragment on sprint 23 + importPreviewFragment для просмотра альбома
         navController.addOnDestinationChangedListener { _, dest, _ ->
             val hideOn = setOf(
@@ -147,9 +234,10 @@ class MainActivity : BaseActivity() {
             0 -> R.id.searchFragment
             1 -> R.id.mediaLibraryFragment
             2 -> R.id.settingsFragment
-            5 -> R.id.extraOptionFragment // ✅ добавляем
+            5 -> R.id.usersFragment // ✅ добавляем
             else -> R.id.mainFragment
         }
+//        5 -> R.id.extraOptionFragment // ✅ добавляем
 
         if (navController.currentDestination?.id != destinationId) {
             navController.navigate(destinationId)
@@ -190,28 +278,28 @@ class MainActivity : BaseActivity() {
         }
 
         val current = getCurrentVisibleFragment()
-        val isTopLevel =
-            current is SearchFragment ||
-                    current is MediaLibraryFragment ||
-                    current is SettingsFragment
+            val isTopLevel =
+                current is SearchFragment ||
+                        current is MediaLibraryFragment ||
+                        current is SettingsFragment
 
-        if (isTopLevel) {
-            // Диалог подтверждения выхода
-            MaterialAlertDialogBuilder(this)
-                .setMessage("Вы действительно хотите выйти из приложения?")
-                .setPositiveButton("Да") { d, _ ->
-                    d.dismiss()
-                    finishAffinity() // закрываем всю задачу приложения
+            if (isTopLevel) {
+                // Диалог подтверждения выхода
+                MaterialAlertDialogBuilder(this)
+                    .setMessage("Вы действительно хотите выйти из приложения?")
+                    .setPositiveButton("Да") { d, _ ->
+                        d.dismiss()
+                        finishAffinity() // закрываем всю задачу приложения
+                    }
+                    .setNegativeButton("Нет") { d, _ -> d.dismiss() }
+                    .show()
+            } else {
+                // Обычный шаг назад по навграфу
+                if (!navController.navigateUp()) {
+                    // Если уже некуда «назад» внутри графа — закрываем текущую Activity
+                    finish()
                 }
-                .setNegativeButton("Нет") { d, _ -> d.dismiss() }
-                .show()
-        } else {
-            // Обычный шаг назад по навграфу
-            if (!navController.navigateUp()) {
-                // Если уже некуда «назад» внутри графа — закрываем текущую Activity
-                finish()
             }
-        }
     }
 
     // ✅ 2 для перехода с TrackPreviewFragment на CreatePlaylistFragment :

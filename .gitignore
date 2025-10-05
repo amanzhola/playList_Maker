@@ -1,15 +1,27 @@
+# IDE
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+
+# Android/Gradle build
+.gradle/
+build/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local machine configs
 local.properties
+
+# Keystores / приватные вещи
+*.jks
+keystore.properties
+gradle.properties
+
+# Firebase локальные артефакты/эмуляторы
+.firebase/
+.firebaserc.local
+
+# (опционально) если не хочешь коммитить google-services.json, раскомментируй:
+# app/google-services.json

@@ -1,14 +1,28 @@
 package com.example.playlistmaker.ui.audioPosters
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -22,6 +36,7 @@ import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentExtraOptionBinding
+import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.AudioSingleTrackShare
 import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
@@ -29,15 +44,43 @@ import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.roots.main.MainActivity
+import com.example.playlistmaker.services.MusicService
 import com.example.playlistmaker.ui.main.BottomNavConfig
+import com.example.playlistmaker.utils.EXTRA_ARTIST
+import com.example.playlistmaker.utils.EXTRA_ID
+import com.example.playlistmaker.utils.EXTRA_TITLE
+import com.example.playlistmaker.utils.EXTRA_URL
 import com.example.playlistmaker.utils.NavKeys
+import com.example.playlistmaker.utils.showLongSnack
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
+class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // [ADDED] Запрос Разрешения
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Современный запрос разрешения (Android 13+)
+    private val requestNotifPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                // ✅ Разрешение выдано — показывать уведомления во время PLAYING
+                showSnack(getString(R.string.permission_notifications_granted))
+            } else {
+                // ❌ Отказ — покажи краткое пояснение
+                // Если юзер нажал «Не спрашивать снова», стоит предложить открыть настройки
+                showSnack(getString(R.string.permission_notifications_denied))
+            }
+        }
+
+    // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+    private val networkChecker: NetworkStatusChecker by inject { parametersOf(requireContext()) }
+    private var cm: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var lastConnected: Boolean? = null
 
     private lateinit var binding: FragmentExtraOptionBinding
     private lateinit var adapter: TrackAdapterAudio
@@ -54,6 +97,46 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
     private lateinit var overlay: View
     private val imageLoader: ImageLoader by inject()
     private val bottomAdapter by lazy { PlaylistBottomAdapter(imageLoader) { viewModel.onPlaylistClicked(it) } }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // [ADDED] Привязка к сервису AudioPlayerControl (MusicService)
+    // ─────────────────────────────────────────────────────────────────────────────
+    private var musicService: MusicService? = null
+    private var isBound: Boolean = false
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            // [ADDED] получаем экземпляр сервиса и отдаём в VM
+            val binder = service as? MusicService.MusicServiceBinder ?: return
+            musicService = binder.getService()
+            isBound = true
+            // передаём control в VM (замена старого startObservingAudioPlayer)
+            viewModel.setAudioPlayerControl(musicService!!)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            // [ADDED] сервис умер/отключился → сообщаем VM
+            isBound = false
+            musicService = null
+            viewModel.removeAudioPlayerControl()
+        }
+    }
+
+    // [ADDED] Удобный хелпер: формируем Intent для bindService и кладём данные трека (artist/title)
+    private fun buildBindIntentForCurrent(): Intent {
+        val ctx = requireContext()
+        val intent = Intent(ctx, MusicService::class.java)
+
+        // По чек-листу: при привязке передаём url/artist/title/id — для текста уведомления и т.п.
+        viewModel.getCurrentTrack()?.let { t ->
+            intent.putExtra(EXTRA_URL, t.previewUrl)
+            intent.putExtra(EXTRA_ARTIST, t.artistName)
+            intent.putExtra(EXTRA_TITLE, t.trackName)
+            intent.putExtra(EXTRA_ID, t.trackId)
+        }
+        return intent
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -190,9 +273,12 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         // 👀 Подписка на состояние ViewModel (StateFlow)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                // [REMOVED → REPLACED]
                 // запускаем наблюдение за плеером, когда экран на виду
                 // в VM есть защита от повторного старта
-                viewModel.startObservingAudioPlayer()
+//                viewModel.startObservingAudioPlayer()
+                // Теперь подписки активируются из viewModel.setAudioPlayerControl() после bindService.
 
                 // 1) Состояние аудиоплеера/экрана
                 launch {
@@ -278,6 +364,27 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
+        // 🔔 Запрос разрешения на уведомления (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && savedInstanceState == null) {
+            val hasPermission = requireContext()
+                .checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
+            if (!hasPermission) {
+                val shouldExplain = shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+                if (shouldExplain) {
+                    // Коротко объясняем пользователю «зачем»
+                    showSnack(getString(R.string.permission_notifications_rationale))
+                    // Можно подождать 0.5–1с или показать Snackbar с action «Разрешить»
+                    // и в action вызвать:
+//                     requestNotifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    // Первый запрос или пользователь не запретил «навсегда» → просто спрашиваем
+                    requestNotifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+
+
         // ⭐ Подсветка иконки нижнего меню
         binding.root.findViewById<View>(R.id.bottom6)?.isSelected = true
 
@@ -285,11 +392,148 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         viewModel.startFavoritesSyncIfNeeded()
     }
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // [ADDED] Привязка/отвязка сервиса, + нотификация при уходе в фон/возврате
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    override fun onStart() {
+        super.onStart()
+        // [ADDED] При входе на экран — привязываемся к сервису.
+        // В Intent кладём текущий трек, чтобы сервис знал artist/title для уведомления.
+        requireContext().bindService(
+            buildBindIntentForCurrent(),
+            connection,
+            Context.BIND_AUTO_CREATE
+        )
+        // ok = true — система приняла запрос на bind. Фактическое соединение придёт в onServiceConnected.
+        // (на случай редких fail можно логировать ok)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        val activity = requireActivity()
+        val changingCfg = activity.isChangingConfigurations
+        val finishing = activity.isFinishing
+
+        // Это «уходим в фон», если НЕ идёт конфигурационное изменение и активити не финишится,
+        // и действительно теряем фокус окна (сворачивание / переключение в другое приложение)
+        val goingToBackground = !changingCfg && !finishing && !activity.hasWindowFocus()
+        if (!goingToBackground) return
+
+        // Android 13+: уведомления только при наличии разрешения
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) return
+        }
+
+        // Только теперь просим VM показать foreground-уведомление (если реально PLAYING)
+        viewModel.onUiWentBackground()
+    }
+
+    // Отвязка здесь:
+    // [ADDED] Отвязка сервиса по условиям задачи (экран закрыт/уходит — не держим лишних связей)
+    override fun onDestroyView() {
+        // останавливаем трек ТОЛЬКО при реальном закрытии экрана (назад/уход со страницы),
+        // но НЕ при конфигурационных изменениях и не когда Activity просто пересоздаётся из-за темы
+        val reallyClosingScreen =
+            (isRemoving && !requireActivity().isChangingConfigurations) ||
+                    requireActivity().isFinishing
+
+        if (reallyClosingScreen) {
+            viewModel.stopAudioPlay() // требование пункта 2 — стоп при закрытии экрана/приложения
+        }
+
+        super.onDestroyView()
+
+        // Разрываем связь с сервисом только если это НЕ конфигурационное изменение
+        if (!requireActivity().isChangingConfigurations && isBound) {
+            try { requireContext().unbindService(connection) } catch (_: Exception) {}
+            isBound = false
+            musicService = null
+            viewModel.removeAudioPlayerControl()
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // toolbar save and apply background color
+    @SuppressLint("ObsoleteSdkInt")
+    override fun onResume() {
+        super.onResume()
+        (activity as? BaseActivity)?.updateSegmentTexts()
+        if (hideBottomSheetIfOpen()) {
+            overlay.visibility = View.GONE
+            overlay.alpha = 0f
+        }
+
+        // [ADDED] UI вернулся на экран — просим VM скрыть уведомление
+        viewModel.onUiCameToForeground()
+
+        // fixing theme on emulator and real mobile difference
+        (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
+
+        // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+        cm = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        // инициализируем предыдущее состояние (чтобы не спамить первым событием)
+        lastConnected = networkChecker.isNetworkAvailable()
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                // стало доступно — просто запомним
+                lastConnected = true
+            }
+
+            override fun onLost(network: Network) {
+                // сеть потеряна → проверим реальную доступность и покажем snack при переходе true -> false
+                val now = networkChecker.isNetworkAvailable()
+                val was = lastConnected
+                if (was == true && !now) {
+                    // см. пункт 2 — используем ваш showLongSnack()
+                    showLongSnack(getString(R.string.no_internet_connection))
+                }
+                lastConnected = now
+            }
+
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                // на некоторых устройствах потеря валидированного интернета прилетает сюда
+                val now = networkChecker.isNetworkAvailable()
+                val was = lastConnected
+                if (was == true && !now) {
+                    showLongSnack(getString(R.string.no_internet_connection))
+                }
+                lastConnected = now
+            }
+        }
+
+        // РЕГИСТРАЦИЯ
+        // API 24+ — можно коротко:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            cm?.registerDefaultNetworkCallback(networkCallback!!)
+        } else {
+            // API 21–23 — явно строим запрос на интернет
+            val req = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build()
+            cm?.registerNetworkCallback(req, networkCallback!!)
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         val pos = (binding.tracksRecyclerView.layoutManager as? LinearLayoutManager)
             ?.findFirstVisibleItemPosition() ?: 0
         viewModel.setScrollPosition(pos)
+
+        // use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION
+        networkCallback?.let { cb ->
+            try { cm?.unregisterNetworkCallback(cb) } catch (_: Exception) {}
+        }
+        networkCallback = null
+        cm = null
     }
 
     fun shareSingleTrack() {
@@ -310,7 +554,7 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
         ).toInt()
 
     override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.option) {
+        ToolbarConfig(View.VISIBLE, R.string.chat_btm) {
             if (viewModel.state.value.isBottomNavVisible) {
                 (requireActivity() as? MainActivity)?.apply {
                     buttonIndex = -1
@@ -340,18 +584,6 @@ class ExtraOptionFragment : BaseFragment(), BottomNavConfig {
 
     override fun onSegment4ClickedInternal() {
         viewModel.updateState { s -> s.copy(isBottomNavVisible = !s.isBottomNavVisible) }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        (activity as? BaseActivity)?.updateSegmentTexts()
-        if (hideBottomSheetIfOpen()) {
-            overlay.visibility = View.GONE
-            overlay.alpha = 0f
-        }
-
-        // fixing theme on emulator and real mobile difference
-        (activity as? BaseActivity)?.applyToolbarThemeColors()
     }
 
     private fun showSnack(text: String, durationMs: Int = 4000) {

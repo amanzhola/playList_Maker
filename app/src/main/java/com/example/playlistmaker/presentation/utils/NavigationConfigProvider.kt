@@ -1,6 +1,5 @@
 package com.example.playlistmaker.presentation.utils
 
-//import com.example.playlistmaker.ui.audioPosters.ExtraOption
 import android.content.Context
 import com.example.playlistmaker.NavigationData
 import com.example.playlistmaker.R
@@ -17,7 +16,7 @@ object NavigationConfigProvider {
             Pair(context.getString(R.string.settings), R.drawable.settings_icon),
             Pair(context.getString(R.string.movie), R.drawable.movies_icon),
             Pair(context.getString(R.string.weather), R.drawable.weather_icon),
-            Pair(context.getString(R.string.option), R.drawable.add_box_icon)
+            Pair(context.getString(R.string.chat_btm), R.drawable.baseline_chat_24)
         )
     }
 

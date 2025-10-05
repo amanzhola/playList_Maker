@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Круглый прямоугольник -->
+    <item android:bottom="0dp" android:top="0dp" android:left="8dp" android:right="0dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="16dp"/>
+            <solid android:color="@color/chat_bubble_in"/>
+        </shape>
+    </item>
+
+    <!-- Хвостик слева -->
+    <item
+        android:drawable="@drawable/tail_left_in"
+        android:gravity="start|bottom"
+        android:left="0dp"
+        android:bottom="6dp"/>
+</layer-list>

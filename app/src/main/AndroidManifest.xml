@@ -13,6 +13,13 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 
+    <!-- Android 13+ уведомления -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--Сервис (Bound + Foreground)-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
     <!--
          =========================
          option 0: icon [icon_launcher] and roundIcon [icon_launcher_round]
@@ -31,9 +38,9 @@
         tools:targetApi="31">
         <activity
             android:name=".roots.movie.MovieRootActivity"
-            android:windowSoftInputMode="adjustNothing"
+            android:windowSoftInputMode="stateHidden"
             android:exported="false" /> <!-- <activity -->
-
+<!--        android:windowSoftInputMode="adjustNothing"-->
         <!--
          =========================
              Стартовая активность — MainActivity
@@ -49,6 +56,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Сервис для FCM -->
+        <service
+            android:name=".ui.chat.notification.ChatPushService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Иконка по умолчанию для статус-бара -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_chat" />
+
         <activity
             android:name=".ui.launcher.LauncherActivity"
             android:theme="@style/AppTheme"
@@ -129,6 +151,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!--Сервис (Bound + Foreground)-->
+        <service
+            android:name=".services.MusicService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
     </application>
 
 </manifest>

@@ -7,56 +7,46 @@ import com.example.playlistmaker.ui.main.BottomNavConfig
 
 open class BaseFragment : Fragment() {
 
-    private var wasBottomNavSynced = false // ✅ Однократная защита от сбоя навигации
+    private var wasBottomNavSynced = false // ✅ однократно синхроним btm-nav
 
     protected fun getBaseActivity(): BaseActivity? = activity as? BaseActivity
-
     open fun getToolbarConfig(): ToolbarConfig? = null
 
     override fun onResume() {
         super.onResume()
 
-        val activity = getBaseActivity() ?: return
-        val main = activity as? MainActivity ?: return
+        val act = getBaseActivity() ?: return
+        val main = act as? MainActivity ?: return
 
-        if (this is BottomNavConfig) {
-            // ✅ Показываем или скрываем навигацию
-            if (shouldShowBottomNav()) {
-                activity.showBottomNavigation()
-            } else {
-                activity.hideBottomNavigation()
-            }
+        // ---- Bottom nav (только если фрагмент её конфигурирует) ----
+        val cfg = this as? BottomNavConfig
+        cfg?.let { c ->
+            // Показать/спрятать навигацию // ✅ Показываем или скрываем навигацию
+            if (c.shouldShowBottomNav()) act.showBottomNavigation() else act.hideBottomNavigation()
 
-
-            // ✅ Однократная синхронизация на старте — для Search/Settings
-            if (!wasBottomNavSynced) {
-                getBottomNavButtonIndex()?.let { index ->
+            // Синхронизация выделенной кнопки // ✅ Однократная синхронизация на старте — для Search/Settings
+            c.getBottomNavButtonIndex()?.let { index ->
+                if (!wasBottomNavSynced) {
                     main.buttonIndex = index
                     main.bottomNavigationHelper.selectButton(index)
-                    main.bottomNavigationHelper.setBottomNavigationVisibility() // ← вызывать и при равенстве
-                }
-                wasBottomNavSynced = true
-            } else {
-                // ✅ Обычная логика при возвратах и пересозданиях
-                getBottomNavButtonIndex()?.let { index ->
+                    main.bottomNavigationHelper.setBottomNavigationVisibility()
+                    wasBottomNavSynced = true
+                } else { // ✅ Обычная логика при возвратах и пересозданиях
                     if (main.buttonIndex != index) {
-                        // поднимаем индекс в MainActivity
                         main.buttonIndex = index
-                        // подсветить нужную кнопку
                         main.bottomNavigationHelper.selectButton(index)
                     }
-                    main.bottomNavigationHelper.setBottomNavigationVisibility() // ← вызывать и при равенстве
+                    main.bottomNavigationHelper.setBottomNavigationVisibility()
                 }
             }
         }
 
-        // ✅ Обновляем тулбар
-        getToolbarConfig()?.let { config ->
-            activity.updateToolbar(config)
-        }
+        // ---- Toolbar ---- // ✅ Обновляем тулбар
+        getToolbarConfig()?.let { act.updateToolbar(it) }
+
+        // ---- Цвета (тема + сохранённые для текущего screenKey) ----
+        act.applySavedColorsForCurrentScreen()
     }
 
-    open fun onSegment4ClickedInternal() {
-        // по умолчанию ничего
-    }
+    open fun onSegment4ClickedInternal() { /* no-op */ }
 }

@@ -1,6 +1,8 @@
 package com.example.playlistmaker.presentation.utils
 
+import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.presentation.utils.ColorHelper.changeBackgroundColor
@@ -27,17 +29,27 @@ class ColorApplierHelper(
                     toolbarHelper.setBackArrowColor(color)
                 }
             }
-            1 -> {
-                mainLayout.setBackgroundColor(color)
-                if (!isMainFragment) {
-                    val fragmentRoot = currentFragment?.view as? ViewGroup
-                    fragmentRoot?.applyBackgroundRecursively(color)
+
+            1 -> { // toolbar save and apply background color
+                val visibleFragment = activity.getVisibleScreenFragmentOrNull()
+
+                // исключения: спросим у фрагмента (если поддерживает)
+                val excludeIds = (visibleFragment as? BackgroundExclusionProvider)?.backgroundExclusionIds().orEmpty()
+
+                visibleFragment?.let { frag ->
+                    // есть ребёнок → красим ТОЛЬКО его root // есть фрагмент/таба → красим ТОЛЬКО его root И общий тулбар (mainLayout НЕ трогаем)
+                    (frag.view as? ViewGroup)?.applyBackgroundRecursively(color, excludeIds)
+                    toolbarHelper.setBackgroundColor(color)
+                } ?: run {
+                    // ребёнка нет → “чистая” активити // «чистая» активити → красим корневой layout И общий тулбар
+                    mainLayout.setBackgroundColor(color)
+                    toolbarHelper.setBackgroundColor(color)
                 }
             }
             2 -> when {
                 isMainFragment -> mainLayout.changeTextColor(color)
                 currentFragment is SearchFragment -> {
-                    currentFragment.getAdapter()?.setTextColor(color)
+                    currentFragment.getAdapter().setTextColor(color)
                 }
                 else -> {
                     mainLayout.changeTextColor(color, R.id.toolbar)
@@ -54,7 +66,7 @@ class ColorApplierHelper(
                     mainLayout.changeCompoundDrawableColor(color, R.id.toolbar)
                 }
                 currentFragment is SearchFragment -> {
-                    currentFragment.getAdapter()?.setArrowColor(color)
+                    currentFragment.getAdapter().setArrowColor(color)
                 }
             }
             4 -> if (isMainFragment) {
@@ -63,16 +75,45 @@ class ColorApplierHelper(
         }
     }
 
-    private fun ViewGroup.applyBackgroundRecursively(color: Int) {
+    // toolbar save and apply background color
+    private fun ViewGroup.applyBackgroundRecursively(
+        color: Int,
+        excludeIds: Set<Int> = emptySet()
+    ) {
+        if (this.id in excludeIds) return
         this.setBackgroundColor(color)
         for (i in 0 until childCount) {
             val child = getChildAt(i)
+            if (child.id in excludeIds) continue
             if (child is ViewGroup) {
-                child.applyBackgroundRecursively(color)
+                child.applyBackgroundRecursively(color, excludeIds)
             } else {
                 child.setBackgroundColor(color)
             }
         }
     }
 
+    // Позволяет дочернему фрагменту быстро сбросить свой фон в дефолт
+    fun Fragment.resetOwnBackgroundTo(color: Int, excludeIds: Set<Int> = emptySet()) {
+        (view as? ViewGroup)?.applyBackgroundRecursively(color, excludeIds)
+    }
+}
+
+fun View?.resetBackgroundRecursively(color: Int, excludeIds: Set<Int> = emptySet()) {
+    val vg = this as? ViewGroup ?: return
+    if (vg.id !in excludeIds) vg.setBackgroundColor(color)
+    for (i in 0 until vg.childCount) {
+        val ch = vg.getChildAt(i)
+        if (ch.id in excludeIds) continue
+        if (ch is ViewGroup) ch.resetBackgroundRecursively(color, excludeIds)
+        else ch.setBackgroundColor(color)
+    }
+}
+
+// Если хочешь вызывать именно на ViewGroup — можно и такой синоним оставить:
+fun ViewGroup.applyBackgroundRecursively(
+    color: Int,
+    excludeIds: Set<Int> = emptySet()
+) {
+    this.resetBackgroundRecursively(color, excludeIds)
 }

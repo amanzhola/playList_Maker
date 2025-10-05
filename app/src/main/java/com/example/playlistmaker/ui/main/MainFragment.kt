@@ -14,14 +14,26 @@ import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.base.NavigationTarget
 import com.example.playlistmaker.presentation.mainViewModels.MainViewModel
+import com.example.playlistmaker.presentation.utils.BackgroundExclusionProvider
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.google.android.material.button.MaterialButton
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainFragment : BaseFragment(), BottomNavConfig {
+class MainFragment : BaseFragment(), BottomNavConfig,
+    BackgroundExclusionProvider {
 
     private val viewModel: MainViewModel by viewModel()
     private var isGroupOneVisible = false
+
+    // toolbar save and apply background color
+    override fun backgroundExclusionIds(): Set<Int> = setOf(
+        R.id.button1,
+        R.id.button2,
+        R.id.button3,
+        R.id.button4,
+        R.id.button5,
+        R.id.button6
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -149,13 +161,21 @@ class MainFragment : BaseFragment(), BottomNavConfig {
         }
     }
 
+    // toolbar save and apply background color
     override fun onResume() {
         super.onResume()
         (activity as? BaseActivity)?.updateSegmentTexts()
-        // Синий тулбар только для MainFragment
-        (activity as? BaseActivity)
-            ?.toolbarHelper
-            ?.applyMainBlueColors()
+
+        val act = activity as? BaseActivity ?: return
+
+        // если сохранённого bg (slot 1) для текущего экрана нет — ставим «синий главный»
+        val savedBg = act.getSavedColorForCurrentScreen(slot = 1)
+        if (savedBg == null) {
+            act.toolbarHelper.applyMainBlueColors()
+        }
+
+        // поверх дефолта — всегда подтяни сохранённые цвета для ТЕКУЩЕГО экрана
+        act.applySavedColorsForCurrentScreen()
     }
 
     override fun onPause() {

@@ -1,6 +1,11 @@
 package com.example.playlistmaker
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -41,10 +46,48 @@ class App : Application() { // ☀️ 🔁 🌙
 
     companion object {
         var wasInitialLaunchDone: Boolean = false
+
+        // Если меняли важность и старый канал уже создан с MIN,
+        // используем новый ID (и в серверном FCM).
+        const val CHAT_CHANNEL_ID = "chat"
+        const val CHAT_BADGE_CHANNEL_ID = "chat_badge" // или "chat_badge_v2"
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate() {
         super.onCreate()
+
+        // ВАЖНО: сначала создаём каналы
+        ensureChatChannel(this)
+        ensureChatBadgeChannel(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            // 1) канал для обычных чатов:
+            val ch = NotificationChannel(
+                "chat",
+                "Чаты",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply { setShowBadge(true) }  // <- важное
+
+            // 2) НОВЫЙ канал для «тихого» бейджа (фолбэк для Pixel/AOSP):
+            val chBadge = NotificationChannel(
+                "chat_badge",
+                "Chat badge",
+                NotificationManager.IMPORTANCE_MIN // без баннеров/звуков
+            ).apply {
+                setShowBadge(true)
+                setSound(null, null)
+                enableVibration(false)
+                description = "Silent badge channel for app icon count"
+            }
+
+
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.createNotificationChannel(ch)
+            nm.createNotificationChannel(chBadge)
+        }
+
 
         startKoin {
             androidContext(this@App)
@@ -104,6 +147,55 @@ class App : Application() { // ☀️ 🔁 🌙
             for (i in 0 until childCount) {
                 getChildAt(i).traverse(action)
             }
+        }
+    }
+
+    /** Обычные чат-уведомления (если понадобятся отдельным каналом) */
+    @SuppressLint("ObsoleteSdkInt")
+    fun ensureChatChannel(ctx: Context) {
+        if (Build.VERSION.SDK_INT < 26) return
+        val nm = ctx.getSystemService(NotificationManager::class.java)
+        val existing = nm.getNotificationChannel(App.CHAT_CHANNEL_ID)
+        if (existing == null) {
+            val ch = NotificationChannel(
+                App.CHAT_CHANNEL_ID,
+                "Чаты",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                setShowBadge(true)
+                // можно оставить звук по умолчанию или отключить:
+                // setSound(null, null)
+                // enableVibration(false)
+                description = "Уведомления чатов"
+            }
+            nm.createNotificationChannel(ch)
+        }
+    }
+
+    /**
+     * Канал для «тихого» бейджа (точка/цифра).
+     * Важность — DEFAULT (без звука/вибра), иначе на части лаунчеров точка не появится.
+     */
+    @SuppressLint("ObsoleteSdkInt")
+    fun ensureChatBadgeChannel(ctx: Context) {
+        if (Build.VERSION.SDK_INT < 26) return
+        val nm = ctx.getSystemService(NotificationManager::class.java)
+        val existing = nm.getNotificationChannel(App.CHAT_BADGE_CHANNEL_ID)
+
+        // Важность нельзя менять после создания.
+        // Если существующий канал с MIN — создайте канал с новым ID и используйте его.
+        if (existing == null) {
+            val ch = NotificationChannel(
+                App.CHAT_BADGE_CHANNEL_ID,
+                "Chat badge",
+                NotificationManager.IMPORTANCE_DEFAULT // ключевой момент
+            ).apply {
+                setShowBadge(true)
+                setSound(null, null)     // тихо
+                enableVibration(false)   // без вибра
+                description = "Канал для точки/цифры на иконке"
+            }
+            nm.createNotificationChannel(ch)
         }
     }
 }

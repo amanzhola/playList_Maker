@@ -6,14 +6,15 @@ import org.koin.dsl.module
 
 val extraOptionViewModelModule = module { // + from 🏠 🔍 🛠️ 🎧 ☁️ 🎥
 
+    // single<AudioPlayerInteraction> { AudioPlayerInteractionImpl() } ViewModel больше не получает AudioPlayerInteraction.
+    // Вместо этого Fragment биндинит MusicService и передаёт его в VM через setAudioPlayerControl(...).
+
     // Экран Аудиоплеера после 💃❤️✨
-    viewModel {
+        viewModel {
         ExtraOptionViewModel(
-            audioPlayer = get(),                // AudioPlayerInteraction
             favoriteTracksInteractor = get(),   // FavoriteTracksInteractor
             observePlaylists = get(), // ObservePlaylistsUseCase
             addTrackToPlaylist = get() // AddTrackToPlaylistUseCase
         )
     }
-
 }

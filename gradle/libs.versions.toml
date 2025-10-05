@@ -2,12 +2,12 @@
 adapterdelegates4KotlinDsl = "4.3.2"
 agp = "8.9.1"
 compiler = "4.16.0"
+firebaseBom = "33.3.0"
+firebaseFunctionsKtx = "21.2.1"
 fragmentKtx = "1.7.1"
-#fragmentKtxVersion = "1.5.6"
 glide = "4.16.0"
 gson = "2.12.1"
 koinAndroid = "3.3.0"
-#koinAndroidxFragment = "3.5.3"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -23,6 +23,7 @@ navigationFragmentKtx = "2.9.1"
 recyclerview = "1.4.0"
 retrofit = "2.11.0"
 roomVersion = "2.7.2" # при версии roomVersion = "2.6.1" падает -> Not sure how to convert a Cursor to this method's return type (java.lang.Object)
+shortcutbadger = "1.1.22"
 viewpager2 = "1.0.0"
 firebaseCrashlyticsBuildtools = "3.0.5"
 
@@ -31,7 +32,6 @@ adapterdelegates4-kotlin-dsl = { module = "com.hannesdorfmann:adapterdelegates4-
 adapterdelegates4-kotlin-dsl-viewbinding = { module = "com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding", version.ref = "adapterdelegates4KotlinDsl" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
-#androidx-fragment-ktx-v156 = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtxVersion" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
@@ -43,6 +43,13 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVers
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
+firebase-functions-ktx = { module = "com.google.firebase:firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
+firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -52,7 +59,6 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
-#koin-androidx-fragment = { module = "io.insert-koin:koin-androidx-fragment", version.ref = "koinAndroidxFragment" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -60,6 +66,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+shortcutbadger = { module = "me.leolin:ShortcutBadger", version.ref = "shortcutbadger" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

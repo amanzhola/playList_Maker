@@ -44,8 +44,10 @@ val appModule = module {
     // 2 ThemeInteraction //🅱️ 🌓 ↔️ 🌗 😎 from ⬇️ // Theme — для SettingsActivity // 🌓 ↔️ 🌗
 
     // replace ColorPersistenceHelper 🎨📦
-    factory { (activityName: String, isDarkTheme: Boolean) ->
-        ColorPersistenceHelper(androidContext(), activityName, isDarkTheme)}
+    // toolbar save and apply background color 🎨📦
+    factory { (isDarkTheme: Boolean) ->
+        ColorPersistenceHelper(androidContext(), isDarkTheme)
+    }
 
     // replace share  // 👨‍💻
     factory<Share> { (activity: Activity) -> ShareImpl(activity)}

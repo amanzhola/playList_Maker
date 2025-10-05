@@ -33,6 +33,8 @@ import com.example.playlistmaker.presentation.utils.SegmentTextHelper
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
+import com.example.playlistmaker.presentation.utils.resetBackgroundRecursively
+import com.example.playlistmaker.presentation.utils.screenKeyOrDefault
 import com.example.playlistmaker.presentation.utils.toScreenType
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.MainFragment
@@ -115,15 +117,18 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         mainLayout = findViewById(getMainLayoutId())
 
         buttonIndex = intent.getIntExtra("buttonIndex", -1)
-        val activityName = this::class.simpleName ?: "UnknownActivity"
-        colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(activityName, isDarkThemeEnabled()) }
 
+        // 1) toolbar = initializeToolbar() + toolbarHelper.applyThemeColors()
         initializeToolbar()
         // fixing theme on emulator and real mobile difference
         // ⬇️ сразу применяем цвета темы
         toolbarHelper.applyThemeColors()
 
+        // 2) persistence + applier
+        colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(isDarkThemeEnabled()) }
         colorApplierHelper = ColorApplierHelper(this, mainLayout, toolbarHelper)
+
+        // 3) bottom nav и прочие хелперы
         bottomNavigationHelper = BottomNavigationProvider.createHelper(this, bottomViewIds, buttonIndex)
         bottomNavigationHelper.setupBottomNavigation()
         bottomNavigationHelper.setBottomNavigationVisibility()
@@ -137,12 +142,24 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
         // 👌 for 2 more 😉 parameters by default to have 1 out of 3
         segmentHelper = SegmentHelper(this, this)
-        colorManager = ColorManager(colorApplierHelper, colorPersistenceHelper) { recreate() }
+
+        // 4) ColorManager ДОЛЖЕН быть создан до applySavedColorsForCurrentScreen()
+        colorManager = ColorManager(
+            colorApplierHelper = colorApplierHelper,
+            colorPersistenceHelper = colorPersistenceHelper,
+            getScope = { getCurrentScreenKey() },
+            recreateActivity = { recreate() }
+        )
+
+        // segmentManager после colorManager
         segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
             colorPersistenceHelper, colorManager)
         segmentManager = SegmentManagerProvider.provide(this, colorApplierHelper,
             colorPersistenceHelper, colorManager)
         colorManager.applySavedColors()
+
+        // 5) только теперь — восстановление сохранённых цветов
+        applySavedColorsForCurrentScreen()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -186,7 +203,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
         // fixing theme on emulator and real mobile difference
         // ⬇️ на всякий случай — если тема сменена в другой Activity
-        toolbarHelper.applyThemeColors()
+        applyThemeThenRestoreSaved()
     }
 
     // ⬇️ 🚗 💖
@@ -301,4 +318,79 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     // fixing theme on emulator and real mobile difference
     // Удобный фасад, чтобы дёргать из фрагментов при точечной смене темы
     fun applyToolbarThemeColors() = toolbarHelper.applyThemeColors()
+
+    //************************************************************************
+    // Toolbar color fixing to apply and saving for fragment and activity
+
+    /** Вернёт реально видимый экран: активную «дочку» табов, или текущий фрагмент, или null (чистая активити) */
+    fun getVisibleScreenFragmentOrNull(): Fragment? {
+        val top = getCurrentFragment() ?: return null
+        if (!top.isAdded || top.view == null) return top
+        val child = top.childFragmentManager.fragments.firstOrNull { it.isVisible && it.view != null }
+        return child ?: top
+    }
+
+    /** scope текущего экрана (фрагмента/таба) или scope активити, если фрагмента нет */
+    fun getCurrentScreenKey(): String {
+        val target = getVisibleScreenFragmentOrNull()
+        return target?.screenKeyOrDefault() ?: activityScope()
+    }
+
+    /** scope для активити (один на активити) */
+    fun activityScope(): String = "Activity:${this::class.java.simpleName}"
+
+    fun applySavedColorsForCurrentScreen(skipActivityFallback: Boolean = false) {
+        if (!::toolbarHelper.isInitialized || !::colorPersistenceHelper.isInitialized || !::colorManager.isInitialized) return
+
+        // 1) применяем сохранённые слоты для ТЕКУЩЕГО scope (фрагмент/таба или активити)
+        colorManager.applySavedColors()
+
+        // 2) фолбэк тулбара из активити — ТОЛЬКО если НЕ попросили пропустить
+        if (!skipActivityFallback) {
+            val target = getVisibleScreenFragmentOrNull()
+            if (target != null) {
+                val fragScope = getCurrentScreenKey()
+                val bg = colorPersistenceHelper.load(fragScope, 1)
+                if (bg == null) {
+                    val actBg = colorPersistenceHelper.load(activityScope(), 1)
+                    actBg?.let { toolbarHelper.setBackgroundColor(it) }
+                }
+            }
+        }
+    }
+
+    // Узнать сохранённый цвет для ТЕКУЩЕГО экрана (scope = текущий фрагмент/вкладка или "чистая" Activity)
+    // если где-то нужно узнать сохранённый цвет для текущего экрана:
+    fun getSavedColorForCurrentScreen(slot: Int): Int? =
+        colorPersistenceHelper.load(getCurrentScreenKey(), slot)
+
+    /** Тема + поверх сохранённые цвета. Вызываем вместо "applyToolbarThemeColors()" где надо */
+    fun applyThemeThenRestoreSaved() {
+        toolbarHelper.applyThemeColors()
+        applySavedColorsForCurrentScreen()
+    }
+
+    fun applySavedForScopeOrDefault(scope: String, defaultBg: Int) {
+        // 1) кого сейчас показываем (активный ребёнок у ViewPager2)
+        val child = getVisibleScreenFragmentOrNull()
+        val exclude: Set<Int> =
+            (child as? com.example.playlistmaker.presentation.utils.BackgroundExclusionProvider)
+                ?.backgroundExclusionIds().orEmpty()
+
+        // 2) всегда сперва сбрасываем ФОН ТЕЛА текущей вкладки в дефолт
+        (child?.view as? ViewGroup)?.resetBackgroundRecursively(defaultBg, exclude)
+
+        // 3) подтягиваем персональный bg (slot=1) именно для этого scope
+        val bg = colorPersistenceHelper.load(scope, 1)
+        // bg: Int? (загруженный цвет), defaultBg: Int
+        bg?.let { color ->
+            toolbarHelper.setBackgroundColor(color)                 // тулбар = свой цвет
+            (child?.view as? ViewGroup)
+                ?.resetBackgroundRecursively(color, exclude)        // тело = тот же цвет
+        } ?: run {
+            toolbarHelper.setBackgroundColor(defaultBg)             // тулбар = дефолт
+            // тело уже было сброшено ранее в шаге 2
+        }
+    }
+
 }

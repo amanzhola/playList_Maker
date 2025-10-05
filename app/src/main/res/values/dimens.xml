@@ -86,4 +86,7 @@
     <!-- <create playlistInfo for BS having down from Share and Menu buttons> -->
     <dimen name="peek_below_share_extra">15dp</dimen>
 
+    <!-- <chat fragment> -->
+    <dimen name="chat_bubble_max_width">280dp</dimen>
+
 </resources>

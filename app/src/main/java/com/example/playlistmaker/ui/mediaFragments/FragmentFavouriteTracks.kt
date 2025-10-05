@@ -5,18 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentFavouriteTracksBinding
 import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.ResourceColorProvider
 import com.example.playlistmaker.presentation.media.FavoriteTracksViewModel
+import com.example.playlistmaker.presentation.utils.screenKeyOrDefault
 import com.example.playlistmaker.ui.audio.OnTrackClickListener
 import com.example.playlistmaker.ui.audio.TrackAdapter
 import kotlinx.coroutines.launch
@@ -84,6 +87,18 @@ class FragmentFavouriteTracks : Fragment(), OnTrackClickListener {
         super.onResume()
         // Можно оставить, если хочешь явно триггерить обновление при возврате на экран.
         viewModel.reloadFavorites()
+
+        // toolbar save and apply background color
+        // активна ли эта вкладка?
+        val isActive = (parentFragment as? com.example.playlistmaker.presentation.utils.ActiveChildProvider)
+            ?.getActiveChildFragment() === this
+        if (!isActive) return
+
+        val act = activity as? BaseActivity ?: return
+        val defaultBg = ContextCompat.getColor(requireContext(), R.color.white_textColor)
+
+        val scope = screenKeyOrDefault()   // ← без any is-проверок
+        act.applySavedForScopeOrDefault(scope, defaultBg)
     }
 
     // OnTrackClickListener

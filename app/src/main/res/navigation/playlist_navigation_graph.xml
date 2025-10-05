@@ -54,7 +54,7 @@
 
     <fragment
         android:id="@+id/extraOptionFragment"
-        android:name="com.example.playlistmaker.ui.audioPosters.ExtraOptionFragment"
+        android:name="com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment"
         android:label="fragment_extra_option"
         tools:layout="@layout/fragment_extra_option">
 
@@ -86,6 +86,30 @@
             android:name="arg_import_uri"
             app:argType="android.net.Uri" />
     </fragment>
+
+    <!-- CHAT -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.playlistmaker.ui.chat.ProfileFragment"
+        android:label="@string/profile_title"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="com.example.playlistmaker.ui.chat.UsersFragment"
+        android:label="@string/contacts_title"
+        tools:layout="@layout/fragment_users" />
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.playlistmaker.ui.chat.ChatFragment"
+        android:label="@string/chat_title"
+        tools:layout="@layout/fragment_chat"/>
+
+    <!-- Глобальный переход в чат из любого места -->
+    <action
+        android:id="@+id/action_global_to_chatFragment"
+        app:destination="@id/chatFragment" />
 
     <!-- Новый action для перехода на extraOptionFragment -->
     <action

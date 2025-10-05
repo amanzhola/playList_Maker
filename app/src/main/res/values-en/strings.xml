@@ -211,4 +211,62 @@
     <string name="cd_play">Play</string>
     <string name="cd_pause">Pause</string>
 
+    <!-- <chat fragment> -->
+    <string name="chat">💬 Chat 🗨️, 📨, 📎 </string>
+    <string name="chat_btm">Chat</string>
+    <string name="attach">📎</string>
+    <string name="send">Send💌</string>
+    <string name="type_message">💬Message…</string>
+    <string name="chat_title">💬 Chat 🗨️📨📎</string>
+    <string name="users_avatar">🖼️ Users Avatar</string>
+
+    <string name="pick_photo">🖼️ Select a photo</string>
+    <string name="your_name">💎 Your name </string>
+    <string name="your_status">🏁 Status (sample: busy/online)</string>
+    <string name="profile_title">✨ Profile</string>
+
+    <string name="required_field">👨‍🔧 Required field</string>
+    <string name="saved">Saved ▶ 💾</string>
+    <string name="edit_profile">Edit profile ✏️</string>
+
+    <string name="chats_title">🗨️ Chat 📨📎</string>
+    <string name="new_chat">💬 New Chat</string>
+    <string name="contacts_title">Contacts🧑‍🤝‍🧑</string>
+
+    <string name="enter_uid_hint">enter ID👨‍🔧</string>
+    <string name="new_chat_by_uid_msg">enter user ID👨‍🔧</string>
+    <string name="search_user_hint">search user👨‍🔧</string>
+
+    <!-- <Push Notification> -->
+    <string name="you_have_unread">You have new messages💬</string>
+
+    <!-- <use ConnectivityManager.NetworkCallback instead BroadcastReceiver cause depreciated CONNECTIVITY_ACTION> -->
+    <string name="no_internet_connection">📶❌Lost internet connection ⛔️</string>
+
+    <!-- Foreground notification -->
+    <!-- Fallback text for ongoing playback notification (if no artist/title) -->
+    <string name="playback_in_progress">Воспроизведение идёт…</string>
+    <!-- "Исполнитель — Трек" -->
+    <string name="notification_playing_format">%1$s — %2$s</string>
+
+    <!-- Notification channel -->
+    <string name="notification_channel_name">Воспроизведение</string>
+    <string name="notification_channel_desc">Управление и статус аудио-воспроизведения</string>
+
+    <!-- Actions if will require-->
+    <string name="notification_action_play">Играть</string>
+    <string name="notification_action_pause">Пауза</string>
+    <string name="notification_action_stop">Стоп</string>
+
+    <!-- Notifications permission (Android 13+) -->
+    <string name="permission_notifications_rationale">🔔 Allow notifications so we can show playback status while the app is in the background.</string>
+    <string name="permission_notifications_denied">🚫 Notifications are turned off. You can enable them later in Settings.</string>
+    <string name="permission_notifications_denied_permanently">⚠️ Notifications are disabled for this app. Open Settings to enable them.</string>
+    <string name="permission_notifications_granted">✅ Notifications enabled. We’ll show playback status in the notification shade.</string>
+
+    <!-- Snackbar / button captions -->
+    <string name="allow">Allow</string>
+    <string name="open_settings">Open settings</string>
+    <string name="_00_00">00:00</string>
+
 </resources>
