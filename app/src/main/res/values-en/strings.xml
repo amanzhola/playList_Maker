@@ -267,5 +267,6 @@
     <!-- Snackbar / button captions -->
     <string name="allow">Allow</string>
     <string name="open_settings">Open settings</string>
+    <string name="_00_00">00:00</string>
 
 </resources>

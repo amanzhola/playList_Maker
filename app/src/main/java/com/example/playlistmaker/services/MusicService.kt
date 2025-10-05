@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
@@ -17,6 +18,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.api.player.AudioPlayerControl
 import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.api.player.PlayerUiState
+import com.example.playlistmaker.utils.BUTTON_TEXT_PLAY
 import com.example.playlistmaker.utils.CHANNEL_ID
 import com.example.playlistmaker.utils.CHANNEL_NAME
 import com.example.playlistmaker.utils.EXTRA_ARTIST
@@ -24,6 +26,7 @@ import com.example.playlistmaker.utils.EXTRA_ID
 import com.example.playlistmaker.utils.EXTRA_TITLE
 import com.example.playlistmaker.utils.EXTRA_URL
 import com.example.playlistmaker.utils.NOTIF_ID
+import com.example.playlistmaker.utils.TIMER_INTERVAL_MS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,6 +38,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+
 
 class MusicService : Service(), AudioPlayerControl {
 
@@ -51,7 +55,7 @@ class MusicService : Service(), AudioPlayerControl {
     private val _ui = MutableStateFlow(PlayerUiState(
         isButtonEnabled = false,
         isPlaying = false,
-        progress = "00:00",
+        progress = getString(R.string._00_00),
         buttonText = "PLAY"
     ))
     private val _state = MutableStateFlow(PlaybackState.IDLE)
@@ -137,7 +141,7 @@ class MusicService : Service(), AudioPlayerControl {
         this.artist = artist
         this.title = title
         // моментально обнуляем прогресс в UI для нового currentTrackId
-        _ui.value = _ui.value.copy(progress = "00:00", isPlaying = false, buttonText = "PLAY")
+        _ui.value = _ui.value.copy(progress = getString(R.string._00_00), isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
         resetAndPrepare(url)
     }
 
@@ -155,8 +159,8 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = "00:00",
-                        buttonText = "PLAY"
+                        progress = getString(R.string._00_00),
+                        buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
                 }
@@ -173,8 +177,8 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = "00:00",
-                        buttonText = "PLAY"
+                        progress = getString(R.string._00_00),
+                        buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
                 }
@@ -201,8 +205,8 @@ class MusicService : Service(), AudioPlayerControl {
             _ui.value = PlayerUiState(
                 isButtonEnabled = false,
                 isPlaying = false,
-                progress = "00:00",
-                buttonText = "PLAY"
+                progress = getString(R.string._00_00),
+                buttonText = BUTTON_TEXT_PLAY
             )
             stopTimer()
             stopForegroundNow(true)
@@ -264,15 +268,15 @@ class MusicService : Service(), AudioPlayerControl {
         stopTimer()
         mediaPlayer?.reset()
         _state.value = PlaybackState.PREPARING
-        _ui.value = _ui.value.copy(isButtonEnabled = false, isPlaying = false, progress = "00:00", buttonText = "PLAY")
+        _ui.value = _ui.value.copy(isButtonEnabled = false, isPlaying = false, progress = getString(R.string._00_00), buttonText = BUTTON_TEXT_PLAY)
 
         try {
             mediaPlayer?.apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     setAudioAttributes(
-                        android.media.AudioAttributes.Builder()
-                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                        AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
                             .build()
                     )
                 }
@@ -288,8 +292,8 @@ class MusicService : Service(), AudioPlayerControl {
                     } else {
                         _ui.value = _ui.value.copy(
                             isButtonEnabled = true,
-                            progress = "00:00",
-                            buttonText = "PLAY"
+                            progress = getString(R.string._00_00),
+                            buttonText = BUTTON_TEXT_PLAY
                         )
                     }
                 }
@@ -300,8 +304,8 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = true,
                         isPlaying = false,
-                        progress = "00:00",
-                        buttonText = "PLAY"
+                        progress = getString(R.string._00_00),
+                        buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
                 }
@@ -312,8 +316,8 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = "00:00",
-                        buttonText = "PLAY"
+                        progress = getString(R.string._00_00),
+                        buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
                     true
@@ -326,8 +330,8 @@ class MusicService : Service(), AudioPlayerControl {
             _ui.value = PlayerUiState(
                 isButtonEnabled = false,
                 isPlaying = false,
-                progress = "00:00",
-                buttonText = "PLAY"
+                progress = getString(R.string._00_00),
+                buttonText = BUTTON_TEXT_PLAY
             )
             stopForegroundNow(true)
         }
@@ -337,7 +341,7 @@ class MusicService : Service(), AudioPlayerControl {
         stopTimer()
         timerJob = CoroutineScope(Dispatchers.Default).launch {
             while (isActive && mediaPlayer?.isPlaying == true) {
-                delay(200L)
+                delay(TIMER_INTERVAL_MS)
                 val p = mediaPlayer?.currentPosition ?: 0
                 val formatted = SimpleDateFormat("mm:ss", Locale.getDefault()).format(p)
                 _ui.value = _ui.value.copy(progress = formatted)

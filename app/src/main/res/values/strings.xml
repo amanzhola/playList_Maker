@@ -274,6 +274,7 @@
     <!-- Подписи для Snackbar / кнопки -->
     <string name="allow">Разрешить</string>
     <string name="open_settings">Открыть настройки</string>
+    <string name="_00_00">00:00</string>
 
 
     <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
@@ -546,5 +547,6 @@
 <!--    &lt;!&ndash; Подписи для Snackbar / кнопки &ndash;&gt;-->
 <!--    <string name="allow">Разрешить</string>-->
 <!--    <string name="open_settings">Открыть настройки</string>-->
+<!--    <string name="_00_00">00:00</string>-->
 
 </resources>
