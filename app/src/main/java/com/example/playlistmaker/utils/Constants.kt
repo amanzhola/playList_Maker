@@ -56,4 +56,5 @@ const val NOTIF_ID = 1001
 const val TIMER_INTERVAL_MS = 200L
 const val BUTTON_TEXT_PLAY = "PLAY"
 const val BUTTON_TEXT_PAUSE = "PAUSE"
+const val ZERO_TIME = "00:00"
 

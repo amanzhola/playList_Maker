@@ -18,6 +18,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.api.player.AudioPlayerControl
 import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.api.player.PlayerUiState
+import com.example.playlistmaker.utils.BUTTON_TEXT_PAUSE
 import com.example.playlistmaker.utils.BUTTON_TEXT_PLAY
 import com.example.playlistmaker.utils.CHANNEL_ID
 import com.example.playlistmaker.utils.CHANNEL_NAME
@@ -27,6 +28,7 @@ import com.example.playlistmaker.utils.EXTRA_TITLE
 import com.example.playlistmaker.utils.EXTRA_URL
 import com.example.playlistmaker.utils.NOTIF_ID
 import com.example.playlistmaker.utils.TIMER_INTERVAL_MS
+import com.example.playlistmaker.utils.ZERO_TIME
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -55,8 +57,8 @@ class MusicService : Service(), AudioPlayerControl {
     private val _ui = MutableStateFlow(PlayerUiState(
         isButtonEnabled = false,
         isPlaying = false,
-        progress = getString(R.string._00_00),
-        buttonText = "PLAY"
+        progress = ZERO_TIME,
+        buttonText = BUTTON_TEXT_PLAY
     ))
     private val _state = MutableStateFlow(PlaybackState.IDLE)
     override fun getPlayerState(): StateFlow<PlayerUiState> = _ui.asStateFlow()
@@ -141,7 +143,7 @@ class MusicService : Service(), AudioPlayerControl {
         this.artist = artist
         this.title = title
         // моментально обнуляем прогресс в UI для нового currentTrackId
-        _ui.value = _ui.value.copy(progress = getString(R.string._00_00), isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
+        _ui.value = _ui.value.copy(progress = ZERO_TIME, isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
         resetAndPrepare(url)
     }
 
@@ -152,14 +154,14 @@ class MusicService : Service(), AudioPlayerControl {
                 try {
                     mp.start()
                     _state.value = PlaybackState.PLAYING
-                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = "PAUSE")
+                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = BUTTON_TEXT_PAUSE)
                     startTimer()
                 } catch (e: IllegalStateException) {
                     _state.value = PlaybackState.ERROR
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
+                        progress = ZERO_TIME,
                         buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
@@ -170,14 +172,14 @@ class MusicService : Service(), AudioPlayerControl {
                     mp.seekTo(0)
                     mp.start()
                     _state.value = PlaybackState.PLAYING
-                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = "PAUSE")
+                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = BUTTON_TEXT_PAUSE)
                     startTimer()
                 } catch (_: IllegalStateException) {
                     _state.value = PlaybackState.ERROR
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
+                        progress = ZERO_TIME,
                         buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
@@ -198,14 +200,14 @@ class MusicService : Service(), AudioPlayerControl {
                 mp.pause()
                 _state.value = PlaybackState.PAUSED
                 stopTimer()
-                _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = false, buttonText = "PLAY")
+                _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
             }
         } catch (e: IllegalStateException) {
             _state.value = PlaybackState.ERROR
             _ui.value = PlayerUiState(
                 isButtonEnabled = false,
                 isPlaying = false,
-                progress = getString(R.string._00_00),
+                progress = ZERO_TIME,
                 buttonText = BUTTON_TEXT_PLAY
             )
             stopTimer()
@@ -226,7 +228,7 @@ class MusicService : Service(), AudioPlayerControl {
             mp?.reset()
         } catch (_: IllegalStateException) { }
         _state.value = PlaybackState.IDLE
-        _ui.value = PlayerUiState(isButtonEnabled = false, isPlaying = false, progress = "00:00", buttonText = "PLAY")
+        _ui.value = PlayerUiState(isButtonEnabled = false, isPlaying = false, progress = ZERO_TIME, buttonText = BUTTON_TEXT_PLAY)
         stopForegroundNow(true)
     }
 
@@ -268,7 +270,7 @@ class MusicService : Service(), AudioPlayerControl {
         stopTimer()
         mediaPlayer?.reset()
         _state.value = PlaybackState.PREPARING
-        _ui.value = _ui.value.copy(isButtonEnabled = false, isPlaying = false, progress = getString(R.string._00_00), buttonText = BUTTON_TEXT_PLAY)
+        _ui.value = _ui.value.copy(isButtonEnabled = false, isPlaying = false, progress = ZERO_TIME, buttonText = BUTTON_TEXT_PLAY)
 
         try {
             mediaPlayer?.apply {
@@ -292,7 +294,7 @@ class MusicService : Service(), AudioPlayerControl {
                     } else {
                         _ui.value = _ui.value.copy(
                             isButtonEnabled = true,
-                            progress = getString(R.string._00_00),
+                            progress = ZERO_TIME,
                             buttonText = BUTTON_TEXT_PLAY
                         )
                     }
@@ -304,7 +306,7 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = true,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
+                        progress = ZERO_TIME,
                         buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
@@ -316,7 +318,7 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
+                        progress = ZERO_TIME,
                         buttonText = BUTTON_TEXT_PLAY
                     )
                     stopForegroundNow(true)
@@ -330,7 +332,7 @@ class MusicService : Service(), AudioPlayerControl {
             _ui.value = PlayerUiState(
                 isButtonEnabled = false,
                 isPlaying = false,
-                progress = getString(R.string._00_00),
+                progress = ZERO_TIME,
                 buttonText = BUTTON_TEXT_PLAY
             )
             stopForegroundNow(true)
