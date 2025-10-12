@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.os.bundleOf
@@ -188,7 +189,7 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
                 val isBlocked = blockedSet.contains(peerUid)
 
                 if (peerUid != null) {
-                    if (!isBlocked) options += "Заблокировать" else options += "Разблокировать"
+                    options += if (!isBlocked) "Заблокировать" else "Разблокировать"
                 }
                 options += "Убрать из списка"
 
@@ -249,8 +250,8 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
         androidx.core.app.NotificationManagerCompat.from(ctx).cancelAll()
 
         // Снять флажки непрочитанности на сервере (чтобы «кол-во чатов» стало 0)
-        val uid = com.google.firebase.ktx.Firebase.auth.currentUser?.uid ?: return
-        val db = com.google.firebase.ktx.Firebase.firestore
+        val uid = Firebase.auth.currentUser?.uid ?: return
+        val db = Firebase.firestore
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val qs = db.collection("chats")
@@ -299,7 +300,7 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
                 viewLifecycleOwner.lifecycleScope.launch {
                     val exists = try { usersRepo.exists(other) } catch (_: Throwable) { false }
                     if (!exists) { showLongSnack("Пользователь не найден", anchor = fab)
-                        ; return@launch }
+                        return@launch }
 
                     try {
                         val chatId = chatRepo.createOrOpenDm(me, other)
@@ -376,7 +377,7 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
 
     // ---- Toolbar ----
     override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.chats_title) {
+        ToolbarConfig(GONE, R.string.chats_title) {
             (requireActivity() as? MainActivity)?.apply {
                 buttonIndex = -1
                 switchFragment(buttonIndex)

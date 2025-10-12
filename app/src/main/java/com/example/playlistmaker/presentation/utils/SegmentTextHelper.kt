@@ -18,12 +18,19 @@ object SegmentTextHelper {
     }
 
     fun getSegmentTexts(context: Context, isMain: Boolean): Array<String> {
+        val screen = resolveScreenType(context)
+        val fifthText = when {
+            isMain -> context.getString(R.string.toDefault)
+            screen == ScreenType.AUDIO_FRAGMENT -> context.getString(R.string.youtube)   // ← YouTube
+            else -> context.getString(R.string.navigation)
+        }
+
         return arrayOf(
             context.getString(R.string.switch_short),
             context.getString(R.string.share_short), // 🎶
             context.getString(R.string.support_short),
             context.getString(R.string.agreement_short),
-            if (isMain) context.getString(R.string.toDefault) else context.getString(R.string.navigation),
+            fifthText,
             context.getString(R.string.language)
         )
     }
@@ -44,12 +51,16 @@ object SegmentTextHelper {
 
         val secondIcon = when (screen) {
             ScreenType.SEARCH_FRAGMENT -> R.drawable.queue_music_24
-            ScreenType.EXTRA_FRAGMENT -> R.drawable.music_note_24
+            ScreenType.AUDIO_FRAGMENT -> R.drawable.music_note_24
             ScreenType.SEARCH_MOVIE_ACTIVITY -> R.drawable.move_down_24
             else -> R.drawable.share
         }
 
-        val fifthIcon = if (screen == ScreenType.MAIN_FRAGMENT) R.drawable.color_24 else R.drawable.navigation_24
+        val fifthIcon = when (screen) {
+            ScreenType.MAIN_FRAGMENT  -> R.drawable.color_24
+            ScreenType.AUDIO_FRAGMENT -> R.drawable.ic_youtube_24    // ← новая иконка
+            else -> R.drawable.navigation_24
+        }
 
         return intArrayOf(
             R.drawable.switch_24,

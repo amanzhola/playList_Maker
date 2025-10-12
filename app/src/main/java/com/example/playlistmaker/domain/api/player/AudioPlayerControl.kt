@@ -6,7 +6,12 @@ data class PlayerUiState(
     val isButtonEnabled: Boolean,
     val isPlaying: Boolean,
     val progress: String,   // "mm:ss"
-    val buttonText: String  // "PLAY" / "PAUSE"
+    val buttonText: String,  // "PLAY" / "PAUSE"
+
+    // 🆕 миллисекунды для таймбара
+    val positionMs: Long = 0L,
+    val durationMs: Long = 0L,
+    val bufferedMs: Long = 0L
 )
 
 interface AudioPlayerControl {
@@ -15,6 +20,9 @@ interface AudioPlayerControl {
     fun startPlayer()
     fun pausePlayer()
     fun stopPlayer()
+
+    // 🆕 for audio time bar
+    fun seekTo(positionMs: Long)
 
     // Трек и метаданные для нотификации
     fun setTrack(

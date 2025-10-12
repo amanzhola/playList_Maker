@@ -1,11 +1,19 @@
 package com.example.playlistmaker.ui.audioPosters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer // ⬇️ + импорты
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView // ⬇️ + импорты
+import androidx.media3.ui.TimeBar
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -14,6 +22,7 @@ import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.ui.widgets.PlaybackButtonView
 import com.example.playlistmaker.utils.TracksDiffCallbackAudio
 
+
 interface OnTrackAudioClickListener {
     fun onTrackClicked(track: Track, position: Int)
     fun onPlayButtonClicked(track: Track)
@@ -21,6 +30,9 @@ interface OnTrackAudioClickListener {
     // 🆕 Новый метод для клика по кнопке "Избранное"
     fun onFavoriteClicked(track: Track) // ❤️
     fun onAddTrackClicked(track: Track) // 🎵➕👉💿
+
+    // 🆕 seek по аудио-ползунку
+    fun onSeekRequested(track: Track, positionMs: Long)
 }
 
 class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
@@ -36,7 +48,18 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         diffResult.dispatchUpdatesTo(this)
     }
 
-    inner class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    @UnstableApi
+    @SuppressLint("ClickableViewAccessibility")
+    inner class TrackViewHolder @OptIn(UnstableApi::class) constructor
+        (itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        // 🔁 постер и PlayerView
+        private val audioTimeBar: DefaultTimeBar? = itemView.findViewById(R.id.audio_timebar)
+
+        // 🔁 постер и PlayerView
+        private val poster: ImageView = itemView.findViewById(R.id.track_image)
+        val playerView: PlayerView? = itemView.findViewById(R.id.player_view)
+
         private val trackImage: ImageView = itemView.findViewById(R.id.track_image)
         private val trackName: TextView = itemView.findViewById(R.id.track_name)
         private val authorName: TextView = itemView.findViewById(R.id.track_author)
@@ -92,9 +115,32 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
                     listener.onAddTrackClicked(tracks[position])
                 }
             }
+
+            // стало (минимально):
+            playerView?.useController = true
+            // По желанию, чтобы таймбар всегда виден:
+             playerView?.controllerShowTimeoutMs = 0
+
+            configurePlayerViewOnce()
+
+            audioTimeBar?.addListener(object : TimeBar.OnScrubListener {
+                override fun onScrubStart(timeBar: TimeBar, position: Long) {}
+                override fun onScrubMove(timeBar: TimeBar, position: Long) {}
+                override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+                    val idx = bindingAdapterPosition
+                    if (!canceled && idx != RecyclerView.NO_POSITION) {
+                        listener.onSeekRequested(tracks[idx], position)
+                    }
+                }
+            })
+
         }
 
         fun bind(track: Track) {
+
+            // По умолчанию показываем постер (видео прячем)
+            hideVideo()
+
             Glide.with(itemView.context)
                 .load(track.artworkUrl512)
                 .placeholder(R.drawable.placeholder)
@@ -137,17 +183,117 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
         fun updatePlayState(track: Track) {
             playButton.setPlaying(track.isPlaying)
         }
+
+        // ⬇️ ВКЛЮЧИТЬ видео в этом холдере
+        @OptIn(UnstableApi::class)
+        fun showVideo(player: ExoPlayer) {
+            playerView?.useController = true   // на всякий случай
+
+            playerView?.player = player
+            playerView?.visibility = View.VISIBLE
+
+            playerView?.showController()
+
+            poster.visibility = View.GONE
+
+            hideAudioTimebar()              // ⬅️ audio time bar
+        }
+
+        // ⬇️ ВЫКЛЮЧИТЬ видео в этом холдере
+        fun hideVideo() {
+            // важно отвязать player, чтобы избежать «утечки» вьюхи
+            playerView?.player = null
+            playerView?.visibility = View.GONE
+            poster.visibility = View.VISIBLE
+        }
+
+        // только статические поля (тексты, иконки, playTime/isPlaying) — БЕЗ постера/видео
+        fun bindTexts(track: Track) {
+            trackName.text = track.trackName
+            authorName.text = track.artistName
+            trackTime.text = track.trackDuration
+
+            if (track.collectionName.isEmpty()) {
+                trackAlbum.visibility = View.GONE
+                album.visibility = View.GONE
+            } else {
+                trackAlbum.text = track.collectionName
+                trackAlbum.visibility = View.VISIBLE
+                album.visibility = View.VISIBLE
+            }
+
+            val date = track.releaseDate
+            val cutFrom = date.indexOf('-').takeIf { it >= 0 } ?: date.length
+            trackYear.text = date.replaceRange(cutFrom, date.length, "")
+
+            trackGenre.text = track.primaryGenreName
+            trackCountry.text = track.country
+
+            updatePlayTime(track)
+            updatePlayState(track)
+
+            favorite?.setImageResource(
+                if (track.isFavorite) R.drawable.favorite1 else R.drawable.favorite
+            )
+        }
+
+        // только постер (когда нет видео)
+        fun bindPoster(track: Track) {
+            Glide.with(itemView.context)
+                .load(track.artworkUrl512)
+                .placeholder(R.drawable.placeholder)
+                .transform(RoundedCorners(8))
+                .into(trackImage)
+        }
+
+        fun setPlayTimeText(text: String) {
+            playTime.text = text
+        }
+
+        fun showAudioTimebar(positionMs: Long, durationMs: Long, bufferedMs: Long) {
+            audioTimeBar?.apply {
+                visibility = View.VISIBLE
+                setDuration(if (durationMs > 0) durationMs else 0L)
+                setBufferedPosition(bufferedMs.coerceAtLeast(0))
+                setPosition(positionMs.coerceAtLeast(0))
+            }
+        }
+
+        fun hideAudioTimebar() {
+            audioTimeBar?.visibility = View.GONE
+        }
+
+
     }
 
+    @OptIn(UnstableApi::class)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
         return TrackViewHolder(view)
     }
 
+    @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
-        holder.bind(tracks[position])
+        val track = tracks[position]
+
+        // 1) всегда сначала тексты
+        holder.bindTexts(track)
+
+        // 2) визуальная часть: видео или постер
+        if (position == videoPos && currentPlayer != null) {
+            holder.showVideo(currentPlayer!!)
+            holder.hideAudioTimebar()            // ⬅️ при видео таймбар аудио скрыт
+        } else {
+            holder.hideVideo()      // спрятать PlayerView
+            holder.bindPoster(track) // показать постер
+            holder.hideAudioTimebar()            // ⬅️ по умолчанию скрываем аудио-таймбар
+            // Показ и обновление таймбара для текущей карточки сделает фрагмент через
+            // adapter.updateAudioTimebarAt(...) при каждом тике прогресса.
+        }
+
     }
 
+    @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
@@ -159,12 +305,137 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
                 when (it) {
                     "playTime" -> holder.updatePlayTime(track)
                     "isPlaying" -> holder.updatePlayState(track)
+                    // ➕
+                    "favorite"   -> {
+                        holder.itemView.findViewById<ImageView?>(R.id.favorite)?.setImageResource(
+                            if (track.isFavorite) R.drawable.favorite1 else R.drawable.favorite
+                        )
+                    }
                 }
             }
         }
     }
 
+    // ⬇️ ПРИ РЕЦИКЛЕ — обязательно скрываем видео и отвязываем player
+    @OptIn(UnstableApi::class)
+    override fun onViewRecycled(holder: TrackViewHolder) {
+        holder.hideVideo()
+        holder.hideAudioTimebar() // audio time bar
+        super.onViewRecycled(holder)
+    }
+
     override fun getItemCount(): Int = tracks.size
 
     fun getItems(): List<Track> = tracks
+
+    // 🔧 Хелперы для фрагмента: прикрепить/открепить видео к позиции
+    @OptIn(UnstableApi::class)
+    fun attachVideoAt(recycler: RecyclerView, position: Int, player: ExoPlayer) {
+        val vh = recycler.findViewHolderForAdapterPosition(position) as? TrackViewHolder ?: return
+        vh.showVideo(player)
+    }
+
+    @OptIn(UnstableApi::class)
+    fun detachVideoAt(recycler: RecyclerView, position: Int) {
+        val vh = recycler.findViewHolderForAdapterPosition(position) as? TrackViewHolder ?: return
+        vh.hideVideo()
+    }
+
+    private var videoPos: Int = RecyclerView.NO_POSITION
+    private var currentPlayer: ExoPlayer? = null
+
+    fun setVideoBoundPosition(pos: Int) {
+        val old = videoPos
+        videoPos = pos
+        if (old != RecyclerView.NO_POSITION) notifyItemChanged(old)
+        notifyItemChanged(pos) // попросим onBind у обеих позиций отрисовать верное состояние
+    }
+
+    fun clearVideoBoundPosition() {
+        val old = videoPos
+        videoPos = RecyclerView.NO_POSITION
+        if (old != RecyclerView.NO_POSITION) notifyItemChanged(old)
+    }
+
+    fun setVideoPlayer(player: ExoPlayer?) {
+        currentPlayer = player
+    }
+
+    @OptIn(UnstableApi::class)
+    fun updatePlayTimeTextAt(recycler: RecyclerView, position: Int, text: String) {
+        val vh = recycler.findViewHolderForAdapterPosition(position) as? TrackViewHolder ?: return
+        vh.setPlayTimeText(text)
+    }
+
+    @OptIn(UnstableApi::class)
+    fun updateAudioTimebarAt(
+        recycler: RecyclerView,
+        position: Int,
+        positionMs: Long,
+        durationMs: Long,
+        bufferedMs: Long
+    ) {
+        val vh = recycler.findViewHolderForAdapterPosition(position) as? TrackViewHolder ?: return
+        // Показываем ползунок только если ЭТО НЕ видео-карточка
+        if (position != videoPos || currentPlayer == null) {
+            vh.showAudioTimebar(positionMs, durationMs, bufferedMs)
+        } else {
+            vh.hideAudioTimebar()
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun TrackViewHolder.configurePlayerViewOnce() {
+        playerView?.apply {
+            useController = true                 // включаем контроллер
+            controllerShowTimeoutMs = 0          // не скрывать
+            // Можно и это оставить (на всякий случай):
+            // setControllerAutoShow(true)       // auto-show, хотя уже есть в XML
+        }
+    }
+
+    // audio time bar
+    @OptIn(UnstableApi::class)
+    fun hideAudioTimebarForVisibleExcept(recycler: RecyclerView, keepPos: Int) {
+        val lm = recycler.layoutManager as? LinearLayoutManager ?: return
+        val first = lm.findFirstVisibleItemPosition()
+        val last  = lm.findLastVisibleItemPosition()
+        if (first == RecyclerView.NO_POSITION || last == RecyclerView.NO_POSITION) return
+
+        for (pos in first..last) {
+            val vh = recycler.findViewHolderForAdapterPosition(pos) as? TrackViewHolder ?: continue
+            // если это видео-карточка — там свой контроллер, таймбар аудио скрываем
+            if (pos == videoPos && currentPlayer != null) {
+                vh.hideAudioTimebar()
+                continue
+            }
+            if (pos == keepPos) {
+                // оставим как есть — актуальные значения выставит updateAudioTimebarAt(...)
+            } else {
+                // для всех НЕ текущих — прячем (или можно обнулить, см. функцию ниже)
+                vh.hideAudioTimebar()
+            }
+        }
+    }
+
+    // audio time bar
+    /** Если не прятать, а именно «обнулять» ползунок у НЕ текущих карточек */
+    @OptIn(UnstableApi::class)
+    fun zeroAudioTimebarForVisibleExcept(recycler: RecyclerView, keepPos: Int) {
+        val lm = recycler.layoutManager as? LinearLayoutManager ?: return
+        val first = lm.findFirstVisibleItemPosition()
+        val last  = lm.findLastVisibleItemPosition()
+        if (first == RecyclerView.NO_POSITION || last == RecyclerView.NO_POSITION) return
+
+        for (pos in first..last) {
+            val vh = recycler.findViewHolderForAdapterPosition(pos) as? TrackViewHolder ?: continue
+            if (pos == videoPos && currentPlayer != null) {
+                vh.hideAudioTimebar()
+            } else if (pos != keepPos) {
+                // duration=0 ⇒ «неактивный» нулевой ползунок
+                vh.showAudioTimebar(positionMs = 0L, durationMs = 0L, bufferedMs = 0L)
+            }
+        }
+    }
+
 }

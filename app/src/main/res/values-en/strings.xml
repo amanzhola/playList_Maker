@@ -269,4 +269,13 @@
     <string name="open_settings">Open settings</string>
     <string name="_00_00">00:00</string>
 
+    <!-- Utube-->
+    <string name="youtube">UTube</string>
+    <string name="no_track_selected">Нет выбранного трека</string>
+    <string name="searching_on_youtube">Ищем на YouTube…</string>
+    <string name="nothing_found_utube">Ничего не найдено</string>
+    <string name="youtube_found">Нашли: %1$s — %2$s</string>
+    <string name="youtube_audio_only_found">Нашли аудио-поток: %1$s — %2$s</string>
+    <string name="youtube_progressive_found">Нашли mp4 (…mime…): %1$s — %2$s</string>
+
 </resources>

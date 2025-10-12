@@ -20,6 +20,9 @@ class TracksDiffCallbackAudio(
             changes.add("playTime")
         }
 
+        // ➕
+        if (oldItem.isFavorite != newItem.isFavorite) changes.add("favorite")
+
         return if (changes.isEmpty()) null else changes
     }
 }

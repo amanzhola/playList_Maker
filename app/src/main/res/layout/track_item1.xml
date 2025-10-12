@@ -32,20 +32,51 @@
             app:layout_constraintGuide_percent="@dimen/guideline" />
         <!--        📱 📱-->
 
-        <ImageView
-            android:id="@+id/track_image"
+        <FrameLayout
+            android:id="@+id/poster_container"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginBottom="5dp"
-            android:contentDescription="@string/placeholder"
-            android:scaleType="centerCrop"
-            android:src="@drawable/placeholder2"
             app:layout_constrainedWidth="true"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/track_name"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toStartOf="@id/rightBorder"
             app:layout_constraintStart_toEndOf="@id/leftBorder"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@id/rightBorder"
+            app:layout_constraintDimensionRatio="1:1">
+
+                <!-- Картинка (по умолчанию видна) -->
+                <ImageView
+                    android:id="@+id/track_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/placeholder"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/placeholder2" />
+
+                <!-- Видео (по умолчанию скрыто) -->
+                <androidx.media3.ui.PlayerView
+                    android:id="@+id/player_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    app:controller_layout_id="@layout/exo_controller_timebar_only"
+                    app:show_buffering="when_playing" />
+
+                <!-- АУДИО-ТАЙМБАР -->
+                <androidx.media3.ui.DefaultTimeBar
+                    android:id="@+id/audio_timebar"
+                    android:layout_width="match_parent"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:visibility="gone"
+                    app:played_color="@color/timebar_played"
+                    app:scrubber_color="@color/timebar_scrubber"
+                    app:buffered_color="@color/timebar_buffered"
+                    app:unplayed_color="@color/timebar_unplayed"/>
+
+        </FrameLayout>
+        <!--                app:controller_auto_show="true"-->
 
         <TextView
             android:id="@+id/track_name"

@@ -1,5 +1,7 @@
 package com.example.playlistmaker.utils
 
+import androidx.recyclerview.widget.RecyclerView
+
 const val SEARCH_DEBOUNCE_DELAY = 2000L
 //const val CLICK_DEBOUNCE_DELAY = 1000L // ⛔ 🕒 1 секунда задержки
 const val CLICK_DEBOUNCE_DELAY = 300L // ⛔ 🕒 1 секунда задержки
@@ -57,4 +59,7 @@ const val TIMER_INTERVAL_MS = 200L
 const val BUTTON_TEXT_PLAY = "PLAY"
 const val BUTTON_TEXT_PAUSE = "PAUSE"
 const val ZERO_TIME = "00:00"
+
+// utube
+const val NO_VIDEO_POSITION: Int = RecyclerView.NO_POSITION
 

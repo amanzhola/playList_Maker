@@ -79,6 +79,15 @@ class TrackPreviewActivity : AppCompatActivity() {
         adapter = TrackAdapterAudio(
             emptyList(),
             object : OnTrackAudioClickListener {
+
+                override fun onSeekRequested(track: Track, positionMs: Long) {
+
+                    // require update if needed for time bar on utube support audio old mob
+//                    // Если сейчас привязано видео — игнорим (ползунок видео свой)
+//                    if (videoBoundPosition != NO_VIDEO_POSITION) return
+//                    viewModel.seekTo(positionMs) // need add seekTo to viewModel
+                }
+
                 override fun onTrackClicked(track: Track, position: Int) {
                     viewModel.setCurrentTrackIndex(position)
                     viewModel.toggleIsHorizontal()
