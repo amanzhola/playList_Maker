@@ -74,6 +74,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         set(value) { viewModel.videoPos = value }
 
     private var videoTickerJob: Job? = null
+    private var videoPlayerListener: Player.Listener? = null // for video
 
     private val networkChecker: NetworkStatusChecker by inject { parametersOf(requireContext()) }
     private var cm: ConnectivityManager? = null
@@ -276,6 +277,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                 }
             }
         })
+        adapter.setTimebarVertical(currentLayoutOrientation == LinearLayoutManager.HORIZONTAL)
 
         // RecyclerView
         binding.tracksRecyclerView.adapter = adapter
@@ -329,8 +331,12 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                         if (desired != currentLayoutOrientation) {
                             currentLayoutOrientation = desired
                             setLayoutManager(desired)
+                            adapter.setTimebarVertical(state.isHorizontal)// for audio time bar
                             binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
                             updateTimesForVisibleItems()
+                        }else {
+                            // Если LM не менялся, синхронизируем флаг (после возврата на экран, восстановления и т.п.)
+                            adapter.setTimebarVertical(state.isHorizontal)
                         }
                         binding.tracksRecyclerView.isVisible = !state.isBottomNavVisible
                         requireActivity().findViewById<TextView>(R.id.title)?.isVisible = state.isBottomNavVisible
@@ -711,6 +717,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                 player.prepare()
                 player.playWhenReady = false // старт по кнопке
 
+                attachVideoPlayerCallbacks()
+
                 adapter.setVideoPlayer(player)
                 adapter.setVideoBoundPosition(pos)
                 adapter.attachVideoAt(binding.tracksRecyclerView, pos, player)
@@ -826,6 +834,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
     private fun stopAndReleaseVideo() {
         stopVideoTicker()
+        videoPlayerListener?.let { exo?.removeListener(it) }
+        videoPlayerListener = null
         exo?.stop()
         exo?.clearMediaItems()
     }
@@ -870,5 +880,43 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         val mm = s / 60
         val ss = s % 60
         return String.format("%d:%02d", mm, ss)
+    }
+
+    // stop video by own
+    private fun attachVideoPlayerCallbacks() {
+        val player = exo ?: return
+
+        // снять старый, чтобы не плодить слушателей
+        videoPlayerListener?.let { player.removeListener(it) }
+
+        val l = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                val pos = videoBoundPosition
+                if (pos != NO_VIDEO_POSITION) {
+                    // синхронизируем кнопку Play/Pause на карточке с нативным контроллером PlayerView
+                    viewModel.updatePlayingUiForIndex(pos, isPlaying)
+                }
+                if (isPlaying) startVideoTicker() else stopVideoTicker()
+            }
+
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_ENDED) {
+                    val pos = videoBoundPosition
+                    // видео закончилось → кнопка должна стать "Play"
+                    if (pos != NO_VIDEO_POSITION) {
+                        viewModel.updatePlayingUiForIndex(pos, false)
+                        // по желанию — обнулить подпись времени на карточке
+                        adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, "0:00")
+                    }
+                    stopVideoTicker()
+                    // вернуть в начало, чтобы следующий Play начинал с 0
+                    player.seekTo(0)
+                    player.playWhenReady = false
+                }
+            }
+        }
+
+        player.addListener(l)
+        videoPlayerListener = l
     }
 }

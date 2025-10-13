@@ -1,9 +1,11 @@
 package com.example.playlistmaker.ui.audioPosters
 
 import android.annotation.SuppressLint
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.OptIn
@@ -41,6 +43,21 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
     private val layoutId: Int = R.layout.track_item1
 ) : RecyclerView.Adapter<TrackAdapterAudio.TrackViewHolder>() {
 
+    private var timebarVertical: Boolean = true // по умолчанию: вертикальный (т.к. горизонтальный список)
+
+    // for audio time bar + video time bar
+    fun setTimebarVertical(isVertical: Boolean) {
+        if (timebarVertical != isVertical) {
+            timebarVertical = isVertical
+            // аудио-таймбары — у всех видимых // точечное обновление: пэйлоад "timebarOrientation"
+            notifyItemRangeChanged(0, itemCount, listOf("timebarOrientation"))
+            // видео-таймбар — только у позиции, где прикреплено видео
+            if (videoPos != RecyclerView.NO_POSITION) {
+                notifyItemChanged(videoPos, listOf("videoTimebarOrientation"))
+            }
+        }
+    }
+
     fun update(newItems: List<Track>) { // 🌟 💖
         val diffCallback = TracksDiffCallbackAudio(tracks, newItems)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
@@ -53,10 +70,10 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
     inner class TrackViewHolder @OptIn(UnstableApi::class) constructor
         (itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        // 🔁 постер и PlayerView
+        // 🔁 постер и PlayerView для audio
         private val audioTimeBar: DefaultTimeBar? = itemView.findViewById(R.id.audio_timebar)
 
-        // 🔁 постер и PlayerView
+        // 🔁 постер и PlayerView для video
         private val poster: ImageView = itemView.findViewById(R.id.track_image)
         val playerView: PlayerView? = itemView.findViewById(R.id.player_view)
 
@@ -263,7 +280,82 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
             audioTimeBar?.visibility = View.GONE
         }
 
+        // for audio time bar
+        fun applyTimebarOrientation(vertical: Boolean) {
+            audioTimeBar ?: return
+            val tb = audioTimeBar
+            val lp = tb.layoutParams as FrameLayout.LayoutParams
 
+            if (vertical) {
+                // справа, снизу-вверх
+                tb.rotation = 270f
+                tb.pivotX = 0f
+                tb.pivotY = 0f
+                lp.width = FrameLayout.LayoutParams.MATCH_PARENT
+                lp.height = dp(12)
+                lp.gravity = Gravity.BOTTOM
+
+            } else {
+                // горизонтальный снизу
+                tb.rotation = 0f
+                tb.pivotX = 0f
+                tb.pivotY = 0f
+                tb.translationX = 0f
+                lp.width = FrameLayout.LayoutParams.MATCH_PARENT
+                lp.height = dp(12)
+                lp.gravity = Gravity.TOP
+            }
+            tb.layoutParams = lp
+        }
+
+        fun applyVideoTimebarOrientation(vertical: Boolean) {
+            val pv = playerView ?: return
+            // ВАЖНО: искать системный id из Media3
+            pv.post {
+                val tb = pv.findViewById<androidx.media3.ui.DefaultTimeBar?>(
+                    androidx.media3.ui.R.id.exo_progress
+                ) ?: return@post
+
+                val lp = (tb.layoutParams as? FrameLayout.LayoutParams)
+                    ?: FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        dp(12)
+                    )
+
+                if (vertical) {
+                    // Вертикально справа, прогресс снизу-вверх
+                    tb.rotation = 270f
+                    tb.pivotX = 0f
+                    tb.pivotY = 0f
+                    tb.translationX = 0f
+
+                    lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
+                    lp.height = dp(12)
+                    lp.gravity = Gravity.BOTTOM
+                } else {
+                    // Горизонтально (сверху/снизу — на выбор)
+                    tb.rotation = 0f
+                    tb.pivotX = 0f
+                    tb.pivotY = 0f
+                    tb.translationX = 0f
+
+                    lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
+                    lp.height = dp(12)
+                    lp.gravity = Gravity.TOP // или Gravity.BOTTOM
+                }
+                tb.layoutParams = lp
+
+                // чтобы точно видно сразу
+                pv.useController = true
+                pv.controllerShowTimeoutMs = 0
+                pv.showController()
+            }
+        }
+
+        private fun dp(v: Int): Int {
+            val d = itemView.resources.displayMetrics.density
+            return (v * d + 0.5f).toInt()
+        }
     }
 
     @OptIn(UnstableApi::class)
@@ -276,12 +368,16 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
 
+        // audio time bar
+        holder.applyTimebarOrientation(timebarVertical)
+
         // 1) всегда сначала тексты
         holder.bindTexts(track)
 
         // 2) визуальная часть: видео или постер
         if (position == videoPos && currentPlayer != null) {
             holder.showVideo(currentPlayer!!)
+            holder.applyVideoTimebarOrientation(timebarVertical)
             holder.hideAudioTimebar()            // ⬅️ при видео таймбар аудио скрыт
         } else {
             holder.hideVideo()      // спрятать PlayerView
@@ -311,6 +407,8 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
                             if (track.isFavorite) R.drawable.favorite1 else R.drawable.favorite
                         )
                     }
+                    "timebarOrientation" -> holder.applyTimebarOrientation(timebarVertical)
+                    "videoTimebarOrientation" -> holder.applyVideoTimebarOrientation(timebarVertical)
                 }
             }
         }
