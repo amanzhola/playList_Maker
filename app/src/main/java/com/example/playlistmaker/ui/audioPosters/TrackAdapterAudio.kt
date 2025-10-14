@@ -282,35 +282,65 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
 
         // for audio time bar
         fun applyTimebarOrientation(vertical: Boolean) {
-            audioTimeBar ?: return
-            val tb = audioTimeBar
-            val lp = tb.layoutParams as FrameLayout.LayoutParams
+            val tb = audioTimeBar ?: return
+            val poster = itemView.findViewById<FrameLayout>(R.id.poster_container) ?: return
 
-            if (vertical) {
-                // справа, снизу-вверх
-                tb.rotation = 270f
-                tb.pivotX = 0f
-                tb.pivotY = 0f
-                lp.width = FrameLayout.LayoutParams.MATCH_PARENT
-                lp.height = dp(12)
-                lp.gravity = Gravity.BOTTOM
+            tb.post {
+                val lp = tb.layoutParams as FrameLayout.LayoutParams
+                val thickness = dp(12)
 
-            } else {
-                // горизонтальный снизу
-                tb.rotation = 0f
-                tb.pivotX = 0f
-                tb.pivotY = 0f
-                tb.translationX = 0f
-                lp.width = FrameLayout.LayoutParams.MATCH_PARENT
-                lp.height = dp(12)
-                lp.gravity = Gravity.TOP
+                if (vertical) {
+                    val extra = dp(15)
+                    val pLp = poster.layoutParams as? ViewGroup.MarginLayoutParams
+                    val topM = pLp?.topMargin ?: 0
+                    val botM = pLp?.bottomMargin ?: 0
+                    // длина = высота постера, чтобы точно вписаться
+                    val posterH = (poster.height - topM - botM - extra).coerceAtLeast(0)
+
+                    tb.rotation = 270f
+                    tb.pivotX = 0f
+                    tb.pivotY = 0f
+
+                    // ДО поворота width станет "длиной" после поворота
+                    lp.width  = posterH          // ← ключевая строка: длина = высота контейнера
+                    lp.height = thickness        // толщина рейки
+                    lp.gravity = Gravity.BOTTOM
+
+                    // если есть боковые маргины у tb — можешь вычесть их из posterH:
+                    // lp.width = (posterH - tb.marginTop - tb.marginBottom).coerceAtLeast(0)
+
+                } else {
+                    tb.rotation = 0f
+                    tb.pivotX = 0f
+                    tb.pivotY = 0f
+                    tb.translationX = 0f
+
+                    lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
+                    lp.height = thickness
+                    lp.gravity = Gravity.TOP // или BOTTOM
+                }
+                tb.layoutParams = lp
             }
-            tb.layoutParams = lp
         }
 
         fun applyVideoTimebarOrientation(vertical: Boolean) {
             val pv = playerView ?: return
-            // ВАЖНО: искать системный id из Media3
+            val poster = itemView.findViewById<FrameLayout>(R.id.poster_container) ?: return
+
+            // 1) гарантируем, что контроллер надут и виден
+            pv.useController = true
+            pv.controllerShowTimeoutMs = 0
+            pv.showController()
+
+            // 2) делаем, чтобы ничего не отсекалось после поворота
+            pv.clipToPadding = false
+            pv.clipChildren = false
+            (pv.parent as? ViewGroup)?.apply {
+                clipToPadding = false
+                clipChildren = false
+            }
+
+            // 3) ждём, когда PlayerView точно измерится и контроллер будет надут
             pv.post {
                 val tb = pv.findViewById<androidx.media3.ui.DefaultTimeBar?>(
                     androidx.media3.ui.R.id.exo_progress
@@ -322,32 +352,42 @@ class TrackAdapterAudio( // ⚠️ ViewBinding 🚫 ➡️ 📉 📈 📛
                         dp(12)
                     )
 
+                val thickness = dp(12)
+
                 if (vertical) {
-                    // Вертикально справа, прогресс снизу-вверх
+                    // длина по высоте постера с небольшим «минус запас»
+                    val extra = dp(15)
+                    val pLp = poster.layoutParams as? ViewGroup.MarginLayoutParams
+                    val topM = pLp?.topMargin ?: 0
+                    val botM = pLp?.bottomMargin ?: 0
+                    val posterH = (poster.height - topM - botM - extra).coerceAtLeast(0)
+
                     tb.rotation = 270f
                     tb.pivotX = 0f
                     tb.pivotY = 0f
                     tb.translationX = 0f
 
-                    lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
-                    lp.height = dp(12)
+                    // после поворота width станет «длиной» вертикальной линейки
+                    lp.width = posterH
+                    lp.height = thickness
                     lp.gravity = Gravity.BOTTOM
+
                 } else {
-                    // Горизонтально (сверху/снизу — на выбор)
                     tb.rotation = 0f
                     tb.pivotX = 0f
                     tb.pivotY = 0f
                     tb.translationX = 0f
 
-                    lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
-                    lp.height = dp(12)
-                    lp.gravity = Gravity.TOP // или Gravity.BOTTOM
+                    lp.width = FrameLayout.LayoutParams.MATCH_PARENT
+                    lp.height = thickness
+                    lp.gravity = Gravity.TOP   // или Gravity.BOTTOM
+                    lp.marginEnd = 0
                 }
-                tb.layoutParams = lp
 
-                // чтобы точно видно сразу
-                pv.useController = true
-                pv.controllerShowTimeoutMs = 0
+                tb.layoutParams = lp
+                tb.visibility = View.VISIBLE
+
+                // ещё раз покажем контроллер на всякий
                 pv.showController()
             }
         }
