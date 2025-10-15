@@ -179,17 +179,43 @@ class ChatRepo {
      * Отправка картинки: грузим в Storage, пишем сообщение, обновляем шапку.
      * Тоже атомарно по смыслу (сообщение и шапка — одним batch’ем).
      */
-    suspend fun sendImage(chatId: String, uri: Uri) {
+    suspend fun sendImage(
+        chatId: String,
+        uri: Uri,
+        onProgress: ((percent: Int) -> Unit)? = null
+    ) {
         val uid = auth.currentUser?.uid ?: error("No auth")
 
         if (isBlockedForSender(chatId, uid)) {
             throw IllegalStateException("Пользователь вас заблокировал")
         }
 
-        // 1) Upload в Storage
+        // 1) Upload в Storage c прогрессом
         val fileRef = storage.reference
             .child("chatMedia/$chatId/${uid}_${System.currentTimeMillis()}.jpg")
-        fileRef.putFile(uri).await()
+
+        val uploadTask = fileRef.putFile(uri)
+
+        onProgress?.invoke(0)
+
+        // сохраняем listener, чтобы удалить потом
+        val listener = com.google.firebase.storage.OnProgressListener<com.google.firebase.storage.UploadTask.TaskSnapshot> { snap ->
+            val total = snap.totalByteCount
+            val sent  = snap.bytesTransferred
+            val p = if (total > 0) ((sent * 100) / total).toInt() else 0
+            onProgress?.invoke(p.coerceIn(0, 100))
+        }
+        uploadTask.addOnProgressListener(listener)
+
+        try {
+            // ждём завершения
+            uploadTask.await()
+            onProgress?.invoke(100)
+        } finally {
+            // на всякий пожарный — снимем listener
+            try { uploadTask.removeOnProgressListener(listener) } catch (_: Throwable) {}
+        }
+
         val url = fileRef.downloadUrl.await().toString()
 
         // 2) Сообщение + «шапка» батчем
@@ -212,7 +238,7 @@ class ChatRepo {
             "lastMessage" to mapOf(
                 "type"     to "image",
                 "ts"       to now,
-                "senderId" to uid   // 👈 добавили
+                "senderId" to uid
             )
         )
         batch.set(chatRef, header, SetOptions.merge())

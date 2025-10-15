@@ -44,8 +44,18 @@ class ToolbarHelper(private val activity: Activity) {
     }
 
     fun updateToolbar(config: ToolbarConfig) {
+        android.util.Log.d(
+            "TITLEFLOW",
+            "ToolbarHelper.updateToolbar: backVis=${config.backArrowVisibility} resId=${config.titleResId}"
+        )
         backArrow?.visibility = config.backArrowVisibility
-        title?.setText(config.titleResId)
+        // ⚠️ НЕ трогаем заголовок, если titleResId == 0
+        if (config.titleResId != 0) {
+            title?.setText(config.titleResId)
+            android.util.Log.d("TITLEFLOW", "ToolbarHelper.updateToolbar: setTitle(fromRes)")
+        } else {
+            android.util.Log.d("TITLEFLOW", "ToolbarHelper.updateToolbar: skip title (resId=0)")
+        }
 
         backArrow?.setOnClickListener(null)
         title?.setOnClickListener(null)
@@ -113,6 +123,7 @@ class ToolbarHelper(private val activity: Activity) {
 
     /** Поставить произвольный текст заголовка (минуя titleResId) */
     fun setTitle(text: CharSequence) {
+        android.util.Log.d("TITLEFLOW", "ToolbarHelper.setTitle -> $title")
         title?.text = text
     }
 }

@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
@@ -65,6 +66,19 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
+    // diff between listener and view life cycle
+    private var videoTickerJob: Job? = null
+    private var videoPlayerListener: Player.Listener? = null
+
+    private fun stopVideoTicker() {
+        videoTickerJob?.cancel()
+        videoTickerJob = null
+    }
+
+    // запускать тикер только если есть owner (то есть view жива)
+    private fun startVideoTickerSafely() {
+        viewLifecycleOwnerLiveData.value?.let { startVideoTicker(it) }
+    }
 
     // Прокси на VM
     private val viewModel: ExtraOptionViewModel by viewModel()
@@ -73,15 +87,13 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         get() = viewModel.videoPos
         set(value) { viewModel.videoPos = value }
 
-    private var videoTickerJob: Job? = null
-    private var videoPlayerListener: Player.Listener? = null // for video
-
     private val networkChecker: NetworkStatusChecker by inject { parametersOf(requireContext()) }
     private var cm: ConnectivityManager? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var lastConnected: Boolean? = null
 
-    private lateinit var binding: FragmentExtraOptionBinding
+    private var _binding: FragmentExtraOptionBinding? = null
+    private val binding get() = _binding!!
     private lateinit var adapter: TrackAdapterAudio
     private lateinit var snapHelper: PagerSnapHelper
 
@@ -139,7 +151,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentExtraOptionBinding.inflate(inflater, container, false)
+        _binding = FragmentExtraOptionBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -292,7 +304,10 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                 adapter.attachVideoAt(binding.tracksRecyclerView, videoBoundPosition, exo!!)
                 updateTimesForVisibleItems()
             }
-            if (exo?.isPlaying == true) startVideoTicker()
+            if (exo?.isPlaying == true) {
+                // ⬇️ ключевая правка
+                startVideoTicker(viewLifecycleOwner)
+            }
         } else {
             updateTimesForVisibleItems()
         }
@@ -371,7 +386,6 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                             } else {
                                 // не играет — не двигаем ползунок на этой карточке
                                 // (можно скрыть или обнулить на всякий)
-                                // adapter.zeroAudioTimebarForVisibleExcept(binding.tracksRecyclerView, pos)
                                 adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, "0:00")
                             }
                         }
@@ -513,6 +527,12 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     }
 
     override fun onDestroyView() {
+
+        // Снять listener, чтобы не прилетали события в «мертвый» UI
+        exo?.let { p -> videoPlayerListener?.let { p.removeListener(it) } }
+        videoPlayerListener = null
+        stopVideoTicker()
+
         val reallyClosingScreen =
             (isRemoving && !requireActivity().isChangingConfigurations) ||
                     requireActivity().isFinishing
@@ -523,6 +543,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             viewModel.releasePlayer()
         }
 
+        _binding = null
         super.onDestroyView()
 
         if (!requireActivity().isChangingConfigurations && isBound) {
@@ -774,7 +795,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                     viewModel.updatePlayingUiForIndex(cur, false)
                 } else {
                     player.play()
-                    startVideoTicker()
+                    // ⬇️ вместо startVideoTicker()
+                    startVideoTickerSafely()
                     viewModel.updatePlayingUiForIndex(cur, true)
                 }
             }
@@ -802,27 +824,26 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     }
 
     @SuppressLint("DefaultLocale")
-    private fun startVideoTicker() {
+    private fun startVideoTicker(owner: LifecycleOwner) {
         videoTickerJob?.cancel()
         val player = exo ?: return
-        videoTickerJob = viewLifecycleOwner.lifecycleScope.launch {
+
+        videoTickerJob = owner.lifecycleScope.launch {
+            // если нужно — можно завернуть цикл в repeatOnLifecycle, но здесь owner уже viewOwner
             while (isActive && player.playbackState != Player.STATE_IDLE) {
                 val pos = videoBoundPosition
+                // view уже уничтожена — выходим
+                val rv = _binding?.tracksRecyclerView ?: break
                 if (pos != NO_VIDEO_POSITION) {
                     val ms = player.currentPosition.coerceAtLeast(0L)
                     val mm = (ms / 1000 / 60).toInt()
                     val ss = ((ms / 1000) % 60).toInt()
                     val text = String.format("%d:%02d", mm, ss)
-                    adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, text)
+                    adapter.updatePlayTimeTextAt(rv, pos, text)
                 }
                 delay(500)
             }
         }
-    }
-
-    private fun stopVideoTicker() {
-        videoTickerJob?.cancel()
-        videoTickerJob = null
     }
 
     private fun resetTimeForIndex(index: Int) {
@@ -896,7 +917,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                     // синхронизируем кнопку Play/Pause на карточке с нативным контроллером PlayerView
                     viewModel.updatePlayingUiForIndex(pos, isPlaying)
                 }
-                if (isPlaying) startVideoTicker() else stopVideoTicker()
+                // ⬇️ используем безопасный запуск/стоп
+                if (isPlaying) startVideoTickerSafely() else stopVideoTicker()
             }
 
             override fun onPlaybackStateChanged(state: Int) {
@@ -906,7 +928,9 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                     if (pos != NO_VIDEO_POSITION) {
                         viewModel.updatePlayingUiForIndex(pos, false)
                         // по желанию — обнулить подпись времени на карточке
-                        adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, "0:00")
+                        _binding?.let { b ->
+                            adapter.updatePlayTimeTextAt(b.tracksRecyclerView, pos, "0:00")
+                        }
                     }
                     stopVideoTicker()
                     // вернуть в начало, чтобы следующий Play начинал с 0

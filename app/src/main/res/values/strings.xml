@@ -285,6 +285,9 @@
     <string name="youtube_audio_only_found">Нашли аудио-поток: %1$s — %2$s</string>
     <string name="youtube_progressive_found">Нашли mp4 (…mime…): %1$s — %2$s</string>
 
+    <!-- chat fragment edit field-->
+    <string name="clear">Очистить</string>
+
     <!--    На очень старых устройствах часть эмодзи может рендериться “квадратиками”;
     используем базовые ☀️🌤️⛅️🌧️❄️🌬️🌡️-->
 <!--    👀💎 / 🦅👁️ / 🔎👁️ 🙏✨ / 🙌 / 😊 💎 🚀 🔽 🕒 🎨-->

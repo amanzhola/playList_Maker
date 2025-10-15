@@ -1,52 +1,80 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="12dp"
-    android:paddingBottom="8dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="64dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:minHeight="64dp"
+    android:paddingBottom="8dp">
 
-    <ImageView
-        android:id="@+id/ivAvatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/ic_user_placeholder"
-        android:contentDescription="@string/users_avatar"/>
-
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_toEndOf="@id/ivAvatar"
-        android:layout_marginStart="12dp"
-        android:layout_width="0dp"
+    <!-- ВНУТРЕННИЙ контейнер с отступами для «основного» контента -->
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textStyle="bold"
-        android:textSize="16sp"/>
+        android:paddingStart="12dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="12dp">
 
-    <TextView
-        android:id="@+id/tvSubtitle"
-        android:layout_below="@id/tvTitle"
-        android:layout_toEndOf="@id/ivAvatar"
-        android:layout_marginStart="12dp"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textSize="13sp"
-        android:textColor="#888"/>
+        <ImageView
+            android:id="@+id/ivAvatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_user_placeholder"
+            android:contentDescription="@string/users_avatar"/>
 
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_toEndOf="@id/ivAvatar"
+            android:layout_marginStart="12dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_below="@id/tvTitle"
+            android:layout_toEndOf="@id/ivAvatar"
+            android:layout_marginStart="12dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="13sp"
+            android:textColor="#888"/>
+
+        <TextView
+            android:id="@+id/tvBadge"
+            android:text="🔥"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            tools:visibility="visible"/>
+    </RelativeLayout>
+
+    <!-- ВЕРХНИЙ бейдж, свободный от padding'а -->
     <TextView
-        android:id="@+id/tvBadge"
-        android:text="🔥"
-        android:textSize="12sp"
-        android:visibility="gone"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
+        android:id="@+id/tvBadgeCore"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-<!--    android:text="●"-->
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="12dp"
+        android:paddingBottom="8dp"
+        android:includeFontPadding="false"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        tools:text="💎💎"
+        tools:visibility="visible"/>
 </RelativeLayout>

@@ -5,6 +5,7 @@ import com.example.playlistmaker.ui.chat.model.ChatItem
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.tasks.await
 import kotlin.math.max
 
 class ChatsRepo {
@@ -20,7 +21,7 @@ class ChatsRepo {
                 "participants",
                 myUid
             )      // ✅ один фильтр; без orderBy/visibleForMap
-            // .limit(200)                                   // (необязательно) ограничь трафик, если чатов много
+            // .limit(200) // (необязательно) ограничь трафик, если чатов много
             .addSnapshotListener { snap, e ->
                 if (e != null) {
                     Log.e(
@@ -56,7 +57,7 @@ class ChatsRepo {
                                 "lastMsgTs=${lastMsgTs ?: -1} " +
                                 "sender=${lastMsgSenderId ?: "null"} " +
                                 "lastRead=${
-                                    ((d.get("lastRead.$myUid") as? com.google.firebase.Timestamp)
+                                    ((d.get("lastRead.$myUid") as? Timestamp)
                                         ?.toDate()?.time) ?: -1
                                 }"
                     )
@@ -78,5 +79,47 @@ class ChatsRepo {
 
                 onList(sorted)
             }
+    }
+
+    suspend fun countUnreadForChat(
+        chatId: String,
+        myUid: String,
+        lastReadTsMillis: Long?
+    ): Int {
+        Log.d(
+            "UnreadRepo",
+            "→ count chat=$chatId myUid=$myUid lastReadTs=${lastReadTsMillis ?: -1}"
+        )
+
+        val chatRef = db.collection("chats").document(chatId)
+        val msgsRef = chatRef.collection("messages")
+
+        // Если есть lastReadTs — берём только сообщения новее этой точки.
+        // Если нет — берём последние 100 (чтобы не грузить весь чат) и считаем.
+        val docs = if (lastReadTsMillis != null) {
+            val sinceTs = Timestamp(java.util.Date(lastReadTsMillis))
+            msgsRef.whereGreaterThan("createdAt", sinceTs)
+                .get().await().documents
+        } else {
+            msgsRef.orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(100)
+                .get().await().documents
+        }
+
+        var count = 0
+        for (d in docs) {
+            val sender = d.getString("senderId") ?: d.getString("author") ?: continue
+            if (sender == myUid) continue
+
+            val ts = d.getTimestamp("createdAt")?.toDate()?.time
+                ?: d.getLong("createdAt") ?: -1L
+
+            if (lastReadTsMillis == null || ts > lastReadTsMillis) {
+                count++
+            }
+        }
+
+        Log.d("UnreadRepo", "← count chat=$chatId = $count")
+        return count
     }
 }
