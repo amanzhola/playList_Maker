@@ -3,7 +3,7 @@ package com.example.playlistmaker.ui.movie
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.View.VISIBLE
+import android.view.View.GONE
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -232,7 +232,7 @@ class SearchMovie : BaseActivity() { // 🔁 👉 🎬 экран поиска �
     // ── BaseActivity hooks ─────────────────────────────────────────────────────
     override fun getLayoutId() = R.layout.activity_search_movie     // 🧱 layout ресурc
     override fun getMainLayoutId() = R.id.main                      // 🎯 корневой контейнер
-    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(VISIBLE, R.string.movie) {
+    override fun getToolbarConfig(): ToolbarConfig = ToolbarConfig(GONE, R.string.movie) {
         navigateToMainScreen(this@SearchMovie, -1)                  // 🧭 обработчик навбара «назад»
     }
     override fun shouldEnableEdgeToEdge(): Boolean = false          // ⛔ без edge-to-edge для экрана

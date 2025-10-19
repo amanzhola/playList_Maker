@@ -110,7 +110,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
                     binding.progressBar.isVisible = state.isLoading
 
                     // 👇 используем метод для синхронизации ⬇️ 🚗 💖
-                    val shouldShowBottomNav = state.query.isEmpty()
+                    val shouldShowBottomNav = state.query.isBlank()
                     updateBottomNavVisibility(shouldShowBottomNav)
 
                     when (state.error) {
@@ -140,7 +140,7 @@ class SearchFragment : BaseFragment(), OnTrackClickListener, BottomNavConfig, Re
 
                     binding.history.isVisible = state.showHistory
                     binding.searchBox.hint =
-                        if (state.query.isNotEmpty() || state.isInputFocused) null
+                        if (state.query.isNotBlank() || state.isInputFocused) null
                         else getString(R.string.search_hint)
 
                     binding.clearIcon.isVisible = state.isClearIconVisible

@@ -59,12 +59,19 @@ class SearchViewModel(
     // 🔤 без поломки emoji — режем только обычные пробелы/переносы
     private fun String.trimForEmoji(): String = trim(' ', '\t', '\n', '\r')
 
+    // ✅ ЕДИНАЯ нормализация строки запроса
+    // -----------------------------------------------------------------------------
+    // NEW: добавляем схлопывание внутренних пробелов и трим краёв
+    //      чтобы "beatles  " → "beatles",  "   " → "" , "ac   dc" → "ac dc"
+    private fun normalizeQuery(raw: String): String =
+        raw.trimForEmoji().replace(Regex("\\s+"), " ")
+
     // ⌛ триггеры поиска: дебаунс ввода + явный Done
     @OptIn(FlowPreview::class)
     private val debouncedQueries: Flow<String> =
         queryFlow
             .debounce(SEARCH_DEBOUNCE_DELAY)
-            .map { it.trimForEmoji() }
+            // NEW: нормализуем НА ВХОДЕ (см. onQueryChanged), здесь это больше не нужно
             .filter { it.isNotBlank() }
             .distinctUntilChanged()
             .onEach {
@@ -138,12 +145,12 @@ class SearchViewModel(
             }
             .combine(removedFromSearch) { (p, execQ), removedIds ->
                 Inputs(
-                    query = p.query,
+                    query = p.query, // ← тут уже НОРМАЛИЗОВАННАЯ строка
                     isFocused = p.isFocused,
                     history = p.history,
                     resource = p.resource,
                     isLoading = p.isLoading,
-                    executedQuery = execQ,
+                    executedQuery = execQ,  // ← и это нормализованно, т.к. приходит из searchQueries
                     removedIds = removedIds
                 )
             }
@@ -152,7 +159,8 @@ class SearchViewModel(
     val uiState: StateFlow<SearchUiState> =
         inputs
             .map { inp ->
-                val queryBlank = inp.query.isBlank()
+                val queryBlank = inp.query.isBlank() // NEW: inp.query уже нормализован (единый источник истины)
+
                 val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
                 // 🧠 queryBlank — пустой ввод?
                 // 🗂️ showHistory — показывать историю только когда есть фокус, ввода нет и история не пуста
@@ -162,6 +170,10 @@ class SearchViewModel(
                     is Resource.Success -> {
                         val list = inp.resource.data.orEmpty()
                         // ❗ «Ничего не найдено» показываем ТОЛЬКО для реально выполненного запроса
+
+                        // OLD: сравнивали сырую строку и выполненную → могли не совпасть из-за пробелов
+                        // NEW: обе уже нормализованы → сравнение корректно
+
                         if (
                             inp.query.isNotEmpty() &&
                             inp.query == inp.executedQuery &&
@@ -214,8 +226,16 @@ class SearchViewModel(
 
     // ─── public API ───
 
+    // 2) При вводе — сразу нормализуем
+    // -----------------------------------------------------------------------------
+    // OLD:
+    // fun onQueryChanged(query: String) { queryFlow.value = query }
+    //
+    // NEW: кладём в поток уже нормализованный текст.
+    // Это устраняет несоответствие "сырое" vs "выполненное" и чинит кейс "beatles " (с пробелом).
+
     fun onQueryChanged(query: String) {
-        queryFlow.value = query
+        queryFlow.value = normalizeQuery(query)
     }
 
     fun setInputFocused(focused: Boolean) {
@@ -223,8 +243,14 @@ class SearchViewModel(
     }
 
     // 🔘 «Готово / Повторить»
+
+    // -----------------------------------------------------------------------------
+    // OLD:
+    // val qUi = queryFlow.value.trimForEmoji()
+    // NEW: используем ту же самую нормализацию, что и для onQueryChanged
+
     fun onSearchActionDone() {
-        val qUi = queryFlow.value.trimForEmoji()
+        val qUi = normalizeQuery(queryFlow.value)
         val q = if (qUi.isNotEmpty()) qUi else lastSubmittedQuery.value
         if (q.isNotEmpty()) manualSearchRequests.tryEmit(q)
     }
