@@ -213,7 +213,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
     protected open fun shouldEnableEdgeToEdge(): Boolean = true
     protected open fun getLayoutId(): Int = R.layout.base_main
-    protected open fun getMainLayoutId(): Int = R.id.nav_host_container
+    open fun getMainLayoutId(): Int = R.id.nav_host_container
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu, menu)

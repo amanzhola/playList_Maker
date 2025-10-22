@@ -54,6 +54,8 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import com.example.playlistmaker.utils.showFailOrSnack
+import org.koin.android.ext.android.getKoin
 
 class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackClickListener {
 
@@ -233,6 +235,14 @@ class PlaylistInfoFragment : Fragment(R.layout.fragment_playlist_info), OnTrackC
         if (ui.tracks.isEmpty()) {
             showLongSnack(getString(R.string.nothing_to_share))
             return
+        }
+
+        // 👇 быстрый локальный чек + мягкое уведомление
+        val checker: NetworkStatusChecker =
+            getKoin().get { parametersOf(requireContext().applicationContext) }
+        if (!checker.isNetworkAvailable()) {
+            showFailOrSnack(isSupport = false)  // ext на Fragment из utils
+             return // блокировать офлайн-шаринг
         }
 
         // генерим .plz (zip) и шэрим как файл

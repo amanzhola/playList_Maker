@@ -3,7 +3,6 @@ package com.example.playlistmaker.di
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.data.network.base.RetrofitInstance
@@ -29,10 +28,10 @@ import com.example.playlistmaker.domain.usecases.base.CheckInternetConnectionUse
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.presentation.utils.ColorPersistenceHelper
-import com.example.playlistmaker.presentation.utils.activityHelper.FailUiController
 import com.google.android.material.button.MaterialButton
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val appModule = module {
@@ -50,24 +49,39 @@ val appModule = module {
     }
 
     // replace share  // 👨‍💻
-    factory<Share> { (activity: Activity) -> ShareImpl(activity)}
+//    factory<Share> { (activity: Activity) -> ShareImpl(activity)}
+    factory<Share> { (activity: Activity) ->
+        ShareImpl(
+            activity = activity,
+            networkStatusChecker = get<NetworkStatusChecker> { parametersOf(androidContext()) }
+        )
+    }
 
     // replace support 🔧✨
-    factory<Support> { (activity: Activity, mainLayout: ViewGroup, failTextView: TextView) ->
-        val failUiController = FailUiController(activity, mainLayout, failTextView)
-        SupportImpl(activity, failUiController)
+    factory<Support> { (activity: Activity) ->
+        SupportImpl(
+            activity = activity,
+            checkInternetConnectionUseCase = get()
+        )
     }
 
     // + for replace agreement
-    single<NetworkRepository> { NetworkRepositoryImpl(RetrofitInstance.api) }
+    single<NetworkRepository> {
+        NetworkRepositoryImpl(
+            apiService = RetrofitInstance.api,
+            networkStatusChecker = get<NetworkStatusChecker> { parametersOf(androidContext()) }
+        )
+    }
 
     // + for replace agreement
     single { CheckInternetConnectionUseCase(get()) }
 
     // replace agreement 👨‍💻 📜
-    factory<Agreement> { (activity: Activity, mainLayout: ViewGroup, failTextView: TextView) ->
-        val failUiController = FailUiController(activity, mainLayout, failTextView)
-        AgreementImpl(activity, get(), failUiController) // get<CheckInternetConnectionUseCase>()
+    factory<Agreement> { (activity: Activity) ->
+        AgreementImpl(
+            activity = activity,
+            checkInternetConnectionUseCase = get()   // get<CheckInternetConnectionUseCase>()
+        )
     }
 
     // Язык — через SharedPreferences to re-do object to class ThemeLanguageHelper and replace val interaction = Creator.provideLanguageInteraction()
@@ -75,7 +89,12 @@ val appModule = module {
     single<LanguageInteraction> { LanguageInteractionImpl(get()) } // provideLanguageInteraction()
 
     // Movie Sharing 👨‍💻 ⬇️ + replace ShareMovie in MoviesAdapterList and in MoviePagerList
-    factory<ShareMovie> { (activity: Activity) -> ShareMovieImpl(activity)}
+    factory<ShareMovie> { (activity: Activity) ->
+        ShareMovieImpl(
+            activity = activity,
+            networkStatusChecker = get<NetworkStatusChecker> { parametersOf(androidContext()) }
+        )
+    }
 
     // SearchActivity and TrackAdapter // 🌐 📶
     factory<NetworkStatusChecker> { (context: Context) ->
@@ -96,5 +115,4 @@ val appModule = module {
 
     // updated sprint22 + 📜 👉 📝 oberver and bottom sheet + favourite ❤️
     viewModel { TrackPreviewViewModel(get(), get(), get(), get()) }
-
 }
