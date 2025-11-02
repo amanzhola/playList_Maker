@@ -27,7 +27,7 @@ class SupportImpl(
             }
 
             if (!hasInternet) {
-                activity.showFailOrSnack(isSupport = true)
+                activity.showFailOrSnack(isSupport = false)
                 return@launch
             }
 
@@ -45,7 +45,7 @@ class SupportImpl(
             try {
                 activity.startActivity(emailIntent)
             } catch (_: Exception) {
-                activity.showFailOrSnack(isSupport = true)
+                activity.showFailOrSnack(isSupport = false)
             }
         }
     }

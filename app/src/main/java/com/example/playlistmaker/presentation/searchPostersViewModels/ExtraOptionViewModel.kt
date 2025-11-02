@@ -1,6 +1,5 @@
 package com.example.playlistmaker.presentation.searchPostersViewModels
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
@@ -20,7 +19,8 @@ import kotlinx.coroutines.launch
 class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудиоплеер)
     private val favoriteTracksInteractor: FavoriteTracksInteractor,
     observePlaylists: ObservePlaylistsUseCase,
-    private val addTrackToPlaylist: AddTrackToPlaylistUseCase
+    private val addTrackToPlaylist: AddTrackToPlaylistUseCase,
+    private val exoProvider: ExoPlayerProvider
 ) : ViewModel() {
     // ────────────────── Utube old mob ──────────────────
     data class AudioProgress(val positionMs: Long, val durationMs: Long, val bufferedMs: Long)
@@ -32,16 +32,37 @@ class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудио
 
     // ────────────────── Utube ──────────────────
 
-    var exo: ExoPlayer? = null
-    var videoPos: Int = NO_VIDEO_POSITION
+    private val _exo = MutableStateFlow<ExoPlayer?>(null)
+        val exoFlow: StateFlow<ExoPlayer?> = _exo
 
-    fun ensurePlayer(ctx: Context) {
-        if (exo == null) exo = ExoPlayer.Builder(ctx.applicationContext).build()
+        var exo: ExoPlayer?
+            get() = _exo.value
+            set(value) { _exo.value = value }
+
+    private val _videoPos = MutableStateFlow(NO_VIDEO_POSITION)
+    val videoPosFlow: StateFlow<Int> = _videoPos
+
+    var videoPos: Int
+        get() = _videoPos.value
+        set(value) { _videoPos.value = value }
+
+    fun ensurePlayer() {
+        if (_exo.value == null) {
+            _exo.value = exoProvider.create()
+        }
     }
+
     fun releasePlayer() {
-        exo?.release()
-        exo = null
+        _exo.value?.release()
+        _exo.value = null
         videoPos = NO_VIDEO_POSITION
+    }
+
+    override fun onCleared() {
+        // На всякий случай освободим, если забыли
+        _exo.value?.release()
+        _exo.value = null
+        super.onCleared()
     }
 
     // ────────────────── Плейлисты (как было) ──────────────────

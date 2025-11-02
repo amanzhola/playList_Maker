@@ -29,17 +29,17 @@
         android:label="fragment_media_library"
         tools:layout="@layout/fragment_media_library" />
 
-    <fragment
-        android:id="@+id/fragmentFavouriteTracks2"
-        android:name="com.example.playlistmaker.ui.mediaFragments.FragmentFavouriteTracks"
-        android:label="fragment_favourite_tracks"
-        tools:layout="@layout/fragment_favourite_tracks"/>
+<!--    <fragment-->
+<!--        android:id="@+id/fragmentFavouriteTracks2"-->
+<!--        android:name="com.example.playlistmaker.ui.mediaFragments.FragmentFavouriteTracks"-->
+<!--        android:label="fragment_favourite_tracks"-->
+<!--        tools:layout="@layout/fragment_favourite_tracks"/>-->
 
-    <fragment
-        android:id="@+id/fragmentPlaylist"
-        android:name="com.example.playlistmaker.ui.mediaFragments.FragmentPlaylist"
-        android:label="fragment_playlist"
-        tools:layout="@layout/fragment_playlist"/>
+<!--    <fragment-->
+<!--        android:id="@+id/fragmentPlaylist"-->
+<!--        android:name="com.example.playlistmaker.ui.mediaFragments.FragmentPlaylist"-->
+<!--        android:label="fragment_playlist"-->
+<!--        tools:layout="@layout/fragment_playlist"/>-->
 
     <fragment
         android:id="@+id/createPlaylistFragment"

@@ -35,6 +35,7 @@ import com.example.playlistmaker.utils.ARG_PREFILL_DESC
 import com.example.playlistmaker.utils.ARG_PREFILL_NAME
 import com.example.playlistmaker.utils.ARG_PREFILL_TRACKS
 import com.example.playlistmaker.utils.EXTRA_IMPORT_ENTRY
+import com.example.playlistmaker.utils.EXTRA_IMPORT_URI
 import com.example.playlistmaker.utils.NavKeys
 import com.example.playlistmaker.utils.makeSingleLineEllipsizeEnd
 import com.example.playlistmaker.utils.setupDesc
@@ -60,13 +61,29 @@ class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrac
 //    private val args: ImportPreviewFragmentArgs by navArgs()
 //    private val inputUri: Uri get() = args.argImportUri
 
-    // Вариант B (без Safe Args)
+//    // Вариант B (без Safe Args)
+//    private val inputUri: Uri? by lazy {
+//        // 1) из аргументов фрагмента
+//        arguments?.let { BundleCompat.getParcelable(it, ARG_IMPORT_URI, Uri::class.java) }
+//        // 2) из интента (deep link / share)
+//            ?: requireActivity().intent?.data
+//            ?: requireActivity().intent?.clipData?.getItemAt(0)?.uri
+//    }
+
     private val inputUri: Uri? by lazy {
         // 1) из аргументов фрагмента
         arguments?.let { BundleCompat.getParcelable(it, ARG_IMPORT_URI, Uri::class.java) }
-        // 2) из интента (deep link / share)
-            ?: requireActivity().intent?.data
-            ?: requireActivity().intent?.clipData?.getItemAt(0)?.uri
+        // 2) ИЗ ИНТЕНТА: СНАЧАЛА EXTRA_IMPORT_URI (вот этого раньше не хватало)
+            ?: run {
+                val i = requireActivity().intent
+                // начиная с API 33 лучше так:
+                val fromExtra = androidx.core.os.BundleCompat.getParcelable(
+                    i.extras ?: Bundle(), EXTRA_IMPORT_URI, Uri::class.java
+                )
+                fromExtra
+                    ?: i.data
+                    ?: i.clipData?.getItemAt(0)?.uri
+            }
     }
 
     // для TrackAdapter инжект зависимости

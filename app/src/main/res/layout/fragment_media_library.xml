@@ -9,25 +9,4 @@
     android:background="@color/white_textColor"
     tools:context=".ui.media.MediaLibraryFragment">
 
-    <!-- ✅ Fail layout -->
-    <include layout="@layout/fail" />
-
-    <!-- ✅ TabLayout + ViewPager2 -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/TabLayout"
-        app:tabMode="fixed"
-        app:tabIndicatorHeight="@dimen/radius_2dp"
-        app:tabIndicatorFullWidth="true"
-        app:tabRippleColor="@android:color/transparent" />
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
-        style="@style/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
 </LinearLayout>

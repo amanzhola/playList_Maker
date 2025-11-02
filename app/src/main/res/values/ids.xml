@@ -1,0 +1,11 @@
+<resources>
+<!--    <item name="composeContent" type="id"/>-->
+    <!-- общий id для Compose-контента на экранах -->
+    <item name="composeContent" type="id"/>
+
+    <!-- общий id для fail-текста (поверх контента) -->
+    <item name="failText" type="id"/>
+
+    <!-- если Snackbar якорится к bottomNavigation -->
+    <item name="bottomNavigation" type="id"/>
+</resources>

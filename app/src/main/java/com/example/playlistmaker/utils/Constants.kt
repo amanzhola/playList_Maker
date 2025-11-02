@@ -6,10 +6,11 @@ const val SEARCH_DEBOUNCE_DELAY = 2000L
 //const val CLICK_DEBOUNCE_DELAY = 1000L // ⛔ 🕒 1 секунда задержки
 const val CLICK_DEBOUNCE_DELAY = 300L // ⛔ 🕒 1 секунда задержки
 
-object NavKeys {
+object NavKeys { // return from CreatePlaylistFragment to tab # 1
     const val PLAYLIST_CREATED_NAME = "playlist_created_name"
     const val SCROLL_TOP = "scroll_top"
     const val SELECT_TAB = "select_tab"
+    const val RESTORE_PLAYLIST_ID = "RESTORE_PLAYLIST_ID"
 }
 
 const val ACTION_SHARE = 1
@@ -63,3 +64,7 @@ const val ZERO_TIME = "00:00"
 // utube
 const val NO_VIDEO_POSITION: Int = RecyclerView.NO_POSITION
 
+const val STATE_MEDIA_TAB = "state_media_tab"
+
+const val SCOPE_FAV = "MediaTab:Favourite"
+const val SCOPE_PL  = "MediaTab:Playlist"

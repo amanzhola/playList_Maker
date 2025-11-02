@@ -18,12 +18,13 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -32,15 +33,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.BaseFragment
 import com.example.playlistmaker.R
-import com.example.playlistmaker.databinding.FragmentExtraOptionBinding
 import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
-import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.repository.base.AudioSingleTrackShare
 import com.example.playlistmaker.domain.repository.base.TrackListIntentParser
 import com.example.playlistmaker.presentation.ImageLoader
@@ -56,7 +52,6 @@ import com.example.playlistmaker.utils.EXTRA_URL
 import com.example.playlistmaker.utils.NO_VIDEO_POSITION
 import com.example.playlistmaker.utils.NavKeys
 import com.example.playlistmaker.utils.showLongSnack
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -66,7 +61,15 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
-    // diff between listener and view life cycle
+
+    private var bgColorExt: androidx.compose.ui.graphics.Color? by
+    androidx.compose.runtime.mutableStateOf(null)
+    private var textColorExt: androidx.compose.ui.graphics.Color? by
+    androidx.compose.runtime.mutableStateOf(null)
+    private var iconColorExt: androidx.compose.ui.graphics.Color? by
+    androidx.compose.runtime.mutableStateOf(null)
+
+    // ───────── ticker / player listener ─────────
     private var videoTickerJob: Job? = null
     private var videoPlayerListener: Player.Listener? = null
 
@@ -75,12 +78,11 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         videoTickerJob = null
     }
 
-    // запускать тикер только если есть owner (то есть view жива)
     private fun startVideoTickerSafely() {
         viewLifecycleOwnerLiveData.value?.let { startVideoTicker(it) }
     }
 
-    // Прокси на VM
+    // VM / player
     private val viewModel: ExtraOptionViewModel by viewModel()
     private val exo: ExoPlayer? get() = viewModel.exo
     private var videoBoundPosition: Int
@@ -92,21 +94,11 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var lastConnected: Boolean? = null
 
-    private var _binding: FragmentExtraOptionBinding? = null
-    private val binding get() = _binding!!
-    private lateinit var adapter: TrackAdapterAudio
-    private lateinit var snapHelper: PagerSnapHelper
-
     private val shareHelper: AudioSingleTrackShare by inject { parametersOf(requireActivity()) }
     private val trackListIntentParser: TrackListIntentParser by inject()
-
-    private var currentLayoutOrientation = LinearLayoutManager.HORIZONTAL
-    private var isFromSearch: Boolean = false
-
-    private lateinit var bottomBehavior: BottomSheetBehavior<LinearLayout>
-    private lateinit var overlay: View
     private val imageLoader: ImageLoader by inject()
-    private val bottomAdapter by lazy { PlaylistBottomAdapter(imageLoader) { viewModel.onPlaylistClicked(it) } }
+
+    private var isFromSearch: Boolean = false
 
     // MusicService binding
     private var musicService: MusicService? = null
@@ -149,339 +141,99 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         super.onCreate(savedInstanceState)
         isFromSearch = arguments?.getBoolean("IS_FROM_SEARCH", false) ?: false
     }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val ctx = requireContext()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentExtraOptionBinding.inflate(inflater, container, false)
-        return binding.root
+        // Инициализация VM из аргументов ДО setContent (как у тебя)
+        if (viewModel.state.value.trackList.isEmpty()) {
+            arguments?.getString("TRACK_LIST_JSON")?.let { json ->
+                val index = arguments?.getInt("TRACK_INDEX") ?: 0
+                trackListIntentParser.parse(json, index)?.let(viewModel::initializeWith)
+            }
+        }
+
+        // 1) Корень: FrameLayout
+        val root = android.widget.FrameLayout(ctx).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            id = View.generateViewId()
+            setBackgroundColor(
+                ContextCompat.getColor(ctx, R.color.white_textColor)
+            )
+        }
+
+        // 2) Compose-контент
+        val compose = ComposeView(ctx).apply {
+            id = R.id.composeContent  // <-- важно для ActivityUiHider
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            setContent {
+                AudioPlayerScreen(
+                    viewModel = viewModel,
+                    imageLoader = imageLoader,
+                    onBack = {
+                        detachCurrentVideo()
+                        stopAndReleaseVideo()
+                        viewModel.stopAudioPlay()
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    },
+                    onCreatePlaylistClick = {
+                        findNavController().navigate(R.id.action_global_to_createPlaylistFragment)
+                    },
+                    onTogglePlayPauseForCurrent = { togglePlayPauseForCurrent() },
+                    onSeek = { ms ->
+                        if (viewModel.videoPos == NO_VIDEO_POSITION) viewModel.seekTo(ms)
+                    },
+                    extBackground = bgColorExt,
+                    extTextColor  = textColorExt,
+                    extIconTint   = iconColorExt
+                )
+            }
+        }
+
+        // 3) fail.xml поверх (по умолчанию у него visibility=gone через стиль)
+        val failView = (layoutInflater.inflate(R.layout.fail, root, false) as TextView).apply {
+            id = R.id.failText   // <-- важно для ActivityUiHider и общего поиска
+            // Позиционирование аналогично Search: TOP + CENTER_HORIZONTAL
+            layoutParams = android.widget.FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL
+                // если надо опустить «под тулбар/хедер», подбери димен
+                topMargin = resources.getDimensionPixelSize(R.dimen.track_45)
+            }
+        }
+
+        root.addView(compose)
+        root.addView(failView)
+
+        // ⛑ восстановление коллбеков видео после пересоздания view (смена темы и т.п.)
+        if (viewModel.videoPos != NO_VIDEO_POSITION && viewModel.exo != null) {
+            attachVideoPlayerCallbacks()
+            if (viewModel.exo?.isPlaying == true) {
+                startVideoTicker(viewLifecycleOwner)
+            }
+        }
+
+        return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottom = view.findViewById<LinearLayout>(R.id.playlists_bottom_sheet)
-        overlay = view.findViewById(R.id.overlay)
-
-        val rv = view.findViewById<RecyclerView>(R.id.rvBottomPlaylists)
-        rv.layoutManager = LinearLayoutManager(requireContext())
-        rv.adapter = bottomAdapter
-        bottomAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) rv.post { rv.scrollToPosition(0) }
-            }
-        })
-
-        view.findViewById<View>(R.id.btnUpdate).setOnClickListener {
-            bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            findNavController().navigate(R.id.action_global_to_createPlaylistFragment)
-        }
-
-        bottomBehavior = BottomSheetBehavior.from(bottom).apply { state = BottomSheetBehavior.STATE_HIDDEN }
-        bottomBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(sheet: View, newState: Int) {
-                when (newState) {
-                    BottomSheetBehavior.STATE_HIDDEN -> { overlay.isGone = true; overlay.alpha = 0f }
-                    BottomSheetBehavior.STATE_COLLAPSED -> { overlay.isVisible = false; overlay.alpha = 0f }
-                    BottomSheetBehavior.STATE_HALF_EXPANDED -> { overlay.isVisible = true; overlay.alpha = 0.6f }
-                    BottomSheetBehavior.STATE_EXPANDED -> { overlay.isVisible = true; overlay.alpha = 1f }
-                    BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> Unit
-                }
-            }
-            override fun onSlide(sheet: View, slideOffset: Float) {
-                val t = slideOffset.coerceIn(0f, 1f)
-                overlay.alpha = t.coerceAtMost(1f)
-                overlay.isVisible = t > 0f
-            }
-        })
-
-        // one-shot toast after playlist created
+        // one-shot toast после создания плейлиста
         val handle = findNavController().currentBackStackEntry?.savedStateHandle
         handle?.getLiveData<String>(NavKeys.PLAYLIST_CREATED_NAME)
             ?.observe(viewLifecycleOwner) { name ->
-                if (::bottomBehavior.isInitialized) {
-                    bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                    overlay.visibility = View.GONE
-                    overlay.alpha = 0f
-                }
                 showSnack(getString(R.string.playlist_created, name), durationMs = 4000)
                 handle.remove<String>(NavKeys.PLAYLIST_CREATED_NAME)
             }
-
-        // Adapter
-        adapter = TrackAdapterAudio(emptyList(), object : OnTrackAudioClickListener {
-
-            override fun onSeekRequested(track: Track, positionMs: Long) {
-                // Если играет видео — игнорим (ползунок скрыт)
-                if (videoBoundPosition != NO_VIDEO_POSITION) return
-                viewModel.seekTo(positionMs)
-            }
-
-            override fun onTrackClicked(track: Track, position: Int) {
-                if (videoBoundPosition != NO_VIDEO_POSITION && videoBoundPosition != position) {
-                    detachCurrentVideo()
-                    stopAndReleaseVideo()
-                }
-                viewModel.setCurrentTrackIndex(position)
-                viewModel.toggleIsHorizontal()
-                viewModel.setScrollPosition(position)
-            }
-
-            override fun onPlayButtonClicked(track: Track) {
-                // индекс карточки, по которой кликнули
-                val newIndex = adapter.getItems().indexOfFirst { it.trackId == track.trackId }
-                if (newIndex == RecyclerView.NO_POSITION) return
-
-                val oldIndex = viewModel.state.value.currentTrackIndex
-
-                // 1) если клик по самой видео-карточке — управляем видео и выходим
-                if (videoBoundPosition == newIndex && exo != null) {
-                    togglePlayPauseForCurrent()
-                    return
-                }
-
-                // 2) если видео прикреплено к ДРУГОЙ карточке — сначала полностью выключаем ВИДЕО
-                if (videoBoundPosition != NO_VIDEO_POSITION && videoBoundPosition != newIndex) {
-                    val wasVideoPos = videoBoundPosition
-
-                    // 🔸 оптимистично сбрасываем UI у бывшей видеокарточки
-                    viewModel.updatePlayingUiForIndex(wasVideoPos, false)
-                    adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, wasVideoPos, "0:00")
-
-                    // и уже потом реально отцепляем/останавливаем видео
-                    detachCurrentVideo()
-                    stopAndReleaseVideo()
-                }
-
-                // 3) если переходим на ДРУГОЙ аудио-трек — пересаживаем текущий индекс
-                if (newIndex != oldIndex) {
-                    viewModel.setCurrentTrackIndex(newIndex)
-                    viewModel.setScrollPosition(newIndex)
-
-                    // 🔸 оптимистичное переключение кнопок: старую гасим, новую зажигаем
-                    viewModel.updatePlayingUiForIndex(oldIndex, false)
-                    viewModel.updatePlayingUiForIndex(newIndex, true)
-
-                    // стартуем аудио нового трека
-                    viewModel.getCurrentTrack()?.let { cur ->
-                        viewModel.audioPlay(cur)
-                    }
-                    return
-                }
-
-                // 4) клик по этой же карточке → обычный toggle
-                togglePlayPauseForCurrent()
-            }
-
-            override fun onBackArrowClicked() {
-                detachCurrentVideo()
-                stopAndReleaseVideo()
-                viewModel.stopAudioPlay()
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-            }
-            override fun onFavoriteClicked(track: Track) {
-                viewModel.onFavoriteClicked(track.id)
-            }
-            override fun onAddTrackClicked(track: Track) {
-                bottom.post {
-                    bottomBehavior.isFitToContents = false
-                    bottomBehavior.halfExpandedRatio = 0.6f
-                    bottomBehavior.skipCollapsed = false
-                    bottomBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-                }
-            }
-        })
-        adapter.setTimebarVertical(currentLayoutOrientation == LinearLayoutManager.HORIZONTAL)
-
-        // RecyclerView
-        binding.tracksRecyclerView.adapter = adapter
-        snapHelper = PagerSnapHelper().also { it.attachToRecyclerView(binding.tracksRecyclerView) }
-        setLayoutManager(currentLayoutOrientation)
-
-        // Переаттач видео после поворота
-        adapter.setVideoPlayer(exo)
-        if (videoBoundPosition != NO_VIDEO_POSITION && exo != null) {
-            adapter.setVideoBoundPosition(videoBoundPosition)
-            binding.tracksRecyclerView.post {
-                adapter.attachVideoAt(binding.tracksRecyclerView, videoBoundPosition, exo!!)
-                updateTimesForVisibleItems()
-            }
-            if (exo?.isPlaying == true) {
-                // ⬇️ ключевая правка
-                startVideoTicker(viewLifecycleOwner)
-            }
-        } else {
-            updateTimesForVisibleItems()
-        }
-
-        // State subscriptions
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.state.collect { state ->
-
-                        // --- ЗАМЕНА блока ---
-                        val old = adapter.getItems()
-                        val new = state.trackList
-
-                        val oldIds = old.map { it.trackId }
-                        val newIds = new.map { it.trackId }
-                        val idsChanged = oldIds != newIds || adapter.itemCount == 0
-
-                        val playingChanged =
-                            !idsChanged &&
-                                    old.size == new.size &&
-                                    old.indices.any { i -> old[i].isPlaying != new[i].isPlaying }
-
-                        // ➕ Добавили это:
-                        val favoriteChanged =
-                            !idsChanged && old.size == new.size &&
-                                    old.indices.any { i -> old[i].isFavorite != new[i].isFavorite }
-
-                        if (idsChanged || playingChanged || favoriteChanged) {
-                            adapter.update(new.map { it.copy() })
-                            binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
-                            updateTimesForVisibleItems()
-                        }
-
-                        val desired = if (state.isHorizontal) LinearLayoutManager.HORIZONTAL else LinearLayoutManager.VERTICAL
-                        if (desired != currentLayoutOrientation) {
-                            currentLayoutOrientation = desired
-                            setLayoutManager(desired)
-                            adapter.setTimebarVertical(state.isHorizontal)// for audio time bar
-                            binding.tracksRecyclerView.scrollToPosition(state.currentTrackIndex)
-                            updateTimesForVisibleItems()
-                        }else {
-                            // Если LM не менялся, синхронизируем флаг (после возврата на экран, восстановления и т.п.)
-                            adapter.setTimebarVertical(state.isHorizontal)
-                        }
-                        binding.tracksRecyclerView.isVisible = !state.isBottomNavVisible
-                        requireActivity().findViewById<TextView>(R.id.title)?.isVisible = state.isBottomNavVisible
-                        requireActivity().findViewById<Toolbar>(R.id.toolbar)?.apply {
-                            val fixedHeightInPx = 45.convertDpToPx(requireContext())
-                            layoutParams.height = fixedHeightInPx
-                            requestLayout()
-                        }
-
-                        // audio time bar // ---- ЕДИНСТВЕННЫЙ блок для аудио-таймбара ----
-                        if (videoBoundPosition == NO_VIDEO_POSITION) {
-                            val pos = state.currentTrackIndex
-                            // спрятать у всех видимых, кроме текущей
-                            adapter.hideAudioTimebarForVisibleExcept(binding.tracksRecyclerView, pos)
-
-                            val current = state.trackList.getOrNull(pos)
-                            if (current?.isPlaying == true) {
-                                // 1) двигаем ползунок
-                                viewModel.getAudioProgress()?.let { p ->
-                                    adapter.updateAudioTimebarAt(
-                                        binding.tracksRecyclerView,
-                                        pos,
-                                        p.positionMs, p.durationMs, p.bufferedMs
-                                    )
-                                    // 2) обновляем подпись времени
-                                    adapter.updatePlayTimeTextAt(
-                                        binding.tracksRecyclerView,
-                                        pos,
-                                        formatMs(p.positionMs)
-                                    )
-                                }
-                            } else {
-                                // не играет — не двигаем ползунок на этой карточке
-                                // (можно скрыть или обнулить на всякий)
-                                adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, "0:00")
-                            }
-                        }
-                    }
-                }
-                launch { viewModel.playlists.collect { list -> bottomAdapter.submitList(list) } }
-                launch {
-                    viewModel.playlistEvents.collect { e ->
-                        when (e) {
-                            is ExtraOptionViewModel.PlaylistEvent.Added -> {
-                                bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                                showSnack(getString(R.string.added_to_playlist, e.playlistName))
-                            }
-                            is ExtraOptionViewModel.PlaylistEvent.AlreadyExists ->
-                                showSnack(getString(R.string.track_already_in_playlist, e.playlistName))
-                            is ExtraOptionViewModel.PlaylistEvent.Error ->
-                                showSnack(e.message)
-                        }
-                    }
-                }
-            }
-        }
-
-        // Скролл — только индекс + корректные таймеры
-        binding.tracksRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val pos = currentSnappedPosition()
-                val cur = viewModel.state.value.currentTrackIndex
-                if (pos != RecyclerView.NO_POSITION && pos != cur) {
-
-                    // 1) обновляем индекс
-                    viewModel.setCurrentTrackIndex(pos)
-                    viewModel.setScrollPosition(pos)
-
-                    // for audio time bar
-                    // 2) если ИДЁТ АУДИО (видео нет) — спрячь/обнули таймбары у всех видимых, кроме текущей
-                    if (videoBoundPosition == NO_VIDEO_POSITION) {
-                        adapter.hideAudioTimebarForVisibleExcept(binding.tracksRecyclerView, pos)
-                        // если вместо скрытия нужно "ноль у всех", используй:
-                        // adapter.zeroAudioTimebarForVisibleExcept(binding.tracksRecyclerView, pos)
-                    }
-                }
-                // 3) если идёт ВИДЕО — обновляем его время для видимых карточек (как было)
-                if (videoBoundPosition != NO_VIDEO_POSITION) updateTimesForVisibleItems()
-            }
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val pos = currentSnappedPosition().takeIf { it != RecyclerView.NO_POSITION } ?: 0
-
-                    // 1) фиксируем индекс
-                    viewModel.setCurrentTrackIndex(pos)
-                    viewModel.setScrollPosition(pos)
-
-                    // replace by audio time bar
-                    if (videoBoundPosition != NO_VIDEO_POSITION) {
-                        // 2a) при видео — обновляем таймеры (как было)
-                        updateTimesForVisibleItems()
-                    } else {
-                        // 2b) при аудио — скрыть/обнулить у всех, кроме текущей...
-                        adapter.hideAudioTimebarForVisibleExcept(binding.tracksRecyclerView, pos)
-
-                        val current = viewModel.state.value.trackList.getOrNull(pos)
-                        if (current?.isPlaying == true) {
-                            // ...и тут же оживить ползунок у текущей карточки актуальным прогрессом
-                            viewModel.getAudioProgress()?.let { p ->
-                                adapter.updateAudioTimebarAt(
-                                    binding.tracksRecyclerView,
-                                    pos,
-                                    p.positionMs, p.durationMs, p.bufferedMs
-                                )
-
-                                // + текст времени у текущей карточки
-                                adapter.updatePlayTimeTextAt(
-                                    binding.tracksRecyclerView,
-                                    pos,
-                                    formatMs(p.positionMs)  // String
-                                )
-                            }
-                        } else { // else — ничего не обновляем (ползунок скрыт/ноль)
-                            adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, "0:00")
-                        }
-                    }
-                }
-            }
-        })
-
-        // init args
-        if (savedInstanceState == null) {
-            arguments?.let {
-                val json = it.getString("TRACK_LIST_JSON") ?: return@let
-                val index = it.getInt("TRACK_INDEX")
-                trackListIntentParser.parse(json, index)?.let { inputData ->
-                    viewModel.initializeWith(inputData)
-                }
-            }
-        }
 
         // notifications permission (13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && savedInstanceState == null) {
@@ -496,15 +248,45 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
-        binding.root.findViewById<View>(R.id.bottom6)?.isSelected = true
+        // Подписки, которые остаются (без каких-либо ссылок на удалённый XML)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // управление тулбаром/нижней навигацией по состоянию
+                launch {
+                    viewModel.state.collect { state ->
+                        requireActivity().findViewById<TextView>(R.id.title)?.isVisible =
+                            state.isBottomNavVisible
+                        requireActivity().findViewById<Toolbar>(R.id.toolbar)?.apply {
+                            val fixedHeightInPx = 45.convertDpToPx(requireContext())
+                            layoutParams.height = fixedHeightInPx
+                            requestLayout()
+                        }
+                    }
+                }
+                // как только сервис играет аудио — отвязываем локальное видео
+                launch {
+                    viewModel.state.collect { st ->
+                        if (st.playbackState == com.example.playlistmaker.domain.api.player.PlaybackState.PLAYING) {
+                            if (videoBoundPosition != NO_VIDEO_POSITION) {
+                                detachCurrentVideo()
+                                stopAndReleaseVideo()
+                                viewModel.updatePlayingUiForIndex(st.currentTrackIndex, false)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         viewModel.startFavoritesSyncIfNeeded()
     }
 
-    // ───────────────── lifecycle / service ─────────────────
+
+    // ───────── lifecycle / service ─────────
 
     override fun onStart() {
         super.onStart()
-        viewModel.ensurePlayer(requireContext())
+        viewModel.ensurePlayer()
         requireContext().bindService(buildBindIntentForCurrent(), connection, Context.BIND_AUTO_CREATE)
     }
 
@@ -517,8 +299,10 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         if (!goingToBackground) return
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val granted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) ==
-                    PackageManager.PERMISSION_GRANTED
+            val granted = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
             if (!granted) return
         }
 
@@ -527,15 +311,13 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     }
 
     override fun onDestroyView() {
-
-        // Снять listener, чтобы не прилетали события в «мертвый» UI
+        restoreToolbarDefaultsAfterAudio()
         exo?.let { p -> videoPlayerListener?.let { p.removeListener(it) } }
         videoPlayerListener = null
         stopVideoTicker()
 
         val reallyClosingScreen =
-            (isRemoving && !requireActivity().isChangingConfigurations) ||
-                    requireActivity().isFinishing
+            (isRemoving && !requireActivity().isChangingConfigurations) || requireActivity().isFinishing
 
         if (reallyClosingScreen) {
             viewModel.stopAudioPlay()
@@ -543,7 +325,6 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             viewModel.releasePlayer()
         }
 
-        _binding = null
         super.onDestroyView()
 
         if (!requireActivity().isChangingConfigurations && isBound) {
@@ -557,8 +338,10 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     @SuppressLint("ObsoleteSdkInt")
     override fun onResume() {
         super.onResume()
+
+        android.util.Log.d("TITLEFLOW","Audio.onResume()")
+        (activity as? BaseActivity)?.toolbarHelper?.dumpState()
         (activity as? BaseActivity)?.updateSegmentTexts()
-        if (hideBottomSheetIfOpen()) { overlay.visibility = View.GONE; overlay.alpha = 0f }
 
         viewModel.onUiCameToForeground()
         (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
@@ -592,9 +375,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
     override fun onPause() {
         super.onPause()
-        val pos = (binding.tracksRecyclerView.layoutManager as? LinearLayoutManager)
-            ?.findFirstVisibleItemPosition() ?: 0
-        viewModel.setScrollPosition(pos)
+        android.util.Log.d("TITLEFLOW","Audio.onPause()")
+        viewModel.setScrollPosition(viewModel.state.value.currentTrackIndex)
 
         networkCallback?.let { cb ->
             try { cm?.unregisterNetworkCallback(cb) } catch (_: Exception) {}
@@ -603,15 +385,10 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         cm = null
     }
 
-    // ───────────────── helpers ─────────────────
+    // ───────── helpers ─────────
 
     fun shareSingleTrack() {
         viewModel.getCurrentTrack()?.let { shareHelper.shareTrackOrNotify(it) }
-    }
-
-    private fun setLayoutManager(orientation: Int) {
-        binding.tracksRecyclerView.layoutManager = LinearLayoutManager(requireContext(), orientation, false)
-        snapHelper.attachToRecyclerView(binding.tracksRecyclerView)
     }
 
     private fun Int.convertDpToPx(context: Context): Int =
@@ -635,9 +412,9 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
-    override fun getBottomNavButtonIndex(): Int = 5
-    override fun shouldShowBottomNav(): Boolean = !isFromSearch
-    override fun shouldShowFullBottomNav(): Boolean = isFromSearch
+    override fun getBottomNavButtonIndex(): Int? = null
+    override fun shouldShowBottomNav(): Boolean = false
+    override fun shouldShowFullBottomNav(): Boolean = false
 
     override fun onSegment4ClickedInternal() {
         triggerYouTubeSearchFromToolbar()
@@ -652,26 +429,12 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         sb.show()
     }
 
-    private fun hideBottomSheetIfOpen(): Boolean {
-        if (::bottomBehavior.isInitialized && bottomBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
-            bottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            return true
-        }
-        return false
-    }
-
     private fun isLegacyDevice(): Boolean {
         // Старые считаем API <= 28
         return Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
     }
 
     private fun triggerYouTubeSearchFromToolbar() {
-        val snapped = currentSnappedPosition()
-        if (snapped != RecyclerView.NO_POSITION && snapped != viewModel.state.value.currentTrackIndex) {
-            viewModel.setCurrentTrackIndex(snapped)
-            viewModel.setScrollPosition(snapped)
-        }
-
         val track = viewModel.getCurrentTrack() ?: run {
             showLongSnack(getString(R.string.no_track_selected))
             return
@@ -682,7 +445,6 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
             val legacy = isLegacyDevice()
 
-            // 1) Вызываем нужный резолвер (НЕ подавляем типы!)
             val resultLegacy: com.example.playlistmaker.presentation.utils.YoutubeDirectResolver.Result?
             val resultNew:    com.example.playlistmaker.presentation.utils.YoutubeNewPipeResolver.Result?
 
@@ -707,7 +469,6 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                 resultLegacy = null
             }
 
-            // Проверка на null
             val hasAny = (resultLegacy != null || resultNew != null)
             if (!hasAny) {
                 showLongSnack(getString(R.string.nothing_found_utube))
@@ -720,33 +481,25 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             viewModel.updatePlayingUiForIndex(audioIndex, false)
             viewModel.updatePlayTimeForIndex(audioIndex, "0:00")
 
-            // 3) Ветка «новые девайсы с прогрессивным видео»
-            val mp4: String? = resultNew?.progressiveVideoUrl // строгий тип String?
+            // 3) Видео (привязка к текущей странице)
+            val mp4: String? = resultNew?.progressiveVideoUrl
             if (!legacy && !mp4.isNullOrBlank()) {
-                // видео-режим
                 detachCurrentVideo()
                 stopAndReleaseVideo()
 
                 val pos = viewModel.state.value.currentTrackIndex
                 val player = exo ?: run {
-                    viewModel.ensurePlayer(requireContext())
+                    viewModel.ensurePlayer()
                     viewModel.exo!!
                 }
 
-                // MediaItem.fromUri ожидает String или Uri — здесь точно String
                 player.setMediaItem(androidx.media3.common.MediaItem.fromUri(mp4))
                 player.prepare()
-                player.playWhenReady = false // старт по кнопке
+                player.playWhenReady = false
 
                 attachVideoPlayerCallbacks()
-
-                adapter.setVideoPlayer(player)
-                adapter.setVideoBoundPosition(pos)
-                adapter.attachVideoAt(binding.tracksRecyclerView, pos, player)
                 videoBoundPosition = pos
-
                 resetTimeForIndex(pos)
-                updateTimesForVisibleItems()
 
                 val mime: String = resultNew.progressiveMime ?: "video/mp4"
                 val titleShown: String = resultNew.title
@@ -754,8 +507,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                 return@launch
             }
 
-            // 4) Фоллбэк: только аудио (или «старые»)
-            // Достаём поля единообразно
+            // 4) Фоллбэк: только аудио
             val audioUrl: String = resultLegacy?.audioUrl ?: resultNew?.audioUrl ?: return@launch
             val title: String = resultLegacy?.title ?: resultNew?.title ?: track.trackName
             val channel: String = resultLegacy?.channel ?: resultNew?.channel ?: track.artistName
@@ -776,12 +528,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
     private fun detachCurrentVideo() {
         if (videoBoundPosition != NO_VIDEO_POSITION) {
-            adapter.detachVideoAt(binding.tracksRecyclerView, videoBoundPosition)
-            adapter.clearVideoBoundPosition()
-            adapter.setVideoPlayer(null)
             videoBoundPosition = NO_VIDEO_POSITION
             stopVideoTicker()
-            updateTimesForVisibleItems()
         }
     }
 
@@ -795,7 +543,6 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                     viewModel.updatePlayingUiForIndex(cur, false)
                 } else {
                     player.play()
-                    // ⬇️ вместо startVideoTicker()
                     startVideoTickerSafely()
                     viewModel.updatePlayingUiForIndex(cur, true)
                 }
@@ -829,17 +576,11 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         val player = exo ?: return
 
         videoTickerJob = owner.lifecycleScope.launch {
-            // если нужно — можно завернуть цикл в repeatOnLifecycle, но здесь owner уже viewOwner
             while (isActive && player.playbackState != Player.STATE_IDLE) {
                 val pos = videoBoundPosition
-                // view уже уничтожена — выходим
-                val rv = _binding?.tracksRecyclerView ?: break
                 if (pos != NO_VIDEO_POSITION) {
                     val ms = player.currentPosition.coerceAtLeast(0L)
-                    val mm = (ms / 1000 / 60).toInt()
-                    val ss = ((ms / 1000) % 60).toInt()
-                    val text = String.format("%d:%02d", mm, ss)
-                    adapter.updatePlayTimeTextAt(rv, pos, text)
+                    viewModel.updatePlayTimeForIndex(pos, formatMs(ms))
                 }
                 delay(500)
             }
@@ -861,40 +602,6 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         exo?.clearMediaItems()
     }
 
-    private fun currentSnappedPosition(): Int {
-        val lm = binding.tracksRecyclerView.layoutManager as? LinearLayoutManager
-            ?: return RecyclerView.NO_POSITION
-        val snapView = snapHelper.findSnapView(lm) ?: return lm.findFirstVisibleItemPosition()
-        return lm.getPosition(snapView)
-    }
-
-    // обновляем время только у видимых: у позиции с видео — текущее; у остальных — 0:00
-    @SuppressLint("DefaultLocale")
-    private fun updateTimesForVisibleItems() {
-
-        // 👉 НЕТ видео — НИЧЕГО не трогаем (аудио-время рисует VM)
-        if (videoBoundPosition == NO_VIDEO_POSITION || exo == null) return
-
-        val lm = binding.tracksRecyclerView.layoutManager as? LinearLayoutManager ?: return
-        val first = lm.findFirstVisibleItemPosition()
-        val last = lm.findLastVisibleItemPosition()
-        if (first == RecyclerView.NO_POSITION || last == RecyclerView.NO_POSITION) return
-
-        val player = exo
-        for (pos in first..last) {
-            if (pos == videoBoundPosition && player != null) {
-                val ms = player.currentPosition.coerceAtLeast(0L)
-                val mm = (ms / 1000 / 60).toInt()
-                val ss = ((ms / 1000) % 60).toInt()
-                val text = String.format("%d:%02d", mm, ss)
-                adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, text)
-            } else {
-                adapter.updatePlayTimeTextAt(binding.tracksRecyclerView, pos, "0:00")
-            }
-        }
-    }
-
-    // audio time bar
     @SuppressLint("DefaultLocale")
     private fun formatMs(ms: Long): String {
         val s = (ms.coerceAtLeast(0L) / 1000)
@@ -903,37 +610,27 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         return String.format("%d:%02d", mm, ss)
     }
 
-    // stop video by own
     private fun attachVideoPlayerCallbacks() {
         val player = exo ?: return
-
-        // снять старый, чтобы не плодить слушателей
         videoPlayerListener?.let { player.removeListener(it) }
 
         val l = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 val pos = videoBoundPosition
                 if (pos != NO_VIDEO_POSITION) {
-                    // синхронизируем кнопку Play/Pause на карточке с нативным контроллером PlayerView
                     viewModel.updatePlayingUiForIndex(pos, isPlaying)
                 }
-                // ⬇️ используем безопасный запуск/стоп
                 if (isPlaying) startVideoTickerSafely() else stopVideoTicker()
             }
 
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
                     val pos = videoBoundPosition
-                    // видео закончилось → кнопка должна стать "Play"
                     if (pos != NO_VIDEO_POSITION) {
                         viewModel.updatePlayingUiForIndex(pos, false)
-                        // по желанию — обнулить подпись времени на карточке
-                        _binding?.let { b ->
-                            adapter.updatePlayTimeTextAt(b.tracksRecyclerView, pos, "0:00")
-                        }
+                        viewModel.updatePlayTimeForIndex(pos, "0:00")
                     }
                     stopVideoTicker()
-                    // вернуть в начало, чтобы следующий Play начинал с 0
                     player.seekTo(0)
                     player.playWhenReady = false
                 }
@@ -942,5 +639,23 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
 
         player.addListener(l)
         videoPlayerListener = l
+    }
+
+    private fun restoreToolbarDefaultsAfterAudio() {
+        val tb = requireActivity().findViewById<Toolbar>(R.id.toolbar) ?: return
+        tb.findViewById<TextView>(R.id.title)?.isVisible = true
+        tb.layoutParams = tb.layoutParams.apply { height = ViewGroup.LayoutParams.WRAP_CONTENT }
+        tb.requestLayout()
+        (activity as? BaseActivity)?.applyToolbarThemeColors()
+    }
+
+    fun setAudioBackgroundColor(@androidx.annotation.ColorInt color: Int) {
+        bgColorExt = androidx.compose.ui.graphics.Color(color)
+    }
+    fun setAudioTextColor(@androidx.annotation.ColorInt color: Int) {
+        textColorExt = androidx.compose.ui.graphics.Color(color)
+    }
+    fun setAudioIconColor(@androidx.annotation.ColorInt color: Int) {
+        iconColorExt = androidx.compose.ui.graphics.Color(color)
     }
 }

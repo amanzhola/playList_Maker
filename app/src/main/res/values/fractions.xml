@@ -1,0 +1,4 @@
+<resources>
+    <fraction name="guideline_percent">60%</fraction>
+    <item name="cover_width_percent" type="fraction">97%</item>
+</resources>

@@ -13,6 +13,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -36,6 +37,9 @@ class SearchViewModel(
     private val audioInteraction: AudioInteraction,
     private val searchHistoryInteraction: SearchHistoryInteraction
 ) : ViewModel() {
+
+    private val _openTrack = MutableSharedFlow<Track>(extraBufferCapacity = 1)
+    val openTrack: SharedFlow<Track> = _openTrack
 
     // 🧩 ввод и фокус
     private val queryFlow = MutableStateFlow("")
@@ -130,7 +134,7 @@ class SearchViewModel(
         val isLoading: Boolean
     )
 
-    private val inputs: Flow<Inputs> =
+        private val inputs: Flow<Inputs> =
         combine(
             queryFlow,
             focusFlow,
@@ -218,7 +222,7 @@ class SearchViewModel(
                     searchTracks = tracksRaw,                    // 📄 сырая (отфильтрованная) выдача
                     historyTracks = inp.history,                 // 🗂️ история
                     showHistory = !isLoadingSafe && showHistory, // 👁️ история не перекрывается лоадером
-                    displayedTracks = displayed                  // 🖼️ именно это отображаем в списке
+                    displayedTracks = displayed,                  // 🖼️ именно это отображаем в списке
                 )
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchUiState())
@@ -228,11 +232,6 @@ class SearchViewModel(
 
     // 2) При вводе — сразу нормализуем
     // -----------------------------------------------------------------------------
-    // OLD:
-    // fun onQueryChanged(query: String) { queryFlow.value = query }
-    //
-    // NEW: кладём в поток уже нормализованный текст.
-    // Это устраняет несоответствие "сырое" vs "выполненное" и чинит кейс "beatles " (с пробелом).
 
     fun onQueryChanged(query: String) {
         queryFlow.value = normalizeQuery(query)
@@ -245,9 +244,6 @@ class SearchViewModel(
     // 🔘 «Готово / Повторить»
 
     // -----------------------------------------------------------------------------
-    // OLD:
-    // val qUi = queryFlow.value.trimForEmoji()
-    // NEW: используем ту же самую нормализацию, что и для onQueryChanged
 
     fun onSearchActionDone() {
         val qUi = normalizeQuery(queryFlow.value)
@@ -261,7 +257,10 @@ class SearchViewModel(
     }
 
     fun onTrackClicked(track: Track) {
-        viewModelScope.launch { searchHistoryInteraction.addTrackToHistory(track) }
+        viewModelScope.launch {
+            searchHistoryInteraction.addTrackToHistory(track)
+            _openTrack.tryEmit(track) // 🔔 событие навигации
+        }
     }
 
     fun removeTrack(track: Track) {

@@ -20,6 +20,8 @@ data class ToolbarConfig( // 📍 👏
 
 class ToolbarHelper(private val activity: Activity) {
 
+    private fun Int.hex(): String = String.format("#%08X", this)
+
     private var toolbar: Toolbar? = null
     private var title: TextView? = null
     private var backArrow: ImageView? = null
@@ -30,36 +32,42 @@ class ToolbarHelper(private val activity: Activity) {
     }
 
     fun initialize(config: ToolbarConfig, isMainActivity: Boolean) {
-        toolbar = activity.findViewById(R.id.toolbar) ?: return
+        toolbar = activity.findViewById(R.id.toolbar) ?: run {
+            android.util.Log.w("TITLEFLOW","ToolbarHelper.initialize: toolbar==null")
+            return
+        }
         title = toolbar!!.findViewById(R.id.title)
         backArrow = toolbar!!.findViewById(R.id.backArrow)
 
-        val appCompatActivity = activity as? AppCompatActivity
-        appCompatActivity?.setSupportActionBar(toolbar)
-        appCompatActivity?.supportActionBar?.setDisplayShowTitleEnabled(false)
+        (activity as? AppCompatActivity)?.apply {
+            setSupportActionBar(toolbar)
+            supportActionBar?.setDisplayShowTitleEnabled(false)
+        }
 
-        title?.isEnabled = isMainActivity || config.backArrowVisibility != View.VISIBLE
-
+        android.util.Log.d("TITLEFLOW",
+            "initialize -> isMain=$isMainActivity, back=${config.backArrowVisibility}, res=${config.titleResId}"
+        )
         updateToolbar(config)
     }
 
     fun updateToolbar(config: ToolbarConfig) {
-        android.util.Log.d(
-            "TITLEFLOW",
-            "ToolbarHelper.updateToolbar: backVis=${config.backArrowVisibility} resId=${config.titleResId}"
+        android.util.Log.d("TITLEFLOW",
+            "updateToolbar enter: back=${config.backArrowVisibility}, res=${config.titleResId}, " +
+                    "curTitle='${title?.text}'"
         )
         backArrow?.visibility = config.backArrowVisibility
-        // ⚠️ НЕ трогаем заголовок, если titleResId == 0
+
         if (config.titleResId != 0) {
             title?.setText(config.titleResId)
-            android.util.Log.d("TITLEFLOW", "ToolbarHelper.updateToolbar: setTitle(fromRes)")
+            android.util.Log.d("TITLEFLOW",
+                "updateToolbar setTitle(fromRes=${config.titleResId}) -> now='${title?.text}'"
+            )
         } else {
-            android.util.Log.d("TITLEFLOW", "ToolbarHelper.updateToolbar: skip title (resId=0)")
+            android.util.Log.d("TITLEFLOW","updateToolbar skip title (resId=0)")
         }
 
         backArrow?.setOnClickListener(null)
         title?.setOnClickListener(null)
-
         if (config.backArrowVisibility == View.VISIBLE) {
             backArrow?.setOnClickListener { config.titleClickListener?.invoke() }
         } else {
@@ -69,24 +77,24 @@ class ToolbarHelper(private val activity: Activity) {
 
     fun setTitleTextColor(color: Int) {
         title?.setTextColor(color)
+        android.util.Log.d("TITLEFLOW","setTitleTextColor -> ${color.hex()}")
     }
 
     fun setBackArrowColor(color: Int) {
         backArrow?.imageTintList = android.content.res.ColorStateList.valueOf(color)
+        android.util.Log.d("TITLEFLOW","setBackArrowColor -> ${color.hex()}")
     }
-    // add background color
+
     fun setToolbarBackgroundColor(color: Int) {
         toolbar?.setBackgroundColor(color)
+        android.util.Log.d("TITLEFLOW","setToolbarBackgroundColor -> ${color.hex()}")
     }
 
-    // fixing theme on emulator and real mobile difference
-    /** Применить цвета из ТЕКУЩЕЙ темы (Day/Night) */
     fun applyThemeColors() {
-        val tb = toolbar ?: return
-
-        // Берём не «жёсткие» R.color.*, а атрибуты темы
-        // + На Android 15 (API 36) Material Components стали строже и кидают IllegalArgumentException,
-        // если атрибут не найден.
+        val tb = toolbar ?: run {
+            android.util.Log.w("TITLEFLOW","applyThemeColors: toolbar==null")
+            return
+        }
         val bg = resolveColorOrNull(tb, R.attr.toolbarColor)
             ?: MaterialColors.getColor(tb, com.google.android.material.R.attr.colorSurface)
         val on = resolveColorOrNull(tb, R.attr.toolbarContentColor)
@@ -99,6 +107,9 @@ class ToolbarHelper(private val activity: Activity) {
             tb.navigationIcon?.setTint(on)
             tb.overflowIcon?.setTint(on)
         }
+        android.util.Log.d("TITLEFLOW",
+            "applyThemeColors -> bg=${bg.hex()} on=${on.hex()} titleNow='${title?.text}'"
+        )
     }
 
     fun applyMainBlueColors() {
@@ -121,9 +132,16 @@ class ToolbarHelper(private val activity: Activity) {
         toolbar?.setBackgroundColor(color)
     }
 
-    /** Поставить произвольный текст заголовка (минуя titleResId) */
     fun setTitle(text: CharSequence) {
-        android.util.Log.d("TITLEFLOW", "ToolbarHelper.setTitle -> $title")
         title?.text = text
+        android.util.Log.d("TITLEFLOW","setTitle(text='$text')")
+    }
+
+    fun dumpState(tag: String = "TITLEFLOW") {
+        val tb = toolbar
+        val t  = title
+        val txt = t?.text
+        val color = t?.currentTextColor
+        android.util.Log.d(tag, "dumpState: title='$txt', titleColor=${color?.hex()}, tb=${tb}")
     }
 }

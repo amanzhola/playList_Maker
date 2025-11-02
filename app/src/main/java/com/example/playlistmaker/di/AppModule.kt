@@ -26,6 +26,8 @@ import com.example.playlistmaker.domain.repository.base.ShareMovie
 import com.example.playlistmaker.domain.repository.base.Support
 import com.example.playlistmaker.domain.usecases.base.CheckInternetConnectionUseCase
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
+import com.example.playlistmaker.presentation.searchPostersViewModels.ExoPlayerProvider
+import com.example.playlistmaker.presentation.searchPostersViewModels.ExoPlayerProviderImpl
 import com.example.playlistmaker.presentation.utils.AudioErrorManager
 import com.example.playlistmaker.presentation.utils.ColorPersistenceHelper
 import com.google.android.material.button.MaterialButton
@@ -115,4 +117,7 @@ val appModule = module {
 
     // updated sprint22 + 📜 👉 📝 oberver and bottom sheet + favourite ❤️
     viewModel { TrackPreviewViewModel(get(), get(), get(), get()) }
+
+    // провайдер: Utube
+    factory<ExoPlayerProvider> { ExoPlayerProviderImpl(androidContext().applicationContext) }
 }

@@ -17,11 +17,9 @@ object ThemeLanguageHelper {
         languageInteraction = language
     }
 
-    // вызывать из SegmentManager
     fun toggleTheme() {
         val newValue = !themeInteraction.isDarkTheme()
-        themeInteraction.setDarkTheme(newValue)
-        themeInteraction.applyTheme()
+        themeInteraction.setDarkTheme(newValue) // applyTheme() уже внутри
     }
 
     fun toggleLanguage(context: Context): String {

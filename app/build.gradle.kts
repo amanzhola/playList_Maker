@@ -8,6 +8,9 @@ plugins {
     // Google services / Crashlytics
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+
+    // Kotlin Compose plugin под 2.0.21
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
 }
 
 android {
@@ -38,15 +41,40 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true    // ✅ включён desugaring
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions { jvmTarget = "17" }
 
-    buildFeatures { viewBinding = true }
+    buildFeatures {
+        viewBinding = true
+        compose = true
+    }
 }
 
 dependencies {
+
+    // --- Compose BOM ---
+    implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(platform(libs.androidx.compose.bom))
+
+    // --- Базовые Compose модули ---
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // Activity/Lifecycle/Nav для Compose
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose)
+
+    // Инструменты для превью/тестов Compose
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
     // --- AndroidX / UI ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -66,23 +94,27 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
-    kapt(libs.compiler)
+    kapt(libs.glide.compiler)
     implementation(libs.gson)
 
     // --- Arch ---
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+
+    // coroutines под Kotlin 2.0.x
     implementation(libs.kotlinx.coroutines.android)
+
+    // --- Koin: ОДНА версия везде (3.5.6) ---
+    // (берётся из catalog; см. libs.versions.toml ниже)
     implementation(libs.koin.android)
-    implementation(libs.adapterdelegates4.kotlin.dsl)
-    implementation(libs.adapterdelegates4.kotlin.dsl.viewbinding)
+    implementation(libs.koin.androidx.compose)
 
     // --- Room ---
     implementation(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler) // (ксп не используем)
+    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
-    // --- Navigation ---
+    // --- Navigation (Views) ---
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
 
@@ -99,59 +131,48 @@ dependencies {
     implementation(libs.firebase.functions.ktx)
 
     // --- NewPipeExtractor + protobuf-lite ---
-    // ✅ v0.24.8 из JitPack; исключаем full protobuf
     implementation(libs.newpipeextractor) {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
+        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+        exclude(group = "com.google.protobuf", module = "protobuf-kotlin-lite")
     }
-    // ✅ один рантайм protobuf (Lite)
     implementation(libs.protobuf.javalite.v3253)
+    implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.3")
 
-    // --- Media3 (воспроизведение/контролы) ---
+    // --- Media3 ---
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
 
-    // --- Desugaring Java 8/Time/NIO (для старых устройств) ---
-    // ❗ Заменили NIO-вариант на базовый пакет desugar_jdk_libs
+    // --- Desugaring Java 8/Time ---
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    // --- Network misc ---
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.conscrypt.android)
-}
 
-// Один рантайм protobuf (lite)
-val protobufLite = "3.25.3"
-val grpcLite = "1.62.2"
-val commonProtosLite = "2.41.0"
+    // Для AndroidViewBinding внутри Compose
+    implementation(libs.androidx.ui.viewbinding)
 
-configurations.configureEach {
-    // не пропускаем full-артефакты
-    exclude(group = "com.google.protobuf", module = "protobuf-java")
-    exclude(group = "io.grpc", module = "grpc-protobuf")
-}
+    // Иконки
+    implementation(libs.androidx.material.icons.extended)
 
-configurations.all {
-    resolutionStrategy {
-        force(
-            "com.google.protobuf:protobuf-javalite:$protobufLite",
-            "io.grpc:grpc-protobuf-lite:$grpcLite",
-            "io.grpc:grpc-stub:$grpcLite",
-            "io.grpc:grpc-api:$grpcLite",
-            "io.grpc:grpc-context:$grpcLite"
-        )
-        eachDependency {
-            if (requested.group == "io.grpc" && requested.name == "grpc-protobuf") {
-                useTarget("io.grpc:grpc-protobuf-lite:$grpcLite")
-                because("на Android нужны lite-артефакты grpc")
-            }
-            if (requested.group == "com.google.protobuf" && requested.name == "protobuf-java") {
-                useTarget("com.google.protobuf:protobuf-javalite:$protobufLite")
-                because("один рантайм protobuf (lite)")
-            }
-            if (requested.group == "com.google.api.grpc" && requested.name == "proto-google-common-protos") {
-                useTarget("com.google.api.grpc:proto-google-common-protos:$commonProtosLite:lite")
-                because("исключаем full протосы")
-            }
-        }
+    // --- Kotlin BOM + constraints: жёстко фиксируем 2.0.21 на всё kotlin-* ---
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.0.21"))
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-common:2.0.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.21")
     }
+
+    implementation(libs.adapterdelegates4.kotlin.dsl)
+    implementation(libs.adapterdelegates4.kotlin.dsl.viewbinding)
+
+    implementation("io.coil-kt.coil3:coil:3.0.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.0.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0")
+
+    implementation(libs.androidx.constraintlayout.compose)
 }

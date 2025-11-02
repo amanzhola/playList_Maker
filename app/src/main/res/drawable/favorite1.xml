@@ -4,10 +4,7 @@
     android:viewportWidth="51"
     android:viewportHeight="51">
 
-    <path
-        android:pathData="M25.5,0A25.5,25.5 0,1 1 0,25.5A25.5,25.5 0,0 1 25.5,0Z"
-        android:fillColor="#AEAFB4" />
-
+    <!-- Сердце, фиксированно красное (#F56B6C), как у тебя -->
     <group
         android:translateX="13"
         android:translateY="14">

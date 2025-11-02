@@ -27,9 +27,9 @@ import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.roots.main.MainActivity
-import com.example.playlistmaker.ui.audioPosters.OnTrackAudioClickListener
+import com.example.playlistmaker.ui.audioPosters.adapter.OnTrackAudioClickListener
 import com.example.playlistmaker.ui.audioPosters.PlaylistBottomAdapter
-import com.example.playlistmaker.ui.audioPosters.TrackAdapterAudio
+import com.example.playlistmaker.ui.audioPosters.adapter.TrackAdapterAudio
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
