@@ -30,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,8 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.searchViewModels.ErrorState
@@ -56,10 +53,10 @@ import com.example.playlistmaker.presentation.utils.deriveFieldBgFromScreen
 import com.example.playlistmaker.utils.FailBlock
 import com.example.playlistmaker.utils.TrackRow
 import com.example.playlistmaker.utils.UpdateButton
-import kotlinx.coroutines.launch
 
 @Composable
 fun SearchScreen(
+    modifier: Modifier = Modifier,
     state: SearchUiState,
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit,
@@ -74,22 +71,13 @@ fun SearchScreen(
     rowBackgroundOverride: Color? = null
 ) {
     val listState = rememberLazyListState()
-
-    // Прокрутка к началу при возврате на экран
-    val scope = rememberCoroutineScope()
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        scope.launch {
-            listState.scrollToItem(0)
-        }
-    }
-
     val bg = screenBackgroundOverride ?: colorResource(R.color.white_textColor)
 
     val fieldBgForSearch =
         screenBackgroundOverride?.let { deriveFieldBgFromScreen(it) }
 
     Column(
-        Modifier
+        modifier
             .fillMaxSize()
             .background(bg)
     ) {

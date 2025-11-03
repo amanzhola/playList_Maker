@@ -1,6 +1,7 @@
 package com.example.playlistmaker.ui.search.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.playlistmaker.presentation.searchViewModels.SearchViewModel
@@ -14,10 +15,11 @@ fun SearchRoute(
     screenBackgroundOverride: Color? = null,
     rowTextColorOverride: Color? = null,
     rowIconColorOverride: Color? = null,
-    rowBackgroundOverride: Color? = null
+    rowBackgroundOverride: Color? = null,
+    vm: SearchViewModel = koinViewModel()
 ) {
-    val vm: SearchViewModel = koinViewModel()
-    val state: SearchUiState = vm.uiState.collectAsStateWithLifecycle().value
+    val state: SearchUiState by vm.uiState.collectAsStateWithLifecycle()
+
 
     SearchScreen(
         state = state,
