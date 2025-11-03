@@ -14,7 +14,8 @@ val extraOptionViewModelModule = module { // + from 🏠 🔍 🛠️ 🎧 ☁�
         ExtraOptionViewModel(
             favoriteTracksInteractor = get(),   // FavoriteTracksInteractor
             observePlaylists = get(), // ObservePlaylistsUseCase
-            addTrackToPlaylist = get() // AddTrackToPlaylistUseCase
+            addTrackToPlaylist = get(), // AddTrackToPlaylistUseCase
+            exoProvider =get()
         )
     }
 }

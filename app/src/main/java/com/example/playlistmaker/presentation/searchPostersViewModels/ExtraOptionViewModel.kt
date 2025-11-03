@@ -2,6 +2,7 @@ package com.example.playlistmaker.presentation.searchPostersViewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.exoplayer.ExoPlayer
 import com.example.playlistmaker.domain.api.player.AudioPlayerControl
 import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.api.song_db.FavoriteTracksInteractor
@@ -10,6 +11,7 @@ import com.example.playlistmaker.domain.models.playlist.Playlist
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.domain.usecases.playlist.AddTrackToPlaylistUseCase
 import com.example.playlistmaker.domain.usecases.playlist.ObservePlaylistsUseCase
+import com.example.playlistmaker.utils.NO_VIDEO_POSITION
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,8 +19,51 @@ import kotlinx.coroutines.launch
 class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудиоплеер)
     private val favoriteTracksInteractor: FavoriteTracksInteractor,
     observePlaylists: ObservePlaylistsUseCase,
-    private val addTrackToPlaylist: AddTrackToPlaylistUseCase
+    private val addTrackToPlaylist: AddTrackToPlaylistUseCase,
+    private val exoProvider: ExoPlayerProvider
 ) : ViewModel() {
+    // ────────────────── Utube old mob ──────────────────
+    data class AudioProgress(val positionMs: Long, val durationMs: Long, val bufferedMs: Long)
+
+    @Volatile private var lastAudioProgress: AudioProgress? = null
+    fun getAudioProgress(): AudioProgress? = lastAudioProgress
+
+    fun seekTo(ms: Long) { control?.seekTo(ms) }
+
+    // ────────────────── Utube ──────────────────
+
+    private val _exo = MutableStateFlow<ExoPlayer?>(null)
+        val exoFlow: StateFlow<ExoPlayer?> = _exo
+
+        var exo: ExoPlayer?
+            get() = _exo.value
+            set(value) { _exo.value = value }
+
+    private val _videoPos = MutableStateFlow(NO_VIDEO_POSITION)
+    val videoPosFlow: StateFlow<Int> = _videoPos
+
+    var videoPos: Int
+        get() = _videoPos.value
+        set(value) { _videoPos.value = value }
+
+    fun ensurePlayer() {
+        if (_exo.value == null) {
+            _exo.value = exoProvider.create()
+        }
+    }
+
+    fun releasePlayer() {
+        _exo.value?.release()
+        _exo.value = null
+        videoPos = NO_VIDEO_POSITION
+    }
+
+    override fun onCleared() {
+        // На всякий случай освободим, если забыли
+        _exo.value?.release()
+        _exo.value = null
+        super.onCleared()
+    }
 
     // ────────────────── Плейлисты (как было) ──────────────────
     val playlists: StateFlow<List<Playlist>> =
@@ -63,8 +108,11 @@ class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудио
 
         // [KEPT (by semantics)] подписка на UI-состояние плеера (прогресс/кнопка)
         collectJobUi?.cancel()
+
+        // ────────────────── audio time bar updated prev collectJobUi?.cancel() + lastAudioProgress ──────────────────
         collectJobUi = viewModelScope.launch {
             control.getPlayerState().collect { ui ->
+                lastAudioProgress = AudioProgress(ui.positionMs, ui.durationMs, ui.bufferedMs)
                 _state.update { st ->
                     val updated = st.trackList.map { t ->
                         if (t.trackId == control.currentTrackId) {

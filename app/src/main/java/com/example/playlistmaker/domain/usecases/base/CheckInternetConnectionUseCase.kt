@@ -5,7 +5,7 @@ import com.example.playlistmaker.domain.repository.base.NetworkRepository
 class CheckInternetConnectionUseCase( // 📡
     private val networkRepository: NetworkRepository
 ) {
-    fun execute(): Boolean {
+    suspend fun execute(): Boolean {
         return networkRepository.isInternetAvailable()
     }
 }

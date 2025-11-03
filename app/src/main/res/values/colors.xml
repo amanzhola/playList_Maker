@@ -52,4 +52,12 @@
     <color name="chat_bubble_in">#E0E0E0</color>     <!-- серый для входящих -->
     <color name="chat_bubble_out">#81D4FA</color>   <!-- голубой для исходящих -->
 
+    <!-- utube support -->
+    <color name="timebar_played">#1E88E5</color>
+    <color name="timebar_scrubber">#1E88E5</color>
+    <color name="timebar_buffered">#66808080</color>  <!-- с альфой -->
+    <color name="timebar_unplayed">#33000000</color>  <!-- лёгкая тень -->
+
+    <!-- playlistInfo -->
+    <color name="playlist_bg">#F2F3F5</color>
 </resources>

@@ -92,7 +92,7 @@
                     android:layout_height="24dp"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/save"
-                    app:srcCompat="@drawable/baseline_data_saver_on_24"
+                    app:srcCompat="@drawable/album_saver_on_24"
                     tools:ignore="TouchTargetSizeCheck" />
 
             </LinearLayout>

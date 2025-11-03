@@ -18,6 +18,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.api.player.AudioPlayerControl
 import com.example.playlistmaker.domain.api.player.PlaybackState
 import com.example.playlistmaker.domain.api.player.PlayerUiState
+import com.example.playlistmaker.utils.BUTTON_TEXT_PAUSE
 import com.example.playlistmaker.utils.BUTTON_TEXT_PLAY
 import com.example.playlistmaker.utils.CHANNEL_ID
 import com.example.playlistmaker.utils.CHANNEL_NAME
@@ -27,6 +28,7 @@ import com.example.playlistmaker.utils.EXTRA_TITLE
 import com.example.playlistmaker.utils.EXTRA_URL
 import com.example.playlistmaker.utils.NOTIF_ID
 import com.example.playlistmaker.utils.TIMER_INTERVAL_MS
+import com.example.playlistmaker.utils.ZERO_TIME
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,6 +44,32 @@ import java.util.Locale
 
 class MusicService : Service(), AudioPlayerControl {
 
+    // ─────────── audio time bar : lastBufferPercent ───────────
+    private var lastBufferPercent: Int = 0 // 🆕 для bufferedMs
+    private var durationMsInt: Int = 0              // duration медиаплеера в ms (MediaPlayer возвращает Int)
+
+    // ─────────── audio time bar : AudioPlayerControl impl ───────────
+
+    @SuppressLint("DefaultLocale")
+    override fun seekTo(positionMs: Long) {
+        try {
+            mediaPlayer?.seekTo(positionMs.coerceAtLeast(0L).toInt())
+            // Обновим UI сразу — чтобы ползунок «подпрыгнул» моментально
+            val dur = mediaPlayer?.duration?.toLong() ?: 0L
+            val buf = if (dur > 0) (dur * lastBufferPercent / 100) else 0L
+            val mm = (positionMs / 1000 / 60).toInt()
+            val ss = ((positionMs / 1000) % 60).toInt()
+            val text = String.format("%d:%02d", mm, ss)
+            _ui.value = _ui.value.copy(
+                progress   = text,
+                positionMs = positionMs.coerceAtLeast(0L),
+                durationMs = dur.coerceAtLeast(0L),
+                bufferedMs = buf.coerceAtLeast(0L)
+            )
+        } catch (_: Throwable) { /* ignore */ }
+    }
+    // ──────────────────────
+
     private var startAfterPrepare: Boolean = false
 
     // ─────────── Binder ───────────
@@ -55,8 +83,12 @@ class MusicService : Service(), AudioPlayerControl {
     private val _ui = MutableStateFlow(PlayerUiState(
         isButtonEnabled = false,
         isPlaying = false,
-        progress = getString(R.string._00_00),
-        buttonText = "PLAY"
+        progress = ZERO_TIME,
+        buttonText = BUTTON_TEXT_PLAY,
+        // 🆕 ms-поля:
+        positionMs = 0L,
+        durationMs = 0L,
+        bufferedMs = 0L
     ))
     private val _state = MutableStateFlow(PlaybackState.IDLE)
     override fun getPlayerState(): StateFlow<PlayerUiState> = _ui.asStateFlow()
@@ -141,7 +173,7 @@ class MusicService : Service(), AudioPlayerControl {
         this.artist = artist
         this.title = title
         // моментально обнуляем прогресс в UI для нового currentTrackId
-        _ui.value = _ui.value.copy(progress = getString(R.string._00_00), isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
+        _ui.value = _ui.value.copy(progress = ZERO_TIME, isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
         resetAndPrepare(url)
     }
 
@@ -152,15 +184,19 @@ class MusicService : Service(), AudioPlayerControl {
                 try {
                     mp.start()
                     _state.value = PlaybackState.PLAYING
-                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = "PAUSE")
+                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = BUTTON_TEXT_PAUSE)
                     startTimer()
                 } catch (e: IllegalStateException) {
                     _state.value = PlaybackState.ERROR
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
-                        buttonText = BUTTON_TEXT_PLAY
+                        progress = ZERO_TIME,
+                        buttonText = BUTTON_TEXT_PLAY,
+                        // 🆕 ms-поля:
+                        positionMs = 0L,
+                        durationMs = 0L,
+                        bufferedMs = 0L
                     )
                     stopForegroundNow(true)
                 }
@@ -170,15 +206,19 @@ class MusicService : Service(), AudioPlayerControl {
                     mp.seekTo(0)
                     mp.start()
                     _state.value = PlaybackState.PLAYING
-                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = "PAUSE")
+                    _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = true, buttonText = BUTTON_TEXT_PAUSE)
                     startTimer()
                 } catch (_: IllegalStateException) {
                     _state.value = PlaybackState.ERROR
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
-                        buttonText = BUTTON_TEXT_PLAY
+                        progress = ZERO_TIME,
+                        buttonText = BUTTON_TEXT_PLAY,
+                        // 🆕 ms-поля:
+                        positionMs = 0L,
+                        durationMs = 0L,
+                        bufferedMs = 0L
                     )
                     stopForegroundNow(true)
                 }
@@ -198,36 +238,23 @@ class MusicService : Service(), AudioPlayerControl {
                 mp.pause()
                 _state.value = PlaybackState.PAUSED
                 stopTimer()
-                _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = false, buttonText = "PLAY")
+                _ui.value = _ui.value.copy(isButtonEnabled = true, isPlaying = false, buttonText = BUTTON_TEXT_PLAY)
             }
         } catch (e: IllegalStateException) {
             _state.value = PlaybackState.ERROR
             _ui.value = PlayerUiState(
                 isButtonEnabled = false,
                 isPlaying = false,
-                progress = getString(R.string._00_00),
-                buttonText = BUTTON_TEXT_PLAY
+                progress = ZERO_TIME,
+                buttonText = BUTTON_TEXT_PLAY,
+                // 🆕 ms-поля:
+                positionMs = 0L,
+                durationMs = 0L,
+                bufferedMs = 0L
             )
             stopTimer()
             stopForegroundNow(true)
         }
-    }
-
-    override fun stopPlayer() {
-        startAfterPrepare = false
-        val mp = mediaPlayer
-        stopTimer()
-        try {
-            mp?.stop()
-        } catch (_: IllegalStateException) {
-            // ок, уже не в состоянии STOP-able
-        }
-        try {
-            mp?.reset()
-        } catch (_: IllegalStateException) { }
-        _state.value = PlaybackState.IDLE
-        _ui.value = PlayerUiState(isButtonEnabled = false, isPlaying = false, progress = "00:00", buttonText = "PLAY")
-        stopForegroundNow(true)
     }
 
     override fun startForegroundNow() {
@@ -263,12 +290,26 @@ class MusicService : Service(), AudioPlayerControl {
         }
     }
 
+    private fun stopTimer() {
+        timerJob?.cancel()
+        timerJob = null
+    }
+
     @SuppressLint("ObsoleteSdkInt")
     private fun resetAndPrepare(u: String) {
         stopTimer()
         mediaPlayer?.reset()
         _state.value = PlaybackState.PREPARING
-        _ui.value = _ui.value.copy(isButtonEnabled = false, isPlaying = false, progress = getString(R.string._00_00), buttonText = BUTTON_TEXT_PLAY)
+        _ui.value = _ui.value.copy(
+            isButtonEnabled = false,
+            isPlaying = false,
+            progress = ZERO_TIME,
+            buttonText = BUTTON_TEXT_PLAY,
+            // 🆕 ms-поля:
+            positionMs = 0L,
+            durationMs = 0L,
+            bufferedMs = 0L
+        )
 
         try {
             mediaPlayer?.apply {
@@ -283,17 +324,33 @@ class MusicService : Service(), AudioPlayerControl {
 
                 setDataSource(u)
 
-                setOnPreparedListener {
-                    _state.value = PlaybackState.PREPARED
+                // 🆕 буферизация → percent
+                setOnBufferingUpdateListener { _, percent ->
+                    lastBufferPercent = percent.coerceIn(0, 100)
+                    val dur = durationMsInt.coerceAtLeast(0).toLong()
+                    _ui.value = _ui.value.copy(
+                        // progress/кнопки не меняем здесь
+                        bufferedMs = (dur * lastBufferPercent / 100L),
+                        durationMs = dur // на случай, если раньше было 0
+                    )
+                }
 
+                setOnPreparedListener {
+                    durationMsInt = try { mediaPlayer?.duration ?: 0 } catch (_: Exception) { 0 }
+                    _state.value = PlaybackState.PREPARED
                     if (startAfterPrepare) {
                         startAfterPrepare = false
                         startPlayer()
                     } else {
                         _ui.value = _ui.value.copy(
                             isButtonEnabled = true,
-                            progress = getString(R.string._00_00),
-                            buttonText = BUTTON_TEXT_PLAY
+                            isPlaying = false,
+                            progress = ZERO_TIME,
+                            buttonText = BUTTON_TEXT_PLAY,
+                            // 🆕 ms-поля:
+                            positionMs = 0L,
+                            durationMs = durationMsInt.coerceAtLeast(0).toLong(),
+                            bufferedMs = (durationMsInt.toLong() * lastBufferPercent / 100L)
                         )
                     }
                 }
@@ -301,11 +358,17 @@ class MusicService : Service(), AudioPlayerControl {
                 setOnCompletionListener {
                     stopTimer()
                     _state.value = PlaybackState.COMPLETED
+                    val durL = durationMsInt.coerceAtLeast(0).toLong()
+                    val bufL = (durL * lastBufferPercent / 100L)
                     _ui.value = PlayerUiState(
                         isButtonEnabled = true,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
-                        buttonText = BUTTON_TEXT_PLAY
+                        progress = ZERO_TIME,
+                        buttonText = BUTTON_TEXT_PLAY,
+                        // 🆕 ms-поля:
+                        positionMs = 0L,
+                        durationMs = durL,
+                        bufferedMs = bufL
                     )
                     stopForegroundNow(true)
                 }
@@ -316,8 +379,12 @@ class MusicService : Service(), AudioPlayerControl {
                     _ui.value = PlayerUiState(
                         isButtonEnabled = false,
                         isPlaying = false,
-                        progress = getString(R.string._00_00),
-                        buttonText = BUTTON_TEXT_PLAY
+                        progress = ZERO_TIME,
+                        buttonText = BUTTON_TEXT_PLAY,
+                        // 🆕 ms-поля:
+                        positionMs = 0L,
+                        durationMs = 0L,
+                        bufferedMs = 0L
                     )
                     stopForegroundNow(true)
                     true
@@ -330,8 +397,12 @@ class MusicService : Service(), AudioPlayerControl {
             _ui.value = PlayerUiState(
                 isButtonEnabled = false,
                 isPlaying = false,
-                progress = getString(R.string._00_00),
-                buttonText = BUTTON_TEXT_PLAY
+                progress = ZERO_TIME,
+                buttonText = BUTTON_TEXT_PLAY,
+                // 🆕 ms-поля:
+                positionMs = 0L,
+                durationMs = 0L,
+                bufferedMs = 0L
             )
             stopForegroundNow(true)
         }
@@ -343,26 +414,50 @@ class MusicService : Service(), AudioPlayerControl {
             while (isActive && mediaPlayer?.isPlaying == true) {
                 delay(TIMER_INTERVAL_MS)
                 val p = mediaPlayer?.currentPosition ?: 0
+                val durL = durationMsInt.coerceAtLeast(0).toLong()
+                val bufL = (durL * lastBufferPercent / 100L)
                 val formatted = SimpleDateFormat("mm:ss", Locale.getDefault()).format(p)
-                _ui.value = _ui.value.copy(progress = formatted)
+                _ui.value = _ui.value.copy(
+                    isButtonEnabled = true,
+                    isPlaying = true,
+                    progress = formatted,
+                    // 🆕 ms-поля:
+                    positionMs = p.toLong(),
+                    durationMs = durL,
+                    bufferedMs = bufL
+                )
             }
         }
     }
 
-    private fun stopTimer() {
-        timerJob?.cancel()
-        timerJob = null
+    override fun stopPlayer() {
+        startAfterPrepare = false
+        val mp = mediaPlayer
+        stopTimer()
+        try { mp?.stop() } catch (_: IllegalStateException) {}
+        try { mp?.reset() } catch (_: IllegalStateException) {}
+        _state.value = PlaybackState.IDLE
+        _ui.value = PlayerUiState(
+            isButtonEnabled = false,
+            isPlaying = false,
+            progress = ZERO_TIME,
+            buttonText = BUTTON_TEXT_PLAY,
+            // 🆕 ms-поля:
+            positionMs = 0L,
+            durationMs = 0L,
+            bufferedMs = 0L
+        )
+        stopForegroundNow(true)
     }
 
     private fun releasePlayer() {
         startAfterPrepare = false
         stopTimer()
         // 🔽 важно: сначала убираем foreground при необходимости
-        if (inForeground) {
-            stopForegroundNow(true)
-        }
+        if (inForeground) stopForegroundNow(true)
         mediaPlayer?.setOnPreparedListener(null)
         mediaPlayer?.setOnCompletionListener(null)
+        mediaPlayer?.setOnBufferingUpdateListener(null) // 🆕
         try { mediaPlayer?.release() } catch (_: Exception) {}
         mediaPlayer = null
     }

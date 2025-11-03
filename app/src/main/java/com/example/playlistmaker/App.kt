@@ -37,9 +37,11 @@ import com.example.playlistmaker.di.weather.weatherInteractionModule
 import com.example.playlistmaker.di.weather.weatherRepositoryModule
 import com.example.playlistmaker.domain.api.base.ThemeInteraction
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
+import org.conscrypt.Conscrypt
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
+import java.security.Security
 
 // ☀️ 🔁 🌙 👉 🧼🏗️✅
 class App : Application() { // ☀️ 🔁 🌙
@@ -56,6 +58,11 @@ class App : Application() { // ☀️ 🔁 🌙
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate() {
         super.onCreate()
+
+        // Втыкаем Conscrypt как приоритетный провайдер TLS (для старых девайсов критично)
+        try {
+            Security.insertProviderAt(Conscrypt.newProvider(), 1)
+        } catch (_: Throwable) { /* no-op */ }
 
         // ВАЖНО: сначала создаём каналы
         ensureChatChannel(this)

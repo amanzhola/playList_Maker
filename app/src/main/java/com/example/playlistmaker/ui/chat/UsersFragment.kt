@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.os.bundleOf
@@ -38,6 +39,8 @@ import kotlinx.coroutines.tasks.await
 
 class   UsersFragment : BaseFragment(), BottomNavConfig {
 
+    private var unreadJobs = mutableListOf<kotlinx.coroutines.Job>()
+
     private var blocksReg: ListenerRegistration? = null
     private var blockedSet: Set<String> = emptySet()
 
@@ -59,13 +62,57 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
     private fun renderChats(chats: List<ChatItem>, myUid: String) {
         if (!isAdded || view == null) return
 
+        // 1) формируем список
         val enriched = chats.map { c ->
             if (c.title.isNotBlank()) return@map c
             val peerUid = c.participants.firstOrNull { it != myUid }
             val ui = peerUid?.let { peerProfiles[it] }
             c.copy(title = ui?.name ?: "Chat")
         }
-        adapter.submitList(enriched)
+
+        // 2) захватываем scope, пока view точно существует
+        val scope = viewLifecycleOwner.lifecycleScope
+
+        // (опционально) очистить лишние счётчики
+         adapter.dropMissingCounts(enriched)
+
+        // 3) отдаём список в адаптер
+        // UsersFragment.kt — внутри renderChats(...) сразу после adapter.submitList(enriched)
+        adapter.submitList(enriched) {
+
+            // подстраховка: если вью уже умер — выходим
+            if (!isAdded || view == null) return@submitList
+            val uid = Firebase.auth.currentUser?.uid ?: return@submitList
+
+            // 🚫 СНАЧАЛА отменяем предыдущие задачи подсчёта
+            unreadJobs.forEach { it.cancel() }
+            unreadJobs.clear()
+
+            // ✅ Стартуем новые — но ТОЛЬКО в заранее захваченном scope
+            // ВАЖНО: счётать после submitList, чтобы notifyItemChanged(pos, "badge") попал в актуальные позиции
+            scope.launch {
+
+                Log.d("UnreadUI", "start counting for ${enriched.size} chats")
+
+                enriched.forEach { chat ->
+                    val job = launch {
+                        try {
+                            Log.d(
+                                "UnreadUI",
+                                "count start chat=${chat.id} lastRead=${chat.lastReadTs ?: -1}"
+                            )
+                            val cnt = chatsRepo.countUnreadForChat(chat.id, uid, chat.lastReadTs)
+                            Log.d("UnreadUI", "count done chat=${chat.id} -> $cnt")
+                            adapter.setUnreadCount(chat.id, cnt)
+                        } catch (t: Throwable) {
+                            Log.e("UnreadUI", "count failed chat=${chat.id}: ${t.message}")
+                        }
+                    }
+                    // 📌 сохраняем, чтобы отменить при следующем обновлении/уничтожении вью
+                    unreadJobs += job
+                }
+            }
+        }
     }
 
     /** Разовая миграция: если visibleFor отсутствует/пусто — ставим participants */
@@ -188,7 +235,7 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
                 val isBlocked = blockedSet.contains(peerUid)
 
                 if (peerUid != null) {
-                    if (!isBlocked) options += "Заблокировать" else options += "Разблокировать"
+                    options += if (!isBlocked) "Заблокировать" else "Разблокировать"
                 }
                 options += "Убрать из списка"
 
@@ -249,8 +296,8 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
         androidx.core.app.NotificationManagerCompat.from(ctx).cancelAll()
 
         // Снять флажки непрочитанности на сервере (чтобы «кол-во чатов» стало 0)
-        val uid = com.google.firebase.ktx.Firebase.auth.currentUser?.uid ?: return
-        val db = com.google.firebase.ktx.Firebase.firestore
+        val uid = Firebase.auth.currentUser?.uid ?: return
+        val db = Firebase.firestore
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val qs = db.collection("chats")
@@ -270,6 +317,10 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        unreadJobs.forEach { it.cancel() }
+        unreadJobs.clear()
+
         chatsReg?.remove(); chatsReg = null
 
         peerRegs.values.forEach { it.remove() }
@@ -299,7 +350,7 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
                 viewLifecycleOwner.lifecycleScope.launch {
                     val exists = try { usersRepo.exists(other) } catch (_: Throwable) { false }
                     if (!exists) { showLongSnack("Пользователь не найден", anchor = fab)
-                        ; return@launch }
+                        return@launch }
 
                     try {
                         val chatId = chatRepo.createOrOpenDm(me, other)
@@ -376,7 +427,7 @@ class   UsersFragment : BaseFragment(), BottomNavConfig {
 
     // ---- Toolbar ----
     override fun getToolbarConfig(): ToolbarConfig =
-        ToolbarConfig(View.VISIBLE, R.string.chats_title) {
+        ToolbarConfig(GONE, R.string.chats_title) {
             (requireActivity() as? MainActivity)?.apply {
                 buttonIndex = -1
                 switchFragment(buttonIndex)

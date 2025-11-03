@@ -10,7 +10,7 @@ import com.example.playlistmaker.ui.settings.SettingsFragment
 enum class ScreenType {
     MAIN_FRAGMENT,
     SEARCH_FRAGMENT,
-    EXTRA_FRAGMENT,
+    AUDIO_FRAGMENT,
     MEDIA_LIBRARY_FRAGMENT,
     SETTINGS_FRAGMENT,
     SEARCH_MOVIE_ACTIVITY,
@@ -22,7 +22,7 @@ fun Fragment?.toScreenType(): ScreenType {
     return when (this) {
         is MainFragment -> ScreenType.MAIN_FRAGMENT
         is SearchFragment -> ScreenType.SEARCH_FRAGMENT
-        is AudioPlayerFragment -> ScreenType.EXTRA_FRAGMENT
+        is AudioPlayerFragment -> ScreenType.AUDIO_FRAGMENT
         is MediaLibraryFragment -> ScreenType.MEDIA_LIBRARY_FRAGMENT
         is SettingsFragment -> ScreenType.SETTINGS_FRAGMENT
         else -> ScreenType.UNKNOWN

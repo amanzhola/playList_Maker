@@ -5,11 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -33,11 +36,11 @@ import com.example.playlistmaker.presentation.utils.SegmentTextHelper
 import com.example.playlistmaker.presentation.utils.ThemeLanguageHelper
 import com.example.playlistmaker.presentation.utils.ToolbarConfig
 import com.example.playlistmaker.presentation.utils.ToolbarHelper
-import com.example.playlistmaker.presentation.utils.resetBackgroundRecursively
 import com.example.playlistmaker.presentation.utils.screenKeyOrDefault
 import com.example.playlistmaker.presentation.utils.toScreenType
 import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.MainFragment
+import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
@@ -91,21 +94,109 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     )
     var buttonIndex: Int = -1
 
-    private val failTextView: TextView by lazy { findViewById(R.id.fail) }
     private val themeInteraction: ThemeInteraction by inject() // 😎
     lateinit var toolbarHelper: ToolbarHelper
     lateinit var bottomNavigationHelper: BottomNavigationHelper
     private lateinit var segmentHelper: SegmentHelper
     private lateinit var colorApplierHelper: ColorApplierHelper
-    private lateinit var colorPersistenceHelper: ColorPersistenceHelper
+    lateinit var colorPersistenceHelper: ColorPersistenceHelper
     private lateinit var segmentManager: SegmentManager
     private lateinit var colorManager: ColorManager
     private val share: Share by inject { parametersOf(this) }
-    private val support by lazy {
-        getKoin().get<Support> { parametersOf(this, mainLayout, failTextView) }
+
+    // 1) Больше не бросаем error; возвращаем лучший доступный не-Compose контейнер или null
+    private fun resolveBestRoot(): ViewGroup? {
+        val fragmentView = getCurrentFragment()?.view
+        val fragmentRoot = fragmentView as? ViewGroup
+
+        // если корень фрагмента — ComposeView, используем его РОДИТЕЛЯ (как в Settings)
+        val parentOfComposeRoot: ViewGroup? = when (fragmentRoot) {
+            is ComposeView, is AbstractComposeView -> fragmentRoot.parent as? ViewGroup
+            else -> null
+        }
+
+        val mainLayout: ViewGroup? = findViewById(getMainLayoutId())
+        val activityRoot: ViewGroup? = findViewById(android.R.id.content)
+        val decorRoot: ViewGroup? = window?.decorView?.findViewById(android.R.id.content)
+
+        // Приоритет поиска места для overlay:
+        // 1) родитель compose-корня; 2) сам fragmentRoot (если это не ComposeView);
+        // 3) mainLayout; 4) activityRoot; 5) decorRoot — все только если это НЕ ComposeView
+        return listOfNotNull(
+            parentOfComposeRoot,
+            fragmentRoot?.takeUnless { it is ComposeView || it is AbstractComposeView },
+            mainLayout?.takeUnless { it is ComposeView || it is AbstractComposeView },
+            activityRoot?.takeUnless { it is ComposeView || it is AbstractComposeView },
+            decorRoot?.takeUnless { it is ComposeView || it is AbstractComposeView },
+        ).firstOrNull()
     }
+
+    // 2) Пытаемся найти/создать overlay в целевом контейнере; если нельзя — вернём null
+    private fun ensureFailOverlay(root: ViewGroup?): TextView? {
+        root ?: return null
+
+        // на всякий случай: если вдруг пришёл ComposeView — поднимемся на родителя/активити-root
+        val target: ViewGroup = when (root) {
+            is ComposeView, is AbstractComposeView -> {
+                (root.parent as? ViewGroup)
+                    ?: findViewById(android.R.id.content)
+                    ?: window?.decorView?.findViewById(android.R.id.content)
+                    ?: return null
+            }
+            else -> root
+        }
+
+        // уже есть?
+        val existing = target.findViewById<TextView?>(R.id.failText)
+            ?: target.findViewById<TextView?>(R.id.fail)
+        if (existing != null) return existing
+
+        // создать и добавить
+        val fail = layoutInflater.inflate(R.layout.fail, target, false) as TextView
+        fail.id = R.id.failText
+        val lp = android.widget.FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL
+            topMargin = resources.getDimensionPixelSize(R.dimen.track_45)
+        }
+        fail.layoutParams = lp
+
+        return runCatching {
+            target.addView(fail)
+            fail
+        }.getOrNull() // если addView бросит — вернём null
+    }
+
+    // 3) Старый API: не меняем сигнатуру и не падаем — показываем Snackbar как резерв
+    /** Всегда вернёт TextView: либо реальный overlay, либо скрытую "заглушку". */
+    fun getFailTextView(): TextView {
+        ensureFailOverlay(resolveBestRoot())?.let { return it }
+
+        // Фолбэк: показываем Snackbar (якорим к bottomNavigation, если есть)
+        val rootForSnack = findViewById<ViewGroup?>(android.R.id.content)
+        val anchor = findViewById<View?>(R.id.bottomNavigation)
+        if (rootForSnack != null) {
+            // Подставь текст по контексту, если нужно (support/network и т.п.)
+            Snackbar.make(rootForSnack, getString(R.string.networkFail), Snackbar.LENGTH_LONG)
+                .setAnchorView(anchor)
+                .show()
+        }
+
+        // Возвращаем безопасную "заглушку", чтобы старый код, ожидающий non-null, не падал
+        return TextView(this).apply {
+            id = R.id.failText
+            visibility = View.GONE
+        }
+    }
+
+    private val support by lazy {
+        getKoin().get<Support> { parametersOf(this, mainLayout, getFailTextView()) }
+    }
+
     private val agreement by lazy {
-        getKoin().get<Agreement> { parametersOf(this, mainLayout, failTextView) }
+        getKoin().get<Agreement> { parametersOf(this, mainLayout, getFailTextView()) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,7 +218,6 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         // 2) persistence + applier
         colorPersistenceHelper = get<ColorPersistenceHelper> { parametersOf(isDarkThemeEnabled()) }
         colorApplierHelper = ColorApplierHelper(this, mainLayout, toolbarHelper)
-
         // 3) bottom nav и прочие хелперы
         bottomNavigationHelper = BottomNavigationProvider.createHelper(this, bottomViewIds, buttonIndex)
         bottomNavigationHelper.setupBottomNavigation()
@@ -213,7 +303,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
     protected open fun shouldEnableEdgeToEdge(): Boolean = true
     protected open fun getLayoutId(): Int = R.layout.base_main
-    protected open fun getMainLayoutId(): Int = R.id.nav_host_container
+    open fun getMainLayoutId(): Int = R.id.nav_host_container
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
@@ -276,7 +366,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
 
 
 //********************************************************************************
-    // tranfer main to fragment
+    // transfer main to fragment
 
     // no-op: handled by navController.navigate()
     protected open fun setupInitialFragment(fragment: Fragment) {
@@ -337,7 +427,7 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     }
 
     /** scope для активити (один на активити) */
-    fun activityScope(): String = "Activity:${this::class.java.simpleName}"
+    private fun activityScope(): String = "Activity:${this::class.java.simpleName}"
 
     fun applySavedColorsForCurrentScreen(skipActivityFallback: Boolean = false) {
         if (!::toolbarHelper.isInitialized || !::colorPersistenceHelper.isInitialized || !::colorManager.isInitialized) return
@@ -369,28 +459,4 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
         toolbarHelper.applyThemeColors()
         applySavedColorsForCurrentScreen()
     }
-
-    fun applySavedForScopeOrDefault(scope: String, defaultBg: Int) {
-        // 1) кого сейчас показываем (активный ребёнок у ViewPager2)
-        val child = getVisibleScreenFragmentOrNull()
-        val exclude: Set<Int> =
-            (child as? com.example.playlistmaker.presentation.utils.BackgroundExclusionProvider)
-                ?.backgroundExclusionIds().orEmpty()
-
-        // 2) всегда сперва сбрасываем ФОН ТЕЛА текущей вкладки в дефолт
-        (child?.view as? ViewGroup)?.resetBackgroundRecursively(defaultBg, exclude)
-
-        // 3) подтягиваем персональный bg (slot=1) именно для этого scope
-        val bg = colorPersistenceHelper.load(scope, 1)
-        // bg: Int? (загруженный цвет), defaultBg: Int
-        bg?.let { color ->
-            toolbarHelper.setBackgroundColor(color)                 // тулбар = свой цвет
-            (child?.view as? ViewGroup)
-                ?.resetBackgroundRecursively(color, exclude)        // тело = тот же цвет
-        } ?: run {
-            toolbarHelper.setBackgroundColor(defaultBg)             // тулбар = дефолт
-            // тело уже было сброшено ранее в шаге 2
-        }
-    }
-
 }

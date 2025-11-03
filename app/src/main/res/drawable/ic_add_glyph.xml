@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="51dp"
+    android:height="51dp"
+    android:viewportWidth="51"
+    android:viewportHeight="51">
+    <!-- Только внутренний знак, без внешнего круга -->
+    <path
+        android:pathData="M16.3,18.6H14V34.7C14,35.965 15.035,37 16.3,37H32.4V34.7H16.3V18.6ZM34.7,14H20.9C19.635,14 18.6,15.035 18.6,16.3V30.1C18.6,31.365 19.635,32.4 20.9,32.4H34.7C35.965,32.4 37,31.365 37,30.1V16.3C37,15.035 35.965,14 34.7,14ZM33.55,24.35H28.95V28.95H26.65V24.35H22.05V22.05H26.65V17.45H28.95V22.05H33.55V24.35Z"
+        android:fillColor="#FFFFFF"/>
+</vector>

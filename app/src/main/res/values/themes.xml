@@ -293,4 +293,10 @@
         <item name="android:background">@color/white_textColor</item>
     </style>
 
+    <!-- <chat fragment for text edit> -->
+    <style name="Shape.Rounded8" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
 </resources>

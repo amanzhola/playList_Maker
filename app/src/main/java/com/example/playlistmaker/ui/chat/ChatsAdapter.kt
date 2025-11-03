@@ -11,21 +11,32 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
+import com.example.playlistmaker.ui.chat.badge.EmojiBadgePicker
 import com.example.playlistmaker.ui.chat.model.ChatItem
 import com.example.playlistmaker.ui.chat.model.UserUi
 
 class ChatsAdapter(
     private val myUid: String,
-    // как получить профиль по uid (из Map кэша/репозитория)
     private val profileOf: (String) -> UserUi?,
     private val onClick: (ChatItem) -> Unit,
     private val onLongClick: ((ChatItem) -> Unit)? = null
 ) : ListAdapter<ChatItem, ChatsAdapter.VH>(Diff) {
 
+    private enum class BadgeMode { EMOJI, NUMBER }
+
+    private fun chooseMode(chatId: String, myUid: String, peerKey: String?): BadgeMode {
+        val key = "$chatId|$myUid|${peerKey ?: ""}"
+        val crc = java.util.zip.CRC32().apply { update(key.toByteArray(Charsets.UTF_8)) }.value
+        return if ((crc and 1L) == 0L) BadgeMode.EMOJI else BadgeMode.NUMBER
+    }
+
+    private fun chooseModeByCount(count: Int): BadgeMode =
+        if ((count % 2) == 0) BadgeMode.NUMBER else BadgeMode.EMOJI
+
+    /** --------- DIFF --------- */
     /** Точный diff + «частичные» payload’ы, чтобы не перерисовывать весь айтем */
     object Diff : DiffUtil.ItemCallback<ChatItem>() {
-        override fun areItemsTheSame(a: ChatItem, b: ChatItem): Boolean = a.id == b.id
-
+        override fun areItemsTheSame(a: ChatItem, b: ChatItem) = a.id == b.id
         override fun areContentsTheSame(a: ChatItem, b: ChatItem): Boolean {
             if (a.title != b.title) return false
             if (a.updatedAt != b.updatedAt) return false
@@ -35,7 +46,6 @@ class ChatsAdapter(
             if (a.participants.size != b.participants.size) return false
             return a.participants.zip(b.participants).all { (x, y) -> x == y }
         }
-
         override fun getChangePayload(old: ChatItem, new: ChatItem): Any? {
             val keys = mutableSetOf<String>()
             if (old.updatedAt != new.updatedAt ||
@@ -43,7 +53,6 @@ class ChatsAdapter(
                 old.lastMsgTs != new.lastMsgTs ||
                 old.lastMsgSenderId != new.lastMsgSenderId
             ) keys += "badge"
-
             if (old.title != new.title || old.participants != new.participants) {
                 keys += listOf("title", "subtitle", "avatar")
             }
@@ -51,11 +60,36 @@ class ChatsAdapter(
         }
     }
 
+    /** --------- ВРЕМЕННОЕ ХРАНИЛИЩЕ СЧЁТЧИКОВ --------- */
+    private val unreadMap = mutableMapOf<String, Int>() // chatId -> count
+
+    /** Обновить счётчик для конкретного чата и перерисовать только бейдж */
+    fun setUnreadCount(chatId: String, count: Int) {
+        unreadMap[chatId] = count
+        val pos = currentList.indexOfFirst { it.id == chatId }
+        if (pos != -1) {
+            android.util.Log.d("UnreadAdapter", "setUnreadCount chat=$chatId count=$count pos=$pos")
+            notifyItemChanged(pos, setOf("badge"))
+        }
+    }
+
+    /** Удаляем из карты те чаты, которых нет в текущем списке (чтобы не протухало) */
+    fun dropMissingCounts(current: List<ChatItem>) {
+        val keep = current.map { it.id }.toSet()
+        val it = unreadMap.keys.iterator()
+        while (it.hasNext()) {
+            val k = it.next()
+            if (k !in keep) it.remove()
+        }
+    }
+
+    /** --------- VIEW HOLDER --------- */
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
         private val ivAvatar: ImageView = v.findViewById(R.id.ivAvatar)
         private val tvTitle: TextView = v.findViewById(R.id.tvTitle)
         private val tvSubtitle: TextView? = v.findViewById(R.id.tvSubtitle)
         private val tvBadge: TextView = v.findViewById(R.id.tvBadge)
+        private val tvBadgeCore: TextView = v.findViewById(R.id.tvBadgeCore)
 
         @SuppressLint("SetTextI18n")
         fun bindFull(item: ChatItem) {
@@ -97,20 +131,49 @@ class ChatsAdapter(
             }
         }
 
+        @SuppressLint("SetTextI18n")
         private fun bindBadge(item: ChatItem) {
-            val lastRead = item.lastReadTs ?: 0L
-            val lastMsgTs = item.lastMsgTs ?: item.updatedAt // fallback на updatedAt, если вдруг нет lastMsgTs
-            val lastFromOther = item.lastMsgSenderId?.let { it != myUid } ?: true
-            val hasUnseen = lastFromOther && lastMsgTs > lastRead
+            val count = unreadMap[item.id] ?: 0
+            if (count <= 0) {
+                tvBadge.visibility = View.GONE
+                tvBadgeCore.visibility = View.GONE
+                return
+            }
 
-            android.util.Log.d(
-                "Badge",
-                "chat=${item.id} lastTs=${item.lastMsgTs ?: item.updatedAt} " +
-                        "read=${item.lastReadTs ?: 0L} fromOther=${item.lastMsgSenderId?.let { it != myUid } ?: true} unseen=$hasUnseen"
+            tvBadge.visibility = View.VISIBLE
+
+            val others = item.participants.filter { it != myUid }
+            val peerKey = when (others.size) {
+                0 -> null
+                1 -> others.first()
+                else -> others.sorted().joinToString("#")
+            }
+            val mode = chooseMode(item.id, myUid, peerKey)
+
+            if (mode == BadgeMode.NUMBER) {
+                // одна строка справа по центру по вертикали
+                val txt = if (count > 99) "99+" else count.toString()
+                tvBadge.text = "$txt \u00A0🔥"      // NBSP перед 🔥
+                tvBadgeCore.visibility = View.GONE
+                return
+            }
+
+            // EMOJI режим: 🔥 остаётся в середине, core уносим в верхний TextView
+            val core = EmojiBadgePicker.buildCore(
+                context = itemView.context.applicationContext,
+                chatId = item.id,
+                myUid = myUid,
+                peerKey = peerKey,
+                count = count
             )
 
-            tvBadge.text = "\uD83D\uDD25"
-            tvBadge.visibility = if (hasUnseen) View.VISIBLE else View.GONE
+            tvBadge.text = "\u00A0🔥"               // оставляем огонь на исходном месте
+            if (core.isBlank()) {
+                tvBadgeCore.visibility = View.GONE  // ничего сверху
+            } else {
+                tvBadgeCore.text = core
+                tvBadgeCore.visibility = View.VISIBLE
+            }
         }
 
         private fun loadAvatar(item: ChatItem) {
@@ -134,7 +197,6 @@ class ChatsAdapter(
         return VH(v)
     }
 
-    // единая точка биндинга: если payloads пуст — полный биндинг
     override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
         val item = getItem(position)
         if (payloads.isEmpty()) {
@@ -151,7 +213,6 @@ class ChatsAdapter(
         }
     }
 
-    // делегируем в версию с payloads, чтобы не дублировать логику
     override fun onBindViewHolder(holder: VH, position: Int) =
         onBindViewHolder(holder, position, mutableListOf())
 }

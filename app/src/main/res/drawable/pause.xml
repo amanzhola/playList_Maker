@@ -1,20 +1,22 @@
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
     android:height="100dp"
-    android:viewportHeight="100"
     android:viewportWidth="100"
-    android:width="100dp">
+    android:viewportHeight="100">
 
+    <!-- Один path: круг МИНУС две палочки -->
     <path
+        android:fillType="evenOdd"
         android:fillColor="@color/textColor_white"
-        android:pathData="M50,8.33C27,8.33 8.33,27 8.33,50C8.33,73 27,91.67 50,91.67C73,91.67 91.67,73 91.67,50C91.67,27 73,8.33 50,8.33Z"/>
+        android:pathData="
+            M50,8.33
+            C27,8.33 8.33,27 8.33,50
+            C8.33,73 27,91.67 50,91.67
+            C73,91.67 91.67,73 91.67,50
+            C91.67,27 73,8.33 50,8.33
+            Z
 
-    <path
-        android:fillColor="@color/white_textColor"
-        android:pathData="M36,35H44V65H36V35Z"/>
-
-    <path
-        android:fillColor="@color/white_textColor"
-        android:pathData="M56,35H64V65H56V35Z"/>
-
+            M36,35 H44 V65 H36 Z
+            M56,35 H64 V65 H56 Z
+        " />
 </vector>

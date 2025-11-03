@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View.VISIBLE
+import android.view.View.GONE
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -316,7 +316,7 @@ class SearchWeather : BaseActivity() {
     }
 
     override fun getToolbarConfig(): ToolbarConfig {
-        return ToolbarConfig(VISIBLE, R.string.weather) {
+        return ToolbarConfig(GONE, R.string.weather) {
             navigateToMainScreen(this@SearchWeather, -1)
         }
     }

@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+
+    <!-- один path, но fillType=evenOdd делает вторую фигуру дыркой -->
+    <path
+        android:fillColor="@color/hintColor"
+        android:fillType="evenOdd"
+        android:pathData="
+            M3,7
+            c0,-2 2,-3 4,-3
+            h10
+            c2,0 4,1 4,3
+            v10
+            c0,2 -2,3 -4,3
+            H7
+            c-2,0 -4,-1 -4,-3
+            z
+
+            M10,8
+            l6,4 -6,4
+            z" />
+</vector>

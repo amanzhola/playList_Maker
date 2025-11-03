@@ -1,20 +1,18 @@
 package com.example.playlistmaker.di.media
 
 import com.example.playlistmaker.domain.api.song_db.FavoriteTracksInteractor
-import com.example.playlistmaker.domain.usecases.media.MediaLibraryInteractor
 import com.example.playlistmaker.presentation.media.FavoriteTracksViewModel
-import com.example.playlistmaker.presentation.media.MediaLibraryViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val mediaViewModelModule = module { // (📀📚)  from 🏠 🔍 🛠️ (🎥 💃) ☁️ 🎧
 
     // Interactor возвращает список MediaTab без репозитория
-    single { MediaLibraryInteractor() }
+//    single { MediaLibraryInteractor() } // compose migration
 
     // ViewModel, которая использует Interactor
     // Экран медиатеки (общий контейнер с табами)
-    viewModel { MediaLibraryViewModel(get()) }
+//    viewModel { MediaLibraryViewModel(get()) } // compose migration
 
     // Интерактор избранного 💃❤️✨ (один раз!)
     single { FavoriteTracksInteractor(get()) }

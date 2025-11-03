@@ -27,9 +27,9 @@ import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.ImageLoader
 import com.example.playlistmaker.presentation.launcherViewModels.TrackPreviewViewModel
 import com.example.playlistmaker.roots.main.MainActivity
-import com.example.playlistmaker.ui.audioPosters.OnTrackAudioClickListener
+import com.example.playlistmaker.ui.audioPosters.adapter.OnTrackAudioClickListener
 import com.example.playlistmaker.ui.audioPosters.PlaylistBottomAdapter
-import com.example.playlistmaker.ui.audioPosters.TrackAdapterAudio
+import com.example.playlistmaker.ui.audioPosters.adapter.TrackAdapterAudio
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -79,6 +79,15 @@ class TrackPreviewActivity : AppCompatActivity() {
         adapter = TrackAdapterAudio(
             emptyList(),
             object : OnTrackAudioClickListener {
+
+                override fun onSeekRequested(track: Track, positionMs: Long) {
+
+                    // require update if needed for time bar on utube support audio old mob
+//                    // Если сейчас привязано видео — игнорим (ползунок видео свой)
+//                    if (videoBoundPosition != NO_VIDEO_POSITION) return
+//                    viewModel.seekTo(positionMs) // need add seekTo to viewModel
+                }
+
                 override fun onTrackClicked(track: Track, position: Int) {
                     viewModel.setCurrentTrackIndex(position)
                     viewModel.toggleIsHorizontal()
