@@ -58,5 +58,6 @@
     <color name="timebar_buffered">#66808080</color>  <!-- с альфой -->
     <color name="timebar_unplayed">#33000000</color>  <!-- лёгкая тень -->
 
-
+    <!-- playlistInfo -->
+    <color name="playlist_bg">#F2F3F5</color>
 </resources>

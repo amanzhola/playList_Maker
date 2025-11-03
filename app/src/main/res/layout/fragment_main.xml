@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/blue_textColor"
     tools:context=".ui.main.MainFragment">
 
     <include layout="@layout/fail"/>
@@ -69,93 +70,3 @@
     </GridLayout>
 
 </LinearLayout>
-
-    <!--option in case require for fragment figma view-->
-<!--<LinearLayout-->
-<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent"-->
-<!--    android:orientation="vertical">-->
-
-<!--    <include layout="@layout/toolbar" />-->
-<!--    <include layout="@layout/fail"/>-->
-
-<!--    <GridLayout-->
-<!--        android:id="@+id/button_grid"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:layout_weight="1"-->
-<!--        android:columnCount="2"-->
-<!--        android:rowCount="3"-->
-<!--        android:useDefaultMargins="true"-->
-<!--        android:alignmentMode="alignMargins"-->
-<!--        android:padding="8dp">-->
-
-<!--        <include-->
-<!--            layout="@layout/button"-->
-<!--            android:id="@+id/button1"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_rowWeight="1"-->
-<!--            android:layout_columnWeight="1" />-->
-
-<!--        <include-->
-<!--            layout="@layout/button"-->
-<!--            android:id="@+id/button4"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_rowWeight="1"-->
-<!--            android:layout_columnWeight="1" />-->
-
-<!--        <include-->
-<!--            layout="@layout/button"-->
-<!--            android:id="@+id/button2"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_rowWeight="1"-->
-<!--            android:layout_columnWeight="1" />-->
-
-<!--        <include-->
-<!--            layout="@layout/button"-->
-<!--            android:id="@+id/button5"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_rowWeight="1"-->
-<!--            android:layout_columnWeight="1" />-->
-
-<!--        <include-->
-<!--            layout="@layout/button"-->
-<!--            android:id="@+id/button3"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_rowWeight="1"-->
-<!--            android:layout_columnWeight="1" />-->
-
-<!--        <include-->
-<!--            layout="@layout/button"-->
-<!--            android:id="@+id/button6"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_rowWeight="1"-->
-<!--            android:layout_columnWeight="1" />-->
-<!--    </GridLayout>-->
-
-<!--</LinearLayout>-->
-
-
-<!--<LinearLayout-->
-<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent"-->
-<!--    android:orientation="vertical">-->
-
-
-<!--    <include layout="@layout/fail" />-->
-
-<!--    <include layout="@layout/button" android:id="@+id/button1"/>-->
-<!--    <include layout="@layout/button" android:id="@+id/button2"/>-->
-<!--    <include layout="@layout/button" android:id="@+id/button3"/>-->
-<!--    <include layout="@layout/button" android:id="@+id/button4"/>-->
-<!--    <include layout="@layout/button" android:id="@+id/button5"/>-->
-<!--    <include layout="@layout/button" android:id="@+id/button6"/>-->
-<!--</LinearLayout>-->

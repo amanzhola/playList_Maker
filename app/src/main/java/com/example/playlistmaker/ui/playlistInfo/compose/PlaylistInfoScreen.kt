@@ -112,6 +112,7 @@ fun PlaylistInfoScreen(
                 modifier = Modifier
                     .weight(0.4f)
                     .fillMaxHeight()
+                    .background(colorResource(R.color.playlist_bg)) // 👈 фон под обложкой
             ) {
                 Image(
                     painter = coverPainter,
@@ -278,7 +279,7 @@ private fun RightPaneWithSheets(
             modifier = Modifier
                 .matchParentSize()
                 .zIndex(1f)
-                .background(Color(0xFFF2F3F5))// ← выше шторки
+                .background((colorResource(R.color.playlist_bg)))// ← выше шторки
                 .padding(horizontal = paddingH, vertical = 16.dp)
                 .onGloballyPositioned { coords ->
                     rightRootHeightPx = coords.size.height          // высота правой половины
@@ -478,7 +479,7 @@ private fun PortraitWithSheets(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Кавер (1:1)
-            Box {
+            Box (modifier = Modifier.background(colorResource(R.color.playlist_bg))){// 👈 фон под обложкой
                 Image(
                     painter = coverPainter as androidx.compose.ui.graphics.painter.Painter,
                     contentDescription = null,
@@ -506,7 +507,7 @@ private fun PortraitWithSheets(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF2F3F5)) // 👈 фон темнее белого
+                    .background(colorResource(R.color.playlist_bg)) // 👈 фон темнее белого
                     .padding(horizontal = paddingH, vertical = 16.dp)
             ) {
                 Text(
