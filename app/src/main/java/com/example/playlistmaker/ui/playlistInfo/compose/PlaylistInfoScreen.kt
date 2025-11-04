@@ -77,6 +77,7 @@ import com.example.playlistmaker.ui.playlistInfo.model.MenuRow
 import com.example.playlistmaker.utils.FailBlock
 import com.example.playlistmaker.utils.FailTextPlacement
 import com.example.playlistmaker.utils.TrackRow
+import com.example.playlistmaker.utils.coverModelFromAny
 import com.example.playlistmaker.utils.coverModelFromPath
 import kotlin.math.roundToInt
 
@@ -601,7 +602,18 @@ private fun MenuSheetContent(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val painter = rememberAsyncImagePainter(model = header.cover ?: R.drawable.placeholder)
+    val ctx = LocalContext.current // coverModelFromAny insted could be one simple toString
+    val model = remember(header.cover) { coverModelFromAny(header.cover.toString()) ?: R.drawable.placeholder }
+    val req = remember(model) {
+        ImageRequest.Builder(ctx)
+            .data(model)
+            .size(180)             // маленькая превьюшка
+            .allowHardware(false)
+            .crossfade(false)
+            .build()
+    }
+    val painter = rememberAsyncImagePainter(req)
+
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {

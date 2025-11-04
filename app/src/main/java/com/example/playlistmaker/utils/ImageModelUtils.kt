@@ -10,7 +10,7 @@ fun coverModelFrom(path: String?): Any? =
     path?.takeIf { it.isNotBlank() }?.let { ref ->
         when {
             ref.startsWith("content://") || ref.startsWith("file://") -> ref.toUri()
-            ref.startsWith("/")  -> java.io.File(ref)
+            ref.startsWith("/")  -> File(ref)
             ref.startsWith("http")-> ref
             else -> null
         }
@@ -24,6 +24,7 @@ fun parseCoverUri(coverPath: String?): Uri? = coverPath?.let { ref ->
     }
 }
 
+// for compose ones Audio, PlaylistInfo and PlaylistEdit
 @SuppressLint("UseKtx")
 fun coverModelFromPath(path: String?): Any? {
     val p = path?.trim().orEmpty()
@@ -34,3 +35,22 @@ fun coverModelFromPath(path: String?): Any? {
         else -> null
     }
 }
+
+// for menu sheet
+@SuppressLint("UseKtx")
+fun coverModelFromAny(src: Any?): Any? = when (src) {
+    null -> null
+    is Uri  -> src
+    is File -> src
+    is String -> {
+        val p = src.trim()
+        when {
+            p.isEmpty() -> null
+            p.startsWith("content://") || p.startsWith("file://") -> Uri.parse(p)
+            p.startsWith("/") -> File(p)                    // абсолютный путь
+            else -> null
+        }
+    }
+    else -> null
+}
+
