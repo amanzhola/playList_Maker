@@ -1,9 +1,16 @@
+@file:OptIn(androidx.media3.common.util.UnstableApi::class)
+@file:Suppress("OPT_IN_ARGUMENT_IS_NOT_MARKER")
+
 package com.example.playlistmaker.di
 
 import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.widget.TextView
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.NoOpCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.data.network.base.RetrofitInstance
 import com.example.playlistmaker.data.repository.base.AgreementImpl
@@ -35,6 +42,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
+import java.io.File
 
 val appModule = module {
 
@@ -119,5 +127,21 @@ val appModule = module {
     viewModel { TrackPreviewViewModel(get(), get(), get(), get()) }
 
     // провайдер: Utube
-    factory<ExoPlayerProvider> { ExoPlayerProviderImpl(androidContext().applicationContext) }
+
+    // Один общий кэш на всё приложение (preventing flicking by week internet Exo)
+    single<Cache>(createdAtStart = true) {
+        SimpleCache(
+            File(androidContext().cacheDir, "media3"),
+            NoOpCacheEvictor(),
+            StandaloneDatabaseProvider(androidContext())
+        )
+    }
+
+    // Провайдер плеера, получает общий кэш
+    single<ExoPlayerProvider> {
+        ExoPlayerProviderImpl(
+            appContext = androidContext().applicationContext,
+            cache = get() // ← тот самый SimpleCache
+        )
+    }
 }

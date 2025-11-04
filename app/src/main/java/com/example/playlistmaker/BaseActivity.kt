@@ -17,6 +17,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
 import com.example.playlistmaker.domain.api.base.ThemeInteraction
@@ -458,5 +459,23 @@ open class BaseActivity : AppCompatActivity(), CircleSegmentsView.OnSegmentClick
     fun applyThemeThenRestoreSaved() {
         toolbarHelper.applyThemeColors()
         applySavedColorsForCurrentScreen()
+    }
+
+    fun enterVideoFullscreenUi() {
+        val window = window
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    }
+
+    fun exitVideoFullscreenUi() {
+        val window = window
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.show(WindowInsetsCompat.Type.systemBars())
+        // вернём стандартные цвета темы; helper сам докрасит тулбар
+        // (можно оставить дефолтные — Material сам выставит)
     }
 }

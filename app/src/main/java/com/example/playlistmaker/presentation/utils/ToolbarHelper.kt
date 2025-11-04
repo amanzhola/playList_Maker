@@ -15,6 +15,8 @@ import com.google.android.material.color.MaterialColors
 data class ToolbarConfig( // 📍 👏
     val backArrowVisibility: Int,
     val titleResId: Int,
+    // 👇 НОВОЕ: по умолчанию скрыть тулбар (per-screen, не глобально!)
+    val hiddenByDefault: Boolean = false,
     val titleClickListener: (() -> Unit)? = null,
 )
 
@@ -25,6 +27,11 @@ class ToolbarHelper(private val activity: Activity) {
     private var toolbar: Toolbar? = null
     private var title: TextView? = null
     private var backArrow: ImageView? = null
+
+    private var currentConfig: ToolbarConfig? = null
+
+    // Для временного скрытия (например, видео-фуллскрин)
+    private var savedVisibility: Int? = null
 
     private fun resolveColorOrNull(view: View, @AttrRes attr: Int): Int? {
         val tv = TypedValue()
@@ -47,10 +54,19 @@ class ToolbarHelper(private val activity: Activity) {
         android.util.Log.d("TITLEFLOW",
             "initialize -> isMain=$isMainActivity, back=${config.backArrowVisibility}, res=${config.titleResId}"
         )
+        currentConfig = config
         updateToolbar(config)
+
+        // 👇 если экран запросил «скрыть по умолчанию» — скрываем тулбар
+        if (config.hiddenByDefault) {
+            toolbar?.visibility = View.GONE
+        } else {
+            toolbar?.visibility = View.VISIBLE
+        }
     }
 
     fun updateToolbar(config: ToolbarConfig) {
+        currentConfig = config
         android.util.Log.d("TITLEFLOW",
             "updateToolbar enter: back=${config.backArrowVisibility}, res=${config.titleResId}, " +
                     "curTitle='${title?.text}'"
@@ -143,5 +159,44 @@ class ToolbarHelper(private val activity: Activity) {
         val txt = t?.text
         val color = t?.currentTextColor
         android.util.Log.d(tag, "dumpState: title='$txt', titleColor=${color?.hex()}, tb=${tb}")
+    }
+
+    // Utube
+    // ── ПУБЛИЧНЫЕ МЕТОДЫ ДЛЯ ПОКАЗА/СКРЫТИЯ ────────────────────────────────
+
+    /** Явно показать тулбар (например, когда видео НЕ фуллскрин). */
+    fun showToolbar() {
+        savedVisibility = null
+        toolbar?.visibility = View.VISIBLE
+    }
+
+    /** Явно скрыть тулбар (например, когда видео фуллскрин в горизонтали). */
+    fun hideToolbar() {
+        savedVisibility = null
+        toolbar?.visibility = View.GONE
+    }
+
+    /**
+     * Временно скрыть тулбар «для фуллскрина», чтобы потом вернуть как было.
+     * Безопасно: если уже скрыт/показан — мы запомним предыдущее состояние и восстановим.
+     */
+    fun hideForFullscreen() {
+        if (savedVisibility == null) {
+            savedVisibility = toolbar?.visibility // запоминаем
+        }
+        toolbar?.visibility = View.GONE
+    }
+
+    /** Восстановить видимость после фуллскрина. */
+    fun restoreAfterFullscreen() {
+        val v = savedVisibility
+        savedVisibility = null
+        if (v != null) {
+            toolbar?.visibility = v
+        } else {
+            // если не было сохранено ранее — применяем дефолт из конфига
+            val hidden = currentConfig?.hiddenByDefault == true
+            toolbar?.visibility = if (hidden) View.GONE else View.VISIBLE
+        }
     }
 }

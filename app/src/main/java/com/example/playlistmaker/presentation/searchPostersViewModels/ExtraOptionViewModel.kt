@@ -22,6 +22,16 @@ class ExtraOptionViewModel( // 🖼️ Детальный экран (Аудио
     private val addTrackToPlaylist: AddTrackToPlaylistUseCase,
     private val exoProvider: ExoPlayerProvider
 ) : ViewModel() {
+    // ────────────────── Utube full screen for horizontal ──────────────────
+    private val _isVideoFullscreen = MutableStateFlow(false)
+    val isVideoFullscreenFlow: StateFlow<Boolean> = _isVideoFullscreen
+
+    fun setVideoFullscreen(on: Boolean) {
+        _isVideoFullscreen.value = on
+        // поле isBottomNavVisible в state, можно тут же скрывать хром:
+        // updateState { it.copy(isBottomNavVisible = !on) }, автоматом скрыто
+    }
+
     // ────────────────── Utube old mob ──────────────────
     data class AudioProgress(val positionMs: Long, val durationMs: Long, val bufferedMs: Long)
 

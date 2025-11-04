@@ -34,8 +34,11 @@ fun AudioPagerScreen(
     textColorOverrideAux: androidx.compose.ui.graphics.Color,
     iconTintOverride:  androidx.compose.ui.graphics.Color,
     iconTintOverrideAux:  androidx.compose.ui.graphics.Color,
+    forceFullscreen: Boolean = false,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isLandscape = androidx.compose.ui.platform.LocalConfiguration.current.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
    // нормализуем стартовый индекс под текущий список
     val normalizedInitial = remember(initialIndex, state.trackList.size) {
@@ -70,7 +73,7 @@ fun AudioPagerScreen(
             }
     }
 
-    val pageContent: @Composable (Int) -> Unit = { page ->
+    val pageContent: @Composable (Int, Boolean) -> Unit = { page, full ->
         val track = state.trackList[page]
         val hasMedia = exo?.currentMediaItem != null
         val isVideoHere = (page == videoBoundPosition && exo != null && hasMedia)
@@ -114,18 +117,29 @@ fun AudioPagerScreen(
             textColorOverrideAux = textColorOverrideAux,
             iconTintOverride  = iconTintOverride,
             iconTintOverrideAux  = iconTintOverrideAux,
+            fullScreen = full
         )
     }
 
-    if (state.isHorizontal) {
-        androidx.compose.foundation.pager.HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { page -> pageContent(page) }
+    // 🔁 Обычный режим (pager) vs Фуллскрин один кадр
+    if (forceFullscreen && isLandscape) {
+        // ❗ В фуллскрине показываем ТОЛЬКО текущую страницу, на весь экран
+        val page = state.currentTrackIndex.coerceIn(0, (state.trackList.size - 1).coerceAtLeast(0))
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
+            pageContent(page, true)   // full = true
+        }
     } else {
-        androidx.compose.foundation.pager.VerticalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { page -> pageContent(page) }
+        // горизонтальный/вертикальный pager
+        if (state.isHorizontal) {
+            androidx.compose.foundation.pager.HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page -> pageContent(page, false) }
+        } else {
+            androidx.compose.foundation.pager.VerticalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page -> pageContent(page, false) }
+        }
     }
 }

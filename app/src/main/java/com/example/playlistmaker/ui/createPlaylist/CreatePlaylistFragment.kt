@@ -1,7 +1,9 @@
 package com.example.playlistmaker.ui.createPlaylist
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +12,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +39,7 @@ import com.example.playlistmaker.utils.NavKeys.SCROLL_TOP
 import com.example.playlistmaker.utils.showWithSquareWhiteStyle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.io.File
 
 class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
 
@@ -55,6 +59,7 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         )
     }
 
+    @SuppressLint("UseKtx")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (activity as? BaseActivity)?.enableEdgeToEdge(false)
 
@@ -63,7 +68,13 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             val id    = requireArguments().getLong(ARG_EDIT_ID)
             val name  = requireArguments().getString(ARG_EDIT_NAME).orEmpty()
             val desc  = requireArguments().getString(ARG_EDIT_DESC)
-            val cover = requireArguments().getString(ARG_EDIT_COVER)
+            val cover: Uri? = requireArguments().getString(ARG_EDIT_COVER)
+                ?.let { s ->
+                    // 1) content:// -> Uri.parse
+                    runCatching { Uri.parse(s) }.getOrNull()
+                    // 2) /data/... -> File -> toUri()
+                        ?: File(s).takeIf { it.exists() }?.toUri()
+                }
             vm.enterEditModeIfNeeded(id, name, desc, cover)
         } else {
             val preName  = arguments?.getString(ARG_PREFILL_NAME)
@@ -215,6 +226,10 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
             .setMessage(getString(messageRes))
             .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss(); onCancel?.invoke() }
             .setPositiveButton(R.string.finish) { d, _ -> d.dismiss(); onConfirm() }
+            .setBackgroundInsetStart(0)
+            .setBackgroundInsetEnd(0)
+            .setBackgroundInsetTop(0)
+            .setBackgroundInsetBottom(0)
             .create()
             .apply { setOnDismissListener { exitDialogShown = false } }
             .showWithSquareWhiteStyle(requireContext())

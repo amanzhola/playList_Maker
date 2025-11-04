@@ -153,6 +153,7 @@ fun TrackItemCompose(
     textColorOverrideAux: androidx.compose.ui.graphics.Color? = null,
     iconTintOverride:  androidx.compose.ui.graphics.Color? = null,
     iconTintOverrideAux:  androidx.compose.ui.graphics.Color? = null,
+    fullScreen: Boolean = false,
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -162,7 +163,8 @@ fun TrackItemCompose(
             context, track, isVideoAttached, timebarVertical, currentPlayer,
             overlayPlayTime, audioProgress, onPlayToggle,
             onItemClick, onBack, onFav, onAdd, onSeek, style,
-            textColorOverride, textColorOverrideAux, iconTintOverride, iconTintOverrideAux
+            textColorOverride, textColorOverrideAux, iconTintOverride, iconTintOverrideAux,
+            fullScreen = fullScreen
         )
     } else {
         TrackItemComposePortrait(

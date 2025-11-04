@@ -171,7 +171,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         // 2) Compose-контент
         val compose = ComposeView(ctx).apply {
             id = R.id.composeContent  // <-- важно для ActivityUiHider
-            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            setBackgroundColor(ContextCompat.getColor(ctx, R.color.white_textColor))
             setContent {
                 AudioPlayerScreen(
                     viewModel = viewModel,
@@ -333,6 +333,7 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             musicService = null
             viewModel.removeAudioPlayerControl()
         }
+        restoreToolbarAfterVideo()// 👈 страховка для тулбара
     }
 
     @SuppressLint("ObsoleteSdkInt")
@@ -530,6 +531,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         if (videoBoundPosition != NO_VIDEO_POSITION) {
             videoBoundPosition = NO_VIDEO_POSITION
             stopVideoTicker()
+            viewModel.setVideoFullscreen(false) // 👈 горизонталь
+            restoreToolbarAfterVideo() // 👈 тулбар
         }
     }
 
@@ -600,6 +603,8 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
         videoPlayerListener = null
         exo?.stop()
         exo?.clearMediaItems()
+        viewModel.setVideoFullscreen(false)     // 👈 горизонталь
+        restoreToolbarAfterVideo() // 👈 тулбар
     }
 
     @SuppressLint("DefaultLocale")
@@ -633,6 +638,18 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
                     stopVideoTicker()
                     player.seekTo(0)
                     player.playWhenReady = false
+
+                    viewModel.setVideoFullscreen(false)   // 👈 выключаем фуллскрин
+                    restoreToolbarAfterVideo()                 // 👈 вернуть тулбар
+                }
+                if (state == Player.STATE_READY) {
+                    // ✅ когда видео готово — если горизонталь, разворачиваем
+                    val isLandscape = resources.configuration.orientation ==
+                            android.content.res.Configuration.ORIENTATION_LANDSCAPE
+                    if (isLandscape && videoBoundPosition != NO_VIDEO_POSITION) {
+                        viewModel.setVideoFullscreen(true)
+                        hideToolbarForVideoFullscreen()        // 👈 спрятать тулбар
+                    }
                 }
             }
         }
@@ -657,5 +674,12 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
     }
     fun setAudioIconColor(@androidx.annotation.ColorInt color: Int) {
         iconColorExt = androidx.compose.ui.graphics.Color(color)
+    }
+
+    private fun hideToolbarForVideoFullscreen() {
+        (activity as? BaseActivity)?.toolbarHelper?.hideForFullscreen()
+    }
+    private fun restoreToolbarAfterVideo() {
+        (activity as? BaseActivity)?.toolbarHelper?.restoreAfterFullscreen()
     }
 }

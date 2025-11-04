@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -74,7 +75,7 @@ class MainActivity : BaseActivity() {
                 }
             }
             .addOnFailureListener { e ->
-                android.util.Log.e("AUTH", "Anon sign-in failed", e)
+                Log.e("AUTH", "Anon sign-in failed", e)
             }
     }
 
@@ -99,7 +100,7 @@ class MainActivity : BaseActivity() {
 
         // 3) ТЕПЕРЬ вызываем аутентификацию и проверку профиля
         ensureFirebaseAuthThen { uid ->
-            android.util.Log.d("AUTH", "signed in as $uid")
+            Log.d("AUTH", "signed in as $uid")
 
             // закрываем авто-запуск profileFragment, регистарция есть и по желанию пользователея обновление профиля
             /*
@@ -199,14 +200,36 @@ class MainActivity : BaseActivity() {
         })
 
         // for playlistInfoFragment on sprint 23 + importPreviewFragment для просмотра альбома
-        navController.addOnDestinationChangedListener { _, dest, _ ->
-            val hideOn = setOf(
-                R.id.playlistInfoFragment, // сюда можно добавить и другие экраны без нижней навигации
-                R.id.importPreviewFragment
-            )
-            val shouldHide = dest.id in hideOn
+        navController.addOnDestinationChangedListener { _, _, _ ->
+            // Кто реально виден пользователю прямо сейчас:
+            val top = getCurrentVisibleFragment()  // уже есть этот метод ниже
 
-            val isMainDestination = dest.id == R.id.mainFragment // подставь ID твоего главного фрагмента
+            // 1) Спец-логика ровно для пары экранов:
+            if (top is com.example.playlistmaker.ui.playlistInfo.PlaylistInfoFragment ||
+                top is com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment) {
+
+                // Оба экрана – без нижней навигации:
+                bottomNavigationHelper.hideBottomNavigation()
+
+                // Тулбар: у PlaylistInfo он не нужен, у Audio – нужен (как было)
+                findViewById<View>(R.id.toolbar)?.isVisible =
+                    top is com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment
+
+                // Цвета тулбара – обычные (или оставить как есть):
+                toolbarHelper.applyThemeColors()
+
+                return@addOnDestinationChangedListener // важно: не проваливаемся в общую ветку
+            }
+
+            // 2) Всё остальное — как было:
+            val hideOn = setOf(
+                R.id.importPreviewFragment,
+                R.id.playlistInfoFragment // можно убрать покрыто спец-веткой
+            )
+
+            val destId = navController.currentDestination?.id
+            val isMainDestination = destId == R.id.mainFragment
+            val shouldHide = destId in hideOn
 
             if (isMainDestination) {
                 toolbarHelper.applyMainBlueColors()
@@ -214,10 +237,8 @@ class MainActivity : BaseActivity() {
                 toolbarHelper.applyThemeColors()
             }
 
-            // прячем кастомный низ
-            findViewById<View>(R.id.bottomNavigation).isVisible = !shouldHide
-            // если нужно — прячем и кастомный тулбар
-            findViewById<View>(R.id.toolbar)?.isVisible = !shouldHide
+            if (shouldHide) bottomNavigationHelper.hideBottomNavigation()
+            else bottomNavigationHelper.showBottomNavigation()
         }
     }
 

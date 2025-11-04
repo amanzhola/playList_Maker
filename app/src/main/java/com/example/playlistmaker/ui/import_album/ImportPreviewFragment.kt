@@ -47,6 +47,8 @@ import org.koin.core.parameter.parametersOf
 
 class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrackClickListener {
 
+    private var suppressToolbarOnPause: Boolean = false
+
     private val fromExternalImport by lazy {
         requireActivity().intent.getBooleanExtra(EXTRA_IMPORT_ENTRY, false)
     }
@@ -106,6 +108,12 @@ class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrac
         val max = resources.getInteger(R.integer.qty_lines_create_playlist)
 
         btnBack.setOnClickListener {
+
+            suppressToolbarOnPause = true
+            (activity as? com.example.playlistmaker.BaseActivity)
+                ?.toolbarHelper
+                ?.hideToolbar()
+
             if (fromExternalImport) {
                 requireActivity().finishAffinity()
             } else {
@@ -228,6 +236,13 @@ class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrac
                             ARG_PREFILL_COVER to ui.coverUri?.toString(),
                             ARG_PREFILL_TRACKS to ArrayList(ui.tracks)
                         )
+
+                        // 👇 не даём onPause() показать тулбар во время перехода
+                        suppressToolbarOnPause = true
+                        (activity as? com.example.playlistmaker.BaseActivity)
+                            ?.toolbarHelper
+                            ?.hideToolbar()
+
                         findNavController().navigate(R.id.createPlaylistFragment, args)
                     }
                 }
@@ -284,4 +299,22 @@ class ImportPreviewFragment : Fragment(R.layout.fragment_import_preview), OnTrac
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        suppressToolbarOnPause = false
+        (activity as? com.example.playlistmaker.BaseActivity)
+            ?.toolbarHelper
+            ?.hideToolbar()
+    }
+
+    override fun onPause() {
+        if (!suppressToolbarOnPause) {
+            (activity as? com.example.playlistmaker.BaseActivity)
+                ?.toolbarHelper
+                ?.showToolbar()
+        }
+        super.onPause()
+    }
+
 }

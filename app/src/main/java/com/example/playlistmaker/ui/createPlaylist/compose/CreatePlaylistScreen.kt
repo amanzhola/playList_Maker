@@ -30,10 +30,12 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -44,11 +46,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.example.playlistmaker.R
 import com.example.playlistmaker.presentation.createPlaylist.CreatePlaylistViewModel
 import com.example.playlistmaker.ui.audioPosters.adapter.LegacyTextStyles
 
-@SuppressLint("LocalContextResourcesRead")
+@SuppressLint("LocalContextResourcesRead", "ConfigurationScreenWidthHeight")
 @Composable
 fun CreatePlaylistScreen(
     state: CreatePlaylistViewModel.UiState,
@@ -62,7 +67,9 @@ fun CreatePlaylistScreen(
 ) {
     val context = LocalContext.current
     val coverWidthFraction = context.resources.getFraction(R.fraction.cover_width_percent, 1, 1)
-
+    //*******************************************
+    val screenWidthPx = LocalConfiguration.current.screenWidthDp * context.resources.displayMetrics.density
+    //*******************************************
     val scroll = rememberScrollState()
 
     // тянем maxLines из ресурсов (аналог android:maxLines="@integer/qty_lines_create_playlist")
@@ -135,9 +142,16 @@ fun CreatePlaylistScreen(
             tonalElevation = 0.dp,                           // не тоним, чтобы цвет был чистым
             modifier = Modifier.fillMaxWidth(coverWidthFraction) // <-- percent
         ) {
-            val painter = rememberAsyncImagePainter(
-                model = state.coverUri ?: R.drawable.cover_create_playlist
-            )
+            val req = remember(state.coverUri) {
+                ImageRequest.Builder(context)
+                    .data(state.coverUri ?: R.drawable.cover_create_playlist)
+                    // ↓↓ ключевые штуки для реальных девайсов ↓↓
+                    .size(screenWidthPx.toInt())     // даунсемпл до ширины экрана
+                    .allowHardware(false)            // аппаратный битмап иногда чудит на OEM
+                    .crossfade(false)                // чтобы не держать лишние кадры
+                    .build()
+            }
+            val painter = rememberAsyncImagePainter(model = req)
             Image(
                 painter = painter,
                 contentDescription = null,

@@ -1,5 +1,6 @@
 package com.example.playlistmaker.ui.audioPosters
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,15 +27,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.Player
+import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.presentation.searchPostersViewModels.ExtraOptionViewModel
 import com.example.playlistmaker.presentation.utils.darken
 import com.example.playlistmaker.presentation.utils.lighten
 import com.example.playlistmaker.ui.audioPosters.sheet.PlaylistsSheet
+import com.example.playlistmaker.utils.NO_VIDEO_POSITION
+import com.example.playlistmaker.utils.findActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +80,30 @@ fun AudioPlayerScreen(
     val videoBound by viewModel.videoPosFlow.collectAsStateWithLifecycle()
     val exo        by viewModel.exoFlow.collectAsStateWithLifecycle()
 
+    // 👇 вычисляем fullscreen
+    val cfg = LocalConfiguration.current
+    val isLandscape = cfg.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val hasVideo = exo?.currentMediaItem != null && videoBound != NO_VIDEO_POSITION
+    val fullscreen = isLandscape && hasVideo &&
+            (exo?.isPlaying == true || exo?.playbackState == Player.STATE_READY)
+
+    // >>> Utube:
+    val activity = (LocalContext.current.findActivity() as? BaseActivity)
+    DisposableEffect(fullscreen) {
+        if (fullscreen) {
+            activity?.toolbarHelper?.hideForFullscreen()
+            activity?.enterVideoFullscreenUi()
+        } else {
+            activity?.exitVideoFullscreenUi()
+            activity?.toolbarHelper?.restoreAfterFullscreen()
+        }
+        onDispose {
+            // страховка при уходе со скрина/повторной компоновке
+            activity?.exitVideoFullscreenUi()
+            activity?.toolbarHelper?.restoreAfterFullscreen()
+        }
+    }
+
     LaunchedEffect(videoBound) {
         Log.d("VIDEO_BOUND", "AudioPlayerScreen: videoBound (from VM) = $videoBound")
     }
@@ -79,7 +111,7 @@ fun AudioPlayerScreen(
     val playlists by viewModel.playlists.collectAsStateWithLifecycle(initialValue = emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val sheetBg = colorResource(R.color.white_textColor)            // замени на свой цвет шторки, если нужно
+    val sheetBg = colorResource(R.color.white_textColor)            // заменяем цвет шторки, если нужно
     val scrim = colorResource(R.color.black).copy(alpha = 0.6f)
     // полупрозрачный фон; свой ресурс
 
@@ -110,8 +142,8 @@ fun AudioPlayerScreen(
             Modifier
                 .fillMaxSize()
                 .background(bg)
-                .padding(padding)
-        ) {
+            .padding(padding)
+            ) {
             AudioPagerScreen(
                 viewModel = viewModel,
                 exo = exo,
@@ -130,6 +162,7 @@ fun AudioPlayerScreen(
                 textColorOverrideAux = tColaux,
                 iconTintOverride  = iCol,
                 iconTintOverrideAux  = iColaux,
+                forceFullscreen = fullscreen
             )
         }
     }

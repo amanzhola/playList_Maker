@@ -2,6 +2,7 @@
 
 package com.example.playlistmaker.ui.playlistInfo.compose
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -64,6 +66,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.search.Track
 import com.example.playlistmaker.presentation.playlistInfo.PlaylistInfoViewModel
@@ -72,8 +77,11 @@ import com.example.playlistmaker.ui.playlistInfo.model.MenuRow
 import com.example.playlistmaker.utils.FailBlock
 import com.example.playlistmaker.utils.FailTextPlacement
 import com.example.playlistmaker.utils.TrackRow
+import com.example.playlistmaker.utils.coverModelFromPath
 import kotlin.math.roundToInt
 
+
+@SuppressLint("ConfigurationScreenWidthHeight", "LocalContextResourcesRead")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistInfoScreen(
@@ -97,7 +105,19 @@ fun PlaylistInfoScreen(
     val menuSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // обложка
-    val coverPainter = rememberAsyncImagePainter(model = ui.coverPath ?: R.drawable.placeholder2)
+    val context = LocalContext.current
+    val screenWidthPx = (LocalConfiguration.current.screenWidthDp * context.resources.displayMetrics.density).toInt()
+
+    val coverModel = remember(ui.coverPath) { coverModelFromPath(ui.coverPath) ?: R.drawable.placeholder2 }
+    val coverReq = remember(coverModel) {
+        ImageRequest.Builder(context)
+            .data(coverModel)
+            .size(screenWidthPx)     // даунсемпл: ширина экрана
+            .allowHardware(false)    // стабильнее на реальных девайсах/OEM
+            .crossfade(false)
+            .build()
+    }
+    val coverPainter = rememberAsyncImagePainter(coverReq)
 
     if (isLandscape) {
         // ───────── LANDSCAPE: слева 40% обложка, справа 60% колонка с локальными шторками ─────────

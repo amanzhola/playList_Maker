@@ -1,7 +1,7 @@
 package com.example.playlistmaker.ui.mediaFragments
 
+import android.annotation.SuppressLint
 import android.net.Uri
-import android.widget.ImageView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,8 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -45,10 +49,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.size.Precision
+import coil3.size.Scale
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.playlist.Playlist
 import com.example.playlistmaker.presentation.media.PlaylistViewModel
@@ -60,6 +67,7 @@ import kotlinx.coroutines.yield
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun PlaylistsScreen(
     vm: PlaylistViewModel = koinViewModel(),
@@ -77,6 +85,16 @@ fun PlaylistsScreen(
     var lastNonEmpty by remember { mutableStateOf(emptyList<Playlist>()) }
     val display = if (list.isEmpty() && lastNonEmpty.isNotEmpty()) lastNonEmpty else list
     if (list.isNotEmpty()) lastNonEmpty = list
+
+    // таргетный размер превью в пикселях (фикс для всех карточек)
+    val cfg = LocalConfiguration.current
+    val density = LocalResources.current.displayMetrics.density
+    val cols = if (cfg.smallestScreenWidthDp >= 600) 3 else 2
+    val screenDp = cfg.screenWidthDp
+    val horizontalPaddingDp = 16     // как в LazyVerticalGrid: contentPadding(8.dp) по краям -> 16dp суммарно
+    val itemSpacingDp = 8            // как в LazyVerticalGrid: horizontalArrangement = 8.dp
+    val cellDp = ((screenDp - horizontalPaddingDp * 2 - itemSpacingDp * (cols - 1)) / cols)
+    val cellPx = (cellDp * density).toInt().coerceAtLeast(64)
 
     // НОВОЕ: храним последнюю цель скролла, чтобы не потерять её между кадрами
     var targetId by remember { mutableStateOf<Long?>(null) }
@@ -148,9 +166,8 @@ fun PlaylistsScreen(
                 textPlacement = FailTextPlacement.Top
             )
         } else {
-            val cols = if (LocalConfiguration.current.smallestScreenWidthDp >= 600) 3 else 2
             LazyVerticalGrid(
-                state = gridState, // 👈 ВАЖНО
+                state = gridState,
                 columns = GridCells.Fixed(cols),
                 modifier = Modifier
                     .weight(1f)
@@ -161,37 +178,50 @@ fun PlaylistsScreen(
             ) {
                 items(
                     items = display,
-                    key = { it.id } // если у модели другое поле — замени
+                    key = { it.id },
+                    contentType = { "playlist" } // стабильный тип
                 ) { playlist ->
                     PlaylistCard(
                         playlist = playlist,
-                        onClick = { onOpenPlaylist(playlist.id) }, // поле id при необходимости замени
+                        onClick = { onOpenPlaylist(playlist.id) },
                         textColor = textColor,
-                        cardBackground = Color.Transparent
+                        cardBackground = backgroundColor, // или Color.Transparent
+                        targetPx = cellPx
                     )
                 }
             }
         }
     }
 }
+
 /** Ждём, пока нужный индекс появится в layoutInfo у грида */
 private suspend fun waitUntilItemExists(state: LazyGridState, index: Int) {
-    // быстрый выход
     if (state.layoutInfo.totalItemsCount > index) return
-    // дать Compose собрать layout хотя бы один кадр
     yield()
-    // дождаться, пока общее число элементов станет больше нужного индекса
     snapshotFlow { state.layoutInfo.totalItemsCount }
         .first { it > index }
 }
+
 @Composable
 fun PlaylistCard(
     playlist: Playlist,
     onClick: () -> Unit,
-    textColor: Color,                         // ← внешний цвет текста
-    cardBackground: Color = Color.Unspecified // ← внешний фон карточки (если нужен)
+    textColor: Color,
+    cardBackground: Color = Color.Unspecified,
+    targetPx: Int
 ) {
     val corner = 8.dp
+    val context = LocalContext.current
+
+    val uri: Uri? = remember(playlist.coverPath) {
+        playlist.coverPath?.let { ref ->
+            when {
+                ref.startsWith("content://") || ref.startsWith("file://") -> ref.toUri()
+                ref.startsWith("/") -> Uri.fromFile(File(ref))
+                else -> null
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -201,36 +231,31 @@ fun PlaylistCard(
             .background(cardBackground)
             .padding(8.dp)
     ) {
-        // обложка 1:1
+        // Обложка 1:1
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(corner))
+                .clip(RoundedCornerShape(corner)),
+            contentAlignment = Alignment.Center
         ) {
-            AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = { ivCtx ->
-                    ImageView(ivCtx).apply {
-                        scaleType = ImageView.ScaleType.CENTER_CROP
-                        clipToOutline = true
-                        background = ContextCompat.getDrawable(ivCtx, R.drawable.rounded_8dp)
-                    }
-                },
-                update = { iv ->
-                    val uri: Uri? = playlist.coverPath?.let { ref ->
-                        when {
-                            ref.startsWith("content://") || ref.startsWith("file://") -> ref.toUri()
-                            ref.startsWith("/") -> Uri.fromFile(File(ref))
-                            else -> null
-                        }
-                    }
-                    if (uri == null) {
-                        iv.setImageResource(R.drawable.placeholder)
-                    } else {
-                        iv.setImageURI(uri)
-                    }
-                }
+            val request = remember(uri, targetPx) {
+                ImageRequest.Builder(context)
+                    .data(uri ?: R.drawable.placeholder)
+                    .crossfade(false)               // без анимаций = меньше лагов
+                    .precision(Precision.INEXACT)   // даунсемплим грубо — ок для превью
+                    .scale(Scale.FILL)
+                    .size(targetPx, targetPx)       // КЛЮЧ: фиксированный таргет для всех карточек
+                    // .bitmapConfig(Bitmap.Config.RGB_565) // на слабых устройствах
+                    .build()
+            }
+
+            AsyncImage(
+                model = request,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                error = painterResource(R.drawable.placeholder),
+                modifier = Modifier.fillMaxSize()
             )
         }
 
@@ -241,7 +266,9 @@ fun PlaylistCard(
             color = textColor,
             fontSize = 12.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            fontFamily = FontFamily(Font(R.font.ys_display_medium)),
+            fontWeight = FontWeight.Medium
         )
 
         Spacer(Modifier.height(4.dp))

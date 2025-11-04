@@ -1,6 +1,7 @@
 package com.example.playlistmaker.ui.audioPosters.adapter
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,8 +19,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,15 +36,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.placeholder
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.models.search.Track
 
+@OptIn(UnstableApi::class)
 @Composable
 fun TrackItemComposeLand(
     context: Context,
@@ -64,6 +70,7 @@ fun TrackItemComposeLand(
     iconTintOverride:  Color? = null,
     iconTintOverrideAux:  Color? = null,
     backgroundOverride: Color? = null,
+    fullScreen: Boolean = false,
 ) {
     val defaultTextColor: Color = colorResource(R.color.textColor_white)
     val defaultTextColorAux: Color = colorResource(R.color.hintColor)
@@ -84,6 +91,47 @@ fun TrackItemComposeLand(
     val albumMarginTop    = dimensionResource(R.dimen.album_margin_top)
     val bottom4           = dimensionResource(R.dimen.marginBottom_4)
 
+    // === FULLSCREEN ВЕТКА: только PlayerView на весь экран ===
+    if (fullScreen && isVideoAttached && currentPlayer != null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(R.color.textColor)) // фон для видео
+        ) {
+            // Создаём PlayerView ОДИН раз и настраиваем «анти-мигание»
+            val shutterColor = androidx.core.content.ContextCompat.getColor(context, R.color.textColor)
+            val pv = remember(context) {
+                PlayerView(context).apply {
+                    setUseController(true) // Media3 API
+                    setKeepContentOnPlayerReset(true) // держать последний кадр при reset/ребуфере
+                    setShutterBackgroundColor(shutterColor) // фон до первого кадра
+                    setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
+                    setBackgroundColor(shutterColor) // на случай прозрачностей
+                }
+            }
+
+            // Привязка/отвязка player без пересоздания PlayerView
+            DisposableEffect(currentPlayer) {
+                pv.player = currentPlayer
+                onDispose { if (pv.player === currentPlayer) pv.player = null }
+            }
+
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { pv },
+                update   = { it.player = currentPlayer }
+            )
+
+            // «Назад» поверх (тулбар скрыт)
+            IconButton(
+                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+                onClick = onBack
+            ) { Icon(painterResource(R.drawable.arrow_back), contentDescription = "arrow_back", tint = Color.White) }
+        }
+        return
+    }
+
+    // === ОБЫЧНЫЙ РЕЖИМ (верстка, как было) ===
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -92,7 +140,7 @@ fun TrackItemComposeLand(
         val (posterRef, detailsRef) = createRefs()
 
         // СЛЕВА: квадратный постер 1:1, растянутый по высоте
-        var posterHeightPx by remember { mutableStateOf(0) }
+        var posterHeightPx by remember { mutableIntStateOf(0) }
         Box(
             modifier = Modifier
                 .constrainAs(posterRef) {

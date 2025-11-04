@@ -2,7 +2,7 @@
 
 package com.example.playlistmaker.ui.playlistInfo
 
-import android.content.ClipData
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.playlistmaker.BaseActivity
 import com.example.playlistmaker.R
 import com.example.playlistmaker.domain.api.base.NetworkStatusChecker
 import com.example.playlistmaker.domain.models.search.Track
@@ -39,6 +40,7 @@ import org.koin.core.parameter.parametersOf
 
 class PlaylistInfoFragment : Fragment() {
 
+    private var suppressToolbarOnPause: Boolean = false
     private val args: PlaylistInfoFragmentArgs by navArgs()
     private val vm: PlaylistInfoViewModel by viewModel()
 
@@ -119,6 +121,7 @@ class PlaylistInfoFragment : Fragment() {
 
     /* --------- вспомогательные: диалоги / share / возврат --------- */
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun shareCurrentPlaylistOrSnack(ui: PlaylistInfoViewModel.Ui) {
         if (ui.tracks.isEmpty()) {
             requireActivity().showLongSnack(getString(R.string.nothing_to_share)); return
@@ -128,18 +131,36 @@ class PlaylistInfoFragment : Fragment() {
         if (!checker.isNetworkAvailable()) {
             requireActivity().showFailOrSnack(isSupport = false); return
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
             val uri = PlaylistExport.exportToZip(requireContext(), ui) ?: run {
                 requireActivity().showLongSnack(getString(R.string.export_failed)); return@launch
             }
-            val intent = Intent(Intent.ACTION_SEND).apply {
+
+            val share = Intent(Intent.ACTION_SEND).apply {
                 type = "application/zip"
                 putExtra(Intent.EXTRA_STREAM, uri)
                 putExtra(Intent.EXTRA_TEXT, buildShareText(ui))
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                clipData = ClipData.newRawUri("playlist", uri)
+                clipData = android.content.ClipData.newRawUri("playlist", uri)
             }
-            startActivity(Intent.createChooser(intent, getString(R.string.share)))
+
+            // Раздать read-grant всем потенциальным получателям (иногда без этого падает «Невозможно открыть»)
+            val pm = requireContext().packageManager
+            val res = pm.queryIntentActivities(share, 0)
+            for (ri in res) {
+                requireContext().grantUriPermission(
+                    ri.activityInfo.packageName,
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+
+            // 👇 предотвратить показ тулбара, пока открыт chooser
+            suppressToolbarOnPause = true
+            (activity as? BaseActivity)?.toolbarHelper?.hideToolbar()
+
+            startActivity(Intent.createChooser(share, getString(R.string.share)))
         }
     }
 
@@ -152,14 +173,36 @@ class PlaylistInfoFragment : Fragment() {
             .showWithSquareWhiteStyle(requireContext())
     }
 
+    @SuppressLint("UseKtx")
     private fun confirmDeletePlaylist(onConfirm: () -> Unit) {
-        MaterialAlertDialogBuilder(requireContext())
+        val dlg = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.delete_playlist)
             .setMessage(R.string.delete_playlist_question)
             .setNegativeButton(R.string.no, null)
             .setPositiveButton(R.string.yes) { _, _ -> onConfirm() }
+            // 👇 белая «карточка» самого диалога
+            .setBackground(
+                androidx.core.content.ContextCompat.getDrawable(
+                    requireContext(), R.drawable.bg_dialog_square
+                )
+            )
+            // 👇 убираем чёрные поля-инсеты вокруг карточки
+            .setBackgroundInsetStart(0)
+            .setBackgroundInsetEnd(0)
+            .setBackgroundInsetTop(0)
+            .setBackgroundInsetBottom(0)
             .create()
-            .showWithSquareWhiteStyle(requireContext())
+            .apply {
+                setOnShowListener {
+                    // 👇 убираем затемнение вокруг и фон окна (иначе просвечивают углы)
+                    window?.setDimAmount(0f)
+                    window?.setBackgroundDrawable(androidx.core.content.ContextCompat.getDrawable(
+                        requireContext(), R.color.white_textColor))
+                }
+            }
+
+        // единый хелпер можно не трогать; либо сразу show()
+        dlg.show()
     }
 
     private fun returnToMediaPlaylistsTab() {
@@ -181,5 +224,21 @@ class PlaylistInfoFragment : Fragment() {
                 .append(" (").append(formatDuration(t.trackTimeMillis)).appendLine(")")
         }
         return sb.toString().trimEnd()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        suppressToolbarOnPause = false                 // сброс подавления при возвращении
+        (activity as? BaseActivity)
+            ?.toolbarHelper
+            ?.hideToolbar()    // экран плейлиста без родительского тулбара (залипание в аудио)
+    }
+
+    override fun onPause() {
+        // чтобы следующий экран начал с «нормального» состояния (или его конфиг перезапишет)
+        if (!suppressToolbarOnPause) {
+            (activity as? BaseActivity)?.toolbarHelper?.showToolbar()
+        }
+        super.onPause()
     }
 }
