@@ -413,9 +413,15 @@ class AudioPlayerFragment : BaseFragment(), BottomNavConfig {
             }
         }
 
+<<<<<<< Updated upstream
     override fun getBottomNavButtonIndex(): Int? = null
     override fun shouldShowBottomNav(): Boolean = false
     override fun shouldShowFullBottomNav(): Boolean = false
+=======
+    override fun getBottomNavButtonIndex(): Int? = null // Int = 5
+    override fun shouldShowBottomNav(): Boolean = false // Boolean = !isFromSearch
+    override fun shouldShowFullBottomNav(): Boolean = false //Boolean = isFromSearch
+>>>>>>> Stashed changes
 
     override fun onSegment4ClickedInternal() {
         triggerYouTubeSearchFromToolbar()

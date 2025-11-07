@@ -41,6 +41,22 @@ class SearchViewModel(
     private val _openTrack = MutableSharedFlow<Track>(extraBufferCapacity = 1)
     val openTrack: SharedFlow<Track> = _openTrack
 
+<<<<<<< Updated upstream
+=======
+    private val listItemBackgroundColorFlow = MutableStateFlow<Int?>(null)
+    private val listTextColorFlow = MutableStateFlow<Int?>(null)
+    private val listArrowColorFlow = MutableStateFlow<Int?>(null)
+
+    // 1) Локальный аккумулятор для цепочки combine
+    private data class Acc(
+        val p: P1,
+        val execQ: String,
+        val removedIds: Set<Int>,
+        val listTextColor: Int?,      // может быть null
+        val listArrowColor: Int?      // может быть null
+    )
+
+>>>>>>> Stashed changes
     // 🧩 ввод и фокус
     private val queryFlow = MutableStateFlow("")
     private val focusFlow = MutableStateFlow(false)
@@ -123,7 +139,10 @@ class SearchViewModel(
         val resource: Resource<List<Track>>,
         val isLoading: Boolean,
         val executedQuery: String,
-        val removedIds: Set<Int>
+        val removedIds: Set<Int>,
+        val listTextColor: Int?,     // ⬅️ НОВОЕ
+        val listArrowColor: Int?,     // ⬅️ НОВОЕ
+        val listItemBackgroundColor: Int?
     )
 
     private data class P1(
@@ -144,18 +163,42 @@ class SearchViewModel(
         ) { query, isFocused, history, resource, isLoading ->
             P1(query, isFocused, history, resource, isLoading)
         }
+            // добавили executedQuery
             .combine(executedQuery) { p, execQ ->
                 p to execQ
             }
+            // добавили removedFromSearch → собрали Acc с пустыми цветами
             .combine(removedFromSearch) { (p, execQ), removedIds ->
+                Acc(
+                    p = p,
+                    execQ = execQ,
+                    removedIds = removedIds,
+                    listTextColor = null,
+                    listArrowColor = null
+                )
+            }
+            // прокинули listTextColor
+            .combine(listTextColorFlow) { acc, txtColor ->
+                acc.copy(listTextColor = txtColor)
+            }
+            // прокинули listArrowColor
+            .combine(listArrowColorFlow) { acc, arrowColor ->
+                acc.copy(listArrowColor = arrowColor)
+            }
+            // И ТОЛЬКО ЗДЕСЬ собираем Inputs, уже имея всё + фон
+            .combine(listItemBackgroundColorFlow) { acc, bgColor ->
+                val p = acc.p
                 Inputs(
-                    query = p.query, // ← тут уже НОРМАЛИЗОВАННАЯ строка
+                    query = p.query,
                     isFocused = p.isFocused,
                     history = p.history,
                     resource = p.resource,
                     isLoading = p.isLoading,
-                    executedQuery = execQ,  // ← и это нормализованно, т.к. приходит из searchQueries
-                    removedIds = removedIds
+                    executedQuery = acc.execQ,
+                    removedIds = acc.removedIds,                 // ← Set<Int> как надо
+                    listTextColor = acc.listTextColor,
+                    listArrowColor = acc.listArrowColor,
+                    listItemBackgroundColor = bgColor            // ← фон (Int? из VM)
                 )
             }
 
@@ -223,6 +266,13 @@ class SearchViewModel(
                     historyTracks = inp.history,                 // 🗂️ история
                     showHistory = !isLoadingSafe && showHistory, // 👁️ история не перекрывается лоадером
                     displayedTracks = displayed,                  // 🖼️ именно это отображаем в списке
+<<<<<<< Updated upstream
+=======
+                    // ⬇️ НОВОЕ
+                    listTextColor = inp.listTextColor,
+                    listArrowColor = inp.listArrowColor,
+                    listItemBackgroundColor = inp.listItemBackgroundColor
+>>>>>>> Stashed changes
                 )
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchUiState())
@@ -282,4 +332,24 @@ class SearchViewModel(
     }
 
     fun getTrackHistoryList(): List<Track> = uiState.value.historyTracks
+
+    // сеттеры
+    fun setListTextColor(color: Int?) {
+        listTextColorFlow.value = color
+    }
+    // сеттеры
+    fun setListArrowColor(color: Int?) {
+        listArrowColorFlow.value = color
+    }
+    // сеттеры
+    fun setListItemBackgroundColor(color: Int?) {
+        listItemBackgroundColorFlow.value = color
+    }
+
+    // удобный общий сброс
+    fun resetListColorsToDefault() {
+        listItemBackgroundColorFlow.value = null
+        listTextColorFlow.value = null
+        listArrowColorFlow.value = null
+    }
 }

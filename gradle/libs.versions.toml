@@ -1,8 +1,12 @@
 [versions]
 agp = "8.9.1"
+<<<<<<< Updated upstream
 constraintlayoutCompose = "1.1.1"
 kotlin = "2.0.21"
 
+=======
+kotlin = "2.0.21"
+>>>>>>> Stashed changes
 adapterdelegates4KotlinDsl = "4.3.2"
 
 coreKtx = "1.15.0"
@@ -15,9 +19,13 @@ viewpager2 = "1.0.0"
 fragmentKtx = "1.7.1"
 
 lifecycleViewmodelKtx = "2.8.7"
+<<<<<<< Updated upstream
 
 # ВАЖНО: coroutines >= 1.9.0
 kotlinxCoroutinesAndroid = "1.9.0"
+=======
+kotlinxCoroutinesAndroid = "1.7.3"
+>>>>>>> Stashed changes
 
 navigationFragmentKtx = "2.9.1"
 
@@ -46,10 +54,15 @@ conscryptAndroid = "2.5.2"
 newpipeextractor = "v0.24.8"
 protobufJavaliteVersion = "3.25.3"
 
+<<<<<<< Updated upstream
 # ВАЖНО: одна версия Koin
 koin = "3.5.6"
 
 # Используй реальный существующий BOM Compose. Если твой 2025.10.00 не существует у тебя локально — поставь актуальный.
+=======
+koin = "3.3.0"
+
+>>>>>>> Stashed changes
 composeBom = "2025.10.00"
 
 [libraries]
@@ -111,9 +124,13 @@ protobuf-javalite-v3253 = { module = "com.google.protobuf:protobuf-javalite", ve
 
 conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscryptAndroid" }
 
+<<<<<<< Updated upstream
 # --- Koin: одна версия для всех артефактов ---
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+=======
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+>>>>>>> Stashed changes
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

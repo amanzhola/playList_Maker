@@ -17,8 +17,13 @@ object SegmentManagerProvider {
         val currentFragment = activity.getCurrentFragment()
         val isMainFragment = currentFragment?.toScreenType() == ScreenType.MAIN_FRAGMENT
 
+<<<<<<< Updated upstream
         // ⬇️ берём ThemeInteraction из Koin через Activity
         val theme: ThemeInteraction = activity.getKoin().get()
+=======
+            // ⬇️ берём ThemeInteraction из Koin через Activity
+            val theme: ThemeInteraction = activity.getKoin().get()
+>>>>>>> Stashed changes
 
         return SegmentManager(
             context = activity,
@@ -36,6 +41,7 @@ object SegmentManagerProvider {
                 }
             },
 
+<<<<<<< Updated upstream
             shareSingleTrack = {
                 val fragment = activity.getCurrentFragment()
                 if (fragment is AudioPlayerFragment) {
@@ -51,3 +57,20 @@ object SegmentManagerProvider {
         )
     }
 }
+=======
+                        shareSingleTrack = {
+                    val fragment = activity.getCurrentFragment()
+                    if (fragment is AudioPlayerFragment) {
+                        fragment.shareSingleTrack()
+                    }
+                },
+                recreate = { activity.recreate() },
+                colorManager = colorManager, // Передаем созданный ColorManager
+                changeLanguage = { activity.changeLanguage() },
+
+                // ⬇️ новое поле — передаём внутрь менеджера
+                theme = theme
+            )
+        }
+    }
+>>>>>>> Stashed changes

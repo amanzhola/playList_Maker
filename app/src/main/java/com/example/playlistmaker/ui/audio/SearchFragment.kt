@@ -13,12 +13,16 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.TextView
+<<<<<<< Updated upstream
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+=======
+import androidx.compose.ui.platform.ComposeView
+>>>>>>> Stashed changes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -35,11 +39,13 @@ import com.example.playlistmaker.roots.main.MainActivity
 import com.example.playlistmaker.ui.main.BottomNavConfig
 import com.example.playlistmaker.ui.search.compose.SearchRoute
 import com.example.playlistmaker.utils.showLongSnack
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
+<<<<<<< Updated upstream
 class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvider {
 
     private var searchScreenBg: Color? by mutableStateOf(null)
@@ -47,6 +53,13 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
     private var listTextColorOverride: Color? by mutableStateOf(null)
     private var listIconColorOverride: Color? by mutableStateOf(null)
     private var listRowBgOverride: Color? by mutableStateOf(null)
+=======
+
+class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvider {
+
+    // 👇 одноразовый флаг «прокрутить наверх»
+    private val scrollToTopOnce = MutableStateFlow(false)
+>>>>>>> Stashed changes
 
     // --- VM и сервисы, которые реально нужны ---
     private val viewModel: SearchViewModel by viewModel()
@@ -110,11 +123,16 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    // --- ONLY change: возвращаем ComposeView вместо ViewBinding ---
+>>>>>>> Stashed changes
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+<<<<<<< Updated upstream
         val ctx = requireContext()
 
         // Корень: FrameLayout, чтобы можно было положить overlay поверх compose
@@ -163,6 +181,15 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
         root.addView(compose)
         root.addView(failView)
         return root
+=======
+        return ComposeView(requireContext()).apply {
+            setContent {
+                setContent {
+                    SearchRoute() // ← без параметров
+                }
+            }
+        }
+>>>>>>> Stashed changes
     }
 
     // --- BottomNavConfig ---
@@ -182,6 +209,7 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
         }
 
     fun setListTextColor(color: Int) {
+<<<<<<< Updated upstream
         listTextColorOverride = Color(color)
     }
 
@@ -195,6 +223,21 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
         searchScreenBg   = c                 // и фон всего SearchScreen
     }
 
+=======
+        viewModel.setListTextColor(color)
+    }
+
+    fun setListArrowColor(color: Int) {
+        viewModel.setListArrowColor(color)
+    }
+
+    fun setListBackGroundColor(color: Int) {
+        viewModel.setListItemBackgroundColor(color)
+    }
+
+    fun resetListColorsToDefault() = viewModel.resetListColorsToDefault()
+
+>>>>>>> Stashed changes
     fun shareTrackHistoryFromViewModel() {
         // достаём список из VM и шарим его тем же сервисом, что и раньше
         val tracks = viewModel.getTrackHistoryList()

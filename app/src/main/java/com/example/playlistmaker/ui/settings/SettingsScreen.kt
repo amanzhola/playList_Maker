@@ -2,6 +2,10 @@ package com.example.playlistmaker.ui.settings
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+<<<<<<< Updated upstream
+=======
+import android.view.LayoutInflater
+>>>>>>> Stashed changes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -35,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.playlistmaker.R
+<<<<<<< Updated upstream
 import com.example.playlistmaker.presentation.utils.deriveFieldBgFromScreen
 import com.google.android.material.switchmaterial.SwitchMaterial
 
@@ -54,6 +59,10 @@ private fun Color.lighten(amount: Float): Color {
 
 /* ───────────────── screen ───────────────── */
 
+=======
+import com.google.android.material.switchmaterial.SwitchMaterial
+
+>>>>>>> Stashed changes
 @SuppressLint("LocalContextResourcesRead")
 @Composable
 fun SettingsScreen(
@@ -62,6 +71,7 @@ fun SettingsScreen(
     onShare: () -> Unit,
     onSupport: () -> Unit,
     onAgreement: () -> Unit,
+<<<<<<< Updated upstream
 
     // принимаем ТОЛЬКО 3 внешних цвета
     extBackground: Color? = null,   // фон
@@ -73,6 +83,16 @@ fun SettingsScreen(
     val ctx = LocalContext.current
     val density = LocalDensity.current
     val textColor = extTextColor ?: colorResource(R.color.black_white)
+=======
+) {
+    // фон экрана из XML (day/night)
+    val screenBg = colorResource(R.color.white_textColor)
+
+    // текстовый стиль Text16 из XML
+    val ctx = LocalContext.current
+    val density = LocalDensity.current
+    val textColor = colorResource(R.color.black_white)
+>>>>>>> Stashed changes
     val textSizeSp = with(density) { ctx.resources.getDimension(R.dimen.Settings_Text_16).toSp() }
     val ysRegular = FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.W400))
     val text16 = TextStyle(
@@ -82,6 +102,7 @@ fun SettingsScreen(
         color = textColor
     )
 
+<<<<<<< Updated upstream
     // цвет иконок: внешне заданный или hintColor по умолчанию
     val iconTint = extIconTint ?: colorResource(R.color.hintColor)
 
@@ -92,11 +113,14 @@ fun SettingsScreen(
 
     val switchTrackOff =  deriveFieldBgFromScreen(iconTint)
 
+=======
+>>>>>>> Stashed changes
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(screenBg)
     ) {
+<<<<<<< Updated upstream
         Spacer(Modifier.height(dimensionResource(R.dimen.Separator_10)))
 
         SwitchRowExact(
@@ -113,12 +137,40 @@ fun SettingsScreen(
             onCheckedChange = onToggleDarkMode
         )
 
+=======
+        // include @layout/fail
+        IncludeFailXml()
+
+        // marginTop из SwitchView
+        Spacer(Modifier.height(dimensionResource(R.dimen.Separator_10)))
+
+        // строка со свитчем (правый край как у строк с иконками + зазор между текстом и свитчем)
+        SwitchRowExact(
+            title = stringResource(R.string.switch_r),
+            checked = darkMode,
+            rowEndPadding = dimensionResource(R.dimen.Switch_padding_6),       // выравнивание по правому краю
+            gapTextToSwitch = dimensionResource(R.dimen.Switch_padding_6), // как android:paddingEnd у Switch
+            textStyle = text16,
+            rowBackground = screenBg,
+            // цвета свитча (day/night) — как в стилях SwitchView
+            thumbOn = colorResource(R.color.switch_thumb_on_color),
+            trackOn = colorResource(R.color.switch_track_on_color),
+            thumbOff = colorResource(R.color.switch_thumb_off_color),
+            trackOff = colorResource(R.color.switch_track_off_color),
+            onCheckedChange = onToggleDarkMode
+        )
+
+        // три строки как SettingsTextView
+>>>>>>> Stashed changes
         SettingsRowExact(
             title = stringResource(R.string.share_r),
             iconEndRes = R.drawable.share,
             textStyle = text16,
             rowBackground = screenBg,
+<<<<<<< Updated upstream
             iconTint = iconTint,
+=======
+>>>>>>> Stashed changes
             onClick = onShare
         )
         SettingsRowExact(
@@ -126,7 +178,10 @@ fun SettingsScreen(
             iconEndRes = R.drawable.group,
             textStyle = text16,
             rowBackground = screenBg,
+<<<<<<< Updated upstream
             iconTint = iconTint,
+=======
+>>>>>>> Stashed changes
             onClick = onSupport
         )
         SettingsRowExact(
@@ -134,15 +189,35 @@ fun SettingsScreen(
             iconEndRes = R.drawable.vector,
             textStyle = text16,
             rowBackground = screenBg,
+<<<<<<< Updated upstream
             iconTint = iconTint,
+=======
+>>>>>>> Stashed changes
             onClick = onAgreement
         )
     }
 }
 
+<<<<<<< Updated upstream
 /* ───────────────── helpers (без изменений логики) ───────────────── */
 
 @Composable
+=======
+/* ===== helpers ===== */
+
+@Composable
+private fun IncludeFailXml() {
+    AndroidView(
+        modifier = Modifier.fillMaxWidth(),
+        factory = { ctx ->
+            LayoutInflater.from(ctx).inflate(R.layout.fail, null, false)
+        }
+    )
+}
+
+// <<<<<<<<<<<<< ВАЖНО: SwitchMaterial во View через AndroidView >>>>>>>>>>
+@Composable
+>>>>>>> Stashed changes
 private fun MdcSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
@@ -152,6 +227,10 @@ private fun MdcSwitch(
     AndroidView(
         factory = { context ->
             SwitchMaterial(context).apply {
+<<<<<<< Updated upstream
+=======
+                // размеры/фон/состояния возьмутся из темы MDC; выставим цвета как в стилях
+>>>>>>> Stashed changes
                 thumbTintList = ColorStateList.valueOf(thumbColor.toArgb())
                 trackTintList = ColorStateList.valueOf(trackColor.toArgb())
                 isChecked = checked
@@ -160,12 +239,26 @@ private fun MdcSwitch(
         },
         update = { view ->
             if (view.isChecked != checked) view.isChecked = checked
+<<<<<<< Updated upstream
+=======
+            // tint'ы держим синхронно, если сменили тему
+>>>>>>> Stashed changes
             view.thumbTintList = ColorStateList.valueOf(thumbColor.toArgb())
             view.trackTintList = ColorStateList.valueOf(trackColor.toArgb())
         }
     )
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * Строка со свитчем:
+ * - правый отступ = Padding_18 (как у строк с иконками) → выравнивание по правому краю
+ * - зазор между текстом и свитчем = Switch_padding_6 (как android:paddingEnd у SwitchMaterial)
+ * - внутри строки фон = white_textColor
+ * - сам свитч = SwitchMaterial (MDC), вид 1-в-1 как во View
+ */
+>>>>>>> Stashed changes
 @Composable
 private fun SwitchRowExact(
     title: String,
@@ -201,6 +294,10 @@ private fun SwitchRowExact(
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(gapTextToSwitch))
+<<<<<<< Updated upstream
+=======
+            // используем MDC Switch, чтобы внешний вид был как у SwitchMaterial из XML
+>>>>>>> Stashed changes
             MdcSwitch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
@@ -217,7 +314,10 @@ private fun SettingsRowExact(
     iconEndRes: Int,
     textStyle: TextStyle,
     rowBackground: Color,
+<<<<<<< Updated upstream
     iconTint: Color,
+=======
+>>>>>>> Stashed changes
     onClick: () -> Unit
 ) {
     val rowHeight = dimensionResource(R.dimen.Settings_Height_61)
@@ -247,7 +347,11 @@ private fun SettingsRowExact(
             Icon(
                 painter = painterResource(iconEndRes),
                 contentDescription = null,
+<<<<<<< Updated upstream
                 tint = iconTint
+=======
+                tint = Color.Unspecified
+>>>>>>> Stashed changes
             )
         }
     }
