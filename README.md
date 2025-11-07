@@ -352,6 +352,196 @@
 ---
 <h2 align="right">🎞️ Экран Кино</h2>
 
+<table width="100%">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/1db1fcab-1401-4bb8-b01a-69013f802626e" alt="shot-1" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/a2b17d96-3ccc-49c0-962e-9bb777c1bd9e" alt="shot-2" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/30ba1f2d-92e4-41e0-9fd5-7a1321003153" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/6f7b8a4d-a990-48e2-b099-db0c16abe5be" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/16bd48b5-b07e-4465-bbc1-4e7d0115be4c" alt="shot-3" width="200"></td>
+  </tr>
+</table>
+
+- Поиск фильмов:
+    - Кнопка старта как альтернатива экрану поиска Песен.
+    - Автостарт реализован (и закомментирован в коде).
+- Результаты поиска при переходе на трек:
+    - ViewPager2 с **горизонтальным скролом** (по умолчанию).
+    - Переключение на **вертикальный скрол** — по кнопке.
+- Верхний тулбар и нижний навигатор доступны.
+- Деление фильмов на избранные (❤️).
+- При поиске обьединяются и выдаются результы двух режимов поиска:
+    - **Обычный** — имена актёров.
+    - **Расширенный** — краткое описание фильма.
+- При отдельном просмотре фильма как альтернатива экрану поиска песен — **без тулбара** и **нижнего навигатора**.
+- Переворот списка (reverse scroll) — по фильтру.
+- ✨📽️💃 Шаринг кинофильма при просмотре в режиме просмотра постера фильма
+- Получение кинофильма и распознавание если она в вашем списке избранных
+- Переход на фрашменты, где имеется детали фильма, список и имена звезд и их фотографии
+- Экран поиск звезд(актеров и актрис) альтернативно создан из ресурсов Википедия, с определением языка из поля ввода поиска
+
+<table width="100%">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/cdc57d70-0b88-4afd-bbd1-a456b65b61bf" alt="shot-1" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/5b4e8f6c-f67b-40ab-aee5-b5603bdd8b38" alt="shot-2" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/fb209b74-932b-481e-986a-4274a409bac7" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/1feb6c8b-628a-414d-865c-f19ed0f61b18" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/6c0356fa-e30f-47f8-a680-b155540f1140" alt="shot-3" width="200"></td>
+  </tr>
+</table>
+
+<table width="100%">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/1d700dc2-4a1f-4a3f-94c2-f7adb1815285" alt="shot-1" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/446885c0-6723-499c-9f6d-65511b67f524" alt="shot-2" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/0286a267-0d20-435e-b574-ebfef9e2f951" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/204a5a42-1c40-4973-b0be-dce2c5c25006" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/fb877cb5-4ffa-42e3-82c4-79d421d8d1d3" alt="shot-3" width="200"></td>
+  </tr>
+</table>
+
+<table width="100%">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/8e16251a-7850-44aa-bc44-f97380994067" alt="shot-1" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/158a7bd0-5a44-4913-aec6-559f729eb59a" alt="shot-2" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/d8508830-d344-46b1-82e2-19893ce87c64" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/066a7063-c13b-45c9-8221-e5855308e081" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/e50a2e13-aa2a-4645-88df-8ba56bda1163" alt="shot-3" width="200"></td>
+  </tr>
+</table>
+
+
+<table width="100%">
+  <tr>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/cce7a9b5-a968-4a9f-83c2-c920b302a362" alt="shot-1" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/8c43e04f-34d6-46ff-80f0-efc3f2417d7e" alt="shot-2" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/6a1c2b5d-7bfb-441d-984d-fb8e057435d4" alt="shot-3" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/a3c27df8-5bad-4419-8185-3edf491befc6"" alt="shot-3" width="250"></td>
+  </tr>
+</table>
+
+---
+
+## 🌦️ Экран Погоды
+
+<table width="100%">
+  <tr>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/9041bdd1-de80-436b-b910-af89f4a42926" alt="shot-1" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/49d73fe3-1f94-4f9d-ad46-923d3311a1d0" alt="shot-2" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/099831ed-85ea-4089-a614-d1f7140d71a3" alt="shot-3" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/125ec96c-692e-410e-a6fb-84f62aa5318e" alt="shot-3" width="250"></td>
+  </tr>
+</table>
+
+- Получение данных с Foreca API.
+- В связи с ограничением бесплатного пользования в 30 дней дополнено в случае отсуствия информации поиcк через бесплатные сервисы аэропортов мира
+- После ввода названия доп запрашивается код страны для нахождения определением через долготу и ширину
+- Верхний тулбар и нижний навигатор доступны.
+- Переключение темы и поддержка всех стандартных функций тулбара.
+
+  <tr>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/1dafcbc0-05bf-496f-b5bc-b1b949040859" alt="shot-1" width="240"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/fee677a5-8507-41ad-95fe-6dbb1b57a018" alt="shot-2" width="240"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/dbf3a057-8438-4367-bfb1-ddef6c929c33" alt="shot-3" width="240"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/cc130189-0e20-436c-92b1-62df13fa6e51" alt="shot-3" width="240"></td>
+  </tr>
+</table>
+
+---
+
+<h2 align="right">💠 Экран Чата</h2>
+
+<table width="100%">
+  <tr>
+    <td align="center" width="33%">
+       <img src="https://github.com/user-attachments/assets/f4776aae-7c2c-4033-aed1-4a8ae9d33b1e" alt="shot-3" width="310">
+    </td>
+    <td align="center" width="33%">
+    <img src="https://github.com/user-attachments/assets/6c7283d0-656b-4d1d-9b8b-8f65547e0c2b" alt="Chat(unreadCount)" width="310">
+    </td>
+    <td align="center" width="33%">
+      <img src="https://github.com/user-attachments/assets/d2e95765-4722-4757-a902-d9328af08dc5" alt="chat(horizontal)" width="310">
+    </td>
+  </tr>
+</table>
+
+- Используется:
+    - Реализован на базе FireBase (личка, позже + групповой чат)
+- Отображает тулбар и доступ к теме, делиться и другим действиям.
+- экран регистрация пользователей (профиль)
+- экран списка контактов
+- экран обмена текстовыми сообщениями и картинами  
+
+<table width="100%">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/5d8395f5-6b45-43ac-ac09-bef867a47b59" alt="shot-1" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/55a424b8-14e3-4659-9ec1-9f8dd3d267eb" alt="shot-2" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/871db67a-d821-42c1-97a6-5d08bfcb38ce" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/d45faae2-1a87-49ac-b991-e49875315764" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/682e670c-b37e-4872-add9-795ab7c1a334" alt="shot-3" width="200"></td>
+  </tr>
+</table>
+
+<table width="100%">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/55bdcaa2-ae2a-4532-bcbc-4a3b43e0ea45" alt="shot-1" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/4f5885db-2f12-4779-97e9-dade5acbc80a" alt="shot-2" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/2584b021-7f40-49c6-a165-58ae633d597b" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/c156fdf7-67a3-45c5-9d8b-64e14dbc4b80" alt="shot-3" width="220"></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/75a514a9-6474-4934-9d82-7f0ad21a6a73" alt="shot-3" width="200"></td>
+  </tr>
+</table>
+
+---
+
+## 🛠️ Технические особенности
+
+- Кастомные анимации переходов между экранами (6 видов).
+- Реализация `Dropdown` через вложенные вращающие круги.
+- Переключение языка и видимости UI в зависимости от локали.
+- Прямые переходы (без стека), максимально быстрый отклик и удаление блуждания при длинных переходах.
+- Удобный тулбар через `BaseActivity`.
+- В каждом экране реализован сообщение на отсутсвии интернета экран очищается для показа ошибки на 3 секунды и затем все обратно 
+
+
+<h2 align="right">✌️ Стек технологий</h2>
+ * Kotlin
+ * Android SDK
+ * ViewModel + LiveData
+ * Coroutines
+ * Retrofit
+ * Koin (DI)
+ * ViewPager2
+ * RecyclerView
+ * SharedPreferences
+
+---
+
+## 🚀 Будущие доработки
+
+- Расширение возможностей экрана ExtraOption (сделано)
+- Оптимизация истории поиска треков и фильмов. (сделано)
+- Поддержка более длительного токена погоды.  (сделано)
+- Возможность синхронизации истории с облаком.  (сделано)
+
+---
+
+<h2 align="right">⚙️ Установка  и запуск</h2>
+
+1. Клонировать репозиторий:
+   git clone https://github.com/amanzhola/playList_Maker
+2. Открыть проект в Android Studio
+3. Собрать и запустить на эмуляторе или устройстве
+
+---
+
+## 🧑‍💻 Автор / Команда
+
+> **Имя**: Аманжол Аимов
+> **Почта**: amanzholaimov@gmail.com  
+> **GitHub**: [github.com/amanzhola](https://github.com/amanzhola)
+
+---
 
 
 
