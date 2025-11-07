@@ -259,12 +259,6 @@
         • Просмотр списка любимых композиций <br>
         • Локальное хранение избранных треков <br> 
         • Управление цветами <br> 
-        📝 Создание плейлистов  <br>
-        • Создание пользовательских плейлистов <br>
-        • Добавление обложки, названия и описания <br>
-        • Добавление треков в плейлисты <br>   
-        • Управление плейлистами (редактирование, удаление) <br>
-        • Импорт-экспорт плейлистами <br>
       </p>
      </td>
     <td width="300" align="center" valign="middle">
@@ -277,6 +271,10 @@
   </tr>
 </table>
 
+📝 Создание плейлистов  <br>
+• Создание пользовательских плейлистов <br>
+• Добавление обложки, названия и описания <br>
+
 <table width="100%">
   <tr>
     <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/b2676c78-ecf8-4dee-8179-8b61533e0af1" alt="shot-1" width="220"></td>
@@ -286,6 +284,10 @@
     <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/3ce74af0-89a2-4708-87ae-a562407d206d" alt="shot-3" width="200"></td>
   </tr>
 </table>
+
+• Добавление треков в плейлисты <br> 
+• Управление плейлистами (редактирование, удаление) <br>
+• Импорт-экспорт плейлистами <br>
 
 <table width="100%">
   <tr>
@@ -332,15 +334,6 @@
 
 <table width="100%">
   <tr>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/0bc7261a-ffbb-495d-a9a2-95366d470bde" alt="shot-1" width="230"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/66ee37a5-d66f-4bd7-8cc8-cca5f8603534" alt="shot-2" width="230"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/b43f519d-3b59-4433-b3d4-7d31b31a63f6" alt="shot-3" width="230"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/29165c11-0813-4f71-85bc-bc4c73fe5bfd" alt="shot-3" width="230"></td>
-  </tr>
-</table>
-
-<table width="100%">
-  <tr>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/a3b61ffe-ac44-4d80-b3fe-c16004293d8f" alt="shot-1" width="230"></td>
        </td>
        <td width="230" valign="middle" align="left">
@@ -351,6 +344,15 @@
      </td>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/7e69953e-664c-4e57-ba33-90d6e6d5c1a3" alt="shot-2" width="230"></td>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/85822c37-9b13-4f7f-b999-7a0d9039ee34" alt="shot-3" width="230"></td>
+  </tr>
+</table>
+
+<table width="100%">
+  <tr>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/0bc7261a-ffbb-495d-a9a2-95366d470bde" alt="shot-1" width="230"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/66ee37a5-d66f-4bd7-8cc8-cca5f8603534" alt="shot-2" width="230"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/b43f519d-3b59-4433-b3d4-7d31b31a63f6" alt="shot-3" width="230"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/29165c11-0813-4f71-85bc-bc4c73fe5bfd" alt="shot-3" width="230"></td>
   </tr>
 </table>
 
