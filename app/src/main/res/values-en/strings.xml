@@ -133,6 +133,7 @@
 
     <!-- <adding Movies Cast Description> -->
     <string name="moviesCastDescription">✨📽️💃Movies Cast Description🧑‍🤝‍🧑🌼</string>
+    <string name="nothing_found_people">No one was found</string>
 
     <!-- <adding Movies Names Search> -->
     <string name="moviesStars"> ✍️ Name of the actor or actress ✨📽️💃 👈</string>

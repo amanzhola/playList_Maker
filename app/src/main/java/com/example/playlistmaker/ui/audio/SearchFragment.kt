@@ -40,8 +40,10 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvider {
+class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvider, ReversableList {
 
+    // сигнал «прокрутить список к началу»
+    private val scrollTopRequests = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private var searchScreenBg: Color? by mutableStateOf(null)
 
     private var listTextColorOverride: Color? by mutableStateOf(null)
@@ -140,7 +142,8 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
                     screenBackgroundOverride = searchScreenBg,
                     rowTextColorOverride    = listTextColorOverride,
                     rowIconColorOverride    = listIconColorOverride,
-                    rowBackgroundOverride   = listRowBgOverride
+                    rowBackgroundOverride   = listRowBgOverride,
+                    scrollToTopFlow         = scrollTopRequests // НОВОЕ:
                 )
             }
         }
@@ -272,4 +275,13 @@ class SearchFragment : BaseFragment(), BottomNavConfig, BackgroundExclusionProvi
 
     // раньше было для исключения раскраски конкретных View id — их больше нет
     override fun backgroundExclusionIds(): Set<Int> = emptySet()
+
+    override fun reverseList() {
+        viewModel.toggleReverseDisplayedOrder() // ← VM
+        viewLifecycleOwner.lifecycleScope.launch {
+            // emit гарантированно доставит событие, даже если collect уже активен чуть позже
+            scrollTopRequests.emit(Unit)
+        }
+    }
+
 }

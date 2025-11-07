@@ -47,6 +47,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -192,7 +194,9 @@ fun TrackItemComposePortrait(
             text = track.trackName,
             color = textColor,
             style = LegacyTextStyles.text22_400().copy(
-                platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false)
+                platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false),
+                lineBreak = LineBreak.Heading,   // или .Simple / .Paragraph (API 33+ эффективнее)
+                hyphens = Hyphens.Auto           // API 33+
             ),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -202,6 +206,7 @@ fun TrackItemComposePortrait(
                 end.linkTo(rightBorder)
                 top.linkTo(posterRef.bottom)
                 bottom.linkTo(horizontalGL)
+                width  = Dimension.fillToConstraints           // зажать по гайдлайнам
                 height = Dimension.wrapContent
                 verticalBias = 1f
                 horizontalBias = 0f

@@ -52,6 +52,7 @@
         <color name="backgroundDay1">@color/backgroundDay</color>
         <color name="hintFieldColor1">@color/hintFieldColor</color>
         <color name="switch_track_on_color1">@color/switch_track_on_color</color>
+        <color name="filter">@color/white</color>
 
         movie
         <color name="eeeee_black">@color/black</color>

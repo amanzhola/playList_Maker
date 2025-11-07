@@ -38,6 +38,14 @@ class SearchViewModel(
     private val searchHistoryInteraction: SearchHistoryInteraction
 ) : ViewModel() {
 
+    // флаг "показывать в обратном порядке"
+    private val reverseFlag = MutableStateFlow(false)
+
+    /** Вызываем из фрагмента/активити, чтобы перевернуть текущий список. */
+    fun toggleReverseDisplayedOrder() {
+        reverseFlag.value = !reverseFlag.value
+    }
+
     private val _openTrack = MutableSharedFlow<Track>(extraBufferCapacity = 1)
     val openTrack: SharedFlow<Track> = _openTrack
 
@@ -123,7 +131,8 @@ class SearchViewModel(
         val resource: Resource<List<Track>>,
         val isLoading: Boolean,
         val executedQuery: String,
-        val removedIds: Set<Int>
+        val removedIds: Set<Int>,
+        val isReversed: Boolean             // ← НОВОЕ
     )
 
     private data class P1(
@@ -134,7 +143,7 @@ class SearchViewModel(
         val isLoading: Boolean
     )
 
-        private val inputs: Flow<Inputs> =
+    private val inputs: Flow<Inputs> =
         combine(
             queryFlow,
             focusFlow,
@@ -144,18 +153,18 @@ class SearchViewModel(
         ) { query, isFocused, history, resource, isLoading ->
             P1(query, isFocused, history, resource, isLoading)
         }
-            .combine(executedQuery) { p, execQ ->
-                p to execQ
-            }
-            .combine(removedFromSearch) { (p, execQ), removedIds ->
+            .combine(executedQuery) { p, execQ -> p to execQ }
+            .combine(removedFromSearch) { (p, execQ), removedIds -> Triple(p, execQ, removedIds) }
+            .combine(reverseFlag) { (p, execQ, removedIds), reversed ->
                 Inputs(
-                    query = p.query, // ← тут уже НОРМАЛИЗОВАННАЯ строка
+                    query = p.query,
                     isFocused = p.isFocused,
                     history = p.history,
                     resource = p.resource,
                     isLoading = p.isLoading,
-                    executedQuery = execQ,  // ← и это нормализованно, т.к. приходит из searchQueries
-                    removedIds = removedIds
+                    executedQuery = execQ,
+                    removedIds = removedIds,
+                    isReversed = reversed       // ← НОВОЕ
                 )
             }
 
@@ -165,11 +174,11 @@ class SearchViewModel(
             .map { inp ->
                 val queryBlank = inp.query.isBlank() // NEW: inp.query уже нормализован (единый источник истины)
 
-                val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
                 // 🧠 queryBlank — пустой ввод?
                 // 🗂️ showHistory — показывать историю только когда есть фокус, ввода нет и история не пуста
 
                 // 1) 📦 Собираем «сырую» выдачу и базовую ошибку
+                // 1) Разбираем ресурс поиска + ошибки
                 val (tracksRaw0, error0) = when (inp.resource) {
                     is Resource.Success -> {
                         val list = inp.resource.data.orEmpty()
@@ -183,36 +192,42 @@ class SearchViewModel(
                             inp.query == inp.executedQuery &&
                             !inp.isLoading &&
                             list.isEmpty()
-                        ) {
-                            emptyList<Track>() to ErrorState.ERROR // 🫙
-                        } else {
-                            list to ErrorState.NONE // ✅ есть данные или поиск ещё идёт
-                        }
+                        ) emptyList<Track>() to ErrorState.ERROR // 🫙
+                        else list to ErrorState.NONE // ✅ есть данные или поиск ещё идёт
                     }
                     is Resource.Error -> emptyList<Track>() to ErrorState.FAILURE // ⚠️ сеть/сервер
                 }
 
                 // 2) 🧼 Мягкое удаление — прячем локально исключённые треки (без запроса к бэку)
+                // 2) Прячем локально удалённые
                 val filtered0 = tracksRaw0.filter { it.trackId !in inp.removedIds }
 
                 // 3) 🚫 Жёсткая засечка: при пустом вводе — всегда пустой список и без ошибок
+                // 3) Если ввод пуст — ничего не показываем и без ошибок
                 val (tracksRaw, error) = if (queryBlank) {
                     emptyList<Track>() to ErrorState.NONE // 🔕 ни лоадера, ни ошибок, ни хвостов
                 } else {
                     filtered0 to error0
                 }
 
+                // 4) Что показывать «по умолчанию» (до реверса)
+                val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
+
                 // 4) 🎯 Что реально показываем пользователю
-                val displayed = when {
+                val displayedBase = when {
                     showHistory -> inp.history                        // 🗂️ история
                     !queryBlank && inp.query != inp.executedQuery -> emptyList() // ⏳ печатает (debounce ещё не сработал)
                     else -> tracksRaw                                  // 🔍 свежая выдача поиска
                 }
 
+                // 5) Применяем реверс
+                val displayed = if (inp.isReversed) displayedBase.asReversed() else displayedBase
+
                 // 5) 🧊 При пустом запросе не крутим лоадер
                 val isLoadingSafe = if (queryBlank) false else inp.isLoading
 
                 // 6) 🧱 Финальный UI-стейт (адаптер рисует displayedTracks)
+                // 6) Итоговый стейт
                 SearchUiState(
                     query = inp.query,
                     isInputFocused = inp.isFocused,
@@ -226,7 +241,6 @@ class SearchViewModel(
                 )
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchUiState())
-
 
     // ─── public API ───
 

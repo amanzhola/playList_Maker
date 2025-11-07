@@ -16,6 +16,7 @@ fun SearchRoute(
     rowTextColorOverride: Color? = null,
     rowIconColorOverride: Color? = null,
     rowBackgroundOverride: Color? = null,
+    scrollToTopFlow: kotlinx.coroutines.flow.Flow<Unit>? = null,
     vm: SearchViewModel = koinViewModel()
 ) {
     val state: SearchUiState by vm.uiState.collectAsStateWithLifecycle()
@@ -35,6 +36,7 @@ fun SearchRoute(
         screenBackgroundOverride = screenBackgroundOverride,
         rowTextColorOverride     = rowTextColorOverride,
         rowIconColorOverride     = rowIconColorOverride,
-        rowBackgroundOverride    = rowBackgroundOverride
+        rowBackgroundOverride    = rowBackgroundOverride,
+        scrollToTopFlow          = scrollToTopFlow // НОВОЕ:
     )
 }

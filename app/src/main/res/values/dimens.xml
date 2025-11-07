@@ -89,4 +89,7 @@
     <!-- <chat fragment> -->
     <dimen name="chat_bubble_max_width">280dp</dimen>
 
+    <!-- <create/edit fragment> -->
+    <dimen name="toolbar_height">56dp</dimen>
+
 </resources>

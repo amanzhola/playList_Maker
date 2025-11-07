@@ -1,0 +1,95 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Базовый лепесток: заполняем белым и даём тонкую серую обводку -->
+    <group android:pivotX="24" android:pivotY="24" android:rotation="0">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+        android:strokeWidth="1.2"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"/>
+    </group>
+
+    <!-- Копии лепестка с поворотами -->
+    <group android:pivotX="24" android:pivotY="24" android:rotation="45">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <group android:pivotX="24" android:pivotY="24" android:rotation="90">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <group android:pivotX="24" android:pivotY="24" android:rotation="135">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <group android:pivotX="24" android:pivotY="24" android:rotation="180">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <group android:pivotX="24" android:pivotY="24" android:rotation="225">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <group android:pivotX="24" android:pivotY="24" android:rotation="270">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <group android:pivotX="24" android:pivotY="24" android:rotation="315">
+        <path
+            android:pathData="M24,8 C26.8,8 29,10.7 29,14 C29,17.3 26.8,20 24,20 C21.2,20 19,17.3 19,14 C19,10.7 21.2,8 24,8 Z"
+            android:fillColor="#FFFFFFFF"
+            android:strokeColor="#22000000"
+            android:strokeWidth="1.2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <!-- Центр: жёлтый круг с тонкой тёплой обводкой -->
+    <path
+        android:fillColor="#FFC107"
+        android:strokeColor="#CC8E00"
+        android:strokeWidth="1.0"
+        android:pathData="M24,24 m -5,0 a 5,5 0 1,0 10,0 a 5,5 0 1,0 -10,0"/>
+</vector>

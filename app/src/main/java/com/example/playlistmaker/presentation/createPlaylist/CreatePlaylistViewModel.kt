@@ -81,7 +81,7 @@ class CreatePlaylistViewModel(
     }
 
     fun onNameChanged(raw: String) = reduce { st ->
-        val oneLine = raw.replace("\r", " ").replace("\n", " ").trim()
+        val oneLine = raw.replace("\r", " ").replace("\n", " ")
         val dirty =
             if (mode == Mode.EDIT) computeDirty(oneLine, st.desc, st.coverUri)
             else (st.dirty || oneLine.isNotBlank())
@@ -123,14 +123,15 @@ class CreatePlaylistViewModel(
                                 return@launch
                             }
                         }
-
+                        val cleanedName = snapshot.name.trimEnd()
                         val newId = withContext(Dispatchers.IO) {
                             createPlaylist(
-                                snapshot.name.trim(),
+                                cleanedName,
                                 snapshot.desc.ifBlank { null },
                                 coverPath
                             )
                         }
+                        _events.send(Event.Saved(newId, cleanedName))
 
                         if (pendingImportTracks.isNotEmpty()) {
                             withContext(Dispatchers.IO) {
@@ -161,14 +162,17 @@ class CreatePlaylistViewModel(
                         }
 
                         val id = requireNotNull(editId)
+                        val cleanedEditName = snapshot.name.trimEnd()
                         withContext(Dispatchers.IO) {
                             updatePlaylist(
                                 id = id,
-                                name = snapshot.name.trim(),
+                                name = cleanedEditName,
                                 desc = snapshot.desc.ifBlank { null },
                                 coverPath = newCoverPath
                             )
                         }
+                        originalName = cleanedEditName
+                        _events.send(Event.Saved(id, cleanedEditName))
 
                         originalName = snapshot.name.trim()
                         originalDesc = snapshot.desc

@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,6 +54,7 @@ import com.example.playlistmaker.presentation.utils.deriveFieldBgFromScreen
 import com.example.playlistmaker.utils.FailBlock
 import com.example.playlistmaker.utils.TrackRow
 import com.example.playlistmaker.utils.UpdateButton
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SearchScreen(
@@ -68,13 +70,26 @@ fun SearchScreen(
     screenBackgroundOverride: Color? = null,
     rowTextColorOverride: Color? = null,
     rowIconColorOverride: Color? = null,
-    rowBackgroundOverride: Color? = null
+    rowBackgroundOverride: Color? = null,
+    scrollToTopFlow: kotlinx.coroutines.flow.Flow<Unit>? = null  // НОВОЕ:
 ) {
     val listState = rememberLazyListState()
     val bg = screenBackgroundOverride ?: colorResource(R.color.white_textColor)
 
     val fieldBgForSearch =
         screenBackgroundOverride?.let { deriveFieldBgFromScreen(it) }
+
+    // НОВОЕ: ловим сигнал и скроллим
+    LaunchedEffect(scrollToTopFlow, listState) {
+        scrollToTopFlow?.let { flow ->
+            flow.collectLatest {
+                // даём Compose применить изменения списка
+                withFrameNanos { /* один кадр ожидания */ }
+                // а теперь прокручиваем к началу (можно animateScrollToItem, если нужна анимация)
+                listState.scrollToItem(0)
+            }
+        }
+    }
 
     Column(
         modifier
