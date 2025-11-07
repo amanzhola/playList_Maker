@@ -439,11 +439,12 @@
 - Верхний тулбар и нижний навигатор доступны.
 - Переключение темы и поддержка всех стандартных функций тулбара.
 
+<table width="100%">
   <tr>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/1dafcbc0-05bf-496f-b5bc-b1b949040859" alt="shot-1" width="230"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/fee677a5-8507-41ad-95fe-6dbb1b57a018" alt="shot-2" width="230"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/dbf3a057-8438-4367-bfb1-ddef6c929c33" alt="shot-3" width="230"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/cc130189-0e20-436c-92b1-62df13fa6e51" alt="shot-3" width="230"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/1dafcbc0-05bf-496f-b5bc-b1b949040859" alt="shot-1" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/fee677a5-8507-41ad-95fe-6dbb1b57a018" alt="shot-2" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/dbf3a057-8438-4367-bfb1-ddef6c929c33" alt="shot-3" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/cc130189-0e20-436c-92b1-62df13fa6e51" alt="shot-3" width="250"></td>
   </tr>
 </table>
 
