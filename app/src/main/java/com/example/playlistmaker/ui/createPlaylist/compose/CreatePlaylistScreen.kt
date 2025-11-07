@@ -12,13 +12,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,13 +37,19 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.integerResource
@@ -52,6 +65,9 @@ import coil3.request.crossfade
 import com.example.playlistmaker.R
 import com.example.playlistmaker.presentation.createPlaylist.CreatePlaylistViewModel
 import com.example.playlistmaker.ui.audioPosters.adapter.LegacyTextStyles
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("LocalContextResourcesRead", "ConfigurationScreenWidthHeight")
 @Composable
@@ -71,6 +87,13 @@ fun CreatePlaylistScreen(
     val screenWidthPx = LocalConfiguration.current.screenWidthDp * context.resources.displayMetrics.density
     //*******************************************
     val scroll = rememberScrollState()
+
+    // для каждого поля свой requester
+    val nameBring = remember { BringIntoViewRequester() }
+    val descBring = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+    val keyboard = LocalSoftwareKeyboardController.current
+    var typingJob by remember { mutableStateOf<Job?>(null) }
 
     // тянем maxLines из ресурсов (аналог android:maxLines="@integer/qty_lines_create_playlist")
     val maxDescLines = integerResource(id = R.integer.qty_lines_create_playlist)
@@ -122,13 +145,22 @@ fun CreatePlaylistScreen(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri -> onPickCover(uri) }
 
+    fun scheduleAutoHide() {
+        typingJob?.cancel()
+        typingJob = scope.launch {
+            delay(2000)           // 1 сек после последнего ввода
+            keyboard?.hide()      // спрятать IME
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             // фон экрана как в XML: android:background="@color/white_textColor"
             .background(colorResource(id = R.color.white_textColor))
             .systemBarsPadding()
-            .navigationBarsPadding() // .imePadding()
+//            .navigationBarsPadding() //
+            .imePadding()
             .verticalScroll(scroll)
             .padding(horizontal = paddingH),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -172,13 +204,28 @@ fun CreatePlaylistScreen(
         // Название (обязательное) — стиль Text16 из набора
         OutlinedTextField(
             value = state.name,
-            onValueChange = { raw -> onNameChanged(raw.replace("\r", " ").replace("\n", " ")) },
+            onValueChange = {
+                onNameChanged(it)
+                scheduleAutoHide()
+            },
             label = { Text(text = stringResource(R.string.name_new_playlist), style = LegacyTextStyles.text16_400()) },
             singleLine = true,
             textStyle = LegacyTextStyles.text16_400(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
             colors = nameFieldColors, // ← здесь подключён аналог селектора boxStroke + hint
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .bringIntoViewRequester(nameBring)
+                .onFocusEvent { ev ->
+                    if (ev.isFocused) {
+                        scope.launch {
+                            delay(100)                 // дать IME выехать
+                            nameBring.bringIntoView()  // прокрутить поле над клавой
+                        }
+                    } else {
+                        keyboard?.hide()
+                    }
+                }
         )
 
         Spacer(Modifier.height(12.dp)) // нужно в dimens
@@ -186,7 +233,10 @@ fun CreatePlaylistScreen(
         // Описание (опционально) — мультистрочное, minLines=1, maxLines из ресурсов
         OutlinedTextField(
             value = state.desc,
-            onValueChange = onDescChanged,
+            onValueChange = {
+                onDescChanged(it)
+                scheduleAutoHide()
+            },
             label = { Text(text = stringResource(R.string.description), style = text16_noFontPad) },
             singleLine = false,              // == android:inputType="textMultiLine"
             minLines = 1,                    // == android:minLines="1"
@@ -197,7 +247,19 @@ fun CreatePlaylistScreen(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Default
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .bringIntoViewRequester(descBring)
+                .onFocusEvent { ev ->
+                    if (ev.isFocused) {
+                        scope.launch {
+                            delay(100)
+                            descBring.bringIntoView()
+                        }
+                    }else {
+                        keyboard?.hide()
+                    }
+                }
         )
 
         Spacer(Modifier.weight(1f))
@@ -215,15 +277,11 @@ fun CreatePlaylistScreen(
                 disabledContainerColor = colorResource(R.color.hintColor),
                 disabledContentColor   = colorResource(R.color.white1)  // или полупрозрачным, если нужно
             ),
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 0.dp,
-                pressedElevation = 0.dp,
-                focusedElevation = 0.dp,
-                hoveredElevation = 0.dp,
-                disabledElevation = 0.dp
-            ),
+            elevation = ButtonDefaults.buttonElevation(0.dp,0.dp,0.dp,0.dp,0.dp),
             modifier = Modifier
                 .fillMaxWidth()
+                // ↓↓↓ добавляем только нижний inset от клавиатуры
+                .windowInsetsPadding(WindowInsets.ime.only(WindowInsetsSides.Bottom))
                 .padding(bottom = bottomGap)
         ) {
             Text(

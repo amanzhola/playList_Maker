@@ -19,9 +19,14 @@ class PersonViewHolder(parent: ViewGroup) :
     var description: TextView = itemView.findViewById(R.id.description)
 
     fun bind(person: Person) {
-        Glide.with(itemView)
-            .load(person.photoUrl)
+
+        val url = person.photoUrl.takeIf { it.isNotBlank() }
+
+        Glide.with(photo)
+            .load(url)
             .placeholder(R.drawable.ic_person)
+            .error(R.drawable.ic_person)       // если загрузка не удалась/404
+            .fallback(R.drawable.ic_person)    // если модель == null (после takeIf)
             .circleCrop()
             .into(photo)
 

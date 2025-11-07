@@ -249,8 +249,21 @@ class CreatePlaylistFragment : BaseFragment(), BottomNavConfig {
         else R.string.create_playlist_title
 
     // Оставляем, если есть различия темы между девайсами/эмулятором
+    @Suppress("DEPRECATION")
     override fun onResume() {
         super.onResume()
+        // Включаем resize только на время этого экрана
+        requireActivity().window.setSoftInputMode(
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
         (activity as? BaseActivity)?.applyThemeThenRestoreSaved()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Возвращаем стандартный режим, чтобы не поломать другие экраны
+        requireActivity().window.setSoftInputMode(
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+        )
     }
 }

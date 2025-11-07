@@ -135,6 +135,8 @@
 
     <!-- <adding Movies Cast Description> -->
     <string name="moviesCastDescription">Описание актеров фильмов</string>
+    <!-- <adding Movies -> NamesViewModel> -->
+    <string name="nothing_found_people">Никого не нашли</string>
 
     <!-- <adding Movies Names Search> -->
     <string name="moviesStars"> ✍️ Имя актера или актрисы ✨📽️💃 👈</string>

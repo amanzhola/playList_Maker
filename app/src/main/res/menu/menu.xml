@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/dropdown"
-        android:icon="@drawable/expand_more_border"
-        android:title=""
+        android:title="@string/dropdown_emoji"
         app:showAsAction="ifRoom"
         app:iconTint = "@color/menu_state_selector"/>
     <item
@@ -22,5 +21,8 @@
 
 <!--        option to replace dropdown icon by emoji -> note: selector be invalid-->
 <!--    android:title="@string/dropdown_emoji"-->
-
+<!--    android:title=""-->
+<!--        option to replace dropdown icon by 2 drawable -> note: selector valid-->
+<!--    android:icon="@drawable/expand_more_border"-->
+    <!--    android:icon="@drawable/ic_flower"-->
 </menu>

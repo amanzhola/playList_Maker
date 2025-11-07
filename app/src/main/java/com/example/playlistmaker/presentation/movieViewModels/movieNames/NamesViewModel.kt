@@ -59,7 +59,7 @@ class NamesViewModel(
                                 val persons = foundNames.orEmpty()
                                 if (persons.isEmpty()) {
                                     NamesState.Empty(
-                                        message = context.getString(R.string.nothing_found)
+                                        message = context.getString(R.string.nothing_found_people)
                                     )
                                 } else {
                                     NamesState.Content(persons)

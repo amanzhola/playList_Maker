@@ -38,25 +38,17 @@ class SearchViewModel(
     private val searchHistoryInteraction: SearchHistoryInteraction
 ) : ViewModel() {
 
+    // флаг "показывать в обратном порядке"
+    private val reverseFlag = MutableStateFlow(false)
+
+    /** Вызываем из фрагмента/активити, чтобы перевернуть текущий список. */
+    fun toggleReverseDisplayedOrder() {
+        reverseFlag.value = !reverseFlag.value
+    }
+
     private val _openTrack = MutableSharedFlow<Track>(extraBufferCapacity = 1)
     val openTrack: SharedFlow<Track> = _openTrack
 
-<<<<<<< Updated upstream
-=======
-    private val listItemBackgroundColorFlow = MutableStateFlow<Int?>(null)
-    private val listTextColorFlow = MutableStateFlow<Int?>(null)
-    private val listArrowColorFlow = MutableStateFlow<Int?>(null)
-
-    // 1) Локальный аккумулятор для цепочки combine
-    private data class Acc(
-        val p: P1,
-        val execQ: String,
-        val removedIds: Set<Int>,
-        val listTextColor: Int?,      // может быть null
-        val listArrowColor: Int?      // может быть null
-    )
-
->>>>>>> Stashed changes
     // 🧩 ввод и фокус
     private val queryFlow = MutableStateFlow("")
     private val focusFlow = MutableStateFlow(false)
@@ -140,9 +132,7 @@ class SearchViewModel(
         val isLoading: Boolean,
         val executedQuery: String,
         val removedIds: Set<Int>,
-        val listTextColor: Int?,     // ⬅️ НОВОЕ
-        val listArrowColor: Int?,     // ⬅️ НОВОЕ
-        val listItemBackgroundColor: Int?
+        val isReversed: Boolean             // ← НОВОЕ
     )
 
     private data class P1(
@@ -153,7 +143,7 @@ class SearchViewModel(
         val isLoading: Boolean
     )
 
-        private val inputs: Flow<Inputs> =
+    private val inputs: Flow<Inputs> =
         combine(
             queryFlow,
             focusFlow,
@@ -163,42 +153,18 @@ class SearchViewModel(
         ) { query, isFocused, history, resource, isLoading ->
             P1(query, isFocused, history, resource, isLoading)
         }
-            // добавили executedQuery
-            .combine(executedQuery) { p, execQ ->
-                p to execQ
-            }
-            // добавили removedFromSearch → собрали Acc с пустыми цветами
-            .combine(removedFromSearch) { (p, execQ), removedIds ->
-                Acc(
-                    p = p,
-                    execQ = execQ,
-                    removedIds = removedIds,
-                    listTextColor = null,
-                    listArrowColor = null
-                )
-            }
-            // прокинули listTextColor
-            .combine(listTextColorFlow) { acc, txtColor ->
-                acc.copy(listTextColor = txtColor)
-            }
-            // прокинули listArrowColor
-            .combine(listArrowColorFlow) { acc, arrowColor ->
-                acc.copy(listArrowColor = arrowColor)
-            }
-            // И ТОЛЬКО ЗДЕСЬ собираем Inputs, уже имея всё + фон
-            .combine(listItemBackgroundColorFlow) { acc, bgColor ->
-                val p = acc.p
+            .combine(executedQuery) { p, execQ -> p to execQ }
+            .combine(removedFromSearch) { (p, execQ), removedIds -> Triple(p, execQ, removedIds) }
+            .combine(reverseFlag) { (p, execQ, removedIds), reversed ->
                 Inputs(
                     query = p.query,
                     isFocused = p.isFocused,
                     history = p.history,
                     resource = p.resource,
                     isLoading = p.isLoading,
-                    executedQuery = acc.execQ,
-                    removedIds = acc.removedIds,                 // ← Set<Int> как надо
-                    listTextColor = acc.listTextColor,
-                    listArrowColor = acc.listArrowColor,
-                    listItemBackgroundColor = bgColor            // ← фон (Int? из VM)
+                    executedQuery = execQ,
+                    removedIds = removedIds,
+                    isReversed = reversed       // ← НОВОЕ
                 )
             }
 
@@ -208,11 +174,11 @@ class SearchViewModel(
             .map { inp ->
                 val queryBlank = inp.query.isBlank() // NEW: inp.query уже нормализован (единый источник истины)
 
-                val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
                 // 🧠 queryBlank — пустой ввод?
                 // 🗂️ showHistory — показывать историю только когда есть фокус, ввода нет и история не пуста
 
                 // 1) 📦 Собираем «сырую» выдачу и базовую ошибку
+                // 1) Разбираем ресурс поиска + ошибки
                 val (tracksRaw0, error0) = when (inp.resource) {
                     is Resource.Success -> {
                         val list = inp.resource.data.orEmpty()
@@ -226,36 +192,42 @@ class SearchViewModel(
                             inp.query == inp.executedQuery &&
                             !inp.isLoading &&
                             list.isEmpty()
-                        ) {
-                            emptyList<Track>() to ErrorState.ERROR // 🫙
-                        } else {
-                            list to ErrorState.NONE // ✅ есть данные или поиск ещё идёт
-                        }
+                        ) emptyList<Track>() to ErrorState.ERROR // 🫙
+                        else list to ErrorState.NONE // ✅ есть данные или поиск ещё идёт
                     }
                     is Resource.Error -> emptyList<Track>() to ErrorState.FAILURE // ⚠️ сеть/сервер
                 }
 
                 // 2) 🧼 Мягкое удаление — прячем локально исключённые треки (без запроса к бэку)
+                // 2) Прячем локально удалённые
                 val filtered0 = tracksRaw0.filter { it.trackId !in inp.removedIds }
 
                 // 3) 🚫 Жёсткая засечка: при пустом вводе — всегда пустой список и без ошибок
+                // 3) Если ввод пуст — ничего не показываем и без ошибок
                 val (tracksRaw, error) = if (queryBlank) {
                     emptyList<Track>() to ErrorState.NONE // 🔕 ни лоадера, ни ошибок, ни хвостов
                 } else {
                     filtered0 to error0
                 }
 
+                // 4) Что показывать «по умолчанию» (до реверса)
+                val showHistory = inp.isFocused && queryBlank && inp.history.isNotEmpty()
+
                 // 4) 🎯 Что реально показываем пользователю
-                val displayed = when {
+                val displayedBase = when {
                     showHistory -> inp.history                        // 🗂️ история
                     !queryBlank && inp.query != inp.executedQuery -> emptyList() // ⏳ печатает (debounce ещё не сработал)
                     else -> tracksRaw                                  // 🔍 свежая выдача поиска
                 }
 
+                // 5) Применяем реверс
+                val displayed = if (inp.isReversed) displayedBase.asReversed() else displayedBase
+
                 // 5) 🧊 При пустом запросе не крутим лоадер
                 val isLoadingSafe = if (queryBlank) false else inp.isLoading
 
                 // 6) 🧱 Финальный UI-стейт (адаптер рисует displayedTracks)
+                // 6) Итоговый стейт
                 SearchUiState(
                     query = inp.query,
                     isInputFocused = inp.isFocused,
@@ -266,17 +238,9 @@ class SearchViewModel(
                     historyTracks = inp.history,                 // 🗂️ история
                     showHistory = !isLoadingSafe && showHistory, // 👁️ история не перекрывается лоадером
                     displayedTracks = displayed,                  // 🖼️ именно это отображаем в списке
-<<<<<<< Updated upstream
-=======
-                    // ⬇️ НОВОЕ
-                    listTextColor = inp.listTextColor,
-                    listArrowColor = inp.listArrowColor,
-                    listItemBackgroundColor = inp.listItemBackgroundColor
->>>>>>> Stashed changes
                 )
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, SearchUiState())
-
 
     // ─── public API ───
 
@@ -332,24 +296,4 @@ class SearchViewModel(
     }
 
     fun getTrackHistoryList(): List<Track> = uiState.value.historyTracks
-
-    // сеттеры
-    fun setListTextColor(color: Int?) {
-        listTextColorFlow.value = color
-    }
-    // сеттеры
-    fun setListArrowColor(color: Int?) {
-        listArrowColorFlow.value = color
-    }
-    // сеттеры
-    fun setListItemBackgroundColor(color: Int?) {
-        listItemBackgroundColorFlow.value = color
-    }
-
-    // удобный общий сброс
-    fun resetListColorsToDefault() {
-        listItemBackgroundColorFlow.value = null
-        listTextColorFlow.value = null
-        listArrowColorFlow.value = null
-    }
 }
