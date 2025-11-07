@@ -422,7 +422,7 @@
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/cce7a9b5-a968-4a9f-83c2-c920b302a362" alt="shot-1" width="250"></td>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/8c43e04f-34d6-46ff-80f0-efc3f2417d7e" alt="shot-2" width="250"></td>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/6a1c2b5d-7bfb-441d-984d-fb8e057435d4" alt="shot-3" width="250"></td>
-    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/a3c27df8-5bad-4419-8185-3edf491befc6"" alt="shot-3" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/a3c27df8-5bad-4419-8185-3edf491befc6" alt="shot-3" width="250"></td>
   </tr>
 </table>
 
