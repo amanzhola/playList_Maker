@@ -25,3 +25,16 @@ gradle.properties
 
 # (опционально) если не хочешь коммитить google-services.json, раскомментируй:
 # app/google-services.json
+
+# Kotlin build cache/IDE stuff
+.kotlin/
+
+# Release артефакты
+app/release/
+
+# Файлы Firebase (игнорируй, только если точно не хочешь хранить их в репо)
+.firebaserc
+firebase.json
+
+# Файлы/папки с пробелами (экранируем пробелы бэкслешами)
+witch\ -c\ rescue-*
