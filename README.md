@@ -383,7 +383,6 @@
 - ✨📽️💃 Шаринг кинофильма при просмотре в режиме просмотра постера фильма
 - Получение кинофильма и распознавание если она в вашем списке избранных
 - Переход на фрагменты, где имеется детали фильма, список и имена звезд и их фотографии
-- Экран поиск звезд(актеров и актрис) альтернативно создан из ресурсов Википедия, с определением языка из поля ввода поиска
 
 <table width="100%">
   <tr>
@@ -422,6 +421,18 @@
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/8c43e04f-34d6-46ff-80f0-efc3f2417d7e" alt="shot-2" width="250"></td>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/6a1c2b5d-7bfb-441d-984d-fb8e057435d4" alt="shot-3" width="250"></td>
     <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/a3c27df8-5bad-4419-8185-3edf491befc6" alt="shot-3" width="250"></td>
+  </tr>
+</table>
+
+- Ru версия, с определением языка из поля ввода поиска
+- Перевод названия фильма Ru->En альтернативно из ресурсов Википедия, тексты качества "прямого" перевода и все же "лучше чем ничего"
+
+<table width="100%">
+  <tr>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/60112d2c-bc3e-4205-811f-abc050f019af" alt="shot-1" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/b2e0c72e-4da7-43f9-83cc-618e25983218" alt="shot-2" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/82bf3291-a09a-4f2a-b15b-cbbe855d5709" alt="shot-3" width="250"></td>
+    <td align="center" width="25%"><img src="https://github.com/user-attachments/assets/bf6208ca-d87b-4365-b870-a01fd2227616" alt="shot-3" width="250"></td>
   </tr>
 </table>
 
@@ -472,7 +483,7 @@
 </table>
 
 - Используется:
-    - Реализован на базе FireBase (личка, позже + групповой чат)
+- Реализован на базе FireBase (личка, позже + групповой чат)
 - Отображает тулбар и доступ к теме, делиться и другим действиям.
 - экран регистрация пользователей (профиль)
 - экран списка контактов
