@@ -35,6 +35,7 @@ app/release/
 # Файлы Firebase (игнорируй, только если точно не хочешь хранить их в репо)
 .firebaserc
 firebase.json
+functions/
 
 # Файлы/папки с пробелами (экранируем пробелы бэкслешами)
 witch\ -c\ rescue-*
