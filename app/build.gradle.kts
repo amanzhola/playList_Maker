@@ -9,11 +9,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 
-<<<<<<< Updated upstream
     // Kotlin Compose plugin под 2.0.21
-=======
-    // ⬇️ Важно для Kotlin 2.0+
->>>>>>> Stashed changes
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
 }
 
@@ -52,11 +48,7 @@ android {
 
     buildFeatures {
         viewBinding = true
-<<<<<<< Updated upstream
         compose = true
-=======
-         compose = true
->>>>>>> Stashed changes
     }
 }
 
@@ -67,11 +59,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     debugImplementation(platform(libs.androidx.compose.bom))
 
-<<<<<<< Updated upstream
     // --- Базовые Compose модули ---
-=======
-    // --- Базовые Compose модули (версии берутся из BOM) ---
->>>>>>> Stashed changes
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.material3)
@@ -106,11 +94,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
-<<<<<<< Updated upstream
     kapt(libs.glide.compiler)
-=======
-    kapt(libs.glide.compiler)          // ← переименованный alias
->>>>>>> Stashed changes
     implementation(libs.gson)
 
     // --- Arch ---
@@ -148,19 +132,12 @@ dependencies {
 
     // --- NewPipeExtractor + protobuf-lite ---
     implementation(libs.newpipeextractor) {
-<<<<<<< Updated upstream
         exclude(group = "com.google.protobuf", module = "protobuf-java")
         exclude(group = "com.google.protobuf", module = "protobuf-javalite")
         exclude(group = "com.google.protobuf", module = "protobuf-kotlin-lite")
     }
     implementation(libs.protobuf.javalite.v3253)
     implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.3")
-=======
-        exclude(group = "com.google.protobuf", module = "protobuf-java") // исключаем full protobuf
-        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-        exclude(group = "com.google.protobuf", module = "protobuf-kotlin-lite")
-    }
->>>>>>> Stashed changes
 
     // --- Media3 ---
     implementation(libs.androidx.media3.exoplayer)
@@ -173,7 +150,6 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.conscrypt.android)
-<<<<<<< Updated upstream
 
     // Для AndroidViewBinding внутри Compose
     implementation(libs.androidx.ui.viewbinding)
@@ -199,22 +175,7 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0")
 
     implementation(libs.androidx.constraintlayout.compose)
+
+    // movie translation to Russian
+    implementation("com.google.mlkit:translate:17.0.2")
 }
-=======
-
-    // совместимая версию для Firebase/protolite для--- NewPipeExtractor + protobuf-lite ---
-    implementation("com.google.protobuf:protobuf-javalite:3.25.3")
-    implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.3")
-
-    // Для AndroidViewBinding(FragmentSearchBinding::inflate) внутри Compose
-    implementation(libs.androidx.ui.viewbinding)
-
-    // Иконки
-    implementation(libs.androidx.material.icons.extended)
-
-    // варант дял мостика к компоуз из фрагмента 
-    implementation("io.insert-koin:koin-androidx-compose:3.5.6")
-
-}
-
->>>>>>> Stashed changes

@@ -1,4 +1,3 @@
-// presentation/utils/SegmentManager.kt
 package com.example.playlistmaker.presentation.utils
 
 import android.content.Context
@@ -12,11 +11,8 @@ import com.example.playlistmaker.ui.audio.SearchFragment
 import com.example.playlistmaker.ui.audioPosters.AudioPlayerFragment
 import com.example.playlistmaker.ui.media.MediaLibraryFragment
 import com.example.playlistmaker.ui.movie.SearchMovie
-<<<<<<< Updated upstream
 import com.example.playlistmaker.utils.SCOPE_FAV
 import com.example.playlistmaker.utils.SCOPE_PL
-=======
->>>>>>> Stashed changes
 
 class SegmentManager(
     private val context: Context,
@@ -47,7 +43,6 @@ class SegmentManager(
 
         if (isChangedState) {
             when (segmentIndex) {
-<<<<<<< Updated upstream
                 4 -> { if (!isMainFragment) changeLanguage(); return }
                 5 -> { // очистка
                     if (mediaParent != null && mediaScope != null) {
@@ -56,41 +51,6 @@ class SegmentManager(
                         colorManager.clearAllColors()
                     }
                     return
-=======
-                4 -> if (!isMainFragment) changeLanguage()
-                5 -> if (isMainFragment) changeLanguage() else {
-                    colorManager.clearAllColors()
-                    if (currentFragment is SearchFragment) {
-                        // вариант 1 — общий:
-                        currentFragment.resetListColorsToDefault()
-
-                        // вариант 2 — точечно:
-                        // visibleFragment.setListItemBackgroundColor(null)
-                        // visibleFragment.setListTextColor(null)
-                        // visibleFragment.setListArrowColor(null)
-                    }
-                }
-            }
-
-            if (segmentIndex != 5) {
-                // toolbar save and apply background color
-                val scope = (currentActivity as? BaseActivity)?.getCurrentScreenKey()
-                    ?: (currentActivity as BaseActivity).activityScope()
-
-                colorPersistenceHelper.save(scope, segmentIndex, randomColor)
-                colorApplierHelper.apply(segmentIndex, randomColor)
-            }
-        } else {
-            when (segmentIndex) {
-                0 -> { // Toggle theme
-                    val nowDark = theme.isDarkTheme()
-                    theme.setDarkTheme(!nowDark) // сохранит, эмитнёт во Flow, применит AppCompatDelegate внутри
-
-                    // применяем тему мгновенно // for activity and fragment via BaseActivity
-                    (currentActivity as? AppCompatActivity)?.delegate?.applyDayNight() // ⚡ применить Day/Night к Activity
-                    (currentActivity as? BaseActivity)?.applyToolbarThemeColors()  // ⚡ перекрасить тулбар под логику
-
->>>>>>> Stashed changes
                 }
             }
 

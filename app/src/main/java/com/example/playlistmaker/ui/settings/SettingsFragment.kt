@@ -4,18 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-<<<<<<< Updated upstream
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-=======
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.getValue
->>>>>>> Stashed changes
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,7 +24,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsFragment : BaseFragment(), BottomNavConfig {
 
-<<<<<<< Updated upstream
     // локальные стейты, чтобы дергать из Helper
     private var bgColorExt: Color? by mutableStateOf(null)
     private var textColorExt: Color? by mutableStateOf(null)
@@ -116,32 +109,6 @@ class SettingsFragment : BaseFragment(), BottomNavConfig {
 
     fun setSettingsIconColor(@ColorInt color: Int) {
         iconColorExt = Color(color)
-=======
-    private val viewModel: SettingsViewModel by viewModel()
-    private var isBottomNavVisible = true
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MaterialTheme {
-                    val dark by viewModel.darkTheme.collectAsStateWithLifecycle()
-
-                    SettingsScreen(
-                        darkMode = dark,
-                        onToggleDarkMode = { isChecked ->
-                            viewModel.toggleTheme(isChecked)
-                            (requireActivity() as? AppCompatActivity)?.delegate?.applyDayNight()
-                            (activity as? BaseActivity)?.applyToolbarThemeColors()
-                        },
-                        onShare = { getBaseActivity()?.shareApp() },
-                        onSupport = { getBaseActivity()?.writeToSupport() },
-                        onAgreement = { getBaseActivity()?.openAgreement() },
-                    )
-                }
-            }
-        }
->>>>>>> Stashed changes
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

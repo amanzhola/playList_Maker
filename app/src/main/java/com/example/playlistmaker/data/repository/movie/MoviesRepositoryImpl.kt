@@ -1,13 +1,17 @@
 package com.example.playlistmaker.data.repository.movie
 
+import android.util.Log
 import com.example.playlistmaker.data.dto.movie.MovieAdvancedSearchDto
 import com.example.playlistmaker.data.dto.movie.MovieSearchDto
 import com.example.playlistmaker.data.movie_db.MovieDbConvertor
 import com.example.playlistmaker.data.movie_db.MoviesDatabase
 import com.example.playlistmaker.data.network.movie.IMDbApi
+import com.example.playlistmaker.data.translator.TranslateBatcher
+import com.example.playlistmaker.data.translator.WikiTitleResolver
 import com.example.playlistmaker.domain.api.movie.MoviesRepository
 import com.example.playlistmaker.domain.models.movie.Movie
 import com.example.playlistmaker.domain.util.Resource
+import com.example.playlistmaker.domain.util.isRussian
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -18,21 +22,25 @@ import kotlinx.coroutines.flow.flowOn
 class MoviesRepositoryImpl(
     private val apiService: IMDbApi,
     private val apiKey: String,
+    private val batcher: TranslateBatcher, // 👈 добавили
     private val appDatabase: MoviesDatabase,        // 👈 добавили БД
-    private val movieDbConvertor: MovieDbConvertor  // 👈 добавили конвертер
+    private val movieDbConvertor: MovieDbConvertor,  // 👈 добавили конвертер
+    private val wikiResolver: WikiTitleResolver,
 ) : MoviesRepository {
 
     companion object { private const val TAG = "HistoryRepo" }
 
-//    init {
-//        Log.d("MoviesRepo", "MoviesRepositoryImpl created")
-//    }
-
     override fun searchMovies(expression: String): Flow<Resource<List<Movie>>> = flow {
         try {
+
+            // 1) RU → EN для запроса
+            val isRuQuery = isRussian(expression)
+            val q = if (isRuQuery) wikiResolver.ruToEnOrSelf(expression) else expression
+            Log.d(TAG, "wiki q='$q' (from '$expression', isRu=$isRuQuery)")
+
             val (searchResponse, advancedSearchResponse) = coroutineScope {
-                val searchDeferred = async { apiService.searchMovies(apiKey, expression) }
-                val advancedDeferred = async { apiService.getAdvancedSearch(apiKey, expression) }
+                val searchDeferred = async { apiService.searchMovies(apiKey, q) }
+                val advancedDeferred = async { apiService.getAdvancedSearch(apiKey, q) }
 
                 Pair(searchDeferred.await(), advancedDeferred.await())
             }
@@ -65,8 +73,7 @@ class MoviesRepositoryImpl(
 
             val searchDataMap = searchResults?.associateBy { it.id } ?: emptyMap()
             val advancedSearchDataMap = advancedSearchResults?.associateBy { it.id } ?: emptyMap()
-
-            val primaryList = advancedSearchResults ?: searchResults
+            val primaryList = advancedSearchResults?.takeIf { it.isNotEmpty() }?: searchResults
 
             val combinedMovies = primaryList?.mapNotNull { primaryDto ->
                 val id = when (primaryDto) {
@@ -96,24 +103,48 @@ class MoviesRepositoryImpl(
                 )
             } ?: emptyList()
 
+            val uiList = if (isRuQuery) {
+                // Пакетный быстрый перевод:
+                batcher.moviesToRu(combinedMovies)
+            } else combinedMovies
+
             if (combinedMovies.isEmpty()) {
                 emit(Resource.Error("Ничего не найдено"))
             } else {
                 // Сохраняем список фильмов в историю поиска (БД)
-                saveMovies(expression, combinedMovies) // 👈 сюда просто прокидываем параметр
-                emit(Resource.Success(combinedMovies))
+
+                // translate to Russian
+                saveMovies(expression, uiList)
+                emit(Resource.Success(uiList))
             }
 
         } catch (e: Exception) {
             emit(Resource.Error("Ошибка при выполнении запросов: ${e.localizedMessage ?: "Неизвестная ошибка"}"))
         }
+
     }.flowOn(Dispatchers.IO)
 
     // Сохраняем в базу данных
-      private suspend fun saveMovies(expression: String, movies: List<Movie>) {
+    private suspend fun saveMovies(expression: String, movies: List<Movie>) {
         val entities = movies.map(movieDbConvertor::map)
 //        Log.d(TAG, "saveMovies(): expr='$expression', size=${entities.size}")
         appDatabase.movieDao().replaceAll(entities)
     }
 
+    // пример хелпера, который переводит поля фильмов EN->RU пакетно
+    suspend fun TranslateBatcher.moviesToRu(movies: List<Movie>): List<Movie> {
+        val titles  = toRu(movies.map { it.title })
+        val descs   = toRu(movies.map { it.description })
+        val plots   = toRu(movies.map { it.plot })
+        val genres  = toRu(movies.map { it.genres })
+
+        return movies.mapIndexed { i, m ->
+            m.copy(
+                title       = titles[i] ?: m.title,
+                description = descs[i],
+                plot        = plots[i],
+                genres      = genres[i]
+            )
+        }
+    }
 }

@@ -28,7 +28,12 @@ class MovieViewHolder(parent: ViewGroup,
             .into(cover)
 
         title.text = movie.title
-        description.text = movie.description
+//        description.text = movie.description
+        val text = buildString {
+            if (!movie.year.isNullOrBlank()) append(movie.year).append('\n')
+            append(movie.plot ?: movie.description.orEmpty())
+        }
+        description.text = text
 
         //  (❤️)
         inFavoriteToggle.setImageDrawable(getFavoriteToggleDrawable(movie.inFavorite))

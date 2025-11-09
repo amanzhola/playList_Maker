@@ -8,17 +8,18 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-
 interface IMDbApi {
+
+    // ВАЖНО: encoded=true, чтобы кириллица не «ломалась» в path
     @GET("/en/API/SearchMovie/{apiKey}/{expression}")
     suspend fun searchMovies(
         @Path("apiKey") apiKey: String,
-        @Path("expression") expression: String
+        @Path(value = "expression", encoded = true) expression: String
     ): Response<SearchResponse<MovieSearchDto>>
 
-    @GET("API/AdvancedSearch/{apiKey}/")
+    @GET("/en/API/AdvancedSearch/{apiKey}/")
     suspend fun getAdvancedSearch(
         @Path("apiKey") apiKey: String,
-        @Query("title") title: String
+        @Query("title", encoded = true) title: String
     ): Response<SearchResponse<MovieAdvancedSearchDto>>
 }

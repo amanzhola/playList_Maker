@@ -47,7 +47,6 @@ class ColorApplierHelper(
                     toolbarHelper.setBackgroundColor(color)
                 }
 
-<<<<<<< Updated upstream
                 (vf as? SettingsFragment)?.setSettingsBackgroundColor(color)
                 (vf as? SearchFragment )?.setListBackGroundColor(color)
                 (vf as? AudioPlayerFragment )?.setAudioBackgroundColor(color)
@@ -78,35 +77,6 @@ class ColorApplierHelper(
                             listOf(R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5, R.id.button6)
                         )
                     }
-=======
-                if (visibleFragment is SearchFragment) { // больше нет RecyclerView-адаптера → зовём метод фрагмента
-                    visibleFragment.setListBackGroundColor(color)
-                }
-            }
-            2 -> when {
-                isMainFragment -> mainLayout.changeTextColor(color)
-                currentFragment is SearchFragment -> {
-                    // больше нет RecyclerView-адаптера → зовём метод фрагмента
-                    currentFragment.setListTextColor(color)
-                }
-                else -> {
-                    mainLayout.changeTextColor(color, R.id.toolbar)
-                }
-            }
-            3 -> when {
-                isMainFragment -> {
-                    mainLayout.changeIconColor(
-                        color,
-                        listOf(R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5, R.id.button6)
-                    )
-                }
-                currentFragment is SettingsFragment -> {
-                    mainLayout.changeCompoundDrawableColor(color, R.id.toolbar)
-                }
-                currentFragment is SearchFragment -> {
-                    // больше нет RecyclerView-адаптера → зовём метод фрагмента
-                    currentFragment.setListArrowColor(color)
->>>>>>> Stashed changes
                 }
             }
 
