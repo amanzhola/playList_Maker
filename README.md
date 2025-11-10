@@ -1,9 +1,15 @@
-# 📱 Android Приложение с 6 Основными Экранами
+# 🎧 📱 PlayList Maker — мультимедиа приложение
 
-## 📖 Описание
+Многофункциональное Android-приложение с **6 основными экранами**: поиск музыки, медиатека, аудиоплеер, кино, погода и чат.
 
-Это Android-приложение, сочетающее в себе музыкальный плеер, поиск фильмов, прогноз погоды и чат. Основной упор сделан на кастомную навигацию, мультиязычность, адаптацию под требования ревьюеров и анимации переходов.
----
+Приложение создано специально **для учебных целей и демонстрации разных архитектурных подходов**:
+- **Jetpack Compose** используется для экранов: **Поиск музыки**, **Медиатека (2 таба: избранное + плейлисты)** и **Настройки**.
+- **Fragment + ViewModel** используется в **Чате** (Firebase).
+- **Activity + Fragment + ViewPager2** используется на экране **Кино** (3 режима просмотра + собственная вложенная нижняя навигация + fallback Wiki).
+- **Activity + ViewModel** используется на экране **Погоды** (Foreca API + fallback аэропортов).
+
+Таким образом приложение показывает **комбинированный стек**:
+Compose + Фрагменты + Многоэкранная навигация + Кастомные анимации + Работа с API + Firebase.
 ---
 <h2 align="right">🏠 Экран "кнопочный рай"</h2>
 
@@ -559,6 +565,37 @@
 > **GitHub**: [github.com/amanzhola](https://github.com/amanzhola)
 
 ---
+---
 
+## 🇬🇧 English Version
+
+**PlayList Maker** is a multifunctional Android multimedia application with 6 main screens:  
+Music Search, Media Library, Audio Player, Movies, Weather and Chat.
+
+The project is intentionally built using **different UI and navigation approaches**:
+
+| Feature | Implementation |
+|--------|----------------|
+| Music Search, Media Library, Settings | **Jetpack Compose** UI |
+| Chat (private messaging, Firebase) | **Fragments + ViewModel** |
+| Movie Screen (poster preview, lists, details) | **Activity + Fragments + ViewPager2** |
+| Weather Screen (API + fallback sources) | **Activity + ViewModel** |
+
+This structure demonstrates:
+- **Compose + Fragment hybrid architecture**
+- Shared ViewModels and state handling
+- Multi-screen navigation without back stack confusion
+- Custom toolbars and animated transitions
+- Local + Remote data handling (API + Firebase)
+
+**Tech Stack**
+- Kotlin
+- Jetpack Compose
+- MVVM + ViewModel
+- Coroutines
+- Retrofit
+- Firebase (Auth, Realtime DB)
+- Coil
+- RecyclerView / ViewPager2
 
 
