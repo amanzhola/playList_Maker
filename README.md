@@ -593,7 +593,7 @@ Android-приложение с **6 экранами**: поиск музыки,
 ---
 ---
 
-## 🇬🇧 English Version
+## <a id="en"></a> Overview (EN)
 
 **PlayList Maker** is a multifunctional Android multimedia application with 6 main screens:  
 Music Search, Media Library, Audio Player, Movies, Weather and Chat.
