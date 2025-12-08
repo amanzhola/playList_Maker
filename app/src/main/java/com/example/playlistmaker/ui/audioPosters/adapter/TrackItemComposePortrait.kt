@@ -24,11 +24,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -63,7 +67,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
-import androidx.media3.ui.TimeBar
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.placeholder
@@ -80,7 +83,7 @@ fun TrackItemComposePortrait(
     overlayPlayTime: String?,
     audioProgress: Any?,
     onPlayToggle: () -> Unit,
-    onItemClick: () -> Unit,
+    onItemClick: () -> Unit,          // ← переключение гориз/верт (через VM)
     onBack: () -> Unit,
     onFav: () -> Unit,
     onAdd: () -> Unit,
@@ -115,12 +118,13 @@ fun TrackItemComposePortrait(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onItemClick() }
+            // .clickable { onItemClick() }              // ❌ РАНЬШЕ: клик по всему экрану
+            .background(bgColor)                         // фон можно сразу задать здесь
     ) {
         val leftBorder    = createGuidelineFromStart(side24)
         val rightBorder   = createGuidelineFromEnd(side24)
-        val gPercent = horizontalGuidelinePercent()
-        val horizontalGL = createGuidelineFromTop(gPercent)
+        val gPercent      = horizontalGuidelinePercent()
+        val horizontalGL  = createGuidelineFromTop(gPercent)
         val leftBorder16  = createGuidelineFromStart(pad16)
         val rightBorder16 = createGuidelineFromEnd(pad16)
 
@@ -135,8 +139,25 @@ fun TrackItemComposePortrait(
             authorRef
         ) = createRefs()
         val countryValRef = createRef()
+        val clickAreaRef = createRef() // NEW: отдельная зона для клика «по экрану» ниже постера
 
         var posterHeightPx by remember { mutableIntStateOf(0) }
+
+        // NEW: прозрачная кликабельная зона НИЖЕ posterRef / horizontalGL
+        // она ловит тапы «по экрану», НЕ задевая постер и не перебивая клики по кнопкам
+        Box(
+            modifier = Modifier
+                .constrainAs(clickAreaRef) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(horizontalGL)          // всё, что ниже guideline
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }
+                .background(Color.Transparent)
+                .clickable { onItemClick() }         // ← только тут меняем гориз/верт
+        )
 
         // ===== POSTER (FrameLayout 0dp x 0dp) =====
         Box(
@@ -184,7 +205,11 @@ fun TrackItemComposePortrait(
                         .align(Alignment.TopStart)
                         .padding(8.dp)
                 ) {
-                    Icon(painterResource(R.drawable.arrow_back), contentDescription = "Back", tint = Color.Red)
+                    Icon(
+                        painterResource(R.drawable.arrow_back),
+                        contentDescription = "Back",
+                        tint = Color.Red
+                    )
                 }
             }
         }
@@ -504,60 +529,57 @@ fun PlayerViewBox(
     // настраиваем полоску прогресса внутри PlayerView
     DisposableEffect(timebarVertical, barLengthPx, player) {
         val view = pv
-        if (view != null) {
-            view.post {
-                val tb = view.findViewById<DefaultTimeBar?>(androidx.media3.ui.R.id.exo_progress) ?: return@post
+        view?.post {
+            val tb = view.findViewById<DefaultTimeBar?>(androidx.media3.ui.R.id.exo_progress) ?: return@post
 
-                (tb.parent as? ViewGroup)?.apply {
-                    clipToPadding = true
-                    clipChildren = true
-                }
-
-                val thicknessPx = dp(view.context, 12)
-                val lp = (tb.layoutParams as? FrameLayout.LayoutParams)
-                    ?: FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        thicknessPx
-                    )
-
-                if (timebarVertical) {
-                    tb.rotation = 270f
-                    tb.pivotX = 0f
-                    tb.pivotY = 0f
-                    val maxLen = view.height.takeIf { it > 0 } ?: barLengthPx
-                    val length = minOf(maxLen, if (barLengthPx > 0) barLengthPx else dp(view.context, 200))
-                    lp.width  = length
-                    lp.height = thicknessPx
-                    lp.gravity = Gravity.BOTTOM or Gravity.START
-                } else {
-                    tb.rotation = 0f
-                    tb.pivotX = 0f
-                    tb.pivotY = 0f
-                    lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
-                    lp.height = thicknessPx
-                    lp.gravity = Gravity.BOTTOM
-                }
-
-                tb.translationX = 0f
-                tb.translationY = 0f
-                tb.layoutParams = lp
-
-                // фирменные цвета
-                try {
-                    tb.setPlayedColor(ContextCompat.getColor(view.context, R.color.timebar_played))
-                    tb.setScrubberColor(ContextCompat.getColor(view.context, R.color.timebar_scrubber))
-                    tb.setBufferedColor(ContextCompat.getColor(view.context, R.color.timebar_buffered))
-                    tb.setUnplayedColor(ContextCompat.getColor(view.context, R.color.timebar_unplayed))
-                } catch (_: Throwable) {}
+            (tb.parent as? ViewGroup)?.apply {
+                clipToPadding = true
+                clipChildren = true
             }
+
+            val thicknessPx = dp(view.context, 12)
+            val lp = (tb.layoutParams as? FrameLayout.LayoutParams)
+                ?: FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    thicknessPx
+                )
+
+            if (timebarVertical) {
+                tb.rotation = 270f
+                tb.pivotX = 0f
+                tb.pivotY = 0f
+                val maxLen = view.height.takeIf { it > 0 } ?: barLengthPx
+                val length = minOf(maxLen, if (barLengthPx > 0) barLengthPx else dp(view.context, 200))
+                lp.width  = length
+                lp.height = thicknessPx
+                lp.gravity = Gravity.BOTTOM or Gravity.START
+            } else {
+                tb.rotation = 0f
+                tb.pivotX = 0f
+                tb.pivotY = 0f
+                lp.width  = FrameLayout.LayoutParams.MATCH_PARENT
+                lp.height = thicknessPx
+                lp.gravity = Gravity.BOTTOM
+            }
+
+            tb.translationX = 0f
+            tb.translationY = 0f
+            tb.layoutParams = lp
+
+            // фирменные цвета
+            try {
+                tb.setPlayedColor(ContextCompat.getColor(view.context, R.color.timebar_played))
+                tb.setScrubberColor(ContextCompat.getColor(view.context, R.color.timebar_scrubber))
+                tb.setBufferedColor(ContextCompat.getColor(view.context, R.color.timebar_buffered))
+                tb.setUnplayedColor(ContextCompat.getColor(view.context, R.color.timebar_unplayed))
+            } catch (_: Throwable) {}
         }
         onDispose { /* nothing */ }
     }
 }
 
 // ---------- Таймбар поверх картинки (аудио) ----------
-@SuppressLint("InflateParams")
-@OptIn(UnstableApi::class)
+@SuppressLint("InflateParams", "LocalContextResourcesRead")
 @Composable
 fun BoxScope.AudioTimebarView(
     vertical: Boolean,
@@ -567,80 +589,113 @@ fun BoxScope.AudioTimebarView(
 ) {
     val onSeekState = rememberUpdatedState(onSeek)
     val density = LocalDensity.current
-    val barLengthDp = with(density) { (if (containerHeightPx > 0) containerHeightPx else 200).toDp() }
-    val thicknessDp = 12.dp
 
-    // аккуратный зазор как у видео
-    val insetDp = 12.dp
+    // как в старом коде — длина вдоль постера
+    val barLengthDp = with(density) {
+        (if (containerHeightPx > 0) containerHeightPx else 200).toDp()
+    }
 
-    AndroidView(
-        factory = { ctx ->
-            (LayoutInflater.from(ctx).inflate(
-                R.layout.exo_controller_timebar_only, null, false
-            ) as DefaultTimeBar).apply {
-                setPlayedColor   (ContextCompat.getColor(ctx, R.color.timebar_played))
-                setScrubberColor (ContextCompat.getColor(ctx, R.color.timebar_scrubber))
-                setBufferedColor (ContextCompat.getColor(ctx, R.color.timebar_buffered))
-                setUnplayedColor (ContextCompat.getColor(ctx, R.color.timebar_unplayed))
-                alpha = 1f
-                translationZ = 10f
+    // высота КОНТЕЙНЕРА, (зона касания)
+    val containerHeight = 12.dp
 
-                val listener = object : TimeBar.OnScrubListener {
-                    override fun onScrubStart(t: TimeBar, p: Long) {}
-                    override fun onScrubMove(t: TimeBar, p: Long) {}
-                    override fun onScrubStop(t: TimeBar, p: Long, canceled: Boolean) {
-                        if (!canceled) onSeekState.value(p)
-                    }
-                }
-                addListener(listener)
-                tag = listener
-            }
-        },
-        update = { tb ->
-            if (progress == null) {
-                tb.setDuration(0); tb.setBufferedPosition(0); tb.setPosition(0)
-            } else {
-                tb.setDuration(progress.durationMs.coerceAtLeast(0))
-                tb.setBufferedPosition(progress.bufferedMs.coerceAtLeast(0))
-                tb.setPosition(progress.positionMs.coerceAtLeast(0))
-            }
+    // отступы — как у старого варианта
+    val insetDp = 12.dp           // для вертикального (start)
+    val horizontalPadding = 12.dp // для горизонтального (left/right)
 
-            tb.rotation = 0f
-            tb.post {
-                val thicknessPx = dp(tb.context, 12)
-                val lp = (tb.layoutParams as? ViewGroup.MarginLayoutParams)
-                    ?: ViewGroup.MarginLayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        thicknessPx
-                    )
-                lp.width  = ViewGroup.LayoutParams.MATCH_PARENT
-                lp.height = thicknessPx
-                tb.layoutParams = lp
-            }
-        },
-        modifier = if (vertical) {
-            Modifier
+    // 👇 отступ снизу для вертикального ползунка
+    val verticalBottomOffset = 6.dp
+
+    // --- цвета как у DefaultTimeBar ---
+    val playedColor   = colorResource(R.color.timebar_played)
+    val scrubberColor = colorResource(R.color.play_red)
+    val unplayedColor = colorResource(R.color.timebar_unplayed)
+
+    val sliderColors = SliderDefaults.colors(
+        activeTrackColor   = playedColor,
+        inactiveTrackColor = unplayedColor,
+        thumbColor         = scrubberColor,
+        disabledActiveTrackColor   = playedColor.copy(alpha = 0.3f),
+        disabledInactiveTrackColor = unplayedColor.copy(alpha = 0.3f)
+    )
+
+    // ---------------- прогресс ----------------
+    val durationMs = (progress?.durationMs ?: 0L).coerceAtLeast(1L)
+    val positionMs = (progress?.positionMs ?: 0L).coerceIn(0L, durationMs)
+
+    var sliderValue by remember(durationMs) {
+        mutableFloatStateOf(positionMs.toFloat() / durationMs.toFloat())
+    }
+
+    LaunchedEffect(positionMs, durationMs) {
+        val newValue = positionMs.toFloat() / durationMs.toFloat()
+        if (!newValue.isNaN() && !newValue.isInfinite()) {
+            sliderValue = newValue
+        }
+    }
+
+    // ---------------- ВЕРТИКАЛЬНЫЙ (сбоку) ----------------
+    if (vertical) {
+        Box(
+            modifier = Modifier
                 .align(Alignment.BottomStart)
-                // даём микро-отступ слева
-                .padding(start = insetDp)
-                // и компенсируем длину, чтобы правый конец не «уехал»
+                .padding(start = insetDp, bottom = verticalBottomOffset)
                 .width((barLengthDp - insetDp).coerceAtLeast(0.dp))
-                .height(thicknessDp)
-                // поворачиваем полосу
+                .height(containerHeight)
                 .graphicsLayer {
                     rotationZ = 270f
                     transformOrigin = TransformOrigin(0f, 1f)
                 }
-                .zIndex(2f)
-        } else {
-            Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 6.dp)
-                .fillMaxWidth()
-                .height(thicknessDp)
-                .zIndex(2f)
+                .zIndex(2f),
+            contentAlignment = Alignment.Center
+        ) {
+            Slider(
+                value = sliderValue,
+                onValueChange = { v ->
+                    sliderValue = v.coerceIn(0f, 1f)
+                },
+                onValueChangeFinished = {
+                    val targetMs = (sliderValue * durationMs.toFloat()).toLong()
+                    onSeekState.value(targetMs)
+                },
+                colors = sliderColors,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // 🔥 толщина ползунка
+                    .graphicsLayer {
+                        scaleY = 0.35f  // опции: 0.3f, 0.25f → станет тоньше
+                    }
+            )
         }
-    )
+        return
+    }
+
+    // ---------------- ГОРИЗОНТАЛЬНЫЙ (внизу) ----------------
+    Box(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(horizontal = horizontalPadding)
+            .fillMaxWidth()
+            .height(containerHeight)
+            .zIndex(2f),
+        contentAlignment = Alignment.Center
+    ) {
+        Slider(
+            value = sliderValue,
+            onValueChange = { v ->
+                sliderValue = v.coerceIn(0f, 1f)
+            },
+            onValueChangeFinished = {
+                val targetMs = (sliderValue * durationMs.toFloat()).toLong()
+                onSeekState.value(targetMs)
+            },
+            colors = sliderColors,
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    scaleY = 0.35f   // 🔥 толщина ползунка для горизонтального
+                }
+        )
+    }
 }
 
 private fun dp(ctx: Context, v: Int): Int =
@@ -658,4 +713,3 @@ private fun horizontalGuidelinePercent(): Float {
 @Composable
 fun stringResourceCompat(context: Context, id: Int): String =
     remember(id) { context.getString(id) }
-

@@ -124,9 +124,17 @@ fun TrackItemComposeLand(
 
             // «Назад» поверх (тулбар скрыт)
             IconButton(
-                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(12.dp),
                 onClick = onBack
-            ) { Icon(painterResource(R.drawable.arrow_back), contentDescription = "arrow_back", tint = Color.White) }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_back),
+                    contentDescription = "arrow_back",
+                    tint = Color.White
+                )
+            }
         }
         return
     }
@@ -135,7 +143,8 @@ fun TrackItemComposeLand(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onItemClick() }
+            .background(bgColor)
+        // .clickable { onItemClick() }   // ❌ РАНЬШЕ: клик по всему экрану, включая постер
     ) {
         val (posterRef, detailsRef) = createRefs()
 
@@ -186,7 +195,11 @@ fun TrackItemComposeLand(
                         .align(Alignment.TopStart)
                         .padding(8.dp)
                 ) {
-                    Icon(painterResource(R.drawable.arrow_back), contentDescription = "Back", tint = Color.Red)
+                    Icon(
+                        painter = painterResource(R.drawable.arrow_back),
+                        contentDescription = "Back",
+                        tint = Color.Red
+                    )
                 }
             }
         }
@@ -205,6 +218,7 @@ fun TrackItemComposeLand(
                 }
                 .padding(horizontal = pad16)
                 .verticalScroll(scroll)
+                .clickable { onItemClick() }  // NEW: клик ТОЛЬКО по правой части (детали) переключает гориз/верт
         ) {
             // Имя трека
             Text(
@@ -286,7 +300,7 @@ fun TrackItemComposeLand(
                         ) {
                             // внутри — только глиф сердца, ВСЕГДА красный
                             Icon(
-                                painter = painterResource(if (track.isFavorite)R.drawable.favorite1 else R.drawable.favorite),
+                                painter = painterResource(if (track.isFavorite) R.drawable.favorite1 else R.drawable.favorite),
                                 contentDescription = "Favorite",
                                 tint = Color.Unspecified,
                                 modifier = Modifier.size(38.dp) // подгон размер под дизайн
@@ -313,8 +327,16 @@ fun TrackItemComposeLand(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResourceCompat(context, R.string.duration),color = textColorAux, style = LegacyTextStyles.text13_400())
-                Text(track.trackDuration,color = textColorAux, style = LegacyTextStyles.text13_400())
+                Text(
+                    stringResourceCompat(context, R.string.duration),
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
+                Text(
+                    track.trackDuration,
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
             }
 
             // Альбом
@@ -323,7 +345,11 @@ fun TrackItemComposeLand(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResourceCompat(context, R.string.album),color = textColorAux, style = LegacyTextStyles.text13_400())
+                Text(
+                    stringResourceCompat(context, R.string.album),
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
                 Text(
                     track.collectionName,
                     color = textColorAux,
@@ -341,8 +367,16 @@ fun TrackItemComposeLand(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResourceCompat(context, R.string.year),color = textColorAux, style = LegacyTextStyles.text13_400())
-                Text(track.releaseDate.takeWhile { it != '-' },color = textColorAux, style = LegacyTextStyles.text13_400())
+                Text(
+                    stringResourceCompat(context, R.string.year),
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
+                Text(
+                    track.releaseDate.takeWhile { it != '-' },
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
             }
 
             // Жанр
@@ -351,8 +385,16 @@ fun TrackItemComposeLand(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResourceCompat(context, R.string.genre),color = textColorAux, style = LegacyTextStyles.text13_400())
-                Text(track.primaryGenreName,color = textColorAux, style = LegacyTextStyles.text13_400())
+                Text(
+                    stringResourceCompat(context, R.string.genre),
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
+                Text(
+                    track.primaryGenreName,
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
             }
 
             // Страна
@@ -361,8 +403,16 @@ fun TrackItemComposeLand(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResourceCompat(context, R.string.country),color = textColorAux, style = LegacyTextStyles.text13_400())
-                Text(track.country,color = textColorAux, style = LegacyTextStyles.text13_400())
+                Text(
+                    stringResourceCompat(context, R.string.country),
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
+                Text(
+                    track.country,
+                    color = textColorAux,
+                    style = LegacyTextStyles.text13_400()
+                )
             }
 
             Spacer(Modifier.height(bottom4))
